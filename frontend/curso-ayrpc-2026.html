@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>AyRPC 2026 — AndyAzhTEC Classroom</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600;700;800&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-logo">
+          <i class="fa-solid fa-graduation-cap"></i>
+        </div>
+
+        <div class="brand-text">
+          <span class="brand-main">
+            Andy<span>Azh</span><strong>TEC</strong>
+          </span>
+          <small>Classroom</small>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav" aria-label="Navegación principal">
+        <a href="index.html" class="nav-item">
+          <i class="fa-solid fa-table-columns"></i>
+          <span>Dashboard</span>
+        </a>
+
+        <a href="#" class="nav-item nav-item-parent active submenu-open" data-submenu-toggle="coursesSubmenu">
+          <i class="fa-solid fa-book-open-reader"></i>
+          <span>Cursos</span>
+          <i class="fa-solid fa-chevron-down submenu-chevron"></i>
+        </a>
+
+        <div class="sidebar-submenu open" id="coursesSubmenu">
+          <a href="curso-ayrpc-2025.html" class="submenu-item" data-course-id="ayrpc-2025">
+            <span class="submenu-dot complete"></span>
+            <span>AyRPC 2025</span>
+          </a>
+
+          <a href="curso-ayrpc-2026.html" class="submenu-item active" data-course-id="ayrpc-2026">
+            <span class="submenu-dot soon"></span>
+            <span>AyRPC 2026</span>
+          </a>
+        </div>
+
+        <a href="#" class="nav-item">
+          <i class="fa-solid fa-chalkboard-user"></i>
+          <span>Clases</span>
+        </a>
+
+        <a href="#" class="nav-item">
+          <i class="fa-solid fa-folder-open"></i>
+          <span>Materiales</span>
+        </a>
+
+        <a href="#" class="nav-item">
+          <i class="fa-solid fa-user-check"></i>
+          <span>Asistencias</span>
+        </a>
+
+        <a href="#" class="nav-item nav-item-featured">
+          <i class="fa-solid fa-file-circle-check"></i>
+          <span>ExamPro</span>
+        </a>
+
+        <a href="#" class="nav-item">
+          <i class="fa-solid fa-certificate"></i>
+          <span>Certificados</span>
+        </a>
+
+        <a href="#" class="nav-item">
+          <i class="fa-solid fa-comments"></i>
+          <span>Comunidad</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="mini-status">
+          <span class="pulse-dot"></span>
+          <div>
+            <strong>Sistema operativo</strong>
+            <small>MVP local</small>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">
+            <i class="fa-solid fa-microchip"></i>
+            Armado y Reparación de Computadoras
+          </p>
+
+          <h1>AyRPC 2026</h1>
+        </div>
+
+        <div class="topbar-actions">
+          <button class="theme-toggle" id="themeToggle" type="button" aria-label="Cambiar tema">
+            <i class="fa-solid fa-moon"></i>
+            <span>Modo oscuro</span>
+          </button>
+
+          <div class="user-pill">
+            <div class="user-avatar">
+              <i class="fa-solid fa-user-astronaut"></i>
+            </div>
+
+            <div>
+              <strong>Andy Coria</strong>
+              <small>Administrador</small>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <section class="hero-panel course-detail-hero">
+        <div class="hero-copy">
+          <span class="badge">
+            <i class="fa-solid fa-clock"></i>
+            Próximamente
+          </span>
+
+          <h2>
+            AyRPC 2026
+            <span>Nueva edición en preparación</span>
+          </h2>
+
+          <p>
+            La edición 2026 nace pensada para usar AndyAzhTEC Classroom desde el inicio:
+            más clases, mejor organización, recuperación de asistencia simplificada,
+            ExamPro integrado y nuevo manual técnico.
+          </p>
+
+          <div class="hero-actions">
+            <a href="#" class="btn btn-primary">
+              <i class="fa-solid fa-eye"></i>
+              Ver avance
+            </a>
+
+            <a href="#" class="btn btn-outline">
+              <i class="fa-solid fa-bell"></i>
+              Avisarme
+            </a>
+          </div>
+        </div>
+
+        <div class="hero-orb">
+          <div class="orb-inner">
+            <i class="fa-solid fa-microchip"></i>
+          </div>
+        </div>
+      </section>
+
+      <section class="stats-grid">
+        <article class="stat-card">
+          <div class="stat-icon violet">
+            <i class="fa-solid fa-clock"></i>
+          </div>
+          <div>
+            <span class="stat-number">Próximo</span>
+            <p>Estado del curso</p>
+          </div>
+        </article>
+
+        <article class="stat-card">
+          <div class="stat-icon cyan">
+            <i class="fa-solid fa-book"></i>
+          </div>
+          <div>
+            <span class="stat-number">Nuevo</span>
+            <p>Manual técnico</p>
+          </div>
+        </article>
+
+        <article class="stat-card">
+          <div class="stat-icon pink">
+            <i class="fa-solid fa-chalkboard-user"></i>
+          </div>
+          <div>
+            <span class="stat-number">+10</span>
+            <p>Clases previstas</p>
+          </div>
+        </article>
+
+        <article class="stat-card">
+          <div class="stat-icon green">
+            <i class="fa-solid fa-graduation-cap"></i>
+          </div>
+          <div>
+            <span class="stat-number">Propia</span>
+            <p>Plataforma</p>
+          </div>
+        </article>
+      </section>
+
+      <section class="course-detail-grid">
+        <article class="panel course-main-panel">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Promesa 2026</p>
+              <h3>Una cursada más ordenada y potente</h3>
+            </div>
+            <span class="status-badge soon-status">Próximamente</span>
+          </div>
+
+          <p>
+            AyRPC 2026 será la primera edición diseñada alrededor del Classroom.
+            El objetivo es reducir trabajo manual, mejorar la experiencia del alumno
+            y centralizar clases, materiales, asistencia, recuperatorios y evaluaciones.
+          </p>
+
+          <div class="course-metrics-grid">
+            <div>
+              <span>Manual</span>
+              <strong>Comunidad Reparando</strong>
+            </div>
+
+            <div>
+              <span>Clases</span>
+              <strong>Más de 10 previstas</strong>
+            </div>
+
+            <div>
+              <span>Asistencia</span>
+              <strong>Recuperación simplificada</strong>
+            </div>
+
+            <div>
+              <span>Evaluación</span>
+              <strong>ExamPro integrado</strong>
+            </div>
+          </div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Módulos planeados</p>
+              <h3>Dentro del Classroom</h3>
+            </div>
+          </div>
+
+          <div class="module-list module-list-vertical">
+            <button class="module-item">
+              <i class="fa-solid fa-folder-open"></i>
+              <span>Materiales por clase</span>
+            </button>
+
+            <button class="module-item">
+              <i class="fa-solid fa-user-check"></i>
+              <span>Asistencia integrada</span>
+            </button>
+
+            <button class="module-item">
+              <i class="fa-solid fa-file-circle-question"></i>
+              <span>Recuperatorios simples</span>
+            </button>
+
+            <button class="module-item">
+              <i class="fa-solid fa-file-circle-check"></i>
+              <span>ExamPro interno</span>
+            </button>
+          </div>
+        </article>
+
+        <article class="panel course-main-panel">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Diferenciales</p>
+              <h3>Qué se viene para esta edición</h3>
+            </div>
+          </div>
+
+          <div class="timeline">
+            <div class="timeline-item">
+              <span></span>
+              <div>
+                <strong>Nuevo manual técnico</strong>
+                <p>Material base de Comunidad Reparando, revisado por especialistas.</p>
+              </div>
+            </div>
+
+            <div class="timeline-item">
+              <span></span>
+              <div>
+                <strong>Más clases</strong>
+                <p>La planificación crece respecto a la edición anterior.</p>
+              </div>
+            </div>
+
+            <div class="timeline-item">
+              <span></span>
+              <div>
+                <strong>Recuperación de asistencia</strong>
+                <p>Flujo pensado para que recuperar una clase sea más claro y rápido.</p>
+              </div>
+            </div>
+
+            <div class="timeline-item">
+              <span></span>
+              <div>
+                <strong>Ecosistema propio</strong>
+                <p>Classroom, ExamPro, materiales, constancias y certificados en una misma plataforma.</p>
+              </div>
+            </div>
+          </div>
+        </article>
+      </section>
+    </main>
+  </div>
+
+  <script src="js/courses-data.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
