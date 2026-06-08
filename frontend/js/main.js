@@ -67,6 +67,12 @@ const ClassroomApp = {
 
     toggles.forEach((toggle) => {
       toggle.addEventListener("click", (event) => {
+        const href = toggle.getAttribute("href");
+
+        if (href && href !== "#") {
+          return;
+        }
+
         event.preventDefault();
 
         const submenuId = toggle.dataset.submenuToggle;
