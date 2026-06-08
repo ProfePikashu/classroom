@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════
    AndyAzhTEC Classroom — main.js
-   Tema claro/oscuro + base de interacciones
+   Tema claro/oscuro + navegación + submenu cursos
 ════════════════════════════════════════════════════════ */
 
 "use strict";
@@ -9,7 +9,8 @@ const ClassroomApp = {
   init() {
     this.initTheme();
     this.bindThemeToggle();
-    this.bindNavItems();
+    this.bindSidebarSubmenus();
+    this.bindCurrentHashCourse();
     this.bindModuleButtons();
   },
 
@@ -35,13 +36,13 @@ const ClassroomApp = {
     const label = toggle.querySelector("span");
 
     if (normalizedTheme === "light") {
-      icon.className = "fa-solid fa-sun";
-      label.textContent = "Modo claro";
+      if (icon) icon.className = "fa-solid fa-sun";
+      if (label) label.textContent = "Modo claro";
       return;
     }
 
-    icon.className = "fa-solid fa-moon";
-    label.textContent = "Modo oscuro";
+    if (icon) icon.className = "fa-solid fa-moon";
+    if (label) label.textContent = "Modo oscuro";
   },
 
   toggleTheme() {
@@ -61,17 +62,47 @@ const ClassroomApp = {
     });
   },
 
-  bindNavItems() {
-    const navItems = document.querySelectorAll(".nav-item");
+  bindSidebarSubmenus() {
+    const toggles = document.querySelectorAll("[data-submenu-toggle]");
 
-    navItems.forEach((item) => {
-      item.addEventListener("click", (event) => {
+    toggles.forEach((toggle) => {
+      toggle.addEventListener("click", (event) => {
         event.preventDefault();
 
-        navItems.forEach((nav) => nav.classList.remove("active"));
+        const submenuId = toggle.dataset.submenuToggle;
+        const submenu = document.getElementById(submenuId);
+
+        if (!submenu) return;
+
+        toggle.classList.toggle("submenu-open");
+        submenu.classList.toggle("open");
+      });
+    });
+
+    const submenuItems = document.querySelectorAll(".submenu-item");
+
+    submenuItems.forEach((item) => {
+      item.addEventListener("click", () => {
+        submenuItems.forEach((link) => link.classList.remove("active"));
         item.classList.add("active");
       });
     });
+  },
+
+  bindCurrentHashCourse() {
+    const hash = window.location.hash.replace("#", "");
+
+    if (!hash) return;
+
+    const item = document.querySelector('[data-course-id="' + hash + '"]');
+
+    if (!item) return;
+
+    document.querySelectorAll(".submenu-item").forEach((link) => {
+      link.classList.remove("active");
+    });
+
+    item.classList.add("active");
   },
 
   bindModuleButtons() {
@@ -80,7 +111,7 @@ const ClassroomApp = {
     moduleButtons.forEach((button) => {
       button.addEventListener("click", () => {
         const moduleName = button.innerText.trim();
-        console.log(`Módulo seleccionado: ${moduleName}`);
+        console.log("Módulo seleccionado:", moduleName);
       });
     });
   },

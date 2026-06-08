@@ -1,0 +1,334 @@
+﻿<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Cursos — AndyAzhTEC Classroom</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600;700;800&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+
+<body>
+  <div class="app-shell">
+
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-logo">
+          <i class="fa-solid fa-graduation-cap"></i>
+        </div>
+
+        <div class="brand-text">
+          <span class="brand-main">
+            Andy<span>Azh</span><strong>TEC</strong>
+          </span>
+          <small>Classroom</small>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav" aria-label="Navegación principal">
+        <a href="index.html" class="nav-item">
+          <i class="fa-solid fa-table-columns"></i>
+          <span>Dashboard</span>
+        </a>
+
+        <a href="#" class="nav-item nav-item-parent active submenu-open" data-submenu-toggle="coursesSubmenu">
+          <i class="fa-solid fa-book-open-reader"></i>
+          <span>Cursos</span>
+          <i class="fa-solid fa-chevron-down submenu-chevron"></i>
+        </a>
+
+        <div class="sidebar-submenu open" id="coursesSubmenu">
+          <a href="cursos.html#ayrpc-2025" class="submenu-item" data-course-id="ayrpc-2025">
+            <span class="submenu-dot complete"></span>
+            <span>AyRPC 2025</span>
+          </a>
+
+          <a href="cursos.html#ayrpc-2026" class="submenu-item" data-course-id="ayrpc-2026">
+            <span class="submenu-dot soon"></span>
+            <span>AyRPC 2026</span>
+          </a>
+        </div>
+
+        <a href="#" class="nav-item">
+          <i class="fa-solid fa-chalkboard-user"></i>
+          <span>Clases</span>
+        </a>
+
+        <a href="#" class="nav-item">
+          <i class="fa-solid fa-folder-open"></i>
+          <span>Materiales</span>
+        </a>
+
+        <a href="#" class="nav-item">
+          <i class="fa-solid fa-user-check"></i>
+          <span>Asistencias</span>
+        </a>
+
+        <a href="#" class="nav-item nav-item-featured">
+          <i class="fa-solid fa-file-circle-check"></i>
+          <span>ExamPro</span>
+        </a>
+
+        <a href="#" class="nav-item">
+          <i class="fa-solid fa-certificate"></i>
+          <span>Certificados</span>
+        </a>
+
+        <a href="#" class="nav-item">
+          <i class="fa-solid fa-comments"></i>
+          <span>Comunidad</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="mini-status">
+          <span class="pulse-dot"></span>
+          <div>
+            <strong>Sistema operativo</strong>
+            <small>MVP local</small>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main-content">
+
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">
+            <i class="fa-solid fa-book-open-reader"></i>
+            Oferta académica
+          </p>
+
+          <h1>Cursos</h1>
+        </div>
+
+        <div class="topbar-actions">
+          <button class="theme-toggle" id="themeToggle" type="button" aria-label="Cambiar tema">
+            <i class="fa-solid fa-moon"></i>
+            <span>Modo oscuro</span>
+          </button>
+
+          <div class="user-pill">
+            <div class="user-avatar">
+              <i class="fa-solid fa-user-astronaut"></i>
+            </div>
+
+            <div>
+              <strong>Andy Coria</strong>
+              <small>Administrador</small>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <section class="hero-panel courses-hero">
+        <div class="hero-copy">
+          <span class="badge">
+            <i class="fa-solid fa-screwdriver-wrench"></i>
+            Armado y Reparación de Computadoras
+          </span>
+
+          <h2>
+            Cursos disponibles
+            <span>AyRPC 2025 / 2026</span>
+          </h2>
+
+          <p>
+            Acá se centralizan las ediciones del curso, sus materiales, métricas,
+            recuperatorios, clases grabadas, certificados y el nuevo flujo de cursada
+            dentro de AndyAzhTEC Classroom.
+          </p>
+        </div>
+
+        <div class="hero-orb">
+          <div class="orb-inner">
+            <i class="fa-solid fa-screwdriver-wrench"></i>
+          </div>
+        </div>
+      </section>
+
+      <section class="stats-grid">
+        <article class="stat-card">
+          <div class="stat-icon cyan">
+            <i class="fa-solid fa-layer-group"></i>
+          </div>
+
+          <div>
+            <span class="stat-number">2</span>
+            <p>Ediciones cargadas</p>
+          </div>
+        </article>
+
+        <article class="stat-card">
+          <div class="stat-icon green">
+            <i class="fa-solid fa-circle-check"></i>
+          </div>
+
+          <div>
+            <span class="stat-number">2025</span>
+            <p>Curso completo</p>
+          </div>
+        </article>
+
+        <article class="stat-card">
+          <div class="stat-icon violet">
+            <i class="fa-solid fa-clock"></i>
+          </div>
+
+          <div>
+            <span class="stat-number">2026</span>
+            <p>Próximamente</p>
+          </div>
+        </article>
+
+        <article class="stat-card">
+          <div class="stat-icon pink">
+            <i class="fa-solid fa-file-circle-check"></i>
+          </div>
+
+          <div>
+            <span class="stat-number">ExamPro</span>
+            <p>Integración prevista</p>
+          </div>
+        </article>
+      </section>
+
+      <section class="courses-preview courses-page-grid">
+        <article class="course-card course-card-complete">
+          <div class="course-card-top">
+            <div class="course-card-icon">
+              <i class="fa-solid fa-screwdriver-wrench"></i>
+            </div>
+
+            <span class="course-chip complete">Completo</span>
+          </div>
+
+          <h3>AyRPC 2025</h3>
+
+          <p>
+            Edición finalizada. Los alumnos aptos ya pueden rendir recuperatorio,
+            consultar materiales, acceder a clases grabadas y autogestionar certificados
+            o constancias.
+          </p>
+
+          <ul>
+            <li><i class="fa-solid fa-folder-open"></i> Materiales de estudio disponibles</li>
+            <li><i class="fa-brands fa-twitch"></i> Clases grabadas en Twitch</li>
+            <li><i class="fa-brands fa-youtube"></i> Clases disponibles en YouTube</li>
+            <li><i class="fa-solid fa-table"></i> Planilla completa en Google Sheets</li>
+            <li><i class="fa-solid fa-certificate"></i> Certificador autogestionable en GitHub</li>
+            <li><i class="fa-solid fa-file-circle-question"></i> Recuperatorio activo para alumnos aptos</li>
+          </ul>
+
+          <div class="course-metrics-grid">
+            <div>
+              <span>Estado</span>
+              <strong>Completo</strong>
+            </div>
+
+            <div>
+              <span>Materiales</span>
+              <strong>Disponibles</strong>
+            </div>
+
+            <div>
+              <span>Recuperatorio</span>
+              <strong>Activo</strong>
+            </div>
+
+            <div>
+              <span>Certificados</span>
+              <strong>Autogestión</strong>
+            </div>
+          </div>
+
+          <div class="course-card-actions">
+            <a href="#" class="btn btn-primary">
+              <i class="fa-solid fa-chart-line"></i>
+              Ver métricas
+            </a>
+
+            <a href="#" class="btn btn-outline">
+              <i class="fa-solid fa-file-circle-question"></i>
+              Recuperatorio
+            </a>
+          </div>
+        </article>
+
+        <article class="course-card course-card-soon">
+          <div class="course-card-top">
+            <div class="course-card-icon">
+              <i class="fa-solid fa-microchip"></i>
+            </div>
+
+            <span class="course-chip soon">Próximamente</span>
+          </div>
+
+          <h3>AyRPC 2026</h3>
+
+          <p>
+            Nueva edición en preparación. La idea es que esta cursada ya nazca usando
+            AndyAzhTEC Classroom como plataforma madre, con ExamPro integrado y una
+            experiencia más ordenada para los alumnos.
+          </p>
+
+          <ul>
+            <li><i class="fa-solid fa-book"></i> Nuevo manual técnico de Comunidad Reparando</li>
+            <li><i class="fa-solid fa-chalkboard-user"></i> Más clases y mejor planificación</li>
+            <li><i class="fa-solid fa-user-check"></i> Recuperación de asistencia con pocos pasos</li>
+            <li><i class="fa-solid fa-folder-tree"></i> Materiales organizados por clase</li>
+            <li><i class="fa-solid fa-file-circle-check"></i> ExamPro integrado al Classroom</li>
+            <li><i class="fa-solid fa-graduation-cap"></i> Certificados y constancias dentro del ecosistema propio</li>
+          </ul>
+
+          <div class="course-metrics-grid">
+            <div>
+              <span>Estado</span>
+              <strong>Próximamente</strong>
+            </div>
+
+            <div>
+              <span>Manual</span>
+              <strong>Nuevo</strong>
+            </div>
+
+            <div>
+              <span>Clases</span>
+              <strong>+10 previstas</strong>
+            </div>
+
+            <div>
+              <span>Plataforma</span>
+              <strong>Propia</strong>
+            </div>
+          </div>
+
+          <div class="course-card-actions">
+            <a href="#" class="btn btn-primary">
+              <i class="fa-solid fa-eye"></i>
+              Ver avance
+            </a>
+
+            <a href="#" class="btn btn-outline">
+              <i class="fa-solid fa-bell"></i>
+              Próximamente
+            </a>
+          </div>
+        </article>
+      </section>
+
+    </main>
+  </div>
+
+  <script src="js/courses-data.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
