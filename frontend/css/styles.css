@@ -522,6 +522,125 @@ a {
   font-size: 0.86rem;
 }
 
+/* ── COURSES PREVIEW ────────────────────────────────── */
+.courses-preview {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.course-card {
+  position: relative;
+  overflow: hidden;
+  padding: 1.1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-card);
+  box-shadow: var(--shadow-card);
+}
+
+.course-card::before {
+  content: '';
+  position: absolute;
+  inset: -80px -120px auto auto;
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  opacity: 0.16;
+  filter: blur(4px);
+  pointer-events: none;
+}
+
+.course-card-complete::before {
+  background: var(--cyan);
+}
+
+.course-card-soon::before {
+  background: var(--violet);
+}
+
+.course-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.9rem;
+}
+
+.course-card-icon {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 15px;
+  color: #ffffff;
+  background: linear-gradient(135deg, var(--violet-dim), var(--cyan-dim));
+  box-shadow: 0 0 22px rgba(0, 245, 255, 0.18);
+}
+
+.course-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.28rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.74rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.course-chip.complete {
+  color: #052e16;
+  background: rgba(34, 197, 94, 0.9);
+}
+
+.course-chip.soon {
+  color: #ffffff;
+  background: linear-gradient(135deg, var(--violet), var(--pink));
+}
+
+.course-card h3 {
+  position: relative;
+  font-family: var(--font-title);
+  font-size: 1.35rem;
+  margin-bottom: 0.6rem;
+}
+
+.course-card p {
+  position: relative;
+  color: var(--text-muted);
+  margin-bottom: 0.9rem;
+}
+
+.course-card ul {
+  position: relative;
+  display: grid;
+  gap: 0.45rem;
+  list-style: none;
+  margin-bottom: 1rem;
+}
+
+.course-card li {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: var(--text-soft);
+  font-size: 0.9rem;
+}
+
+.course-card li i {
+  width: 18px;
+  color: var(--cyan);
+}
+
+.course-card-actions {
+  position: relative;
+  display: flex;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
 /* ── CONTENT GRID ───────────────────────────────────── */
 .content-grid {
   display: grid;
@@ -776,6 +895,11 @@ a {
 
 @media (max-width: 760px) {
   .app-shell {
+    grid-template-columns: 1fr;
+	
+  }
+  
+  .courses-preview {
     grid-template-columns: 1fr;
   }
 
