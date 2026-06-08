@@ -1,6 +1,6 @@
-/* ════════════════════════════════════════════════════════
+﻿/* ════════════════════════════════════════════════════════
    AndyAzhTEC Classroom — main.js
-   Tema claro/oscuro + navegación + submenu cursos
+   Tema claro/oscuro + navegación + submenu cursos + sonidos UI
 ════════════════════════════════════════════════════════ */
 
 "use strict";
@@ -8,10 +8,59 @@
 const ClassroomApp = {
   init() {
     this.initTheme();
+    this.initUiSounds();
     this.bindThemeToggle();
     this.bindSidebarSubmenus();
     this.bindCurrentHashCourse();
     this.bindModuleButtons();
+  },
+
+  initUiSounds() {
+    this.sounds = {
+      click: new Audio("media/sounds/click.mp3"),
+      open: new Audio("media/sounds/click.mp3"),
+      close: new Audio("media/sounds/close.mp3"),
+      errorFast: new Audio("media/sounds/error-fast.mp3"),
+      errorSimple: new Audio("media/sounds/error-simple.mp3"),
+      logout: new Audio("media/sounds/log-out.mp3"),
+    };
+
+    Object.values(this.sounds).forEach((sound) => {
+      sound.volume = 0.16;
+      sound.preload = "auto";
+    });
+
+    document.addEventListener("click", (event) => {
+      const clickable = event.target.closest(
+        ".nav-item, .submenu-item, .btn, .module-item, .theme-toggle"
+      );
+
+      if (!clickable) return;
+
+      if (clickable.matches("[data-submenu-toggle]")) {
+        const submenuId = clickable.dataset.submenuToggle;
+        const submenu = document.getElementById(submenuId);
+        const isOpen = submenu && submenu.classList.contains("open");
+
+        this.playSound(isOpen ? "close" : "open");
+        return;
+      }
+
+      this.playSound("click");
+    });
+  },
+
+  playSound(soundName) {
+    if (!this.sounds || !this.sounds[soundName]) return;
+
+    const sound = this.sounds[soundName];
+
+    try {
+      sound.currentTime = 0;
+      sound.play().catch(() => {});
+    } catch (error) {
+      // No rompemos la UI si el navegador bloquea audio o falta el archivo.
+    }
   },
 
   initTheme() {
