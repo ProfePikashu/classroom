@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>AndyAzhTEC Classroom</title>
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Classroom CSS -->
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+
+<body>
+  <div class="app-shell">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-logo">
+          <i class="fa-solid fa-graduation-cap"></i>
+        </div>
+
+        <div class="brand-text">
+          <span class="brand-main">
+            Andy<span>Azh</span><strong>TEC</strong>
+          </span>
+          <small>Classroom</small>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav" aria-label="Navegación principal">
+        <a href="#" class="nav-item active">
+          <i class="fa-solid fa-table-columns"></i>
+          <span>Dashboard</span>
+        </a>
+
+        <a href="#" class="nav-item">
+          <i class="fa-solid fa-book-open-reader"></i>
+          <span>Cursos</span>
+        </a>
+
+        <a href="#" class="nav-item">
+          <i class="fa-solid fa-chalkboard-user"></i>
+          <span>Clases</span>
+        </a>
+
+        <a href="#" class="nav-item">
+          <i class="fa-solid fa-folder-open"></i>
+          <span>Materiales</span>
+        </a>
+
+        <a href="#" class="nav-item">
+          <i class="fa-solid fa-user-check"></i>
+          <span>Asistencias</span>
+        </a>
+
+        <a href="#" class="nav-item nav-item-featured">
+          <i class="fa-solid fa-file-circle-check"></i>
+          <span>ExamPro</span>
+        </a>
+
+        <a href="#" class="nav-item">
+          <i class="fa-solid fa-certificate"></i>
+          <span>Certificados</span>
+        </a>
+
+        <a href="#" class="nav-item">
+          <i class="fa-solid fa-comments"></i>
+          <span>Comunidad</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="mini-status">
+          <span class="pulse-dot"></span>
+          <div>
+            <strong>Sistema operativo</strong>
+            <small>MVP local</small>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main-content">
+
+      <!-- TOPBAR -->
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">
+            <i class="fa-solid fa-satellite-dish"></i>
+            Campus técnico
+          </p>
+
+          <h1>Dashboard</h1>
+        </div>
+
+        <div class="topbar-actions">
+          <button class="theme-toggle" id="themeToggle" type="button" aria-label="Cambiar tema">
+            <i class="fa-solid fa-moon"></i>
+            <span>Modo oscuro</span>
+          </button>
+
+          <div class="user-pill">
+            <div class="user-avatar">
+              <i class="fa-solid fa-user-astronaut"></i>
+            </div>
+
+            <div>
+              <strong>Andy Coria</strong>
+              <small>Administrador</small>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- HERO -->
+      <section class="hero-panel">
+        <div class="hero-copy">
+          <span class="badge">
+            <i class="fa-solid fa-bolt"></i>
+            Nueva etapa
+          </span>
+
+          <h2>
+            Bienvenido a
+            <span>AndyAzhTEC Classroom</span>
+          </h2>
+
+          <p>
+            La plataforma madre para cursos, clases, materiales, asistencias,
+            recuperatorios, certificados y evaluaciones con ExamPro integrado.
+          </p>
+
+          <div class="hero-actions">
+            <a href="#" class="btn btn-primary">
+              <i class="fa-solid fa-play"></i>
+              Abrir AyRPC 2026
+            </a>
+
+            <a href="#" class="btn btn-outline">
+              <i class="fa-solid fa-file-circle-check"></i>
+              Ir a ExamPro
+            </a>
+          </div>
+        </div>
+
+        <div class="hero-orb">
+          <div class="orb-inner">
+            <i class="fa-solid fa-microchip"></i>
+          </div>
+        </div>
+      </section>
+
+      <!-- STATS -->
+      <section class="stats-grid">
+        <article class="stat-card">
+          <div class="stat-icon cyan">
+            <i class="fa-solid fa-book-open"></i>
+          </div>
+
+          <div>
+            <span class="stat-number">1</span>
+            <p>Curso activo</p>
+          </div>
+        </article>
+
+        <article class="stat-card">
+          <div class="stat-icon violet">
+            <i class="fa-solid fa-users"></i>
+          </div>
+
+          <div>
+            <span class="stat-number">0</span>
+            <p>Alumnos cargados</p>
+          </div>
+        </article>
+
+        <article class="stat-card">
+          <div class="stat-icon pink">
+            <i class="fa-solid fa-user-check"></i>
+          </div>
+
+          <div>
+            <span class="stat-number">0%</span>
+            <p>Asistencia general</p>
+          </div>
+        </article>
+
+        <article class="stat-card">
+          <div class="stat-icon green">
+            <i class="fa-solid fa-file-circle-check"></i>
+          </div>
+
+          <div>
+            <span class="stat-number">ExamPro</span>
+            <p>Módulo operativo</p>
+          </div>
+        </article>
+      </section>
+
+      <!-- CONTENT GRID -->
+      <section class="content-grid">
+
+        <article class="panel course-panel">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Curso principal</p>
+              <h3>AyRPC 2026</h3>
+            </div>
+
+            <span class="status-badge active">Activo</span>
+          </div>
+
+          <p>
+            Armado y Reparación de PC. Curso técnico base para validar el flujo
+            completo del Classroom.
+          </p>
+
+          <div class="course-progress">
+            <div class="progress-info">
+              <span>Preparación del campus</span>
+              <strong>25%</strong>
+            </div>
+
+            <div class="progress-bar">
+              <span style="width: 25%"></span>
+            </div>
+          </div>
+
+          <div class="quick-list">
+            <div>
+              <i class="fa-solid fa-chalkboard-user"></i>
+              <span>Clases</span>
+              <strong>0 cargadas</strong>
+            </div>
+
+            <div>
+              <i class="fa-solid fa-folder-open"></i>
+              <span>Materiales</span>
+              <strong>0 cargados</strong>
+            </div>
+
+            <div>
+              <i class="fa-solid fa-file-circle-question"></i>
+              <span>Recuperatorios</span>
+              <strong>Pendiente</strong>
+            </div>
+          </div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Accesos rápidos</p>
+              <h3>Módulos</h3>
+            </div>
+          </div>
+
+          <div class="module-list">
+            <button class="module-item">
+              <i class="fa-solid fa-book-open-reader"></i>
+              <span>Cursos</span>
+            </button>
+
+            <button class="module-item">
+              <i class="fa-solid fa-user-check"></i>
+              <span>Asistencias</span>
+            </button>
+
+            <button class="module-item">
+              <i class="fa-solid fa-file-circle-check"></i>
+              <span>ExamPro</span>
+            </button>
+
+            <button class="module-item">
+              <i class="fa-solid fa-certificate"></i>
+              <span>Certificados</span>
+            </button>
+          </div>
+        </article>
+
+        <article class="panel announcements-panel">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Avisos</p>
+              <h3>Actividad reciente</h3>
+            </div>
+          </div>
+
+          <div class="timeline">
+            <div class="timeline-item">
+              <span></span>
+              <div>
+                <strong>Classroom iniciado</strong>
+                <p>Se creó la visión, módulos, MVP e identidad visual.</p>
+              </div>
+            </div>
+
+            <div class="timeline-item">
+              <span></span>
+              <div>
+                <strong>ExamPro listo para integrar</strong>
+                <p>El módulo se mantiene operativo y se integrará sin romperlo.</p>
+              </div>
+            </div>
+
+            <div class="timeline-item">
+              <span></span>
+              <div>
+                <strong>Próximo paso</strong>
+                <p>Construir la base visual del dashboard con CSS y JS.</p>
+              </div>
+            </div>
+          </div>
+        </article>
+
+      </section>
+    </main>
+  </div>
+
+  <script src="js/main.js"></script>
+</body>
+</html>
