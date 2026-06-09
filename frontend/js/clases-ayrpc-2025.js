@@ -1103,3 +1103,14 @@ AyRPC2025Classes.selectClass = function (item) {
 
   this.setQuizEnabled(true);
 };
+
+
+/* ── STAFF CAN SKIP VIDEO WATCH ─────────────────────── */
+
+AyRPC2025Classes.isStaff = function () {
+  return typeof ClassroomRoles !== "undefined" && ClassroomRoles.isCurrentStaff();
+};
+
+AyRPC2025Classes.isTeacher = function () {
+  return this.isStaff();
+};

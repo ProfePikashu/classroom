@@ -3578,3 +3578,25 @@ a {
     width: 100%;
   }
 }
+
+
+/* ── ROLE VISIBILITY DOCENTE / MODERADOR ─────────────── */
+.teacher-only,
+.moderator-only,
+.staff-only {
+  display: none !important;
+}
+
+body.role-teacher .teacher-only,
+body.role-teacher .staff-only {
+  display: flex !important;
+}
+
+body.role-moderator .moderator-only,
+body.role-moderator .staff-only {
+  display: flex !important;
+}
+
+.recent-activity-empty {
+  min-height: 120px;
+}
