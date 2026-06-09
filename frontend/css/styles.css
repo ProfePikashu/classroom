@@ -3727,3 +3727,73 @@ body.role-moderator .staff-only {
     flex-direction: column;
   }
 }
+
+
+/* ── FIX ADMIN ZONE BOTTOM SIDEBAR ──────────────────── */
+.sidebar {
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.sidebar-nav {
+  flex: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  min-height: 0 !important;
+}
+
+.teacher-admin-zone.teacher-only {
+  display: none !important;
+}
+
+body.role-teacher .teacher-admin-zone.teacher-only {
+  display: block !important;
+}
+
+.teacher-admin-zone {
+  width: 100% !important;
+  margin-top: auto !important;
+  padding-top: 1rem !important;
+  border-top: 1px solid var(--border) !important;
+}
+
+.teacher-admin-label {
+  display: block !important;
+  margin: 0 0 0.45rem 0.75rem !important;
+  color: var(--text-muted) !important;
+  font-size: 0.68rem !important;
+  font-weight: 900 !important;
+  letter-spacing: 1.6px !important;
+}
+
+.teacher-admin-zone .admin-nav-item {
+  width: 100% !important;
+  margin: 0 !important;
+  border: 1px solid rgba(245, 158, 11, 0.32) !important;
+  border-radius: 14px !important;
+  background:
+    linear-gradient(135deg, rgba(245, 158, 11, 0.10), rgba(168, 85, 247, 0.06)) !important;
+  box-shadow: none !important;
+}
+
+.teacher-admin-zone .admin-nav-item:hover,
+.teacher-admin-zone .admin-nav-item.active {
+  background:
+    linear-gradient(135deg, rgba(245, 158, 11, 0.18), rgba(168, 85, 247, 0.10)) !important;
+  box-shadow: 0 0 22px rgba(245, 158, 11, 0.12) !important;
+}
+
+.teacher-admin-zone .admin-nav-item i,
+.teacher-admin-zone .admin-nav-item span {
+  color: #facc15 !important;
+}
+
+body.role-teacher .sidebar-submenu .teacher-only {
+  display: flex !important;
+}
+
+@media (max-width: 980px) {
+  .teacher-admin-zone {
+    margin-top: 1rem !important;
+  }
+}
