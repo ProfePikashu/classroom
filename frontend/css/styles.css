@@ -2745,3 +2745,70 @@ a {
   }
 }
 
+
+/* -- EXAMPRO EMBED PAGE ------------------------------- */
+.exampro-shell {
+  display: grid;
+  gap: 1rem;
+  min-height: calc(100vh - 135px);
+}
+
+.exampro-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-card);
+  box-shadow: var(--shadow-card);
+}
+
+.exampro-toolbar h3 {
+  font-family: var(--font-title);
+  margin: 0;
+}
+
+.exampro-frame {
+  width: 100%;
+  min-height: calc(100vh - 245px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: #050510;
+  box-shadow: var(--shadow-card), var(--shadow-glow);
+}
+
+.exampro-fallback {
+  display: none;
+  gap: 0.55rem;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-card);
+}
+
+.exampro-fallback strong,
+.exampro-fallback span {
+  display: block;
+}
+
+.exampro-fallback span {
+  color: var(--text-muted);
+}
+
+@media (max-width: 980px) {
+  .exampro-shell {
+    min-height: auto;
+  }
+
+  .exampro-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .exampro-frame {
+    min-height: 72vh;
+  }
+}
+
