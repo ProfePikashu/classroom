@@ -3797,3 +3797,35 @@ body.role-teacher .sidebar-submenu .teacher-only {
     margin-top: 1rem !important;
   }
 }
+
+
+/* ── MOBILE CLASSES ORDER FIX ───────────────────────── */
+@media (max-width: 1100px) {
+  .classes-layout {
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  .classes-layout > .recovery-panel {
+    order: 1 !important;
+  }
+
+  .classes-layout > .panel:not(.recovery-panel) {
+    order: 2 !important;
+  }
+}
+
+@media (max-width: 700px) {
+  .recovery-panel {
+    position: relative !important;
+    z-index: 2 !important;
+  }
+
+  .video-player-box {
+    margin-top: 0.25rem !important;
+  }
+
+  .classes-list {
+    margin-top: 0.35rem !important;
+  }
+}
