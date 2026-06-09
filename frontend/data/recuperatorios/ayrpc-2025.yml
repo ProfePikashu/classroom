@@ -1,0 +1,150 @@
+﻿course_id: ayrpc-2025
+course_title: "AyRPC 2025"
+
+settings:
+  min_score_percent: 70
+  require_full_video_time: true
+  submit_endpoint: "{ASIGNAR_ENDPOINT_RECUPERACION}"
+
+classes:
+  - id: clase-1
+    number: 1
+    title: "Armado y Componentes"
+    video_id: "jjiJ2t8AESU"
+    attendance_key: "1erClase – Presente"
+    status_label: "Primera Clase"
+    quiz:
+      title: "Recuperatorio Clase 1"
+      questions:
+        - id: c1q1
+          type: single
+          prompt: "{ASIGNAR PREGUNTA}"
+          options:
+            - "{ASIGNAR OPCION}"
+            - "{ASIGNAR OPCION}"
+            - "{ASIGNAR OPCION}"
+            - "{ASIGNAR OPCION}"
+          answer: 0
+        - id: c1q2
+          type: single
+          prompt: "{ASIGNAR PREGUNTA}"
+          options:
+            - "{ASIGNAR OPCION}"
+            - "{ASIGNAR OPCION}"
+            - "{ASIGNAR OPCION}"
+            - "{ASIGNAR OPCION}"
+          answer: 0
+
+  - id: clase-2
+    number: 2
+    title: "Instalación de SO"
+    video_id: "I5nRZ-3-TQY"
+    attendance_key: "2daClase – Presente"
+    status_label: "Segunda Clase"
+    quiz:
+      title: "Recuperatorio Clase 2"
+      questions:
+        - id: c2q1
+          type: single
+          prompt: "{ASIGNAR PREGUNTA}"
+          options:
+            - "{ASIGNAR OPCION}"
+            - "{ASIGNAR OPCION}"
+            - "{ASIGNAR OPCION}"
+            - "{ASIGNAR OPCION}"
+          answer: 0
+
+  - id: clase-3
+    number: 3
+    title: "Programación de BIOS"
+    video_id: "kBQ8UhP4rcA"
+    attendance_key: "3erClase – Presente"
+    status_label: "Tercera Clase"
+    quiz:
+      title: "Recuperatorio Clase 3"
+      questions:
+        - id: c3q1
+          type: single
+          prompt: "{ASIGNAR PREGUNTA}"
+          options:
+            - "{ASIGNAR OPCION}"
+            - "{ASIGNAR OPCION}"
+            - "{ASIGNAR OPCION}"
+            - "{ASIGNAR OPCION}"
+          answer: 0
+
+  - id: clase-4
+    number: 4
+    title: "Drivers y Software de mantenimiento"
+    video_id: "RB3iFXq34R4"
+    attendance_key: "4taClase – Presente"
+    status_label: "Cuarta Clase"
+    quiz:
+      title: "Recuperatorio Clase 4"
+      questions:
+        - id: c4q1
+          type: single
+          prompt: "{ASIGNAR PREGUNTA}"
+          options:
+            - "{ASIGNAR OPCION}"
+            - "{ASIGNAR OPCION}"
+            - "{ASIGNAR OPCION}"
+            - "{ASIGNAR OPCION}"
+          answer: 0
+
+  - id: clase-5
+    number: 5
+    title: "Introducción a la microsoldadura"
+    video_id: "F5IVK5Td8cA"
+    attendance_key: "5taClase – Presente"
+    status_label: "Quinta Clase"
+    quiz:
+      title: "Recuperatorio Clase 5"
+      questions:
+        - id: c5q1
+          type: single
+          prompt: "{ASIGNAR PREGUNTA}"
+          options:
+            - "{ASIGNAR OPCION}"
+            - "{ASIGNAR OPCION}"
+            - "{ASIGNAR OPCION}"
+            - "{ASIGNAR OPCION}"
+          answer: 0
+
+  - id: clase-6
+    number: 6
+    title: "Solución de problemas"
+    video_id: "zNMyJLk2YSY"
+    attendance_key: "6taClase – Presente"
+    status_label: "Sexta Clase"
+    quiz:
+      title: "Recuperatorio Clase 6"
+      questions:
+        - id: c6q1
+          type: single
+          prompt: "{ASIGNAR PREGUNTA}"
+          options:
+            - "{ASIGNAR OPCION}"
+            - "{ASIGNAR OPCION}"
+            - "{ASIGNAR OPCION}"
+            - "{ASIGNAR OPCION}"
+          answer: 0
+
+  - id: clase-7
+    number: 7
+    title: "Virus y Malware + Sorteo"
+    video_id: "T7liswcttXU"
+    attendance_key: "UltimaClase – Presente"
+    status_label: "Última Clase"
+    quiz:
+      title: "Recuperatorio Última Clase"
+      questions:
+        - id: c7q1
+          type: single
+          prompt: "{ASIGNAR PREGUNTA}"
+          options:
+            - "{ASIGNAR OPCION}"
+            - "{ASIGNAR OPCION}"
+            - "{ASIGNAR OPCION}"
+            - "{ASIGNAR OPCION}"
+          answer: 0

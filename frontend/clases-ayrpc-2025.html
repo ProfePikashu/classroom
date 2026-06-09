@@ -1,10 +1,13 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <title>Mis Datos — AndyAzhTEC Classroom</title>
+  <title>Clases AyRPC 2025 — AndyAzhTEC Classroom</title>
+
+  <script src="https://www.youtube.com/iframe_api"></script>
+  <script src="https://cdn.jsdelivr.net/npm/js-yaml@4/dist/js-yaml.min.js"></script>
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
 
@@ -57,7 +60,7 @@
             <span>AyRPC 2025</span>
           </a>
 
-          <a href="clases-ayrpc-2025.html" class="submenu-item submenu-child" data-course-child="ayrpc-2025-clases">
+          <a href="clases-ayrpc-2025.html" class="submenu-item submenu-child active" data-course-child="ayrpc-2025-clases">
             <span class="submenu-line"></span>
             <span>Clases</span>
           </a>
@@ -83,13 +86,13 @@
           <span>ExamPro</span>
         </a>
 
-        <a href="#" class="nav-item nav-item-parent submenu-open" data-submenu-toggle="gestionSubmenu">
+        <a href="#" class="nav-item nav-item-parent" data-submenu-toggle="gestionSubmenu">
           <i class="fa-solid fa-folder-tree"></i>
           <span>Gestión</span>
           <i class="fa-solid fa-chevron-down submenu-chevron"></i>
         </a>
 
-        <div class="sidebar-submenu open" id="gestionSubmenu">
+        <div class="sidebar-submenu" id="gestionSubmenu">
           <a href="verificador-ayrpc-2025.html" class="submenu-item" data-gestion-id="certificados">
             <span class="submenu-dot complete"></span>
             <span>Certificados</span>
@@ -112,11 +115,11 @@
       <header class="topbar">
         <div>
           <p class="eyebrow">
-            <i class="fa-solid fa-id-card"></i>
-            Perfil
+            <i class="fa-solid fa-chalkboard-user"></i>
+            AyRPC 2025
           </p>
 
-          <h1>Mis Datos</h1>
+          <h1>Clases</h1>
         </div>
 
         <div class="topbar-actions">
@@ -153,100 +156,70 @@
         </div>
       </header>
 
-      <section class="hero-panel profile-hero">
+      <section class="hero-panel classes-hero">
         <div class="hero-copy">
           <span class="badge">
-            <i class="fa-solid fa-user-graduate"></i>
-            Alumno
+            <i class="fa-solid fa-video"></i>
+            Clases grabadas
           </span>
 
           <h2>
-            Datos del alumno
-            <span id="profileHeroName">{ASIGNAR DATO}</span>
+            AyRPC 2025
+            <span>Clases y recuperación</span>
           </h2>
 
           <p>{ASIGNAR DESCRIPCION}</p>
         </div>
       </section>
 
-      <section class="profile-grid">
+      <section class="classes-layout">
         <article class="panel">
           <div class="panel-header">
             <div>
-              <p class="eyebrow">Datos personales</p>
-              <h3>Información registrada</h3>
+              <p class="eyebrow">Lista</p>
+              <h3>Clases del curso</h3>
             </div>
           </div>
 
-          <div class="profile-data-grid">
-            <div>
-              <span>Nombre completo</span>
-              <strong id="profileName">{ASIGNAR DATO}</strong>
-            </div>
-
-            <div>
-              <span>DNI</span>
-              <strong id="profileDni">{ASIGNAR DATO}</strong>
-            </div>
-
-            <div>
-              <span>Correo</span>
-              <strong id="profileEmail">{ASIGNAR DATO}</strong>
-            </div>
-
-            <div>
-              <span>Teléfono</span>
-              <strong id="profilePhone">{ASIGNAR DATO}</strong>
-            </div>
-
-            <div>
-              <span>Usuario de Twitch</span>
-              <strong id="profileTwitch">{ASIGNAR DATO}</strong>
-            </div>
-
-            <div>
-              <span>Observaciones</span>
-              <strong id="profileObservations">{ASIGNAR DATO}</strong>
-            </div>
-          </div>
+          <div id="classesList" class="classes-list"></div>
         </article>
 
-        <article class="panel">
+        <article class="panel recovery-panel" id="recoveryPanel">
           <div class="panel-header">
             <div>
-              <p class="eyebrow">Cursada</p>
-              <h3>AyRPC 2025</h3>
+              <p class="eyebrow">Recuperación</p>
+              <h3 id="recoveryTitle">Seleccioná una clase</h3>
             </div>
           </div>
 
-          <div class="profile-data-grid">
-            <div>
-              <span>Curso</span>
-              <strong id="profileCourse">AyRPC 2025</strong>
+          <div id="videoPlayerBox" class="video-player-box">
+            <div id="youtubePlayer"></div>
+          </div>
+
+          <div class="watch-progress-box">
+            <div class="progress-info">
+              <span>Tiempo visto válido</span>
+              <strong id="watchProgressText">0%</strong>
             </div>
 
-            <div>
-              <span>APTO examen</span>
-              <strong id="profileApto">{ASIGNAR DATO}</strong>
-            </div>
-
-            <div>
-              <span>Resultado</span>
-              <strong id="profileResult">{ASIGNAR DATO}</strong>
-            </div>
-
-            <div>
-              <span>Rol</span>
-              <strong id="profileRole">Alumno</strong>
+            <div class="progress-bar">
+              <span id="watchProgressBar" style="width:0%"></span>
             </div>
           </div>
 
-          <div class="home-actions-row">
-            <a href="verificador-ayrpc-2025.html" class="btn btn-primary">
-              <i class="fa-solid fa-magnifying-glass-chart"></i>
-              Ver estado completo
+          <div class="recovery-actions">
+            <a id="openYoutubeBtn" href="#" target="_blank" rel="noopener" class="btn btn-outline">
+              <i class="fa-brands fa-youtube"></i>
+              Abrir en YouTube
             </a>
+
+            <button id="quizButton" class="btn btn-primary" type="button" disabled>
+              <i class="fa-solid fa-clipboard-question"></i>
+              Responder cuestionario
+            </button>
           </div>
+
+          <div id="quizBox" class="quiz-box" style="display:none;"></div>
         </article>
       </section>
     </main>
@@ -255,6 +228,6 @@
   <script src="js/auth.js"></script>
   <script src="js/courses-data.js"></script>
   <script src="js/main.js"></script>
-  <script src="js/perfil.js"></script>
+  <script src="js/clases-ayrpc-2025.js"></script>
 </body>
 </html>
