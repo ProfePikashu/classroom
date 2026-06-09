@@ -10,11 +10,9 @@
   <script src="https://cdn.jsdelivr.net/npm/js-yaml@4/dist/js-yaml.min.js"></script>
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
-
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600;700;800&display=swap" rel="stylesheet" />
-
   <link rel="stylesheet" href="css/styles.css" />
 </head>
 
@@ -179,11 +177,15 @@
             </div>
           </div>
 
+          <div id="recoveryNote" class="recovery-note neutral">
+            Elegí una clase de la lista para ver su contenido y estado.
+          </div>
+
           <div id="videoPlayerBox" class="video-player-box">
             <div id="youtubePlayer"></div>
           </div>
 
-          <div class="watch-progress-box">
+          <div class="watch-progress-box" id="watchProgressWrap">
             <div class="progress-info">
               <span>Tiempo visto válido</span>
               <strong id="watchProgressText">0%</strong>
@@ -195,11 +197,6 @@
           </div>
 
           <div class="recovery-actions">
-            <a id="openYoutubeBtn" href="#" target="_blank" rel="noopener" class="btn btn-outline">
-              <i class="fa-brands fa-youtube"></i>
-              Abrir en YouTube
-            </a>
-
             <button id="quizButton" class="btn btn-primary" type="button" disabled>
               <i class="fa-solid fa-clipboard-question"></i>
               Responder cuestionario

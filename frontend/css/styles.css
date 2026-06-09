@@ -2812,3 +2812,196 @@ a {
   }
 }
 
+
+/* -- AYRPC 2025 CLASSES POLISH ------------------------ */
+.class-row-card {
+  display: grid;
+  grid-template-columns: 200px minmax(0, 1fr) auto;
+  gap: 0.9rem;
+  align-items: center;
+  padding: 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--bg-card-strong);
+}
+
+.class-thumb-wrap {
+  position: relative;
+}
+
+.class-thumb {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: #050510;
+  display: block;
+}
+
+.class-thumb-badge {
+  position: absolute;
+  left: 0.55rem;
+  bottom: 0.55rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  background: rgba(5, 5, 16, 0.82);
+  border: 1px solid var(--border-strong);
+  color: var(--cyan);
+  font-size: 0.7rem;
+  font-weight: 900;
+  backdrop-filter: blur(8px);
+}
+
+.class-row-main {
+  min-width: 0;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.class-row-main strong {
+  font-family: var(--font-title);
+  font-size: 1rem;
+}
+
+.class-row-main small {
+  color: var(--text-muted);
+  line-height: 1.45;
+  font-size: 0.9rem;
+}
+
+.class-meta-line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  align-items: center;
+}
+
+.class-meta-label {
+  font-size: 0.76rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.class-row-status {
+  display: grid;
+  gap: 0.65rem;
+  justify-items: end;
+}
+
+.class-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-weight: 900;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.02);
+}
+
+.class-status.ok {
+  color: var(--green);
+  border-color: rgba(34, 197, 94, 0.3);
+}
+
+.class-status.bad {
+  color: var(--red);
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.class-status.warn {
+  color: var(--yellow);
+  border-color: rgba(234, 179, 8, 0.3);
+}
+
+.class-status.neutral {
+  color: var(--text-muted);
+}
+
+.recovery-note {
+  margin-bottom: 1rem;
+  padding: 0.85rem 1rem;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: var(--bg-card-strong);
+  color: var(--text-soft);
+  line-height: 1.45;
+}
+
+.recovery-note.ok {
+  color: var(--green);
+  border-color: rgba(34, 197, 94, 0.28);
+  background: rgba(34, 197, 94, 0.06);
+}
+
+.recovery-note.bad {
+  color: #fecaca;
+  border-color: rgba(239, 68, 68, 0.32);
+  background: rgba(239, 68, 68, 0.08);
+}
+
+.recovery-note.warn {
+  color: #fde68a;
+  border-color: rgba(234, 179, 8, 0.28);
+  background: rgba(234, 179, 8, 0.08);
+}
+
+.recovery-note.neutral {
+  color: var(--text-muted);
+}
+
+.watch-progress-box {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+.progress-info {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.45rem;
+  color: var(--text-muted);
+  font-size: 0.86rem;
+}
+
+.progress-info strong {
+  color: var(--cyan);
+  font-family: var(--font-title);
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.14);
+  overflow: hidden;
+}
+
+.progress-bar span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--cyan), var(--lilac));
+  box-shadow: 0 0 18px rgba(0,245,255,0.28);
+}
+
+@media (max-width: 1200px) {
+  .class-row-card {
+    grid-template-columns: 180px minmax(0, 1fr);
+  }
+
+  .class-row-status {
+    grid-column: 1 / -1;
+    justify-items: start;
+  }
+}
+
+@media (max-width: 700px) {
+  .class-row-card {
+    grid-template-columns: 1fr;
+  }
+}
