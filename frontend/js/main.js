@@ -13,6 +13,7 @@ const ClassroomApp = {
     this.initTheme();
     this.initUiSounds();
     this.bindThemeToggle();
+    this.bindMobileSidebar();
     this.bindSidebarSubmenus();
     this.bindCurrentHashCourse();
     this.bindModuleButtons();
@@ -102,6 +103,68 @@ const ClassroomApp = {
     const nextTheme = currentTheme === "dark" ? "light" : "dark";
 
     this.setTheme(nextTheme);
+  },
+
+  playDuckSound() {
+    const duckSound = new Audio("media/sounds/duck.mp3");
+    const fallbackSound = new Audio("media/sounds/click.mp3");
+
+    duckSound.volume = 0.22;
+    fallbackSound.volume = 0.16;
+
+    duckSound.play().catch(() => {
+      fallbackSound.play().catch(() => {});
+    });
+  },
+
+  bindMobileSidebar() {
+    const toggle = document.getElementById("mobileMenuToggle");
+    const overlay = document.getElementById("mobileSidebarOverlay");
+
+    if (!toggle || !overlay) return;
+
+    const openMenu = () => {
+      document.body.classList.add("mobile-sidebar-open");
+      toggle.classList.add("is-open");
+      overlay.classList.add("is-open");
+      toggle.setAttribute("aria-label", "Cerrar menú");
+      this.playDuckSound();
+    };
+
+    const closeMenu = () => {
+      document.body.classList.remove("mobile-sidebar-open");
+      toggle.classList.remove("is-open");
+      overlay.classList.remove("is-open");
+      toggle.setAttribute("aria-label", "Abrir menú");
+      this.playDuckSound();
+    };
+
+    const toggleMenu = () => {
+      if (document.body.classList.contains("mobile-sidebar-open")) {
+        closeMenu();
+        return;
+      }
+
+      openMenu();
+    };
+
+    toggle.addEventListener("click", toggleMenu);
+    overlay.addEventListener("click", closeMenu);
+
+    document.querySelectorAll(".sidebar a").forEach((link) => {
+      link.addEventListener("click", () => {
+        const isMobile = window.matchMedia("(max-width: 980px)").matches;
+        const isSubmenuToggle = link.matches("[data-submenu-toggle]");
+
+        if (!isMobile || isSubmenuToggle) return;
+
+        closeMenu();
+      });
+    });
+
+    window.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") closeMenu();
+    });
   },
 
   bindThemeToggle() {
