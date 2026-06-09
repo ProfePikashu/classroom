@@ -1141,3 +1141,139 @@ AyRPC2025Classes.selectClass = function (item) {
   this.originalSelectClassAutoScrollPatch(item);
   this.scrollToRecoveryPanel();
 };
+
+
+/* ── ANTI ABANDON WATCH PROTECTION ─────────────────── */
+
+AyRPC2025Classes.abandonWarningShown = false;
+AyRPC2025Classes.abandonResetPending = false;
+
+AyRPC2025Classes.isWatchingRecoveryProtected = function () {
+  if (!this.selectedClass) return false;
+
+  if (typeof ClassroomRoles !== "undefined" && ClassroomRoles.isCurrentStaff()) {
+    return false;
+  }
+
+  const status = this.getAttendanceStatus(this.selectedClass.attendance_key);
+
+  if (!this.canRecover(status)) return false;
+
+  const duration = this.safeDuration();
+
+  if (!duration) return false;
+
+  const completed = this.watchedSeconds >= duration * 0.98;
+
+  return this.watchedSeconds > 0 && !completed;
+};
+
+AyRPC2025Classes.getAbandonMessage = function () {
+  return "Si abandonás la vista de la clase, el tiempo visto válido volverá a 0%. ¿Estás seguro de salir?";
+};
+
+AyRPC2025Classes.resetValidWatchTime = function () {
+  this.watchedSeconds = 0;
+  this.lastTickTime = null;
+  this.lastVideoTime = this.safeCurrentTime();
+
+  this.updateProgress(0);
+  this.setQuizEnabled(false);
+  this.stopTracking();
+
+  try {
+    if (this.player && this.player.pauseVideo) {
+      this.player.pauseVideo();
+    }
+  } catch (error) {}
+};
+
+AyRPC2025Classes.warnAbandonReset = function () {
+  const note = document.getElementById("recoveryNote");
+
+  if (note) {
+    note.className = "recovery-note bad";
+    note.textContent = "Se detectó que abandonaste la vista de la clase. El tiempo visto válido volvió a 0%.";
+  }
+
+  if (!this.abandonWarningShown) {
+    this.abandonWarningShown = true;
+
+    setTimeout(() => {
+      alert("Se detectó que abandonaste la vista de la clase. El tiempo visto válido volvió a 0%.");
+      this.abandonWarningShown = false;
+    }, 250);
+  }
+};
+
+AyRPC2025Classes.handleViewAbandon = function () {
+  if (!this.isWatchingRecoveryProtected()) return;
+
+  this.resetValidWatchTime();
+  this.abandonResetPending = true;
+};
+
+AyRPC2025Classes.handleViewReturn = function () {
+  if (!this.abandonResetPending) return;
+
+  this.abandonResetPending = false;
+  this.warnAbandonReset();
+};
+
+AyRPC2025Classes.bindAbandonProtection = function () {
+  if (this.__abandonProtectionBound) return;
+  this.__abandonProtectionBound = true;
+
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) {
+      this.handleViewAbandon();
+      return;
+    }
+
+    this.handleViewReturn();
+  });
+
+  window.addEventListener("blur", () => {
+    this.handleViewAbandon();
+  });
+
+  window.addEventListener("focus", () => {
+    this.handleViewReturn();
+  });
+
+  window.addEventListener("beforeunload", (event) => {
+    if (!this.isWatchingRecoveryProtected()) return;
+
+    event.preventDefault();
+    event.returnValue = "";
+    return "";
+  });
+
+  document.addEventListener("click", (event) => {
+    const link = event.target.closest("a");
+
+    if (!link) return;
+    if (!this.isWatchingRecoveryProtected()) return;
+
+    const href = link.getAttribute("href") || "";
+
+    if (!href || href === "#" || href.startsWith("javascript:")) return;
+
+    const ok = confirm(this.getAbandonMessage());
+
+    if (!ok) {
+      event.preventDefault();
+      event.stopPropagation();
+      return;
+    }
+
+    this.resetValidWatchTime();
+  }, true);
+};
+
+AyRPC2025Classes.__originalInitAbandonProtection = AyRPC2025Classes.init;
+
+AyRPC2025Classes.init = async function () {
+  await this.__originalInitAbandonProtection();
+  this.bindAbandonProtection();
+};
