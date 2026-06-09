@@ -3829,3 +3829,330 @@ body.role-teacher .sidebar-submenu .teacher-only {
     margin-top: 0.35rem !important;
   }
 }
+
+
+/* ── FIX CLASS CARD BUTTON OVERLAP ───────────────────── */
+.class-row-card {
+  overflow: hidden !important;
+}
+
+.class-row-main {
+  min-width: 0 !important;
+}
+
+.class-row-main strong,
+.class-row-main small {
+  overflow-wrap: anywhere !important;
+}
+
+.class-row-status {
+  min-width: 150px !important;
+}
+
+.class-row-status .btn {
+  min-width: 145px !important;
+  justify-content: center !important;
+  text-align: center !important;
+  white-space: normal !important;
+  line-height: 1.2 !important;
+}
+
+@media (max-width: 1380px) {
+  .classes-layout {
+    grid-template-columns: minmax(360px, 0.75fr) minmax(0, 1.25fr) !important;
+  }
+
+  .class-row-card {
+    grid-template-columns: 150px minmax(0, 1fr) !important;
+  }
+
+  .class-row-status {
+    grid-column: 1 / -1 !important;
+    min-width: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 0.75rem !important;
+  }
+
+  .class-row-status .btn {
+    min-width: 160px !important;
+    max-width: 220px !important;
+  }
+}
+
+@media (max-width: 1100px) {
+  .classes-layout {
+    grid-template-columns: 1fr !important;
+  }
+
+  .class-row-card {
+    grid-template-columns: 170px minmax(0, 1fr) auto !important;
+  }
+
+  .class-row-status {
+    grid-column: auto !important;
+    display: grid !important;
+    justify-items: end !important;
+  }
+}
+
+@media (max-width: 760px) {
+  .class-row-card {
+    grid-template-columns: 1fr !important;
+    gap: 0.8rem !important;
+  }
+
+  .class-thumb-wrap {
+    width: 100% !important;
+  }
+
+  .class-row-status {
+    grid-column: auto !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    justify-items: stretch !important;
+    gap: 0.65rem !important;
+  }
+
+  .class-row-status .class-status {
+    width: fit-content !important;
+  }
+
+  .class-row-status .btn {
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    min-height: 48px !important;
+  }
+}
+
+@media (min-width: 1101px) and (max-width: 1500px) {
+  .class-thumb {
+    min-width: 0 !important;
+  }
+
+  .class-row-main small {
+    display: -webkit-box !important;
+    -webkit-line-clamp: 4 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+  }
+}
+
+
+/* ── RESPONSIVE CLASSES FINAL FIX ───────────────────── */
+.classes-layout {
+  align-items: start !important;
+}
+
+.class-row-card {
+  min-width: 0 !important;
+  overflow: hidden !important;
+}
+
+.class-thumb-wrap,
+.class-row-main,
+.class-row-status {
+  min-width: 0 !important;
+}
+
+.class-row-main strong {
+  display: block !important;
+  max-width: 100% !important;
+  overflow-wrap: normal !important;
+  word-break: normal !important;
+  hyphens: none !important;
+  line-height: 1.22 !important;
+}
+
+.class-row-main small {
+  display: block !important;
+  max-width: 100% !important;
+  overflow-wrap: normal !important;
+  word-break: normal !important;
+  hyphens: none !important;
+  line-height: 1.35 !important;
+}
+
+.class-row-status .btn {
+  white-space: normal !important;
+  text-align: center !important;
+}
+
+/* Desktop ancho */
+@media (min-width: 1501px) {
+  .classes-layout {
+    grid-template-columns: minmax(520px, 0.9fr) minmax(0, 1.1fr) !important;
+  }
+
+  .class-row-card {
+    grid-template-columns: 200px minmax(0, 1fr) auto !important;
+  }
+
+  .class-row-status {
+    grid-column: auto !important;
+    min-width: 150px !important;
+    justify-items: end !important;
+  }
+
+  .class-row-status .btn {
+    min-width: 145px !important;
+  }
+}
+
+/* Ventanas medianas: evitar que se rompa la card */
+@media (min-width: 1101px) and (max-width: 1500px) {
+  .classes-layout {
+    grid-template-columns: minmax(360px, 0.72fr) minmax(0, 1.28fr) !important;
+    gap: 1rem !important;
+  }
+
+  .class-row-card {
+    grid-template-columns: 1fr !important;
+    gap: 0.85rem !important;
+  }
+
+  .class-thumb-wrap {
+    width: 100% !important;
+  }
+
+  .class-thumb {
+    width: 100% !important;
+    max-height: 210px !important;
+    object-fit: cover !important;
+  }
+
+  .class-row-main {
+    display: grid !important;
+    gap: 0.45rem !important;
+  }
+
+  .class-row-main strong {
+    font-size: 1rem !important;
+  }
+
+  .class-row-main small {
+    font-size: 0.9rem !important;
+  }
+
+  .class-meta-line {
+    margin-top: 0.2rem !important;
+  }
+
+  .class-row-status {
+    width: 100% !important;
+    min-width: 0 !important;
+    display: grid !important;
+    justify-items: stretch !important;
+    gap: 0.65rem !important;
+  }
+
+  .class-row-status .btn {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    min-height: 46px !important;
+  }
+}
+
+/* Tablet/mobile: reproductor arriba, lista abajo */
+@media (max-width: 1100px) {
+  .classes-layout {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 1rem !important;
+  }
+
+  .classes-layout > .recovery-panel {
+    order: 1 !important;
+    width: 100% !important;
+  }
+
+  .classes-layout > .panel:not(.recovery-panel) {
+    order: 2 !important;
+    width: 100% !important;
+  }
+
+  .class-row-card {
+    grid-template-columns: 180px minmax(0, 1fr) !important;
+    gap: 0.85rem !important;
+  }
+
+  .class-row-status {
+    grid-column: 1 / -1 !important;
+    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 0.75rem !important;
+  }
+
+  .class-row-status .btn {
+    min-width: 180px !important;
+  }
+}
+
+/* Mobile posta */
+@media (max-width: 760px) {
+  .classes-layout {
+    gap: 1rem !important;
+  }
+
+  .class-row-card {
+    grid-template-columns: 1fr !important;
+    padding: 0.9rem !important;
+  }
+
+  .class-thumb {
+    width: 100% !important;
+    max-height: none !important;
+    aspect-ratio: 16 / 9 !important;
+  }
+
+  .class-row-main strong {
+    font-size: 1.05rem !important;
+  }
+
+  .class-row-main small {
+    font-size: 0.92rem !important;
+  }
+
+  .class-row-status {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    justify-items: stretch !important;
+  }
+
+  .class-row-status .class-status {
+    width: fit-content !important;
+  }
+
+  .class-row-status .btn {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+  }
+
+  .video-player-box {
+    width: 100% !important;
+  }
+}
+
+/* Mobile angosto */
+@media (max-width: 480px) {
+  .classes-hero {
+    margin-bottom: 1rem !important;
+  }
+
+  .recovery-panel,
+  .classes-layout > .panel {
+    padding: 0.9rem !important;
+  }
+
+  .student-question-title {
+    flex-direction: column !important;
+  }
+}
