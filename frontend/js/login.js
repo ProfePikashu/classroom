@@ -1,6 +1,6 @@
-﻿/* ════════════════════════════════════════════════════════
+/* ════════════════════════════════════════════════════════
    AndyAzhTEC Classroom — login.js
-   Login temporal MVP
+   Login MVP por alumno
 ════════════════════════════════════════════════════════ */
 
 "use strict";
@@ -59,15 +59,24 @@ const ClassroomLogin = {
 
   bindLoginForm() {
     const form = document.getElementById("loginForm");
-    const email = document.getElementById("loginEmail");
-    const role = document.getElementById("loginRole");
+    const dni = document.getElementById("loginDni");
+    const twitch = document.getElementById("loginTwitch");
 
-    if (!form || !email || !role) return;
+    if (!form || !dni || !twitch) return;
 
-    form.addEventListener("submit", (event) => {
+    form.addEventListener("submit", async (event) => {
       event.preventDefault();
 
-      const result = ClassroomAuth.login(email.value, role.value);
+      const submit = form.querySelector("button[type='submit']");
+      const originalText = submit.innerHTML;
+
+      submit.disabled = true;
+      submit.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Validando...';
+
+      const result = await ClassroomAuth.loginWithStudent(dni.value, twitch.value);
+
+      submit.disabled = false;
+      submit.innerHTML = originalText;
 
       if (!result.ok) {
         alert(result.message);

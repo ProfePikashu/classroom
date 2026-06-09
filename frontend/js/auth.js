@@ -1,9 +1,11 @@
-﻿/* ════════════════════════════════════════════════════════
+/* ════════════════════════════════════════════════════════
    AndyAzhTEC Classroom — auth.js
-   Autenticación temporal local para MVP estático en GitHub Pages
+   Login MVP por DNI + Twitch contra verificador AyRPC
 ════════════════════════════════════════════════════════ */
 
 "use strict";
+
+const CLASSROOM_VERIFY_API = "https://script.google.com/macros/s/AKfycbxdB1fbiT1S04N5LaiOqHCojJcO12YCOPg7ln21bFrMrEot5GSdyWzy6j6CyEAsuDen/exec";
 
 const ClassroomAuth = {
   storageKey: "andyazh-classroom-session",
@@ -27,7 +29,7 @@ const ClassroomAuth = {
 
   isAuthenticated() {
     const session = this.getSession();
-    return Boolean(session && session.email && session.role);
+    return Boolean(session && session.dni && session.twitch);
   },
 
   requireAuth() {
@@ -46,38 +48,78 @@ const ClassroomAuth = {
     window.location.replace("index.html");
   },
 
-  login(email, role) {
-    const cleanEmail = String(email || "").trim().toLowerCase();
-    const cleanRole = String(role || "student").trim();
+  normalize(value) {
+    return String(value || "")
+      .trim()
+      .toLowerCase()
+      .replace(/^@/, "");
+  },
 
-    if (!cleanEmail) {
+  async loginWithStudent(dni, twitch) {
+    const cleanDni = String(dni || "").trim();
+    const cleanTwitch = this.normalize(twitch);
+
+    if (!cleanDni || !cleanTwitch) {
       return {
         ok: false,
-        message: "Ingresá un correo válido.",
+        message: "Ingresá DNI y usuario de Twitch.",
       };
     }
 
-    const roleLabels = {
-      student: "Alumno",
-      teacher: "Docente",
-      admin: "Administrador",
-    };
+    try {
+      const response = await fetch(CLASSROOM_VERIFY_API + "?dni=" + encodeURIComponent(cleanDni));
+      const alumno = await response.json();
 
-    const session = {
-      email: cleanEmail,
-      role: cleanRole,
-      roleLabel: roleLabels[cleanRole] || "Alumno",
-      displayName: cleanEmail.split("@")[0],
-      createdAt: new Date().toISOString(),
-      provider: "local-mvp",
-    };
+      if (!alumno || !alumno["Nombre Completo"]) {
+        return {
+          ok: false,
+          message: "No se encontró un alumno con ese DNI.",
+        };
+      }
 
-    this.setSession(session);
+      if (alumno.estado === "BAJA") {
+        return {
+          ok: false,
+          message: "El alumno figura dado de baja.",
+        };
+      }
 
-    return {
-      ok: true,
-      session,
-    };
+      const twitchSheet = this.normalize(
+        alumno["Usuario de Twitch (en caso de no tener, deberá crear uno y usarlo en la cursada)"]
+      );
+
+      if (twitchSheet !== cleanTwitch) {
+        return {
+          ok: false,
+          message: "El usuario de Twitch no coincide con el DNI ingresado.",
+        };
+      }
+
+      const session = {
+        dni: cleanDni,
+        twitch: cleanTwitch,
+        email: alumno["Correo"] || "",
+        displayName: alumno["Nombre Completo"] || cleanTwitch,
+        role: "student",
+        roleLabel: "Alumno",
+        course: "AyRPC 2025",
+        alumno,
+        createdAt: new Date().toISOString(),
+        provider: "sheet-mvp",
+      };
+
+      this.setSession(session);
+
+      return {
+        ok: true,
+        session,
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        message: "No se pudo validar el acceso. Intentá de nuevo.",
+      };
+    }
   },
 
   logout() {
@@ -94,11 +136,11 @@ const ClassroomAuth = {
     const roleTargets = document.querySelectorAll("[data-auth-role]");
 
     nameTargets.forEach((target) => {
-      target.textContent = session.displayName || session.email;
+      target.textContent = session.displayName || session.twitch || "Usuario";
     });
 
     roleTargets.forEach((target) => {
-      target.textContent = session.roleLabel || session.role;
+      target.textContent = session.roleLabel || "Alumno";
     });
   },
 

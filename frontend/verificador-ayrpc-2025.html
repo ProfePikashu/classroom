@@ -1,0 +1,357 @@
+﻿<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Verificador AyRPC 2025 — AndyAzhTEC Classroom</title>
+
+  <script src="https://cdn.plot.ly/plotly-2.30.0.min.js"></script>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600;700;800&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+
+<body>
+  <div class="app-shell">
+
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-logo">
+          <i class="fa-solid fa-graduation-cap"></i>
+        </div>
+
+        <div class="brand-text">
+          <span class="brand-main">
+            Andy<span>Azh</span><strong>TEC</strong>
+          </span>
+          <small>Classroom</small>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav" aria-label="Navegación principal">
+        <a href="index.html" class="nav-item">
+          <i class="fa-solid fa-table-columns"></i>
+          <span>Dashboard</span>
+        </a>
+
+        <a href="cursos.html" class="nav-item nav-item-parent submenu-open" data-submenu-toggle="coursesSubmenu">
+          <i class="fa-solid fa-book-open-reader"></i>
+          <span>Cursos</span>
+          <i class="fa-solid fa-chevron-down submenu-chevron"></i>
+        </a>
+
+        <div class="sidebar-submenu open" id="coursesSubmenu">
+          <a href="curso-ayrpc-2025.html" class="submenu-item" data-course-id="ayrpc-2025">
+            <span class="submenu-dot complete"></span>
+            <span>AyRPC 2025</span>
+          </a>
+
+          <a href="curso-ayrpc-2026.html" class="submenu-item" data-course-id="ayrpc-2026">
+            <span class="submenu-dot soon"></span>
+            <span>AyRPC 2026</span>
+          </a>
+        </div>
+
+        <a href="#" class="nav-item">
+          <i class="fa-solid fa-chalkboard-user"></i>
+          <span>Clases</span>
+        </a>
+
+        <a href="https://drive.google.com/drive/folders/1VoQvgIo4D3GujyE9xey7KyTD8M8Tu-my?usp=drive_link" class="nav-item" target="_blank" rel="noopener">
+          <i class="fa-solid fa-folder-open"></i>
+          <span>Materiales</span>
+        </a>
+
+        <a href="#" class="nav-item">
+          <i class="fa-solid fa-user-check"></i>
+          <span>Asistencias</span>
+        </a>
+
+        <a href="verificador-ayrpc-2025.html" class="nav-item active">
+          <i class="fa-solid fa-magnifying-glass-chart"></i>
+          <span>Verificador</span>
+        </a>
+
+        <a href="#" class="nav-item nav-item-featured">
+          <i class="fa-solid fa-file-circle-check"></i>
+          <span>ExamPro</span>
+        </a>
+
+        <a href="#" class="nav-item nav-item-parent submenu-open" data-submenu-toggle="gestionSubmenu">
+          <i class="fa-solid fa-folder-tree"></i>
+          <span>Gestión</span>
+          <i class="fa-solid fa-chevron-down submenu-chevron"></i>
+        </a>
+
+        <div class="sidebar-submenu open" id="gestionSubmenu">
+          <a href="verificador-ayrpc-2025.html" class="submenu-item" data-gestion-id="certificados">
+            <span class="submenu-dot complete"></span>
+            <span>Certificados</span>
+          </a>
+
+          <a href="verificador-ayrpc-2025.html" class="submenu-item" data-gestion-id="constancias">
+            <span class="submenu-dot soon"></span>
+            <span>Constancias</span>
+          </a>
+        </div>
+
+        <a href="#" class="nav-item">
+          <i class="fa-solid fa-comments"></i>
+          <span>Comunidad</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="mini-status">
+          <span class="pulse-dot"></span>
+          <div>
+            <strong>Sistema operativo</strong>
+            <small>MVP local</small>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main-content">
+
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">
+            <i class="fa-solid fa-magnifying-glass-chart"></i>
+            AyRPC 2025
+          </p>
+
+          <h1>Verificador</h1>
+        </div>
+
+        <div class="topbar-actions">
+          <button class="theme-toggle" id="themeToggle" type="button" aria-label="Cambiar tema">
+            <i class="fa-solid fa-moon"></i>
+            <span>Modo oscuro</span>
+          </button>
+
+          <div class="user-pill">
+            <div class="user-avatar">
+              <i class="fa-solid fa-user-astronaut"></i>
+            </div>
+
+            <div>
+              <strong data-auth-name>Usuario</strong>
+              <small data-auth-role>Rol</small>
+            </div>
+          </div>
+
+          <button class="logout-btn" type="button" data-auth-logout title="Cerrar sesión">
+            <i class="fa-solid fa-right-from-bracket"></i>
+          </button>
+        </div>
+      </header>
+
+      <section class="hero-panel verifier-hero">
+        <div class="hero-copy">
+          <span class="badge">
+            <i class="fa-solid fa-id-card"></i>
+            Estado académico
+          </span>
+
+          <h2>
+            Consulta de cursada
+            <span>AyRPC 2025</span>
+          </h2>
+
+          <p>{ASIGNAR DESCRIPCION}</p>
+        </div>
+
+        <div class="hero-orb">
+          <div class="orb-inner">
+            <i class="fa-solid fa-magnifying-glass-chart"></i>
+          </div>
+        </div>
+      </section>
+
+      <section class="verifier-grid">
+        <article class="panel verifier-search-panel" id="login">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Buscar alumno</p>
+              <h3>Ingresar DNI</h3>
+            </div>
+          </div>
+
+          <div class="verifier-form">
+            <label>
+              <span>DNI sin puntos</span>
+              <div class="input-wrap">
+                <i class="fa-solid fa-id-card"></i>
+                <input id="dniInput" type="number" placeholder="Ej: 12345678" />
+              </div>
+            </label>
+
+            <button class="btn btn-primary" id="btnBuscar" type="button">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              Ver mi estado
+            </button>
+
+            <div id="errorBox" class="verifier-alert verifier-alert-error" style="display:none;">
+              <strong>Documento inválido</strong>
+              <span>Introduzca el mismo con el que se inscribió, sin puntos ni espacios.</span>
+            </div>
+
+            <div id="loadingBox" class="verifier-loading" style="display:none;">
+              <div class="loader"></div>
+              <span>Consultando estado académico...</span>
+            </div>
+
+            <div id="debug" class="verifier-debug"></div>
+          </div>
+        </article>
+
+        </section>
+
+      <section id="contenido" style="display:none;">
+        <article class="panel verifier-result-panel">
+          <div class="apto-box classroom-apto-box">
+            <div class="apto-info">
+              <div class="apto-titulo">APTO EXAMEN</div>
+              <div id="aptoValor" class="apto-valor">-</div>
+
+              <div id="resultadoBox" style="margin-top:12px; display:none;">
+                <div class="apto-titulo result-title">RESULTADO DEL EXAMEN</div>
+                <div id="resultadoValor" class="resultado-valor">-</div>
+              </div>
+            </div>
+
+            <div id="botonesWrap">
+              <div id="certificadoBox" style="display:none; contents;">
+                <button id="btnCertificado" class="btn-grande btn-accion-animate btn-certificado" type="button">
+                  <span>🎓</span>
+                  <strong>Ver Certificado</strong>
+                </button>
+
+                <button id="btnRecomendacion" class="btn-grande btn-accion-animate btn-linkedin" type="button" onclick="window.open(LINKEDIN_RECOMENDACION_URL, '_blank')">
+                  <i class="fa-brands fa-linkedin"></i>
+                  <strong>Pedir Recomendación</strong>
+                </button>
+              </div>
+
+              <div id="recuperatorioBox" style="display:none; contents;">
+                <button id="btnRecuperatorio" class="btn-grande btn-accion-animate btn-recuperatorio" type="button" onclick="window.open(RECUPERATORIO_URL, '_blank')">
+                  <span>📋</span>
+                  <strong>Ir al Recuperatorio</strong>
+                </button>
+              </div>
+
+              <div id="constanciaBox" style="display:none; contents;">
+                <button id="btnConstancia" class="btn-grande btn-accion-animate btn-constancia" type="button">
+                  <span>⏬</span>
+                  <strong>Constancia de alumno</strong>
+                </button>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <section class="stats-grid">
+          <article class="stat-card">
+            <div class="stat-icon cyan">
+              <i class="fa-solid fa-user-check"></i>
+            </div>
+            <div>
+              <span class="stat-number" id="k-asistencia"></span>
+              <p>Asistencia</p>
+            </div>
+          </article>
+
+          <article class="stat-card">
+            <div class="stat-icon violet">
+              <i class="fa-solid fa-percent"></i>
+            </div>
+            <div>
+              <span class="stat-number" id="k-porcentaje"></span>
+              <p>Porcentaje</p>
+            </div>
+          </article>
+
+          <article class="stat-card">
+            <div class="stat-icon pink">
+              <i class="fa-solid fa-signal"></i>
+            </div>
+            <div>
+              <span class="stat-number" id="k-estado"></span>
+              <p>Estado</p>
+            </div>
+          </article>
+
+          <article class="stat-card">
+            <div class="stat-icon green">
+              <i class="fa-solid fa-user-graduate"></i>
+            </div>
+            <div>
+              <span class="stat-number" id="nombre"></span>
+              <p>Alumno</p>
+            </div>
+          </article>
+        </section>
+
+        <section class="course-detail-grid">
+          <article class="panel">
+            <div class="panel-header">
+              <div>
+                <p class="eyebrow">Datos</p>
+                <h3>Información del alumno</h3>
+              </div>
+            </div>
+
+            <div class="datos verifier-data">
+              <div><b>Correo:</b> <span id="d-correo"></span></div>
+              <div><b>Teléfono:</b> <span id="d-telefono"></span></div>
+              <div><b>Twitch:</b> <span id="d-twitch"></span></div>
+              <div><b>Observaciones:</b> <span id="d-obs"></span></div>
+            </div>
+          </article>
+
+          
+        </section>
+
+        <article class="panel">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Clases</p>
+              <h3>Estado de asistencia</h3>
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table class="tabla verifier-table">
+              <tbody id="tablaClases"></tbody>
+            </table>
+          </div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Gráficos</p>
+              <h3>Tiempo por clase</h3>
+            </div>
+          </div>
+
+          <div id="graficos" class="graficos verifier-graphs"></div>
+        </article>
+      </section>
+
+    </main>
+  </div>
+
+  <script src="js/auth.js"></script>
+  <script src="js/courses-data.js"></script>
+  <script src="js/main.js"></script>
+  <script src="js/verificador-ayrpc-2025.js"></script>
+</body>
+</html>

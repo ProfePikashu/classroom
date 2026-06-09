@@ -40,29 +40,24 @@
         <h1>Ingresar al Classroom</h1>
 
         <p>
-          Acceso inicial para alumnos, docentes y administradores del ecosistema
-          AndyAzhTEC. Esta etapa usa sesión local temporal hasta integrar autenticación real.
+          {ASIGNAR DESCRIPCION}
         </p>
       </div>
 
       <form class="login-form" id="loginForm">
         <label>
-          <span>Correo</span>
+          <span>Usuario de Twitch</span>
           <div class="input-wrap">
-            <i class="fa-solid fa-envelope"></i>
-            <input id="loginEmail" type="email" placeholder="alumno@ejemplo.com" required />
+            <i class="fa-brands fa-twitch"></i>
+            <input id="loginTwitch" type="text" placeholder="usuario_twitch" required />
           </div>
         </label>
 
         <label>
-          <span>Rol de prueba</span>
+          <span>DNI</span>
           <div class="input-wrap">
-            <i class="fa-solid fa-user-shield"></i>
-            <select id="loginRole" required>
-              <option value="student">Alumno</option>
-              <option value="teacher">Docente</option>
-              <option value="admin">Administrador</option>
-            </select>
+            <i class="fa-solid fa-id-card"></i>
+            <input id="loginDni" type="number" placeholder="DNI sin puntos" required />
           </div>
         </label>
 
@@ -76,9 +71,7 @@
           <span>Modo oscuro</span>
         </button>
 
-        <p class="login-note">
-          Próxima etapa: Clerk o autorización propia conectada con Supabase/ExamPro.
-        </p>
+        <p class="login-note">{ASIGNAR DESCRIPCION}</p>
       </form>
     </section>
 
@@ -92,8 +85,7 @@
       <h2>Campus técnico propio</h2>
 
       <p>
-        Cursos, asistencias, recuperatorios, materiales, ExamPro, certificados
-        y comunidad dentro de una sola plataforma.
+        {ASIGNAR DESCRIPCION}
       </p>
 
       <div class="login-feature-list">
@@ -124,3 +116,4 @@
   <script src="js/login.js"></script>
 </body>
 </html>
+
