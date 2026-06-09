@@ -1,0 +1,126 @@
+﻿<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Login — AndyAzhTEC Classroom</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600;700;800&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+
+<body class="login-body">
+  <main class="login-shell">
+    <section class="login-card">
+      <div class="login-brand">
+        <div class="brand-logo login-brand-logo">
+          <i class="fa-solid fa-graduation-cap"></i>
+        </div>
+
+        <div>
+          <span class="brand-main">
+            Andy<span>Azh</span><strong>TEC</strong>
+          </span>
+          <small>Classroom</small>
+        </div>
+      </div>
+
+      <div class="login-copy">
+        <span class="badge">
+          <i class="fa-solid fa-shield-halved"></i>
+          Acceso al campus
+        </span>
+
+        <h1>Ingresar al Classroom</h1>
+
+        <p>
+          Acceso inicial para alumnos, docentes y administradores del ecosistema
+          AndyAzhTEC. Esta etapa usa sesión local temporal hasta integrar autenticación real.
+        </p>
+      </div>
+
+      <form class="login-form" id="loginForm">
+        <label>
+          <span>Correo</span>
+          <div class="input-wrap">
+            <i class="fa-solid fa-envelope"></i>
+            <input id="loginEmail" type="email" placeholder="alumno@ejemplo.com" required />
+          </div>
+        </label>
+
+        <label>
+          <span>Rol de prueba</span>
+          <div class="input-wrap">
+            <i class="fa-solid fa-user-shield"></i>
+            <select id="loginRole" required>
+              <option value="student">Alumno</option>
+              <option value="teacher">Docente</option>
+              <option value="admin">Administrador</option>
+            </select>
+          </div>
+        </label>
+
+        <button class="btn btn-primary login-btn" type="submit">
+          <i class="fa-solid fa-right-to-bracket"></i>
+          Entrar
+        </button>
+
+        <button class="btn btn-outline" id="themeToggle" type="button">
+          <i class="fa-solid fa-moon"></i>
+          <span>Modo oscuro</span>
+        </button>
+
+        <p class="login-note">
+          Próxima etapa: Clerk o autorización propia conectada con Supabase/ExamPro.
+        </p>
+      </form>
+    </section>
+
+    <section class="login-side-panel">
+      <div class="hero-orb login-orb">
+        <div class="orb-inner">
+          <i class="fa-solid fa-microchip"></i>
+        </div>
+      </div>
+
+      <h2>Campus técnico propio</h2>
+
+      <p>
+        Cursos, asistencias, recuperatorios, materiales, ExamPro, certificados
+        y comunidad dentro de una sola plataforma.
+      </p>
+
+      <div class="login-feature-list">
+        <div>
+          <i class="fa-solid fa-book-open-reader"></i>
+          <span>AyRPC 2025 / 2026</span>
+        </div>
+
+        <div>
+          <i class="fa-solid fa-file-circle-check"></i>
+          <span>ExamPro integrado</span>
+        </div>
+
+        <div>
+          <i class="fa-solid fa-database"></i>
+          <span>Supabase como base futura</span>
+        </div>
+
+        <div>
+          <i class="fa-brands fa-google-drive"></i>
+          <span>Archivos grandes en Drive</span>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="js/auth.js"></script>
+  <script src="js/login.js"></script>
+</body>
+</html>

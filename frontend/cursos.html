@@ -122,10 +122,14 @@
             </div>
 
             <div>
-              <strong>Andy Coria</strong>
-              <small>Administrador</small>
+              <strong data-auth-name>Usuario</strong>
+              <small data-auth-role>Rol</small>
             </div>
           </div>
+
+          <button class="logout-btn" type="button" data-auth-logout title="Cerrar sesión">
+            <i class="fa-solid fa-right-from-bracket"></i>
+          </button>
         </div>
       </header>
 
@@ -328,6 +332,7 @@
     </main>
   </div>
 
+  <script src="js/auth.js"></script>
   <script src="js/courses-data.js"></script>
   <script src="js/main.js"></script>
 </body>

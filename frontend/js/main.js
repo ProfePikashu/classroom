@@ -7,6 +7,9 @@
 
 const ClassroomApp = {
   init() {
+    if (typeof ClassroomAuth !== "undefined") {
+      ClassroomAuth.initProtectedPage();
+    }
     this.initTheme();
     this.initUiSounds();
     this.bindThemeToggle();
