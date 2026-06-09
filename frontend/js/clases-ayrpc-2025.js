@@ -1277,3 +1277,63 @@ AyRPC2025Classes.init = async function () {
   await this.__originalInitAbandonProtection();
   this.bindAbandonProtection();
 };
+
+
+/* ── RECOVERY START WARNING NO EXIT PUNISH ─────────────
+   Cambia la lógica:
+   - No castiga si el alumno cancela salir/cerrar.
+   - La advertencia aparece al iniciar Recuperar clase.
+────────────────────────────────────────────────────── */
+
+AyRPC2025Classes.getRecoveryStartMessage = function () {
+  return "Para recuperar esta clase tenés que ver el video completo desde esta vista. Si abandonás la vista de la clase, cambiás de pestaña o cerrás el navegador, el tiempo visto válido puede volver a 0%. ¿Querés iniciar la recuperación?";
+};
+
+AyRPC2025Classes.isStaffUser = function () {
+  return typeof ClassroomRoles !== "undefined" && ClassroomRoles.isCurrentStaff();
+};
+
+AyRPC2025Classes.isStudentRecoverableItem = function (item) {
+  if (!item) return false;
+  if (this.isStaffUser()) return false;
+
+  const status = this.getAttendanceStatus(item.attendance_key);
+  return ["AUSENTE", "REVISAR"].includes(status);
+};
+
+/* Desactiva la protección vieja que reseteaba al cancelar salida/cierre */
+AyRPC2025Classes.isWatchingRecoveryProtected = function () {
+  return false;
+};
+
+AyRPC2025Classes.handleViewAbandon = function () {
+  return;
+};
+
+AyRPC2025Classes.handleViewReturn = function () {
+  return;
+};
+
+/* Nueva advertencia al iniciar Recuperar clase */
+AyRPC2025Classes.__selectClassRecoveryStartWarningPatch = AyRPC2025Classes.selectClass;
+
+AyRPC2025Classes.selectClass = function (item) {
+  const needsWarning = this.isStudentRecoverableItem(item);
+  const isDifferentClass = !this.selectedClass || this.selectedClass.id !== item.id;
+
+  if (needsWarning && isDifferentClass) {
+    const ok = confirm(this.getRecoveryStartMessage());
+
+    if (!ok) {
+      return;
+    }
+
+    this.watchedSeconds = 0;
+    this.lastTickTime = null;
+    this.lastVideoTime = 0;
+    this.updateProgress(0);
+    this.setQuizEnabled(false);
+  }
+
+  this.__selectClassRecoveryStartWarningPatch(item);
+};
