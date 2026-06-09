@@ -635,3 +635,471 @@ const AyRPC2025Classes = {
 document.addEventListener("DOMContentLoaded", () => {
   AyRPC2025Classes.init();
 });
+
+
+/* ── STUDENT QUIZ EXAMPRO FLOW OVERRIDE ───────────────── */
+
+AyRPC2025Classes.applyLocalRubrics = function () {
+  try {
+    const rawV2 = localStorage.getItem("ayrpc-2025-rubrics-v2");
+    const rawV1 = localStorage.getItem("ayrpc-2025-rubrics-v1");
+    const raw = rawV2 || rawV1;
+
+    if (!raw) return;
+
+    const rubricData = JSON.parse(raw);
+    const quizzes = rubricData.quizzes || {};
+
+    if (!this.data.settings) this.data.settings = {};
+
+    if (rubricData.min_score_percent) {
+      this.data.settings.min_score_percent = Number(rubricData.min_score_percent);
+    }
+
+    this.data.classes = this.data.classes.map((item) => {
+      const customQuiz = quizzes[item.id];
+
+      if (!customQuiz) return item;
+
+      return {
+        ...item,
+        quiz: {
+          title: customQuiz.title || item.quiz?.title || "Recuperatorio",
+          questions: customQuiz.questions || item.quiz?.questions || [],
+        },
+      };
+    });
+  } catch (error) {}
+};
+
+AyRPC2025Classes.getRequiredCorrect = function (total) {
+  if (total <= 1) return 1;
+  return total - 1;
+};
+
+AyRPC2025Classes.normalizeText = function (value) {
+  return String(value || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9ñáéíóúü\s]/gi, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+};
+
+AyRPC2025Classes.getQuestionTypeLabel = function (question) {
+  const type = String(question.type || "DESARROLLO").toUpperCase();
+
+  if (type === "SINGLE" || type === "MULTIPLE_CHOICE" || type === "SELECCION_MULTIPLE") {
+    return "SELECCIÓN MÚLTIPLE";
+  }
+
+  if (type === "VERDADERO_FALSO") {
+    return "VERDADERO / FALSO";
+  }
+
+  return "DESARROLLO";
+};
+
+AyRPC2025Classes.isChoiceQuestion = function (question) {
+  const type = String(question.type || "").toUpperCase();
+  return ["SINGLE", "MULTIPLE_CHOICE", "SELECCION_MULTIPLE", "VERDADERO_FALSO"].includes(type);
+};
+
+AyRPC2025Classes.renderQuiz = function () {
+  if (!this.selectedClass?.quiz) return;
+
+  const status = this.getAttendanceStatus(this.selectedClass.attendance_key);
+  if (!this.canRecover(status)) return;
+
+  const box = document.getElementById("quizBox");
+  box.style.display = "grid";
+
+  const questions = this.selectedClass.quiz.questions || [];
+  const requiredCorrect = this.getRequiredCorrect(questions.length);
+
+  box.innerHTML = `
+    <div class="student-quiz-shell">
+      <div class="student-quiz-header">
+        <div>
+          <p class="eyebrow">Cuestionario</p>
+          <h3>${this.selectedClass.quiz.title}</h3>
+        </div>
+
+        <div class="student-quiz-pass-pill">
+          <i class="fa-solid fa-bolt"></i>
+          ${requiredCorrect}/${questions.length} para recuperar
+        </div>
+      </div>
+
+      <form id="recoveryQuizForm" class="student-quiz-form">
+        ${questions.map((question, index) => this.renderStudentQuestion(question, index)).join("")}
+
+        <div class="student-quiz-submit">
+          <button class="btn btn-primary" type="submit">
+            <i class="fa-solid fa-paper-plane"></i>
+            Enviar respuestas
+          </button>
+        </div>
+      </form>
+    </div>
+  `;
+
+  document.getElementById("recoveryQuizForm").addEventListener("submit", (event) => {
+    event.preventDefault();
+    this.evaluateQuiz(new FormData(event.target));
+  });
+};
+
+AyRPC2025Classes.renderStudentQuestion = function (question, index) {
+  const number = index + 1;
+  const typeLabel = this.getQuestionTypeLabel(question);
+  const isChoice = this.isChoiceQuestion(question);
+  const options = question.options || [];
+
+  const contextHtml = question.context || question.situation ? `
+    <div class="student-practical-box">
+      ${question.context ? `<div>${question.context}</div>` : ""}
+      ${question.situation ? `<div>${question.situation}</div>` : ""}
+    </div>
+  ` : "";
+
+  const inputHtml = isChoice
+    ? `
+      <div class="student-options-list">
+        ${options.map((option, optIndex) => `
+          <label class="student-option-item">
+            <input type="${Array.isArray(question.answer) ? "checkbox" : "radio"}" name="${question.id}" value="${optIndex}" />
+            <span>${option}</span>
+          </label>
+        `).join("")}
+      </div>
+    `
+    : `
+      <textarea
+        class="student-answer-textarea"
+        name="${question.id}"
+        rows="5"
+        placeholder="Tu respuesta sin límite de caracteres..."
+        required
+      ></textarea>
+    `;
+
+  return `
+    <article class="student-question-card">
+      <div class="student-question-head">
+        <div class="student-question-title">
+          <span class="student-question-number">${question.code || number}</span>
+          <strong>${question.prompt || "{ASIGNAR PREGUNTA}"}</strong>
+        </div>
+
+        <span class="student-question-type">${typeLabel}</span>
+      </div>
+
+      ${contextHtml}
+      ${inputHtml}
+    </article>
+  `;
+};
+
+AyRPC2025Classes.evaluateQuiz = async function (formData) {
+  const questions = this.selectedClass.quiz.questions || [];
+  const results = questions.map((question, index) => this.gradeQuestion(question, index, formData));
+
+  const correctCount = results.filter((item) => item.result === "correct").length;
+  const requiredCorrect = this.getRequiredCorrect(questions.length);
+  const passed = correctCount >= requiredCorrect;
+  const score = questions.length ? Math.round((correctCount / questions.length) * 100) : 0;
+
+  if (passed) {
+    this.updateLocalSessionAsRecovered();
+    this.renderClasses();
+  }
+
+  this.renderQuizFeedback({
+    passed,
+    score,
+    correctCount,
+    requiredCorrect,
+    total: questions.length,
+    results,
+  });
+};
+
+AyRPC2025Classes.gradeQuestion = function (question, index, formData) {
+  if (this.isChoiceQuestion(question)) {
+    return this.gradeChoiceQuestion(question, index, formData);
+  }
+
+  return this.gradeDevelopmentQuestion(question, index, formData);
+};
+
+AyRPC2025Classes.gradeChoiceQuestion = function (question, index, formData) {
+  const values = formData.getAll(question.id).map((item) => Number(item));
+  const expected = Array.isArray(question.answer) ? question.answer.map(Number) : [Number(question.answer || 0)];
+
+  const selectedSorted = [...values].sort((a, b) => a - b);
+  const expectedSorted = [...expected].sort((a, b) => a - b);
+
+  const exact =
+    selectedSorted.length === expectedSorted.length &&
+    selectedSorted.every((value, idx) => value === expectedSorted[idx]);
+
+  const intersection = selectedSorted.filter((value) => expectedSorted.includes(value));
+
+  let result = "incorrect";
+
+  if (exact) {
+    result = "correct";
+  } else if (intersection.length > 0) {
+    result = "partial";
+  }
+
+  return {
+    question,
+    index,
+    answer: selectedSorted.map((value) => question.options?.[value] || value).join(", ") || "Sin responder",
+    result,
+    publicMessage: this.publicResultMessage(result),
+    privateDetails: {
+      expected: expectedSorted.map((value) => question.options?.[value] || value),
+    },
+  };
+};
+
+AyRPC2025Classes.gradeDevelopmentQuestion = function (question, index, formData) {
+  const answer = String(formData.get(question.id) || "").trim();
+  const normalizedAnswer = this.normalizeText(answer);
+  const criteria = question.criteria || [];
+
+  if (!answer) {
+    return {
+      question,
+      index,
+      answer: "Sin responder",
+      result: "incorrect",
+      publicMessage: "La respuesta quedó vacía.",
+      criteriaResults: [],
+    };
+  }
+
+  if (!criteria.length) {
+    return {
+      question,
+      index,
+      answer,
+      result: "correct",
+      publicMessage: "Respuesta registrada.",
+      criteriaResults: [],
+    };
+  }
+
+  const criteriaResults = criteria.map((criterion) => {
+    const rawKeywords = String(criterion.keywords || "")
+      .split(/[,;|]/)
+      .map((item) => this.normalizeText(item))
+      .filter(Boolean);
+
+    const detected = rawKeywords.filter((keyword) => normalizedAnswer.includes(keyword));
+    const ok = rawKeywords.length ? detected.length > 0 : false;
+
+    return {
+      title: criterion.title || "{ASIGNAR CRITERIO}",
+      expected: criterion.expected || "",
+      keywords: rawKeywords,
+      detected,
+      missing_message: criterion.missing_message || "",
+      ok,
+    };
+  });
+
+  const okCount = criteriaResults.filter((item) => item.ok).length;
+
+  let result = "incorrect";
+
+  if (okCount === criteriaResults.length) {
+    result = "correct";
+  } else if (okCount > 0) {
+    result = "partial";
+  }
+
+  return {
+    question,
+    index,
+    answer,
+    result,
+    publicMessage: this.publicResultMessage(result),
+    criteriaResults,
+  };
+};
+
+AyRPC2025Classes.publicResultMessage = function (result) {
+  const map = {
+    correct: "Correcto.",
+    partial: "Parcial. Hay elementos bien encaminados, pero falta completar la respuesta.",
+    incorrect: "Incorrecto. Revisá nuevamente la clase antes de reintentar.",
+  };
+
+  return map[result] || "Resultado registrado.";
+};
+
+AyRPC2025Classes.resultLabel = function (result) {
+  const map = {
+    correct: "Correcto",
+    partial: "Parcial",
+    incorrect: "Incorrecto",
+  };
+
+  return map[result] || result;
+};
+
+AyRPC2025Classes.renderQuizFeedback = function (summary) {
+  const box = document.getElementById("quizBox");
+  if (!box) return;
+
+  const statusLabel = summary.passed ? "✅ Recuperada" : "⚠️ Reintentar";
+  const statusClass = summary.passed ? "approved" : "retry";
+
+  box.innerHTML = `
+    <section class="student-feedback-shell">
+      <div class="student-feedback-top ${statusClass}">
+        <div>
+          <p class="eyebrow">Resultado</p>
+          <h3>${statusLabel}</h3>
+        </div>
+
+        <div class="student-score-pill">
+          ${summary.correctCount}/${summary.total} correctas
+        </div>
+      </div>
+
+      <div class="student-feedback-note">
+        ${summary.passed
+          ? "La clase quedó marcada como RECUPERADA en esta prueba visual. Al conectar el endpoint, esto se guardará en la base oficial."
+          : `Necesitás al menos ${summary.requiredCorrect} respuestas correctas de ${summary.total}. La rúbrica completa se muestra recién cuando la recuperación está aprobada.`
+        }
+      </div>
+
+      <div class="student-feedback-list">
+        ${summary.results.map((item) => this.renderQuestionFeedback(item, summary.passed)).join("")}
+      </div>
+
+      <div class="student-quiz-submit">
+        ${summary.passed
+          ? `<button class="btn btn-primary" type="button" onclick="location.reload()">
+                <i class="fa-solid fa-check"></i>
+                Finalizar
+              </button>`
+          : `<button class="btn btn-primary" type="button" id="retryQuizBtn">
+                <i class="fa-solid fa-rotate-right"></i>
+                Reintentar cuestionario
+              </button>`
+        }
+      </div>
+    </section>
+  `;
+
+  const retry = document.getElementById("retryQuizBtn");
+
+  if (retry) {
+    retry.addEventListener("click", () => {
+      this.renderQuiz();
+    });
+  }
+};
+
+AyRPC2025Classes.renderQuestionFeedback = function (item, passed) {
+  const question = item.question;
+
+  const minimumHtml = passed ? `
+    <div class="feedback-minimum-box">
+      <div class="criterion-title">
+        <i class="fa-solid fa-lightbulb"></i>
+        CRITERIO MÍNIMO
+      </div>
+
+      <p>${question.minimum_criterion || "Sin criterio mínimo cargado."}</p>
+    </div>
+  ` : "";
+
+  const criteriaHtml = passed && item.criteriaResults?.length ? `
+    <div class="feedback-criteria-box">
+      <div class="criterion-title detected">
+        DETECTADO
+      </div>
+
+      ${item.criteriaResults.map((criterion) => `
+        <article class="feedback-criterion-item ${criterion.ok ? "ok" : "missing"}">
+          <strong>${criterion.ok ? "✓" : "✘"} ${criterion.title}</strong>
+          <span>${criterion.ok ? criterion.expected : criterion.missing_message || "No detectado en la respuesta."}</span>
+        </article>
+      `).join("")}
+    </div>
+  ` : "";
+
+  return `
+    <article class="student-feedback-card ${item.result}">
+      <div class="student-feedback-question">
+        <p class="eyebrow">P${item.index + 1} · TU RESPUESTA</p>
+        <strong>${question.prompt || "{ASIGNAR PREGUNTA}"}</strong>
+        <p>${item.answer}</p>
+      </div>
+
+      <div class="student-feedback-result">
+        <p class="eyebrow">P${item.index + 1} · DEVOLUCIÓN</p>
+        <span class="feedback-result-badge ${item.result}">
+          ${this.resultLabel(item.result)}
+        </span>
+        <p>${item.publicMessage}</p>
+      </div>
+
+      ${minimumHtml}
+      ${criteriaHtml}
+    </article>
+  `;
+};
+
+
+/* ── TEACHER CAN SKIP VIDEO WATCH ───────────────────── */
+
+AyRPC2025Classes.isTeacher = function () {
+  return typeof ClassroomRoles !== "undefined" && ClassroomRoles.isCurrentTeacher();
+};
+
+AyRPC2025Classes.originalCanRecoverTeacherPatch = AyRPC2025Classes.canRecover;
+
+AyRPC2025Classes.canRecover = function (status) {
+  if (this.isTeacher()) return true;
+  return ["AUSENTE", "REVISAR"].includes(status);
+};
+
+AyRPC2025Classes.originalPaintRecoveryNoteTeacherPatch = AyRPC2025Classes.paintRecoveryNote;
+
+AyRPC2025Classes.paintRecoveryNote = function (status, recoverable) {
+  if (this.isTeacher()) {
+    const note = document.getElementById("recoveryNote");
+    if (!note) return;
+
+    note.className = "recovery-note ok";
+    note.textContent = "Modo docente activo: podés abrir el cuestionario sin completar el tiempo de visualización.";
+    return;
+  }
+
+  return this.originalPaintRecoveryNoteTeacherPatch(status, recoverable);
+};
+
+AyRPC2025Classes.originalSelectClassTeacherPatch = AyRPC2025Classes.selectClass;
+
+AyRPC2025Classes.selectClass = function (item) {
+  this.originalSelectClassTeacherPatch(item);
+
+  if (!this.isTeacher()) return;
+
+  const progressWrap = document.getElementById("watchProgressWrap");
+
+  if (progressWrap) {
+    progressWrap.style.display = "none";
+  }
+
+  this.setQuizEnabled(true);
+};
