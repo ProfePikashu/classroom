@@ -4156,3 +4156,210 @@ body.role-teacher .sidebar-submenu .teacher-only {
     flex-direction: column !important;
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ── CLASSROOM ORB IMG FINAL ────────────────────────── */
+.hero-orb {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: clamp(190px, 20vw, 280px);
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+}
+
+.hero-orb .orb-inner {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+}
+
+.hero-orb .orb-inner .classroom-orb-img {
+  position: absolute;
+  width: 68%;
+  max-width: 168px;
+  height: auto;
+  object-fit: contain;
+  margin: 0;
+  padding: 0;
+  z-index: 30;
+  pointer-events: none;
+}
+
+.hero-orb .orb-inner .classroom-orb-img-dark {
+  display: block;
+  filter: drop-shadow(0 0 22px rgba(0, 245, 255, 0.36));
+}
+
+.hero-orb .orb-inner .classroom-orb-img-light {
+  display: none;
+  filter: drop-shadow(0 0 18px rgba(124, 58, 237, 0.25));
+}
+
+html[data-theme="light"] .hero-orb .orb-inner .classroom-orb-img-dark,
+:root[data-theme="light"] .hero-orb .orb-inner .classroom-orb-img-dark {
+  display: none;
+}
+
+html[data-theme="light"] .hero-orb .orb-inner .classroom-orb-img-light,
+:root[data-theme="light"] .hero-orb .orb-inner .classroom-orb-img-light {
+  display: block;
+}
+
+html[data-theme="dark"] .hero-orb .orb-inner .classroom-orb-img-dark,
+:root[data-theme="dark"] .hero-orb .orb-inner .classroom-orb-img-dark {
+  display: block;
+}
+
+.hero-orb .orb-inner i.fa-microchip {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .hero-orb {
+    width: clamp(150px, 36vw, 220px);
+  }
+
+  .hero-orb .orb-inner .classroom-orb-img {
+    width: 64%;
+    max-width: 140px;
+  }
+}
+
+@media (max-width: 560px) {
+  .hero-orb {
+    width: clamp(125px, 42vw, 180px);
+  }
+
+  .hero-orb .orb-inner .classroom-orb-img {
+    width: 60%;
+    max-width: 112px;
+  }
+}
+
+
+/* ── CLASSROOM LOGO ORB HARD RESET ──────────────────── */
+.hero-orb,
+.orb-inner,
+.classroom-orb-img,
+.classroom-orb-picture,
+.theme-orb-icon,
+.home-classroom-icon,
+.login-classroom-icon {
+  display: none !important;
+}
+
+.classroom-logo-orb {
+  width: clamp(190px, 20vw, 280px);
+  aspect-ratio: 1 / 1;
+  display: grid;
+  place-items: center;
+  position: relative;
+  border-radius: 999px;
+  border: 3px solid transparent;
+  background:
+    linear-gradient(var(--bg-main), var(--bg-main)) padding-box,
+    linear-gradient(135deg, var(--cyan), var(--violet), var(--lilac)) border-box;
+  box-shadow:
+    0 0 34px rgba(0, 245, 255, 0.12),
+    0 0 44px rgba(168, 85, 247, 0.15),
+    inset 0 0 36px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+}
+
+.classroom-logo-orb-img {
+  width: 68%;
+  height: auto;
+  display: block;
+  object-fit: contain;
+  position: relative;
+  z-index: 2;
+}
+
+.classroom-logo-orb-img-dark {
+  display: block;
+  filter: drop-shadow(0 0 22px rgba(0, 245, 255, 0.38));
+}
+
+.classroom-logo-orb-img-light {
+  display: none;
+  filter: drop-shadow(0 0 20px rgba(124, 58, 237, 0.26));
+}
+
+html[data-theme="light"] .classroom-logo-orb-img-dark,
+:root[data-theme="light"] .classroom-logo-orb-img-dark {
+  display: none;
+}
+
+html[data-theme="light"] .classroom-logo-orb-img-light,
+:root[data-theme="light"] .classroom-logo-orb-img-light {
+  display: block;
+}
+
+html[data-theme="dark"] .classroom-logo-orb-img-dark,
+:root[data-theme="dark"] .classroom-logo-orb-img-dark {
+  display: block;
+}
+
+@media (max-width: 900px) {
+  .classroom-logo-orb {
+    width: clamp(150px, 36vw, 220px);
+  }
+
+  .classroom-logo-orb-img {
+    width: 66%;
+  }
+}
+
+@media (max-width: 560px) {
+  .classroom-logo-orb {
+    width: clamp(125px, 42vw, 180px);
+  }
+
+  .classroom-logo-orb-img {
+    width: 64%;
+  }
+}
+
+
+/* ── LOGIN ORB FINAL FIX ────────────────────────────── */
+.login-side-panel .classroom-logo-orb,
+.login-classroom-logo-orb {
+  margin: 0 auto 2.25rem auto;
+}
+
+.classroom-logo-orb-img {
+  width: 76%;
+}
+
+@media (max-width: 900px) {
+  .classroom-logo-orb-img {
+    width: 72%;
+  }
+}
+
+@media (max-width: 560px) {
+  .classroom-logo-orb-img {
+    width: 68%;
+  }
+}
