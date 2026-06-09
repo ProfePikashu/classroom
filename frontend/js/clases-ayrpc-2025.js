@@ -173,6 +173,7 @@ const AyRPC2025Classes = {
 
   async init() {
     await this.loadData();
+    this.applyLocalRubrics();
     this.renderClasses();
     this.bindQuizButton();
   },
@@ -219,6 +220,34 @@ const AyRPC2025Classes = {
         };
       })
     };
+  },
+
+  applyLocalRubrics() {
+    try {
+      const raw = localStorage.getItem("ayrpc-2025-rubrics-v1");
+      if (!raw) return;
+
+      const rubricData = JSON.parse(raw);
+      const quizzes = rubricData.quizzes || {};
+
+      if (rubricData.min_score_percent) {
+        this.data.settings.min_score_percent = Number(rubricData.min_score_percent);
+      }
+
+      this.data.classes = this.data.classes.map((item) => {
+        const customQuiz = quizzes[item.id];
+
+        if (!customQuiz) return item;
+
+        return {
+          ...item,
+          quiz: {
+            title: customQuiz.title || item.quiz?.title || "Recuperatorio",
+            questions: customQuiz.questions || item.quiz?.questions || [],
+          },
+        };
+      });
+    } catch (error) {}
   },
 
   getSession() {

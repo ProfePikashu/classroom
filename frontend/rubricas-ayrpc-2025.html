@@ -4,15 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <title>Clases AyRPC 2025 — AndyAzhTEC Classroom</title>
-
-  <script src="https://www.youtube.com/iframe_api"></script>
-  <script src="https://cdn.jsdelivr.net/npm/js-yaml@4/dist/js-yaml.min.js"></script>
+  <title>Rúbricas AyRPC 2025 — AndyAzhTEC Classroom</title>
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/js-yaml@4/dist/js-yaml.min.js"></script>
+
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600;700;800&display=swap" rel="stylesheet" />
+
   <link rel="stylesheet" href="css/styles.css" />
 </head>
 
@@ -58,12 +58,12 @@
             <span>AyRPC 2025</span>
           </a>
 
-          <a href="clases-ayrpc-2025.html" class="submenu-item submenu-child active" data-course-child="ayrpc-2025-clases">
+          <a href="clases-ayrpc-2025.html" class="submenu-item submenu-child" data-course-child="ayrpc-2025-clases">
             <span class="submenu-line"></span>
             <span>Clases</span>
           </a>
 
-          <a href="rubricas-ayrpc-2025.html" class="submenu-item submenu-child teacher-only" data-course-child="ayrpc-2025-rubricas">
+          <a href="rubricas-ayrpc-2025.html" class="submenu-item submenu-child active teacher-only" data-course-child="ayrpc-2025-rubricas">
             <span class="submenu-line"></span>
             <span>Rúbricas</span>
           </a>
@@ -105,11 +105,11 @@
       <header class="topbar">
         <div>
           <p class="eyebrow">
-            <i class="fa-solid fa-chalkboard-user"></i>
+            <i class="fa-solid fa-list-check"></i>
             AyRPC 2025
           </p>
 
-          <h1>Clases</h1>
+          <h1>Rúbricas</h1>
         </div>
 
         <div class="topbar-actions">
@@ -146,69 +146,91 @@
         </div>
       </header>
 
-      <section class="hero-panel classes-hero">
+      <section class="hero-panel rubrics-hero">
         <div class="hero-copy">
           <span class="badge">
-            <i class="fa-solid fa-video"></i>
-            Clases grabadas
+            <i class="fa-solid fa-user-shield"></i>
+            Panel docente
           </span>
 
           <h2>
-            AyRPC 2025
-            <span>Clases y recuperación</span>
+            Constructor básico
+            <span>Cuestionarios de recuperación</span>
           </h2>
 
           <p>{ASIGNAR DESCRIPCION}</p>
         </div>
       </section>
 
-      <section class="classes-layout">
+      <section id="teacherDenied" class="panel teacher-denied" style="display:none;">
+        <h3>Acceso restringido</h3>
+        <p>Esta sección está disponible solo para usuario docente.</p>
+      </section>
+
+      <section id="rubricsApp" class="rubrics-layout" style="display:none;">
         <article class="panel">
           <div class="panel-header">
             <div>
-              <p class="eyebrow">Lista</p>
-              <h3>Clases del curso</h3>
+              <p class="eyebrow">Clase</p>
+              <h3>Seleccionar recuperación</h3>
             </div>
           </div>
 
-          <div id="classesList" class="classes-list"></div>
-        </article>
+          <div class="rubric-form-grid">
+            <label>
+              <span>Clase</span>
+              <select id="rubricClassSelect"></select>
+            </label>
 
-        <article class="panel recovery-panel" id="recoveryPanel">
-          <div class="panel-header">
-            <div>
-              <p class="eyebrow">Recuperación</p>
-              <h3 id="recoveryTitle">Seleccioná una clase</h3>
-            </div>
+            <label>
+              <span>Título del cuestionario</span>
+              <input id="rubricQuizTitle" type="text" placeholder="{ASIGNAR TITULO}" />
+            </label>
+
+            <label>
+              <span>Mínimo de aprobación</span>
+              <input id="rubricMinScore" type="number" min="1" max="100" value="70" />
+            </label>
           </div>
 
-          <div id="recoveryNote" class="recovery-note neutral">
-            Elegí una clase de la lista para ver su contenido y estado.
-          </div>
+          <div class="rubric-actions">
+            <button class="btn btn-outline" id="btnAddQuestion" type="button">
+              <i class="fa-solid fa-plus"></i>
+              Agregar pregunta
+            </button>
 
-          <div id="videoPlayerBox" class="video-player-box">
-            <div id="youtubePlayer"></div>
-          </div>
+            <button class="btn btn-primary" id="btnSaveRubric" type="button">
+              <i class="fa-solid fa-floppy-disk"></i>
+              Guardar rúbrica
+            </button>
 
-          <div class="watch-progress-box" id="watchProgressWrap">
-            <div class="progress-info">
-              <span>Tiempo visto válido</span>
-              <strong id="watchProgressText">0%</strong>
-            </div>
-
-            <div class="progress-bar">
-              <span id="watchProgressBar" style="width:0%"></span>
-            </div>
-          </div>
-
-          <div class="recovery-actions">
-            <button id="quizButton" class="btn btn-primary" type="button" disabled>
-              <i class="fa-solid fa-clipboard-question"></i>
-              Responder cuestionario
+            <button class="btn btn-outline danger-btn" id="btnResetRubric" type="button">
+              <i class="fa-solid fa-rotate-left"></i>
+              Reset local
             </button>
           </div>
+        </article>
 
-          <div id="quizBox" class="quiz-box" style="display:none;"></div>
+        <article class="panel">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Preguntas</p>
+              <h3>Constructor</h3>
+            </div>
+          </div>
+
+          <div id="rubricQuestions" class="rubric-questions"></div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Vista previa</p>
+              <h3>Cuestionario</h3>
+            </div>
+          </div>
+
+          <div id="rubricPreview" class="rubric-preview"></div>
         </article>
       </section>
     </main>
@@ -218,6 +240,6 @@
   <script src="js/roles.js"></script>
   <script src="js/courses-data.js"></script>
   <script src="js/main.js"></script>
-  <script src="js/clases-ayrpc-2025.js"></script>
+  <script src="js/rubricas-ayrpc-2025.js"></script>
 </body>
 </html>
