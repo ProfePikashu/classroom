@@ -1114,3 +1114,30 @@ AyRPC2025Classes.isStaff = function () {
 AyRPC2025Classes.isTeacher = function () {
   return this.isStaff();
 };
+
+
+/* ── MOBILE AUTOSCROLL TO RECOVERY PANEL ────────────── */
+
+AyRPC2025Classes.scrollToRecoveryPanel = function () {
+  const isMobile = window.matchMedia("(max-width: 1100px)").matches;
+
+  if (!isMobile) return;
+
+  const panel = document.getElementById("recoveryPanel");
+
+  if (!panel) return;
+
+  setTimeout(() => {
+    panel.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  }, 180);
+};
+
+AyRPC2025Classes.originalSelectClassAutoScrollPatch = AyRPC2025Classes.selectClass;
+
+AyRPC2025Classes.selectClass = function (item) {
+  this.originalSelectClassAutoScrollPatch(item);
+  this.scrollToRecoveryPanel();
+};
