@@ -4,15 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <title>Clases AyRPC 2025 — AndyAzhTEC Classroom</title>
-
-  <script src="https://www.youtube.com/iframe_api"></script>
-  <script src="https://cdn.jsdelivr.net/npm/js-yaml@4/dist/js-yaml.min.js"></script>
+  <title>Administrar — AndyAzhTEC Classroom</title>
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600;700;800&display=swap" rel="stylesheet" />
+
   <link rel="stylesheet" href="css/styles.css" />
 </head>
 
@@ -58,7 +57,7 @@
             <span>AyRPC 2025</span>
           </a>
 
-          <a href="clases-ayrpc-2025.html" class="submenu-item submenu-child active" data-course-child="ayrpc-2025-clases">
+          <a href="clases-ayrpc-2025.html" class="submenu-item submenu-child" data-course-child="ayrpc-2025-clases">
             <span class="submenu-line"></span>
             <span>Clases</span>
           </a>
@@ -102,7 +101,7 @@
         <div class="teacher-admin-zone teacher-only">
           <span class="teacher-admin-label">ADMINISTRAR</span>
 
-          <a href="admin.html" class="nav-item admin-nav-item">
+          <a href="admin.html" class="nav-item admin-nav-item active">
             <i class="fa-solid fa-user-shield"></i>
             <span>Roles y permisos</span>
           </a>
@@ -114,11 +113,11 @@
       <header class="topbar">
         <div>
           <p class="eyebrow">
-            <i class="fa-solid fa-chalkboard-user"></i>
-            AyRPC 2025
+            <i class="fa-solid fa-user-shield"></i>
+            Panel docente
           </p>
 
-          <h1>Clases</h1>
+          <h1>Administrar</h1>
         </div>
 
         <div class="topbar-actions">
@@ -155,69 +154,60 @@
         </div>
       </header>
 
-      <section class="hero-panel classes-hero">
-        <div class="hero-copy">
-          <span class="badge">
-            <i class="fa-solid fa-video"></i>
-            Clases grabadas
-          </span>
-
-          <h2>
-            AyRPC 2025
-            <span>Clases y recuperación</span>
-          </h2>
-
-          <p>{ASIGNAR DESCRIPCION}</p>
-        </div>
+      <section id="adminDenied" class="panel teacher-denied" style="display:none;">
+        <h3>Acceso restringido</h3>
+        <p>Esta sección está disponible solo para el rol docente.</p>
       </section>
 
-      <section class="classes-layout">
+      <section id="adminApp" class="admin-layout" style="display:none;">
         <article class="panel">
           <div class="panel-header">
             <div>
-              <p class="eyebrow">Lista</p>
-              <h3>Clases del curso</h3>
+              <p class="eyebrow">Moderación</p>
+              <h3>Asignar rol de moderador</h3>
             </div>
           </div>
 
-          <div id="classesList" class="classes-list"></div>
+          <form id="moderatorForm" class="admin-form">
+            <label>
+              <span>Usuario de Twitch</span>
+              <input id="moderatorTwitch" type="text" placeholder="usuario_twitch" required />
+            </label>
+
+            <label>
+              <span>DNI</span>
+              <input id="moderatorDni" type="number" placeholder="DNI sin puntos" required />
+            </label>
+
+            <button class="btn btn-primary" type="submit">
+              <i class="fa-solid fa-user-plus"></i>
+              Asignar moderador
+            </button>
+          </form>
         </article>
 
-        <article class="panel recovery-panel" id="recoveryPanel">
+        <article class="panel">
           <div class="panel-header">
             <div>
-              <p class="eyebrow">Recuperación</p>
-              <h3 id="recoveryTitle">Seleccioná una clase</h3>
+              <p class="eyebrow">Usuarios</p>
+              <h3>Moderadores asignados</h3>
             </div>
           </div>
 
-          <div id="recoveryNote" class="recovery-note neutral">
-            Elegí una clase de la lista para ver su contenido y estado.
-          </div>
+          <div id="moderatorsList" class="moderators-list"></div>
+        </article>
 
-          <div id="videoPlayerBox" class="video-player-box">
-            <div id="youtubePlayer"></div>
-          </div>
-
-          <div class="watch-progress-box" id="watchProgressWrap">
-            <div class="progress-info">
-              <span>Tiempo visto válido</span>
-              <strong id="watchProgressText">0%</strong>
-            </div>
-
-            <div class="progress-bar">
-              <span id="watchProgressBar" style="width:0%"></span>
+        <article class="panel">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Estado</p>
+              <h3>Notas técnicas</h3>
             </div>
           </div>
 
-          <div class="recovery-actions">
-            <button id="quizButton" class="btn btn-primary" type="button" disabled>
-              <i class="fa-solid fa-clipboard-question"></i>
-              Responder cuestionario
-            </button>
+          <div class="admin-note-box">
+            <p>{ASIGNAR DESCRIPCION}</p>
           </div>
-
-          <div id="quizBox" class="quiz-box" style="display:none;"></div>
         </article>
       </section>
     </main>
@@ -227,6 +217,6 @@
   <script src="js/roles.js"></script>
   <script src="js/courses-data.js"></script>
   <script src="js/main.js"></script>
-  <script src="js/clases-ayrpc-2025.js"></script>
+  <script src="js/admin.js"></script>
 </body>
 </html>

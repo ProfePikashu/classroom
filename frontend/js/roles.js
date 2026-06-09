@@ -16,18 +16,9 @@ const CLASSROOM_TEACHER_NAMES = [
   "ARTURO ANDRÉS CORIA",
 ];
 
-const CLASSROOM_MODERATOR_TWITCH_USERS = [
-  "moderador_1",
-  "moderador_2",
-];
-
-const CLASSROOM_MODERATOR_NAMES = [
-  "NOMBRE MODERADOR 1",
-  "NOMBRE MODERADOR 2",
-];
-
 const ClassroomRoles = {
   storageKey: "andyazh-classroom-session",
+  assignmentsKey: "andyazh-classroom-role-assignments",
 
   normalize(value) {
     return String(value || "")
@@ -36,6 +27,10 @@ const ClassroomRoles = {
       .replace(/^@/, "")
       .normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "");
+  },
+
+  normalizeDni(value) {
+    return String(value || "").replace(/\D/g, "").trim();
   },
 
   normalizeName(value) {
@@ -56,12 +51,32 @@ const ClassroomRoles = {
         alumno["Usuario de Twitch"]
       ),
 
+      dni: this.normalizeDni(
+        session?.dni ||
+        alumno["DNI"]
+      ),
+
       name: this.normalizeName(
         session?.displayName ||
         alumno["Nombre Completo"] ||
         alumno["Nombre"]
       ),
     };
+  },
+
+  getAssignments() {
+    try {
+      const raw = localStorage.getItem(this.assignmentsKey);
+      const parsed = raw ? JSON.parse(raw) : [];
+
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (error) {
+      return [];
+    }
+  },
+
+  saveAssignments(assignments) {
+    localStorage.setItem(this.assignmentsKey, JSON.stringify(assignments || []));
   },
 
   isTeacherSession(session) {
@@ -75,15 +90,23 @@ const ClassroomRoles = {
     return teacherTwitches.includes(identity.twitch) || teacherNames.includes(identity.name);
   },
 
-  isModeratorSession(session) {
-    if (!session) return false;
+  getAssignedRole(session) {
+    if (!session) return null;
 
     const identity = this.getSessionIdentity(session);
 
-    const moderatorTwitches = CLASSROOM_MODERATOR_TWITCH_USERS.map((item) => this.normalize(item));
-    const moderatorNames = CLASSROOM_MODERATOR_NAMES.map((item) => this.normalizeName(item));
+    const match = this.getAssignments().find((item) => {
+      const itemTwitch = this.normalize(item.twitch);
+      const itemDni = this.normalizeDni(item.dni);
 
-    return moderatorTwitches.includes(identity.twitch) || moderatorNames.includes(identity.name);
+      return itemTwitch === identity.twitch && itemDni === identity.dni;
+    });
+
+    return match?.role || null;
+  },
+
+  isModeratorSession(session) {
+    return this.getAssignedRole(session) === "moderator";
   },
 
   apply(session) {
@@ -101,8 +124,8 @@ const ClassroomRoles = {
       return session;
     }
 
-    session.role = session.role || "student";
-    session.roleLabel = session.roleLabel || "Alumno";
+    session.role = "student";
+    session.roleLabel = "Alumno";
 
     return session;
   },
