@@ -130,25 +130,36 @@
         </div>
 
         <div class="topbar-actions">
-          <button class="theme-toggle" id="themeToggle" type="button" aria-label="Cambiar tema">
+          <button class="theme-toggle theme-toggle-icon" id="themeToggle" type="button" aria-label="Cambiar tema">
             <i class="fa-solid fa-moon"></i>
-            <span>Modo oscuro</span>
           </button>
 
-          <div class="user-pill">
-            <div class="user-avatar">
-              <i class="fa-solid fa-user-astronaut"></i>
-            </div>
+          <div class="user-menu" id="userMenu">
+            <button class="user-pill user-menu-toggle" id="userMenuToggle" type="button" aria-label="Abrir menú de usuario">
+              <div class="user-avatar">
+                <i class="fa-solid fa-user-astronaut"></i>
+              </div>
 
-            <div>
-              <strong data-auth-name>Usuario</strong>
-              <small data-auth-role>Rol</small>
+              <div>
+                <strong data-auth-name>Usuario</strong>
+                <small data-auth-role>Rol</small>
+              </div>
+
+              <i class="fa-solid fa-chevron-down user-menu-chevron"></i>
+            </button>
+
+            <div class="user-dropdown" id="userDropdown">
+              <a href="perfil.html">
+                <i class="fa-solid fa-id-card"></i>
+                <span>Mis Datos</span>
+              </a>
+
+              <button type="button" data-auth-logout>
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <span>Cerrar sesión</span>
+              </button>
             </div>
           </div>
-
-          <button class="logout-btn" type="button" data-auth-logout title="Cerrar sesión">
-            <i class="fa-solid fa-right-from-bracket"></i>
-          </button>
         </div>
       </header>
 

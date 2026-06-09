@@ -38,6 +38,7 @@ const VerificadorAyRPC = {
     this.cacheDom();
     this.bindEvents();
     this.autofillFromSession();
+    this.autoLoadFromSession();
   },
 
   cacheDom() {
@@ -73,6 +74,27 @@ const VerificadorAyRPC = {
     if (dniInput) {
       dniInput.value = session.dni;
     }
+  },
+
+  autoLoadFromSession() {
+    if (typeof ClassroomAuth === "undefined") return;
+
+    const session = ClassroomAuth.getSession();
+
+    if (!session || !session.dni) return;
+
+    const searchPanel = document.getElementById("login");
+    const dniInput = document.getElementById("dniInput");
+
+    if (dniInput) {
+      dniInput.value = session.dni;
+    }
+
+    if (searchPanel) {
+      searchPanel.style.display = "none";
+    }
+
+    this.cargar();
   },
 
   bindEvents() {

@@ -13,6 +13,7 @@ const ClassroomApp = {
     this.initTheme();
     this.initUiSounds();
     this.bindThemeToggle();
+    this.bindUserMenu();
     this.bindMobileSidebar();
     this.bindSidebarSubmenus();
     this.bindCurrentHashCourse();
@@ -86,17 +87,13 @@ const ClassroomApp = {
     if (!toggle) return;
 
     const icon = toggle.querySelector("i");
-    const label = toggle.querySelector("span");
-
     if (normalizedTheme === "light") {
       if (icon) icon.className = "fa-solid fa-sun";
-      if (label) label.textContent = "Modo claro";
       return;
     }
 
     if (icon) icon.className = "fa-solid fa-moon";
-    if (label) label.textContent = "Modo oscuro";
-  },
+    },
 
   toggleTheme() {
     const currentTheme = document.documentElement.getAttribute("data-theme");
@@ -164,6 +161,29 @@ const ClassroomApp = {
 
     window.addEventListener("keydown", (event) => {
       if (event.key === "Escape") closeMenu();
+    });
+  },
+
+  bindUserMenu() {
+    const menu = document.getElementById("userMenu");
+    const toggle = document.getElementById("userMenuToggle");
+    const dropdown = document.getElementById("userDropdown");
+
+    if (!menu || !toggle || !dropdown) return;
+
+    toggle.addEventListener("click", (event) => {
+      event.stopPropagation();
+      menu.classList.toggle("open");
+      this.playSound("click");
+    });
+
+    document.addEventListener("click", (event) => {
+      if (menu.contains(event.target)) return;
+      menu.classList.remove("open");
+    });
+
+    window.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") menu.classList.remove("open");
     });
   },
 
