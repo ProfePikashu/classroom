@@ -1,13 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <title>Clases AyRPC 2025 — AndyAzhTEC Classroom</title>
-
-  <script src="https://www.youtube.com/iframe_api"></script>
-  <script src="https://cdn.jsdelivr.net/npm/js-yaml@4/dist/js-yaml.min.js"></script>
+  <title>Gestión — AndyAzhTEC Classroom</title>
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
 
@@ -60,7 +57,7 @@
             <span>AyRPC 2025</span>
           </a>
 
-          <a href="clases-ayrpc-2025.html" class="submenu-item submenu-child active" data-course-child="ayrpc-2025-clases">
+          <a href="clases-ayrpc-2025.html" class="submenu-item submenu-child" data-course-child="ayrpc-2025-clases">
             <span class="submenu-line"></span>
             <span>Clases</span>
           </a>
@@ -86,7 +83,7 @@
           <span>ExamPro</span>
         </a>
 
-        <a href="gestion.html" class="nav-item">
+        <a href="gestion.html" class="nav-item active">
           <i class="fa-solid fa-folder-tree"></i>
           <span>Gestión</span>
         </a>
@@ -102,11 +99,11 @@
       <header class="topbar">
         <div>
           <p class="eyebrow">
-            <i class="fa-solid fa-chalkboard-user"></i>
-            AyRPC 2025
+            <i class="fa-solid fa-folder-tree"></i>
+            Trámites y documentos
           </p>
 
-          <h1>Clases</h1>
+          <h1>Gestión</h1>
         </div>
 
         <div class="topbar-actions">
@@ -143,70 +140,72 @@
         </div>
       </header>
 
-      <section class="hero-panel classes-hero">
+      <section class="hero-panel gestion-hero">
         <div class="hero-copy">
           <span class="badge">
-            <i class="fa-solid fa-video"></i>
-            Clases grabadas
+            <i class="fa-solid fa-file-signature"></i>
+            AyRPC 2025
           </span>
 
           <h2>
-            AyRPC 2025
-            <span>Clases y recuperación</span>
+            Gestión académica
+            <span>Certificados, constancias y baja</span>
           </h2>
 
           <p>{ASIGNAR DESCRIPCION}</p>
         </div>
       </section>
 
-      <section class="classes-layout">
-        <article class="panel">
-          <div class="panel-header">
-            <div>
-              <p class="eyebrow">Lista</p>
-              <h3>Clases del curso</h3>
-            </div>
+      <section class="gestion-grid">
+        <article class="panel gestion-card">
+          <div class="gestion-icon certificado">
+            <i class="fa-solid fa-certificate"></i>
           </div>
 
-          <div id="classesList" class="classes-list"></div>
+          <div>
+            <p class="eyebrow">Documento</p>
+            <h3>Certificado de aprobación</h3>
+            <p>{ASIGNAR DESCRIPCION}</p>
+          </div>
+
+          <button class="btn btn-primary" id="btnGestionCertificado" type="button">
+            <i class="fa-solid fa-file-pdf"></i>
+            Generar certificado
+          </button>
         </article>
 
-        <article class="panel recovery-panel" id="recoveryPanel">
-          <div class="panel-header">
-            <div>
-              <p class="eyebrow">Recuperación</p>
-              <h3 id="recoveryTitle">Seleccioná una clase</h3>
-            </div>
+        <article class="panel gestion-card">
+          <div class="gestion-icon constancia">
+            <i class="fa-solid fa-file-lines"></i>
           </div>
 
-          <div id="videoPlayerBox" class="video-player-box">
-            <div id="youtubePlayer"></div>
+          <div>
+            <p class="eyebrow">Documento</p>
+            <h3>Constancia de alumno</h3>
+            <p>{ASIGNAR DESCRIPCION}</p>
           </div>
 
-          <div class="watch-progress-box">
-            <div class="progress-info">
-              <span>Tiempo visto válido</span>
-              <strong id="watchProgressText">0%</strong>
-            </div>
+          <button class="btn btn-primary" id="btnGestionConstancia" type="button">
+            <i class="fa-solid fa-download"></i>
+            Generar constancia
+          </button>
+        </article>
 
-            <div class="progress-bar">
-              <span id="watchProgressBar" style="width:0%"></span>
-            </div>
+        <article class="panel gestion-card danger-zone">
+          <div class="gestion-icon baja">
+            <i class="fa-solid fa-user-slash"></i>
           </div>
 
-          <div class="recovery-actions">
-            <a id="openYoutubeBtn" href="#" target="_blank" rel="noopener" class="btn btn-outline">
-              <i class="fa-brands fa-youtube"></i>
-              Abrir en YouTube
-            </a>
-
-            <button id="quizButton" class="btn btn-primary" type="button" disabled>
-              <i class="fa-solid fa-clipboard-question"></i>
-              Responder cuestionario
-            </button>
+          <div>
+            <p class="eyebrow">Solicitud</p>
+            <h3>Pedir baja de curso</h3>
+            <p>{ASIGNAR DESCRIPCION}</p>
           </div>
 
-          <div id="quizBox" class="quiz-box" style="display:none;"></div>
+          <button class="btn btn-outline danger-btn" id="btnGestionBaja" type="button">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            Solicitar baja
+          </button>
         </article>
       </section>
     </main>
@@ -215,6 +214,6 @@
   <script src="js/auth.js"></script>
   <script src="js/courses-data.js"></script>
   <script src="js/main.js"></script>
-  <script src="js/clases-ayrpc-2025.js"></script>
+  <script src="js/gestion.js"></script>
 </body>
 </html>
