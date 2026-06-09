@@ -39,8 +39,19 @@ const ClassroomRoles = {
   isTeacherSession(session) {
     if (!session) return false;
 
-    const twitch = this.normalize(session.twitch || session.alumno?.["Usuario de Twitch (en caso de no tener, deberá crear uno y usarlo en la cursada)"]);
-    const name = this.normalizeName(session.displayName || session.alumno?.["Nombre Completo"]);
+    const alumno = session.alumno || {};
+
+    const twitch = this.normalize(
+      session.twitch ||
+      alumno["Usuario de Twitch (en caso de no tener, deberá crear uno y usarlo en la cursada)"] ||
+      alumno["Usuario de Twitch"]
+    );
+
+    const name = this.normalizeName(
+      session.displayName ||
+      alumno["Nombre Completo"] ||
+      alumno["Nombre"]
+    );
 
     const teacherTwitches = CLASSROOM_TEACHER_TWITCH_USERS.map((item) => this.normalize(item));
     const teacherNames = CLASSROOM_TEACHER_NAMES.map((item) => this.normalizeName(item));
@@ -54,34 +65,43 @@ const ClassroomRoles = {
     if (this.isTeacherSession(session)) {
       session.role = "teacher";
       session.roleLabel = "Docente";
+    } else {
+      session.role = session.role || "student";
+      session.roleLabel = session.roleLabel || "Alumno";
     }
 
     return session;
   },
 
   save(session) {
+    if (!session) return;
     localStorage.setItem(this.storageKey, JSON.stringify(session));
   },
 
-  getSession() {
-    if (typeof ClassroomAuth === "undefined") return null;
+  getRawSession() {
+    try {
+      const raw = localStorage.getItem(this.storageKey);
+      return raw ? JSON.parse(raw) : null;
+    } catch (error) {
+      return null;
+    }
+  },
 
-    const session = ClassroomAuth.getSession?.();
+  refreshCurrentSession() {
+    const session = this.apply(this.getRawSession());
 
     if (!session) return null;
 
-    const updated = this.apply(session);
-    this.save(updated);
-
-    return updated;
+    this.save(session);
+    return session;
   },
 
   isCurrentTeacher() {
-    return this.isTeacherSession(this.getSession());
+    return this.isTeacherSession(this.getRawSession());
   },
 
   paintRole() {
-    const session = this.getSession();
+    const session = this.refreshCurrentSession();
 
     if (!session) return;
 
@@ -93,39 +113,7 @@ const ClassroomRoles = {
     });
   },
 
-  patchAuth() {
-    if (typeof ClassroomAuth === "undefined") return;
-
-    if (ClassroomAuth.__rolesPatched) return;
-    ClassroomAuth.__rolesPatched = true;
-
-    const originalLogin = ClassroomAuth.loginWithStudent?.bind(ClassroomAuth);
-    const originalGetSession = ClassroomAuth.getSession?.bind(ClassroomAuth);
-
-    if (originalGetSession) {
-      ClassroomAuth.getSession = () => {
-        const session = originalGetSession();
-
-        if (!session) return null;
-
-        return this.apply(session);
-      };
-    }
-
-    if (originalLogin) {
-      ClassroomAuth.loginWithStudent = async (...args) => {
-        const session = await originalLogin(...args);
-        const updated = this.apply(session);
-
-        this.save(updated);
-
-        return updated;
-      };
-    }
-  },
-
   init() {
-    this.patchAuth();
     this.paintRole();
   },
 };
