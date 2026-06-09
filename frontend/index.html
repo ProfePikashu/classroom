@@ -39,7 +39,7 @@
       <nav class="sidebar-nav" aria-label="Navegación principal">
         <a href="#" class="nav-item active">
           <i class="fa-solid fa-table-columns"></i>
-          <span>Dashboard</span>
+          <span>Inicio</span>
         </a>
 
         <a href="cursos.html" class="nav-item nav-item-parent" data-submenu-toggle="coursesSubmenu">
@@ -73,11 +73,6 @@
         <a href="#" class="nav-item">
           <i class="fa-solid fa-user-check"></i>
           <span>Asistencias</span>
-        </a>
-
-        <a href="verificador-ayrpc-2025.html" class="nav-item">
-          <i class="fa-solid fa-magnifying-glass-chart"></i>
-          <span>Verificador</span>
         </a>
 
         <a href="#" class="nav-item nav-item-featured">
@@ -131,7 +126,7 @@
             Campus técnico
           </p>
 
-          <h1>Dashboard</h1>
+          <h1>Inicio</h1>
         </div>
 
         <div class="topbar-actions">
@@ -193,6 +188,73 @@
             <i class="fa-solid fa-microchip"></i>
           </div>
         </div>
+      </section>
+
+      <!-- STUDENT HOME -->
+      <section class="student-home-panel" id="studentHomePanel">
+        <article class="panel student-summary-card">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Mi cursada</p>
+              <h3>Estado del alumno</h3>
+            </div>
+
+            <span class="status-badge active" id="homeCourseBadge">AyRPC 2025</span>
+          </div>
+
+          <div class="student-summary-grid">
+            <div>
+              <span>Alumno</span>
+              <strong id="homeStudentName">{ASIGNAR DATO}</strong>
+            </div>
+
+            <div>
+              <span>Twitch</span>
+              <strong id="homeStudentTwitch">{ASIGNAR DATO}</strong>
+            </div>
+
+            <div>
+              <span>APTO examen</span>
+              <strong id="homeStudentApto">{ASIGNAR DATO}</strong>
+            </div>
+
+            <div>
+              <span>Resultado</span>
+              <strong id="homeStudentResult">{ASIGNAR DATO}</strong>
+            </div>
+          </div>
+
+          <div class="home-actions-row">
+            <a href="verificador-ayrpc-2025.html" class="btn btn-primary">
+              <i class="fa-solid fa-magnifying-glass-chart"></i>
+              Ver estado completo
+            </a>
+
+            <a href="https://drive.google.com/drive/folders/1VoQvgIo4D3GujyE9xey7KyTD8M8Tu-my?usp=drive_link" target="_blank" rel="noopener" class="btn btn-outline">
+              <i class="fa-solid fa-folder-open"></i>
+              Materiales
+            </a>
+          </div>
+        </article>
+
+        <article class="panel student-courses-card">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Cursos</p>
+              <h3>Mis cursos</h3>
+            </div>
+          </div>
+
+          <div class="home-course-list" id="homeCourseList">
+            <a href="curso-ayrpc-2025.html" class="home-course-item">
+              <i class="fa-solid fa-screwdriver-wrench"></i>
+              <div>
+                <strong>AyRPC 2025</strong>
+                <span>Armado y Reparación de Computadoras</span>
+              </div>
+            </a>
+          </div>
+        </article>
       </section>
 
       <!-- STATS -->
@@ -352,7 +414,7 @@
               <span></span>
               <div>
                 <strong>Próximo paso</strong>
-                <p>Construir la base visual del dashboard con CSS y JS.</p>
+                <p>Construir la base visual del inicio con CSS y JS.</p>
               </div>
             </div>
           </div>
@@ -365,5 +427,6 @@
  <script src="js/auth.js"></script>
   <script src="js/courses-data.js"></script>
  <script src="js/main.js"></script>
+  <script src="js/home.js"></script>
 </body>
 </html>

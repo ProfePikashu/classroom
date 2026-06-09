@@ -1604,3 +1604,248 @@ a {
   gap: 1.5rem;
 }
 
+
+/* -- HOME STUDENT PANEL ------------------------------- */
+.student-home-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(300px, 0.75fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.student-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.student-summary-grid div {
+  padding: 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--bg-card-strong);
+}
+
+.student-summary-grid span {
+  display: block;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  margin-bottom: 0.25rem;
+}
+
+.student-summary-grid strong {
+  display: block;
+  color: var(--cyan);
+  font-family: var(--font-title);
+  font-size: 0.92rem;
+  word-break: break-word;
+}
+
+.home-actions-row {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+
+.home-course-list {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.home-course-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--bg-card-strong);
+  color: var(--text-main);
+  text-decoration: none;
+  transition: var(--transition);
+}
+
+.home-course-item:hover {
+  border-color: var(--border-strong);
+  transform: translateY(-2px);
+}
+
+.home-course-item i {
+  color: var(--cyan);
+  font-size: 1.35rem;
+}
+
+.home-course-item strong,
+.home-course-item span {
+  display: block;
+}
+
+.home-course-item span {
+  color: var(--text-muted);
+  font-size: 0.86rem;
+}
+
+/* -- MOBILE HARD FIX ---------------------------------- */
+@media (max-width: 980px) {
+  .app-shell {
+    display: block !important;
+  }
+
+  .sidebar {
+    position: relative !important;
+    top: auto !important;
+    height: auto !important;
+    width: 100% !important;
+    padding: 0.85rem !important;
+    border-right: none !important;
+    border-bottom: 1px solid var(--border) !important;
+  }
+
+  .brand {
+    justify-content: flex-start !important;
+    margin-bottom: 0.75rem !important;
+  }
+
+  .brand-text,
+  .nav-item span,
+  .mini-status div {
+    display: block !important;
+  }
+
+  .sidebar-nav {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 0.45rem !important;
+  }
+
+  .nav-item {
+    justify-content: flex-start !important;
+    min-height: 44px !important;
+    padding: 0.65rem 0.75rem !important;
+    font-size: 0.82rem !important;
+    transform: none !important;
+  }
+
+  .nav-item:hover {
+    transform: none !important;
+  }
+
+  .submenu-chevron {
+    display: inline-block !important;
+    margin-left: auto !important;
+  }
+
+  .sidebar-submenu {
+    grid-column: 1 / -1 !important;
+    padding-left: 0.5rem !important;
+  }
+
+  .sidebar-submenu.open {
+    display: grid !important;
+  }
+
+  .sidebar-footer {
+    display: none !important;
+  }
+
+  .main-content {
+    padding: 1rem !important;
+  }
+
+  .topbar {
+    display: grid !important;
+    gap: 1rem !important;
+  }
+
+  .topbar-actions {
+    width: 100% !important;
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 0.7rem !important;
+  }
+
+  .theme-toggle,
+  .user-pill,
+  .logout-btn {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+
+  .logout-btn {
+    height: 46px !important;
+  }
+
+  .hero-panel {
+    grid-template-columns: 1fr !important;
+    padding: 1.1rem !important;
+  }
+
+  .hero-copy h2 {
+    font-size: clamp(1.8rem, 9vw, 2.6rem) !important;
+  }
+
+  .hero-orb {
+    display: none !important;
+  }
+
+  .student-home-panel,
+  .content-grid,
+  .course-detail-grid,
+  .verifier-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 560px) {
+  body {
+    overflow-x: hidden !important;
+  }
+
+  .sidebar-nav {
+    grid-template-columns: 1fr !important;
+  }
+
+  .brand-main {
+    font-size: 0.95rem !important;
+  }
+
+  .brand-text small {
+    font-size: 0.68rem !important;
+  }
+
+  .section,
+  .main-content {
+    max-width: 100% !important;
+  }
+
+  .student-summary-grid,
+  .module-list,
+  .course-metrics-grid,
+  .login-feature-list {
+    grid-template-columns: 1fr !important;
+  }
+
+  .btn,
+  .module-item,
+  .home-course-item {
+    width: 100% !important;
+  }
+
+  .panel,
+  .hero-panel,
+  .stat-card,
+  .course-card {
+    border-radius: 16px !important;
+  }
+
+  .stat-number {
+    font-size: 1rem !important;
+  }
+}
+
