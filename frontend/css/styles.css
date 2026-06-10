@@ -5145,3 +5145,16 @@ html[data-theme="dark"] .classroom-logo-orb-img-dark,
   }
 }
 
+
+/* ============================================================
+   ADMIN SIDEBAR SPACING FIX
+   ============================================================ */
+
+.teacher-admin-zone .admin-nav-item + .admin-nav-item {
+  margin-top: 12px;
+}
+
+.teacher-admin-zone .admin-nav-item {
+  margin-bottom: 0;
+}
+

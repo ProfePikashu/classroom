@@ -1,6 +1,6 @@
 ﻿/* ============================================================
    AndyAzhTEC Classroom — alumnos.js
-   Lectura de alumnos desde ExamPro
+   Listado tabular de alumnos desde ExamPro
    ============================================================ */
 
 "use strict";
@@ -13,11 +13,12 @@ const ClassroomStudents = {
       ? "http://127.0.0.1:8000"
       : "https://exampro-backend-1n6d.onrender.com",
 
-  limit: 24,
+  limit: 40,
   offset: 0,
   total: 0,
   loading: false,
   currentSearch: "",
+  students: [],
 
   init() {
     this.cacheDom();
@@ -100,18 +101,20 @@ const ClassroomStudents = {
 
       if (reset) {
         this.offset = 0;
-        if (this.grid) this.grid.innerHTML = "";
+        this.students = [];
       }
 
       this.total = data.total || 0;
+
       const items = Array.isArray(data.items) ? data.items : [];
 
-      this.renderStudents(items);
+      this.students = reset ? items : this.students.concat(items);
+      this.offset = this.students.length;
 
-      this.offset = (reset ? 0 : this.offset) + items.length;
+      this.renderTable();
       this.paintCounters();
 
-      if (!items.length && reset) {
+      if (!this.students.length) {
         this.setStatus("No se encontraron alumnos con esos filtros.");
       } else {
         this.setStatus(`Mostrando ${this.offset} de ${this.total} alumnos.`);
@@ -142,87 +145,99 @@ const ClassroomStudents = {
     this.status.textContent = message;
   },
 
-  renderStudents(items) {
+  renderTable() {
     if (!this.grid) return;
 
-    const fragment = document.createDocumentFragment();
+    if (!this.students.length) {
+      this.grid.innerHTML = "";
+      return;
+    }
 
-    items.forEach((student) => {
-      fragment.appendChild(this.createStudentCard(student));
-    });
+    const rows = this.students
+      .map((student, index) => this.createStudentRow(student, index))
+      .join("");
 
-    this.grid.appendChild(fragment);
-  },
+    this.grid.innerHTML = `
+      <div class="students-table-wrap">
+        <table class="students-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Alumno</th>
+              <th>DNI</th>
+              <th>Twitch</th>
+              <th>Email</th>
+              <th>Cursada</th>
+              <th>Estado</th>
+              <th>Exámenes</th>
+              <th>PDFs</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
 
-  createStudentCard(student) {
-    const card = document.createElement("article");
-    card.className = "student-card";
-
-    const name = student.full_name || student.nombre || student.twitch || "Alumno sin nombre";
-    const twitch = student.twitch ? `@${student.twitch.replace(/^@/, "")}` : "Sin Twitch";
-    const email = student.email || "Sin email";
-    const dni = student.dni || "Sin DNI";
-
-    const exams = student.stats?.examenes_total ?? 0;
-    const mails = student.stats?.emails_total ?? 0;
-    const pdfs = student.stats?.pdfs_total ?? 0;
-
-    card.innerHTML = `
-      <div class="student-card-top">
-        <div class="student-avatar">
-          <i class="fa-solid fa-user-graduate"></i>
-        </div>
-
-        <div>
-          <h3>${this.escapeHtml(name)}</h3>
-          <p>${this.escapeHtml(twitch)}</p>
-        </div>
-      </div>
-
-      <div class="student-card-data">
-        <span>
-          <i class="fa-solid fa-id-card"></i>
-          DNI ${this.escapeHtml(dni)}
-        </span>
-
-        <span>
-          <i class="fa-solid fa-envelope"></i>
-          ${this.escapeHtml(email)}
-        </span>
-      </div>
-
-      <div class="student-card-badges">
-        <span class="student-badge success">
-          <i class="fa-solid fa-circle-check"></i>
-          ${this.escapeHtml(student.apt_examen || "apto")}
-        </span>
-
-        <span class="student-badge">
-          <i class="fa-solid fa-layer-group"></i>
-          ${this.escapeHtml(student.cursada || "Sin cursada")}
-        </span>
-      </div>
-
-      <div class="student-card-stats">
-        <span><strong>${exams}</strong> exámenes</span>
-        <span><strong>${mails}</strong> mails</span>
-        <span><strong>${pdfs}</strong> PDFs</span>
-      </div>
-
-      <div class="student-card-actions">
-        <a class="btn btn-outline" href="alumno.html?id=${encodeURIComponent(student.id)}">
-          <i class="fa-solid fa-address-card"></i>
-          Ver ficha
-        </a>
-
-        <a class="btn btn-primary" href="exampro.html">
-          <i class="fa-solid fa-file-circle-check"></i>
-          ExamPro
-        </a>
+          <tbody>
+            ${rows}
+          </tbody>
+        </table>
       </div>
     `;
+  },
 
-    return card;
+  createStudentRow(student, index) {
+    const name = student.full_name || student.nombre || student.twitch || "Alumno sin nombre";
+    const twitch = student.twitch ? `@${String(student.twitch).replace(/^@/, "")}` : "—";
+    const email = student.email || "—";
+    const dni = student.dni || "—";
+    const cursada = student.cursada || "AyRPC 2025";
+    const estado = student.apt_examen || "apto";
+    const exams = student.stats?.examenes_total ?? 0;
+    const pdfs = student.stats?.pdfs_total ?? 0;
+
+    return `
+      <tr>
+        <td class="students-table-index">${index + 1}</td>
+
+        <td>
+          <div class="students-table-student">
+            <div class="student-table-avatar">
+              <i class="fa-solid fa-user-graduate"></i>
+            </div>
+
+            <div>
+              <strong>${this.escapeHtml(name)}</strong>
+              <small>ID ExamPro: ${this.escapeHtml(student.id)}</small>
+            </div>
+          </div>
+        </td>
+
+        <td>${this.escapeHtml(dni)}</td>
+        <td>${this.escapeHtml(twitch)}</td>
+        <td class="students-table-email">${this.escapeHtml(email)}</td>
+
+        <td>
+          <span class="student-badge course">
+            ${this.escapeHtml(cursada)}
+          </span>
+        </td>
+
+        <td>
+          <span class="student-badge success">
+            <i class="fa-solid fa-circle-check"></i>
+            ${this.escapeHtml(estado)}
+          </span>
+        </td>
+
+        <td class="students-table-number">${this.escapeHtml(exams)}</td>
+        <td class="students-table-number">${this.escapeHtml(pdfs)}</td>
+
+        <td>
+          <a class="btn btn-outline btn-table" href="alumno.html?id=${encodeURIComponent(student.id)}">
+            <i class="fa-solid fa-address-card"></i>
+            Ficha
+          </a>
+        </td>
+      </tr>
+    `;
   },
 
   escapeHtml(value) {

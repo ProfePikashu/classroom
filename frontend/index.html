@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
@@ -15,13 +15,13 @@
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600;700;800&display=swap" rel="stylesheet" />
 
   <!-- Classroom CSS -->
-  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/styles.css?v=20260610-table-sidebar" />
   <link rel="icon" href="favicon.ico" type="image/x-icon" />
   <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
 </head>
 
 <body>
-  <button class="mobile-menu-toggle" id="mobileMenuToggle" type="button" aria-label="Abrir menú">
+  <button class="mobile-menu-toggle" id="mobileMenuToggle" type="button" aria-label="Abrir menÃº">
     <span></span>
     <span></span>
     <span></span>
@@ -45,7 +45,7 @@
         </div>
       </div>
 
-      <nav class="sidebar-nav" aria-label="Navegación principal">
+      <nav class="sidebar-nav" aria-label="NavegaciÃ³n principal">
         <a href="#" class="nav-item active">
           <i class="fa-solid fa-table-columns"></i>
           <span>Inicio</span>
@@ -86,7 +86,7 @@
 
         <a href="gestion.html" class="nav-item">
           <i class="fa-solid fa-folder-tree"></i>
-          <span>Gestión</span>
+          <span>GestiÃ³n</span>
         </a>
 
         <a href="#" class="nav-item">
@@ -95,7 +95,11 @@
         </a>
 
         <div class="teacher-admin-zone teacher-only">
-          <span class="teacher-admin-label">ADMINISTRAR</span>
+          <span class="teacher-admin-label">ADMINISTRAR</span>          <a href="alumnos.html" class="nav-item admin-nav-item">
+            <i class="fa-solid fa-users"></i>
+            <span>Alumnos</span>
+          </a>
+
 
           <a href="admin.html" class="nav-item admin-nav-item">
             <i class="fa-solid fa-user-shield"></i>
@@ -123,7 +127,7 @@
         <div>
           <p class="eyebrow">
             <i class="fa-solid fa-satellite-dish"></i>
-            Campus técnico
+            Campus tÃ©cnico
           </p>
 
           <h1>Inicio</h1>
@@ -135,7 +139,7 @@
           </button>
 
           <div class="user-menu" id="userMenu">
-            <button class="user-pill user-menu-toggle" id="userMenuToggle" type="button" aria-label="Abrir menú de usuario">
+            <button class="user-pill user-menu-toggle" id="userMenuToggle" type="button" aria-label="Abrir menÃº de usuario">
               <div class="user-avatar">
                 <i class="fa-solid fa-user-astronaut"></i>
               </div>
@@ -156,7 +160,7 @@
 
               <button type="button" data-auth-logout>
                 <i class="fa-solid fa-right-from-bracket"></i>
-                <span>Cerrar sesión</span>
+                <span>Cerrar sesiÃ³n</span>
               </button>
             </div>
           </div>
@@ -218,10 +222,13 @@
     </main>
   </div>
 
- <script src="js/auth.js"></script>
+ <script src="js/auth.js?v=20260610-table-sidebar"></script>
   <script src="js/roles.js"></script>
   <script src="js/courses-data.js"></script>
  <script src="js/main.js"></script>
   <script src="js/home.js"></script>
 </body>
 </html>
+
+
+
