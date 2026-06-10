@@ -4890,3 +4890,258 @@ html[data-theme="dark"] .classroom-logo-orb-img-dark,
   }
 }
 
+
+/* ============================================================
+   ALUMNOS - EXAMPRO CLASSROOM
+   ============================================================ */
+
+.students-page-panel {
+  display: grid;
+  gap: 22px;
+}
+
+.students-hero-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(260px, .65fr);
+  gap: 22px;
+  align-items: center;
+}
+
+.students-hero-panel h2 {
+  margin: 0 0 12px;
+  font-family: "Orbitron", sans-serif;
+  font-size: clamp(1.8rem, 4vw, 3.2rem);
+  line-height: 1;
+}
+
+.students-hero-panel p {
+  margin: 0;
+  color: var(--text-muted);
+  max-width: 760px;
+}
+
+.students-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+
+.student-stat-card {
+  padding: 16px;
+  border: 1px solid var(--border-soft);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, .045);
+}
+
+.student-stat-card span {
+  display: block;
+  color: var(--text-muted);
+  font-size: .78rem;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+}
+
+.student-stat-card strong {
+  display: block;
+  margin-top: 6px;
+  font-family: "Orbitron", sans-serif;
+  font-size: 1.5rem;
+}
+
+.students-toolbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 18px;
+  align-items: end;
+}
+
+.students-search span {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+.students-search-box {
+  min-height: 54px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 16px;
+  border: 1px solid var(--border-soft);
+  border-radius: 16px;
+  background: rgba(0, 0, 0, .18);
+}
+
+.students-search-box input {
+  width: 100%;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--text-main);
+  font: inherit;
+}
+
+.students-toolbar-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.students-status {
+  margin-bottom: 18px;
+  color: var(--text-muted);
+}
+
+.students-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.student-card {
+  padding: 18px;
+  border: 1px solid var(--border-soft);
+  border-radius: 20px;
+  background:
+    radial-gradient(circle at top right, rgba(255, 214, 10, .12), transparent 38%),
+    rgba(255, 255, 255, .045);
+  box-shadow: var(--shadow-soft);
+}
+
+.student-card-top {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.student-avatar {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 48px;
+  border-radius: 16px;
+  background: rgba(255, 214, 10, .14);
+  color: var(--accent);
+  border: 1px solid rgba(255, 214, 10, .25);
+}
+
+.student-card h3 {
+  margin: 0;
+  font-size: 1.05rem;
+  line-height: 1.15;
+}
+
+.student-card p {
+  margin: 4px 0 0;
+  color: var(--text-muted);
+}
+
+.student-card-data {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 14px;
+  color: var(--text-muted);
+  font-size: .9rem;
+}
+
+.student-card-data span {
+  display: flex;
+  gap: 8px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.student-card-badges {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.student-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .06);
+  color: var(--text-muted);
+  font-size: .78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+.student-badge.success {
+  color: #7CFFB2;
+  background: rgba(36, 255, 126, .10);
+  border: 1px solid rgba(36, 255, 126, .18);
+}
+
+.student-card-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.student-card-stats span {
+  padding: 10px 8px;
+  border-radius: 14px;
+  text-align: center;
+  background: rgba(0, 0, 0, .15);
+  color: var(--text-muted);
+  font-size: .78rem;
+}
+
+.student-card-stats strong {
+  display: block;
+  color: var(--text-main);
+  font-family: "Orbitron", sans-serif;
+  font-size: 1rem;
+}
+
+.student-card-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.student-card-actions .btn {
+  justify-content: center;
+  min-height: 44px;
+  padding-inline: 12px;
+  font-size: .86rem;
+}
+
+@media (max-width: 1180px) {
+  .students-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .students-hero-panel {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .students-toolbar {
+    grid-template-columns: 1fr;
+  }
+
+  .students-stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .students-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .student-card-actions {
+    grid-template-columns: 1fr;
+  }
+}
+

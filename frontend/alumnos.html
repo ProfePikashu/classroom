@@ -1,0 +1,240 @@
+﻿<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Alumnos — AndyAzhTEC Classroom</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600;700;800&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="icon" href="favicon.ico" type="image/x-icon" />
+</head>
+
+<body>
+  <button class="mobile-menu-toggle" id="mobileMenuToggle" type="button" aria-label="Abrir menú">
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
+
+  <div class="mobile-sidebar-overlay" id="mobileSidebarOverlay"></div>
+
+  <div class="app-shell">
+
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-logo">
+          <i class="fa-solid fa-graduation-cap"></i>
+        </div>
+
+        <div class="brand-text">
+          <span class="brand-main">
+            Andy<span>Azh</span><strong>TEC</strong>
+          </span>
+          <small>Classroom</small>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav" aria-label="Navegación principal">
+        <a href="index.html" class="nav-item">
+          <i class="fa-solid fa-table-columns"></i>
+          <span>Inicio</span>
+        </a>
+
+        <a href="cursos.html" class="nav-item nav-item-parent" data-submenu-toggle="coursesSubmenu">
+          <i class="fa-solid fa-book-open-reader"></i>
+          <span>Cursos</span>
+          <i class="fa-solid fa-chevron-down submenu-chevron"></i>
+        </a>
+
+        <div class="sidebar-submenu" id="coursesSubmenu">
+          <a href="cursos.html#ayrpc-2025" class="submenu-item" data-course-id="ayrpc-2025">
+            <span class="submenu-dot complete"></span>
+            <span>AyRPC 2025</span>
+          </a>
+
+          <a href="cursos.html#ayrpc-2026" class="submenu-item" data-course-id="ayrpc-2026">
+            <span class="submenu-dot soon"></span>
+            <span>AyRPC 2026</span>
+          </a>
+        </div>
+
+        <a href="https://drive.google.com/drive/folders/1VoQvgIo4D3GujyE9xey7KyTD8M8Tu-my?usp=drive_link" class="nav-item" target="_blank" rel="noopener">
+          <i class="fa-solid fa-folder-open"></i>
+          <span>Materiales</span>
+        </a>
+
+        <a href="#" class="nav-item">
+          <i class="fa-solid fa-user-check"></i>
+          <span>Asistencias</span>
+        </a>
+
+        <a href="exampro.html" class="nav-item nav-item-featured">
+          <i class="fa-solid fa-file-circle-check"></i>
+          <span>ExamPro</span>
+        </a>
+
+        <a href="gestion.html" class="nav-item">
+          <i class="fa-solid fa-folder-tree"></i>
+          <span>Gestión</span>
+        </a>
+
+        <a href="#" class="nav-item">
+          <i class="fa-solid fa-comments"></i>
+          <span>Comunidad</span>
+        </a>
+
+        <div class="teacher-admin-zone teacher-only">
+          <span class="teacher-admin-label">ADMINISTRAR</span>
+
+          <a href="alumnos.html" class="nav-item admin-nav-item active">
+            <i class="fa-solid fa-users"></i>
+            <span>Alumnos</span>
+          </a>
+
+          <a href="admin.html" class="nav-item admin-nav-item">
+            <i class="fa-solid fa-user-shield"></i>
+            <span>Roles y permisos</span>
+          </a>
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="mini-status">
+          <span class="pulse-dot"></span>
+          <div>
+            <strong>Sistema operativo</strong>
+            <small>ExamPro API</small>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main-content">
+
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">
+            <i class="fa-solid fa-database"></i>
+            ExamPro / Supabase
+          </p>
+
+          <h1>Alumnos</h1>
+        </div>
+
+        <div class="topbar-actions">
+          <button class="theme-toggle theme-toggle-icon" id="themeToggle" type="button" aria-label="Cambiar tema">
+            <i class="fa-solid fa-moon"></i>
+          </button>
+
+          <div class="user-menu" id="userMenu">
+            <button class="user-pill user-menu-toggle" id="userMenuToggle" type="button" aria-label="Abrir menú de usuario">
+              <div class="user-avatar">
+                <i class="fa-solid fa-user-astronaut"></i>
+              </div>
+
+              <div>
+                <strong data-auth-name>Usuario</strong>
+                <small data-auth-role>Rol</small>
+              </div>
+
+              <i class="fa-solid fa-chevron-down user-menu-chevron"></i>
+            </button>
+
+            <div class="user-dropdown" id="userDropdown">
+              <a href="perfil.html">
+                <i class="fa-solid fa-id-card"></i>
+                <span>Mis Datos</span>
+              </a>
+
+              <button type="button" data-auth-logout>
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <span>Cerrar sesión</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <section class="students-page-panel">
+
+        <article class="panel students-hero-panel">
+          <div>
+            <p class="eyebrow">Base real ExamPro</p>
+            <h2>Alumnos cargados y aptos para examen</h2>
+            <p>
+              Esta vista lee directamente desde el backend de ExamPro. No usa Google Sheets como fuente principal.
+            </p>
+          </div>
+
+          <div class="students-stats-grid">
+            <div class="student-stat-card">
+              <span>Total</span>
+              <strong id="studentsTotal">—</strong>
+            </div>
+
+            <div class="student-stat-card">
+              <span>Mostrados</span>
+              <strong id="studentsShown">—</strong>
+            </div>
+
+            <div class="student-stat-card">
+              <span>Fuente</span>
+              <strong>ExamPro</strong>
+            </div>
+          </div>
+        </article>
+
+        <article class="panel students-toolbar">
+          <label class="students-search">
+            <span>Buscar alumno</span>
+            <div class="students-search-box">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input id="studentsSearchInput" type="search" placeholder="Nombre, DNI, Twitch o email" autocomplete="off" />
+            </div>
+          </label>
+
+          <div class="students-toolbar-actions">
+            <button class="btn btn-outline" id="studentsRefreshBtn" type="button">
+              <i class="fa-solid fa-rotate-right"></i>
+              Actualizar
+            </button>
+
+            <button class="btn btn-primary" id="studentsLoadMoreBtn" type="button">
+              <i class="fa-solid fa-plus"></i>
+              Cargar más
+            </button>
+          </div>
+        </article>
+
+        <article class="panel students-list-panel">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Fichas rápidas</p>
+              <h3>Listado de alumnos</h3>
+            </div>
+          </div>
+
+          <div class="students-status" id="studentsStatus">
+            Cargando alumnos desde ExamPro...
+          </div>
+
+          <div class="students-grid" id="studentsGrid"></div>
+        </article>
+
+      </section>
+    </main>
+  </div>
+
+  <script src="js/auth.js"></script>
+  <script src="js/roles.js"></script>
+  <script src="js/main.js"></script>
+  <script src="js/alumnos.js"></script>
+</body>
+</html>

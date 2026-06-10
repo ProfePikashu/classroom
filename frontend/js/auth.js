@@ -1,11 +1,24 @@
-/* ════════════════════════════════════════════════════════
+﻿/* ============================================================
    AndyAzhTEC Classroom — auth.js
-   Login MVP por DNI + Twitch contra verificador AyRPC
-════════════════════════════════════════════════════════ */
+   Login por DNI + Twitch contra ExamPro
+   ============================================================ */
 
 "use strict";
 
-const CLASSROOM_VERIFY_API = "https://script.google.com/macros/s/AKfycbxdB1fbiT1S04N5LaiOqHCojJcO12YCOPg7ln21bFrMrEot5GSdyWzy6j6CyEAsuDen/exec";
+/*
+  Local:
+    http://127.0.0.1:8000
+
+  Producción:
+    https://exampro-backend-1n6d.onrender.com
+*/
+const EXAMPRO_API_BASE = (
+  window.location.hostname === "localhost" ||
+  window.location.hostname === "127.0.0.1" ||
+  window.location.protocol === "file:"
+)
+  ? "http://127.0.0.1:8000"
+  : "https://exampro-backend-1n6d.onrender.com";
 
 const ClassroomAuth = {
   storageKey: "andyazh-classroom-session",
@@ -55,8 +68,15 @@ const ClassroomAuth = {
       .replace(/^@/, "");
   },
 
+  normalizeDni(value) {
+    return String(value || "")
+      .trim()
+      .replace(/\./g, "")
+      .replace(/\s+/g, "");
+  },
+
   async loginWithStudent(dni, twitch) {
-    const cleanDni = String(dni || "").trim();
+    const cleanDni = this.normalizeDni(dni);
     const cleanTwitch = this.normalize(twitch);
 
     if (!cleanDni || !cleanTwitch) {
@@ -67,45 +87,59 @@ const ClassroomAuth = {
     }
 
     try {
-      const response = await fetch(CLASSROOM_VERIFY_API + "?dni=" + encodeURIComponent(cleanDni));
-      const alumno = await response.json();
+      const response = await fetch(`${EXAMPRO_API_BASE}/api/classroom/student-login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          dni: cleanDni,
+          twitch: cleanTwitch,
+        }),
+      });
 
-      if (!alumno || !alumno["Nombre Completo"]) {
+      const data = await response.json().catch(() => null);
+
+      if (!response.ok || !data || !data.ok) {
         return {
           ok: false,
-          message: "No se encontró un alumno con ese DNI.",
+          message:
+            data?.detail ||
+            data?.message ||
+            "No se pudo validar el acceso con ExamPro.",
         };
       }
 
-      if (alumno.estado === "BAJA") {
-        return {
-          ok: false,
-          message: "El alumno figura dado de baja.",
-        };
-      }
+      const student = data.student || {};
+      const fullName = [student.nombre, student.apellido]
+        .filter(Boolean)
+        .join(" ")
+        .trim();
 
-      const twitchSheet = this.normalize(
-        alumno["Usuario de Twitch (en caso de no tener, deberá crear uno y usarlo en la cursada)"]
-      );
-
-      if (twitchSheet !== cleanTwitch) {
-        return {
-          ok: false,
-          message: "El usuario de Twitch no coincide con el DNI ingresado.",
-        };
-      }
+      const alumno = {
+        DNI: student.dni || cleanDni,
+        Correo: student.email || "",
+        "Nombre Completo": fullName || cleanTwitch,
+        "Usuario de Twitch": student.twitch || cleanTwitch,
+        "Usuario de Twitch (en caso de no tener, deberá crear uno y usarlo en la cursada)": student.twitch || cleanTwitch,
+      };
 
       const session = {
-        dni: cleanDni,
-        twitch: cleanTwitch,
-        email: alumno["Correo"] || "",
-        displayName: alumno["Nombre Completo"] || cleanTwitch,
-        role: "student",
-        roleLabel: "Alumno",
+        dni: student.dni || cleanDni,
+        twitch: student.twitch || cleanTwitch,
+        email: student.email || "",
+        displayName: fullName || cleanTwitch,
+        role: data.role === "alumno" ? "student" : data.role || "student",
+        roleLabel: data.role === "alumno" ? "Alumno" : "Alumno",
         course: "AyRPC 2025",
         alumno,
+        exampro: {
+          apiBase: EXAMPRO_API_BASE,
+          portalUrl: data.portal_url || "/portal",
+          studentId: student.id || null,
+        },
         createdAt: new Date().toISOString(),
-        provider: "sheet-mvp",
+        provider: "exampro-api",
       };
 
       this.setSession(session);
@@ -117,7 +151,7 @@ const ClassroomAuth = {
     } catch (error) {
       return {
         ok: false,
-        message: "No se pudo validar el acceso. Intentá de nuevo.",
+        message: "No se pudo conectar con ExamPro. Verificá que el backend esté levantado.",
       };
     }
   },
