@@ -4819,3 +4819,74 @@ html[data-theme="dark"] .classroom-logo-orb-img-dark,
   }
 }
 
+
+/* ============================================================
+   MOBILE - SOLO AJUSTE DEL PNG DECORATIVO
+   ============================================================ */
+
+@media (max-width: 768px) {
+
+  .hero-card,
+  .welcome-card,
+  .campus-hero,
+  .dashboard-hero {
+    position: relative !important;
+    overflow: hidden !important;
+  }
+
+  /* SOLO el PNG/orb/mascota */
+  .classroom-logo-orb,
+  .hero-orb,
+  .orb-inner,
+  .hero-visual,
+  .hero-decoration,
+  .dashboard-decoration,
+  .campus-decoration {
+    display: block !important;
+    position: relative !important;
+    width: min(42vw, 190px) !important;
+    height: min(42vw, 190px) !important;
+    max-width: 190px !important;
+    max-height: 190px !important;
+    margin: 26px auto -18px auto !important;
+    right: auto !important;
+    left: auto !important;
+    top: auto !important;
+    bottom: auto !important;
+    transform: none !important;
+    opacity: .96 !important;
+    z-index: 1 !important;
+    pointer-events: none !important;
+  }
+
+  .classroom-logo-orb img,
+  .classroom-logo-orb-img,
+  .hero-orb img,
+  .orb-inner img,
+  .hero-visual img,
+  .hero-decoration img,
+  .dashboard-decoration img,
+  .campus-decoration img {
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain !important;
+  }
+}
+
+@media (max-width: 430px) {
+  .classroom-logo-orb,
+  .hero-orb,
+  .orb-inner,
+  .hero-visual,
+  .hero-decoration,
+  .dashboard-decoration,
+  .campus-decoration {
+    width: min(46vw, 165px) !important;
+    height: min(46vw, 165px) !important;
+    max-width: 165px !important;
+    max-height: 165px !important;
+    margin: 22px auto -14px auto !important;
+  }
+}
+
