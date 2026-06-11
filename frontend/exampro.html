@@ -15,29 +15,36 @@
   <link rel="stylesheet" href="css/styles.css?v=20260610-table-sidebar" />
   <link rel="icon" href="favicon.ico" type="image/x-icon" />
   <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
+<link rel="stylesheet" href="css/pelusita.css?v=20260611">
 
   <style>
-    .info-card-mini{
-      background:rgba(15,23,42,.55);
-      border:1px solid rgba(148,163,184,.22);
-      border-radius:16px;
-      padding:14px;
-      display:grid;
-      gap:7px;
-      min-height:130px;
+    .exampro-access-clean{
+      align-items:center;
+      justify-content:space-between;
+      gap:24px;
     }
-    .info-card-mini i{
-      color:var(--primary);
-      font-size:1.2rem;
-    }
-    .info-card-mini strong{
-      color:var(--text);
-      font-size:.95rem;
-    }
-    .info-card-mini span{
+
+    .exampro-access-clean p{
+      max-width:620px;
+      margin-top:8px;
       color:var(--muted);
-      font-size:.86rem;
-      line-height:1.45;
+      line-height:1.6;
+    }
+
+    .btn-exampro-open{
+      min-width:190px;
+      justify-content:center;
+      white-space:nowrap;
+    }
+
+    @media(max-width:760px){
+      .exampro-access-clean{
+        align-items:flex-start;
+      }
+
+      .btn-exampro-open{
+        width:100%;
+      }
     }
   </style>
 
@@ -187,57 +194,20 @@
       </header>
 
       <section class="exampro-shell">
-        <div class="exampro-toolbar">
+        <div class="exampro-toolbar exampro-access-clean">
           <div>
-            <span class="section-kicker">Acceso externo seguro</span>
+            <span class="section-kicker">Acceso externo</span>
             <h3>ExamPro</h3>
             <p>
-              Por seguridad, ExamPro se abre en una pestaña nueva. Mantené abierto este Classroom
-              para volver a tus cursos, clases y materiales cuando lo necesites.
+              Abrí ExamPro en una pestaña nueva para ver tus exámenes, recuperatorios y devoluciones.
+              Este Classroom queda abierto.
             </p>
           </div>
-          <a class="btn btn-primary" href="https://exampro-backend-1n6d.onrender.com/login" target="_blank" rel="noopener noreferrer">
+
+          <a class="btn btn-primary btn-exampro-open" href="https://exampro-backend-1n6d.onrender.com/login" target="_blank" rel="noopener noreferrer">
             <i class="fa-solid fa-arrow-up-right-from-square"></i>
-            Abrir ExamPro en otra pestaña
+            Abrir ExamPro
           </a>
-        </div>
-
-        <div class="exampro-fallback" style="display:grid;gap:16px;text-align:left;">
-          <div>
-            <strong>¿Qué vas a encontrar en ExamPro?</strong>
-            <span>
-              Ingresá con tu usuario de Twitch y DNI para consultar tus exámenes, recuperatorios,
-              resultados y devoluciones del docente.
-            </span>
-          </div>
-
-          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;">
-            <div class="info-card-mini">
-              <i class="fa-solid fa-user-check"></i>
-              <strong>1. Iniciá sesión</strong>
-              <span>Usá los mismos datos del Classroom: Twitch y DNI.</span>
-            </div>
-            <div class="info-card-mini">
-              <i class="fa-solid fa-file-circle-check"></i>
-              <strong>2. Revisá tus exámenes</strong>
-              <span>Entrá al portal para ver exámenes regulares y recuperatorios asociados a tu DNI.</span>
-            </div>
-            <div class="info-card-mini">
-              <i class="fa-solid fa-comments"></i>
-              <strong>3. Leé tu devolución</strong>
-              <span>Cuando el profe corrija, vas a poder ver observaciones, resultado y estado.</span>
-            </div>
-          </div>
-
-          <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;">
-            <span style="font-size:.9rem;color:var(--muted);">
-              Si ya abriste ExamPro, no cierres esta pestaña: simplemente volvé acá cuando termines.
-            </span>
-            <a class="btn btn-primary" href="https://exampro-backend-1n6d.onrender.com/login" target="_blank" rel="noopener noreferrer">
-              <i class="fa-solid fa-up-right-from-square"></i>
-              Ir a ExamPro
-            </a>
-          </div>
         </div>
       </section>
     </main>
@@ -247,5 +217,6 @@
   <script src="js/roles.js"></script>
   <script src="js/courses-data.js"></script>
   <script src="js/main.js"></script>
+  <script src="js/pelusita.js?v=20260611"></script>
 </body>
 </html>

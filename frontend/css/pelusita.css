@@ -1,0 +1,269 @@
+/* ============================================================
+   Pelusita — AndyAzhTEC Classroom
+   ============================================================ */
+
+.pelusita-wrapper{
+  position:fixed;
+  bottom:20px;
+  left:20px;
+  z-index:7000;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:8px;
+  user-select:none;
+}
+
+.pelusita-bubble{
+  background:#fff;
+  color:#1a1a2e;
+  font-size:12px;
+  font-weight:800;
+  font-family:Inter,system-ui,sans-serif;
+  padding:7px 13px;
+  border-radius:12px;
+  border:2px solid #f97316;
+  position:relative;
+  opacity:0;
+  transform:translateY(8px) scale(.88);
+  transition:opacity .25s,transform .25s;
+  max-width:190px;
+  white-space:normal;
+  text-align:center;
+  line-height:1.4;
+  pointer-events:none;
+  box-shadow:0 4px 12px rgba(249,115,22,.25);
+}
+
+.pelusita-bubble.show{
+  opacity:1;
+  transform:translateY(0) scale(1);
+}
+
+.pelusita-bubble::after{
+  content:'';
+  position:absolute;
+  bottom:-10px;
+  left:50%;
+  transform:translateX(-50%);
+  border:6px solid transparent;
+  border-top-color:#f97316;
+}
+
+.pelusita-bubble::before{
+  content:'';
+  position:absolute;
+  bottom:-7px;
+  left:50%;
+  transform:translateX(-50%);
+  border:5px solid transparent;
+  border-top-color:#fff;
+  z-index:1;
+}
+
+.pelusita-dialog{
+  background:linear-gradient(145deg,#1a0a2e,#2d1060);
+  border:2px solid #f97316;
+  border-radius:16px;
+  padding:16px;
+  width:300px;
+  font-family:Inter,system-ui,sans-serif;
+  font-size:13px;
+  color:#fef3c7;
+  line-height:1.55;
+  box-shadow:0 12px 40px rgba(249,115,22,.32);
+  display:none;
+  position:relative;
+  animation:pelusitaDialogIn .25s cubic-bezier(.34,1.56,.64,1);
+}
+
+@keyframes pelusitaDialogIn{
+  from{opacity:0;transform:scale(.85) translateY(12px)}
+  to{opacity:1;transform:scale(1) translateY(0)}
+}
+
+.pelusita-dialog.show{
+  display:block;
+}
+
+.pelusita-dialog-header{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin-bottom:10px;
+  padding-bottom:8px;
+  border-bottom:1px solid rgba(249,115,22,.3);
+}
+
+.pelusita-dialog-avatar{
+  width:32px;
+  height:32px;
+  object-fit:contain;
+  filter:drop-shadow(0 2px 4px rgba(249,115,22,.45));
+}
+
+.pelusita-dialog-name{
+  font-weight:900;
+  font-size:14px;
+  color:#fed7aa;
+  letter-spacing:.02em;
+}
+
+.pelusita-dialog-close{
+  margin-left:auto;
+  cursor:pointer;
+  color:#9a7050;
+  font-size:18px;
+  line-height:1;
+  transition:color .15s,transform .15s;
+}
+
+.pelusita-dialog-close:hover{
+  color:#fff;
+  transform:rotate(90deg);
+}
+
+.pelusita-dialog-msg{
+  white-space:pre-wrap;
+  margin-bottom:12px;
+  color:#fde68a;
+  font-size:12.5px;
+  line-height:1.6;
+}
+
+.pelusita-dialog-opts{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+
+.pelusita-opt{
+  background:rgba(249,115,22,.12);
+  border:1.5px solid rgba(249,115,22,.35);
+  color:#fed7aa;
+  padding:7px 11px;
+  border-radius:10px;
+  font-size:12px;
+  font-weight:700;
+  cursor:pointer;
+  text-align:left;
+  transition:background .15s,border-color .15s,transform .12s;
+  font-family:Inter,system-ui,sans-serif;
+  width:100%;
+}
+
+.pelusita-opt:hover{
+  background:rgba(249,115,22,.28);
+  border-color:#f97316;
+  color:#fff;
+  transform:translateX(3px);
+}
+
+.pelusita-opt-primary{
+  background:rgba(59,130,246,.14)!important;
+  border-color:rgba(59,130,246,.45)!important;
+  color:#bfdbfe!important;
+}
+
+.pelusita-opt-primary:hover{
+  background:rgba(59,130,246,.28)!important;
+  border-color:#3b82f6!important;
+}
+
+.pelusita-opt-wa{
+  background:rgba(37,211,102,.12)!important;
+  border-color:rgba(37,211,102,.4)!important;
+  color:#86efac!important;
+}
+
+.pelusita-opt-wa:hover{
+  background:rgba(37,211,102,.25)!important;
+  border-color:#25d366!important;
+}
+
+.pelusita-opt-mail{
+  background:rgba(59,130,246,.12)!important;
+  border-color:rgba(59,130,246,.4)!important;
+  color:#93c5fd!important;
+}
+
+.pelusita-opt-mail:hover{
+  background:rgba(59,130,246,.25)!important;
+  border-color:#3b82f6!important;
+}
+
+.pelusita-char{
+  width:110px;
+  height:110px;
+  position:relative;
+  cursor:pointer;
+  transform-origin:bottom center;
+}
+
+.pelusita-char:hover .pelusita-img{
+  filter:drop-shadow(0 0 14px rgba(249,115,22,.75)) brightness(1.08);
+}
+
+.pelusita-img{
+  width:110px;
+  height:110px;
+  object-fit:contain;
+  transition:opacity .2s,filter .2s;
+  filter:drop-shadow(0 4px 8px rgba(0,0,0,.35));
+}
+
+.pelusita-img.switching{
+  opacity:0;
+}
+
+@keyframes pelusitaFloat{
+  0%,100%{transform:translateY(0) rotate(0)}
+  30%{transform:translateY(-8px) rotate(-1.5deg)}
+  70%{transform:translateY(-5px) rotate(1deg)}
+}
+
+@keyframes pelusitaBounce{
+  0%{transform:translateY(0) scale(1) rotate(0)}
+  20%{transform:translateY(-20px) scale(1.1) rotate(-6deg)}
+  45%{transform:translateY(-28px) scale(1.08) rotate(5deg)}
+  65%{transform:translateY(-10px) scale(1.04) rotate(-3deg)}
+  80%{transform:translateY(-3px) scale(.97)}
+  100%{transform:translateY(0) scale(1) rotate(0)}
+}
+
+@keyframes pelusitaShake{
+  0%,100%{transform:translateX(0) rotate(0)}
+  10%{transform:translateX(-10px) rotate(-5deg)}
+  25%{transform:translateX(10px) rotate(5deg)}
+  40%{transform:translateX(-8px) rotate(-4deg)}
+  55%{transform:translateX(8px) rotate(4deg)}
+  70%{transform:translateX(-4px) rotate(-2deg)}
+  85%{transform:translateX(4px) rotate(2deg)}
+}
+
+@keyframes pelusitaWobble{
+  0%,100%{transform:rotate(0) scale(1)}
+  20%{transform:rotate(-5deg) scale(1.04)}
+  50%{transform:rotate(5deg) scale(1.04)}
+  75%{transform:rotate(-3deg) scale(1.02)}
+}
+
+@keyframes pelusitaWave{
+  0%,100%{transform:translateY(0) rotate(0)}
+  25%{transform:translateY(-6px) rotate(-4deg)}
+  50%{transform:translateY(-10px) rotate(3deg)}
+  75%{transform:translateY(-6px) rotate(-2deg)}
+}
+
+@media(max-width:720px){
+  .pelusita-wrapper{
+    left:10px;
+    bottom:12px;
+    transform:scale(.86);
+    transform-origin:bottom left;
+  }
+
+  .pelusita-dialog{
+    width:285px;
+  }
+}
