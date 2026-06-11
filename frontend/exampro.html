@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
@@ -15,6 +15,32 @@
   <link rel="stylesheet" href="css/styles.css?v=20260610-table-sidebar" />
   <link rel="icon" href="favicon.ico" type="image/x-icon" />
   <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
+
+  <style>
+    .info-card-mini{
+      background:rgba(15,23,42,.55);
+      border:1px solid rgba(148,163,184,.22);
+      border-radius:16px;
+      padding:14px;
+      display:grid;
+      gap:7px;
+      min-height:130px;
+    }
+    .info-card-mini i{
+      color:var(--primary);
+      font-size:1.2rem;
+    }
+    .info-card-mini strong{
+      color:var(--text);
+      font-size:.95rem;
+    }
+    .info-card-mini span{
+      color:var(--muted);
+      font-size:.86rem;
+      line-height:1.45;
+    }
+  </style>
+
 </head>
 
 <body>
@@ -163,32 +189,55 @@
       <section class="exampro-shell">
         <div class="exampro-toolbar">
           <div>
-            <p class="eyebrow">Módulo externo integrado</p>
+            <span class="section-kicker">Acceso externo seguro</span>
             <h3>ExamPro</h3>
+            <p>
+              Por seguridad, ExamPro se abre en una pestaña nueva. Mantené abierto este Classroom
+              para volver a tus cursos, clases y materiales cuando lo necesites.
+            </p>
           </div>
-
-          <a class="btn btn-outline" href="https://exampro-backend-1n6d.onrender.com/login" target="_self">
+          <a class="btn btn-primary" href="https://exampro-backend-1n6d.onrender.com/login" target="_blank" rel="noopener noreferrer">
             <i class="fa-solid fa-arrow-up-right-from-square"></i>
-            Abrir directo
+            Abrir ExamPro en otra pestaña
           </a>
         </div>
 
-        <iframe
-          class="exampro-frame"
-          src="https://exampro-backend-1n6d.onrender.com/login"
-          title="ExamPro integrado en AndyAzhTEC Classroom"
-          loading="lazy"
-          referrerpolicy="no-referrer-when-downgrade"
-          allow="clipboard-read; clipboard-write"
-        ></iframe>
+        <div class="exampro-fallback" style="display:grid;gap:16px;text-align:left;">
+          <div>
+            <strong>¿Qué vas a encontrar en ExamPro?</strong>
+            <span>
+              Ingresá con tu usuario de Twitch y DNI para consultar tus exámenes, recuperatorios,
+              resultados y devoluciones del docente.
+            </span>
+          </div>
 
-        <div class="exampro-fallback">
-          <strong>Si ExamPro no carga dentro del panel</strong>
-          <span>{ASIGNAR DESCRIPCION}</span>
-          <a class="btn btn-primary" href="https://exampro-backend-1n6d.onrender.com/login" target="_self">
-            <i class="fa-solid fa-arrow-right-to-bracket"></i>
-            Abrir ExamPro
-          </a>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;">
+            <div class="info-card-mini">
+              <i class="fa-solid fa-user-check"></i>
+              <strong>1. Iniciá sesión</strong>
+              <span>Usá los mismos datos del Classroom: Twitch y DNI.</span>
+            </div>
+            <div class="info-card-mini">
+              <i class="fa-solid fa-file-circle-check"></i>
+              <strong>2. Revisá tus exámenes</strong>
+              <span>Entrá al portal para ver exámenes regulares y recuperatorios asociados a tu DNI.</span>
+            </div>
+            <div class="info-card-mini">
+              <i class="fa-solid fa-comments"></i>
+              <strong>3. Leé tu devolución</strong>
+              <span>Cuando el profe corrija, vas a poder ver observaciones, resultado y estado.</span>
+            </div>
+          </div>
+
+          <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;">
+            <span style="font-size:.9rem;color:var(--muted);">
+              Si ya abriste ExamPro, no cierres esta pestaña: simplemente volvé acá cuando termines.
+            </span>
+            <a class="btn btn-primary" href="https://exampro-backend-1n6d.onrender.com/login" target="_blank" rel="noopener noreferrer">
+              <i class="fa-solid fa-up-right-from-square"></i>
+              Ir a ExamPro
+            </a>
+          </div>
         </div>
       </section>
     </main>
@@ -200,6 +249,3 @@
   <script src="js/main.js"></script>
 </body>
 </html>
-
-
-
