@@ -1,5 +1,7 @@
 ﻿"use strict";
 
+const AYRPC2025_VERIFIER_API = "https://script.google.com/macros/s/AKfycbxdB1fbiT1S04N5LaiOqHCojJcO12YCOPg7ln21bFrMrEot5GSdyWzy6j6CyEAsuDen/exec";
+
 const RECOVERY_SUBMIT_ENDPOINT = "{ASIGNAR_ENDPOINT_RECUPERACION}";
 
 const FALLBACK_RECOVERY_DATA = {
@@ -174,6 +176,7 @@ const AyRPC2025Classes = {
   async init() {
     await this.loadData();
     this.applyLocalRubrics();
+    await this.refreshOfficialAttendance();
     this.renderClasses();
     this.bindQuizButton();
   },
@@ -250,6 +253,39 @@ const AyRPC2025Classes = {
     } catch (error) {}
   },
 
+  async refreshOfficialAttendance() {
+    const session = this.getSession();
+    if (!session) return;
+
+    const dni = String(
+      session.dni ||
+      session.student?.dni ||
+      session.alumno?.dni ||
+      ""
+    ).replace(/\D+/g, "");
+
+    if (!dni) return;
+
+    try {
+      const response = await fetch(AYRPC2025_VERIFIER_API + "?dni=" + encodeURIComponent(dni));
+      const data = await response.json();
+
+      if (!data || data.error || data.estado === "BAJA") return;
+
+      if (!session.alumno) session.alumno = {};
+
+      Object.assign(session.alumno, data);
+
+      // Normalizar DNI por si después otra pantalla lo necesita.
+      session.dni = session.dni || data.dni || dni;
+      session.alumno.dni = session.alumno.dni || data.dni || dni;
+
+      localStorage.setItem("andyazh-classroom-session", JSON.stringify(session));
+    } catch (error) {
+      console.warn("No se pudo refrescar asistencia oficial AyRPC 2025:", error);
+    }
+  },
+
   getSession() {
     if (typeof ClassroomAuth === "undefined") return null;
     return ClassroomAuth.getSession();
@@ -262,7 +298,21 @@ const AyRPC2025Classes = {
 
   getAttendanceStatus(attendanceKey) {
     const alumno = this.getSessionAlumno();
-    return String(alumno[attendanceKey] || "-").trim().toUpperCase();
+
+    const variants = [
+      attendanceKey,
+      String(attendanceKey || "").replace("–", "-"),
+      String(attendanceKey || "").replace("-", "–"),
+    ];
+
+    for (const key of variants) {
+      const value = alumno[key];
+      if (value !== undefined && value !== null && String(value).trim() !== "") {
+        return String(value).trim().toUpperCase();
+      }
+    }
+
+    return "-";
   },
 
   canRecover(status) {
