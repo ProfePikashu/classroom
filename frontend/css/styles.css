@@ -6602,3 +6602,41 @@ body.role-moderator .sidebar-submenu .teacher-only {
     padding: 0.7rem 0.55rem;
   }
 }
+
+/* === ALUMNOS SOURCE FILTER === */
+.students-source-filter {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  min-width: 190px;
+}
+
+.students-source-filter span {
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.students-source-filter select {
+  min-height: 44px;
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  padding: 0 0.9rem;
+  background: var(--surface-soft);
+  color: var(--text-main);
+  font-weight: 800;
+  outline: none;
+}
+
+.students-source-filter select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.18);
+}
+
+@media (max-width: 760px) {
+  .students-source-filter {
+    width: 100%;
+  }
+}

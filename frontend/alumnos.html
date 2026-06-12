@@ -166,10 +166,10 @@
 
         <article class="panel students-hero-panel">
           <div>
-            <p class="eyebrow">Base real ExamPro</p>
-            <h2>Alumnos cargados y aptos para examen</h2>
+            <p class="eyebrow">Base unificada Classroom</p>
+            <h2>Alumnos cargados en Classroom</h2>
             <p>
-              Esta vista lee directamente desde el backend de ExamPro. No usa Google Sheets como fuente principal.
+              Esta vista puede leer desde ExamPro, Planilla 2025 o una vista unificada de ambas fuentes.
             </p>
           </div>
 
@@ -186,7 +186,7 @@
 
             <div class="student-stat-card">
               <span>Fuente</span>
-              <strong>ExamPro</strong>
+              <strong id="studentsSourceLabel">ExamPro</strong>
             </div>
           </div>
         </article>
@@ -198,6 +198,15 @@
               <i class="fa-solid fa-magnifying-glass"></i>
               <input id="studentsSearchInput" type="search" placeholder="Nombre, DNI, Twitch o email" autocomplete="off" />
             </div>
+          </label>
+
+          <label class="students-source-filter">
+            <span>Fuente</span>
+            <select id="studentsSourceSelect">
+              <option value="exampro">ExamPro</option>
+              <option value="sheet2025">Planilla 2025</option>
+              <option value="all">Todos</option>
+            </select>
           </label>
 
           <div class="students-toolbar-actions">
@@ -232,9 +241,9 @@
     </main>
   </div>
 
-  <script src="js/auth.js?v=20260612-planilla-login-fallback-v1"></script>
-  <script src="js/roles.js?v=20260612-planilla-login-fallback-v1"></script>
+  <script src="js/auth.js?v=20260612-alumnos-fuentes-v1"></script>
+  <script src="js/roles.js?v=20260612-alumnos-fuentes-v1"></script>
   <script src="js/main.js"></script>
-  <script src="js/alumnos.js?v=20260612-planilla-login-fallback-v1"></script>
+  <script src="js/alumnos.js?v=20260612-alumnos-fuentes-v1"></script>
 </body>
 </html>

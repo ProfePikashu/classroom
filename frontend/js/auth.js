@@ -20,7 +20,7 @@ const EXAMPRO_API_BASE = (
   ? "http://127.0.0.1:8000"
   : "https://exampro-backend-1n6d.onrender.com";
 
-const AYRPC2025_SHEET_API = "https://script.google.com/macros/s/AKfycbxdB1fbiT1S04N5LaiOqHCojJcO12YCOPg7ln21bFrMrEot5GSdyWzy6j6CyEAsuDen/exec";
+const CLASSROOM_SHEET_2025_API = "https://script.google.com/macros/s/AKfycbxajMTyRA6SBGeMYDikKlN2nrmONnlPYG88iDNVsYt-fE-ooH6XYW3wT6N5EV3FVxxU/exec";
 
 const ClassroomAuth = {
   storageKey: "andyazh-classroom-session",
@@ -173,7 +173,7 @@ const ClassroomAuth = {
 
   async loginWithSheetFallback(cleanDni, cleanTwitch, originalMessage = "") {
     try {
-      const response = await fetch(`${AYRPC2025_SHEET_API}?dni=${encodeURIComponent(cleanDni)}`, {
+      const response = await fetch(`${CLASSROOM_SHEET_2025_API}?dni=${encodeURIComponent(cleanDni)}`, {
         cache: "no-store",
       });
 
