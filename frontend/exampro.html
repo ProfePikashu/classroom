@@ -18,39 +18,261 @@
 <link rel="stylesheet" href="css/pelusita.css?v=20260611b">
 
   <style>
+    .exampro-shell{
+      min-height:calc(100vh - 230px);
+      display:grid;
+      place-items:center;
+      padding:clamp(1rem,3vw,2rem);
+    }
+
     .exampro-access-clean{
+      position:relative;
+      width:min(100%,980px);
+      min-height:360px;
+      overflow:hidden;
+      display:grid;
+      grid-template-columns:minmax(0,1.25fr) minmax(260px,.75fr);
       align-items:center;
-      justify-content:space-between;
-      gap:24px;
+      gap:clamp(1.3rem,4vw,3rem);
+      padding:clamp(1.3rem,4vw,2.4rem);
+      border:1px solid var(--border-strong);
+      border-radius:28px;
+      background:
+        radial-gradient(circle at 15% 20%, rgba(0,245,255,.18), transparent 34%),
+        radial-gradient(circle at 92% 8%, rgba(168,85,247,.28), transparent 36%),
+        radial-gradient(circle at 85% 85%, rgba(236,72,153,.15), transparent 34%),
+        linear-gradient(135deg, rgba(10,10,30,.96), rgba(6,6,20,.94));
+      box-shadow:
+        0 24px 80px rgba(0,0,0,.42),
+        0 0 42px rgba(0,245,255,.12),
+        0 0 46px rgba(168,85,247,.16);
+    }
+
+    .exampro-access-clean::before{
+      content:'';
+      position:absolute;
+      inset:18px;
+      border:1px solid rgba(255,255,255,.045);
+      border-radius:22px;
+      pointer-events:none;
+    }
+
+    .exampro-access-clean::after{
+      content:'';
+      position:absolute;
+      right:-120px;
+      bottom:-150px;
+      width:360px;
+      height:360px;
+      border-radius:50%;
+      background:rgba(0,245,255,.09);
+      filter:blur(8px);
+      pointer-events:none;
+    }
+
+    .exampro-access-copy{
+      position:relative;
+      z-index:2;
+      display:grid;
+      gap:.85rem;
+    }
+
+    .exampro-access-clean .section-kicker{
+      width:max-content;
+      display:inline-flex;
+      align-items:center;
+      gap:.5rem;
+      padding:.42rem .7rem;
+      border:1px solid rgba(0,245,255,.28);
+      border-radius:999px;
+      background:rgba(0,245,255,.08);
+      box-shadow:0 0 22px rgba(0,245,255,.08);
+    }
+
+    .exampro-access-clean h3{
+      margin:0;
+      font-family:var(--font-title);
+      font-size:clamp(2.1rem,5vw,4.4rem);
+      line-height:.95;
+      letter-spacing:.02em;
+      text-shadow:0 0 24px rgba(0,245,255,.18);
     }
 
     .exampro-access-clean p{
       max-width:620px;
-      margin-top:8px;
-      color:var(--muted);
-      line-height:1.6;
+      margin:0;
+      color:var(--text-soft);
+      line-height:1.75;
+      font-size:clamp(.96rem,1.4vw,1.05rem);
+    }
+
+    .exampro-access-points{
+      display:grid;
+      gap:.6rem;
+      margin:.2rem 0 .35rem;
+      padding:0;
+      list-style:none;
+    }
+
+    .exampro-access-points li{
+      display:flex;
+      align-items:center;
+      gap:.65rem;
+      color:var(--text-muted);
+      font-weight:700;
+      font-size:.92rem;
+    }
+
+    .exampro-access-points i{
+      width:28px;
+      height:28px;
+      display:grid;
+      place-items:center;
+      border-radius:10px;
+      color:var(--cyan);
+      background:rgba(0,245,255,.09);
+      border:1px solid rgba(0,245,255,.18);
+    }
+
+    .exampro-access-actions{
+      display:flex;
+      align-items:center;
+      gap:.8rem;
+      flex-wrap:wrap;
+      margin-top:.35rem;
     }
 
     .btn-exampro-open{
-      min-width:190px;
+      min-width:220px;
       justify-content:center;
       white-space:nowrap;
+      min-height:52px;
+      font-size:1rem;
+      box-shadow:0 0 30px rgba(168,85,247,.32);
     }
 
-    @media(max-width:760px){
+    .exampro-open-note{
+      display:inline-flex;
+      align-items:center;
+      gap:.45rem;
+      color:var(--text-muted);
+      font-size:.86rem;
+      font-weight:700;
+    }
+
+    .exampro-visual{
+      position:relative;
+      z-index:2;
+      min-height:260px;
+      display:grid;
+      place-items:center;
+    }
+
+    .exampro-orb{
+      width:min(260px,44vw);
+      aspect-ratio:1;
+      display:grid;
+      place-items:center;
+      border-radius:34px;
+      border:1px solid rgba(168,85,247,.35);
+      background:
+        radial-gradient(circle at 28% 20%, rgba(0,245,255,.24), transparent 34%),
+        radial-gradient(circle at 70% 78%, rgba(236,72,153,.22), transparent 38%),
+        rgba(15,5,35,.64);
+      box-shadow:
+        inset 0 0 38px rgba(255,255,255,.04),
+        0 0 55px rgba(168,85,247,.2);
+      transform:rotate(-2deg);
+    }
+
+    .exampro-orb i{
+      font-size:clamp(4.5rem,11vw,7rem);
+      color:#e2e8f0;
+      filter:drop-shadow(0 0 20px rgba(0,245,255,.28));
+    }
+
+    .exampro-orb span{
+      position:absolute;
+      bottom:32px;
+      padding:.35rem .7rem;
+      border-radius:999px;
+      border:1px solid rgba(0,245,255,.26);
+      background:rgba(0,245,255,.08);
+      color:var(--cyan);
+      font-family:var(--font-title);
+      font-size:.78rem;
+      letter-spacing:.12em;
+    }
+
+    body.page-exampro .pelusita-wrapper{
+      top:auto;
+      left:auto;
+      right:54px;
+      bottom:54px;
+      transform:scale(.74);
+      transform-origin:bottom right;
+    }
+
+    body.page-exampro .pelusita-dialog{
+      width:300px;
+    }
+
+    @media(max-width:920px){
+      .exampro-shell{
+        min-height:auto;
+        place-items:stretch;
+      }
+
       .exampro-access-clean{
-        align-items:flex-start;
+        grid-template-columns:1fr;
+        min-height:0;
+      }
+
+      .exampro-visual{
+        min-height:180px;
+        order:-1;
+      }
+
+      .exampro-orb{
+        width:min(210px,62vw);
+      }
+
+      body.page-exampro .pelusita-wrapper{
+        right:12px;
+        bottom:10px;
+        transform:scale(.62);
+      }
+    }
+
+    @media(max-width:560px){
+      .exampro-shell{
+        padding:.8rem 0;
+      }
+
+      .exampro-access-clean{
+        border-radius:22px;
+        padding:1.1rem;
+      }
+
+      .exampro-access-actions{
+        display:grid;
       }
 
       .btn-exampro-open{
         width:100%;
+        min-width:0;
+      }
+
+      .exampro-open-note{
+        justify-content:center;
+        text-align:center;
       }
     }
   </style>
 
 </head>
 
-<body>
+<body class="page-exampro">
   <button class="mobile-menu-toggle" id="mobileMenuToggle" type="button" aria-label="Abrir menú">
     <span></span>
     <span></span>
@@ -195,19 +417,54 @@
 
       <section class="exampro-shell">
         <div class="exampro-toolbar exampro-access-clean">
-          <div>
-            <span class="section-kicker">Acceso externo</span>
+          <div class="exampro-access-copy">
+            <span class="section-kicker">
+              <i class="fa-solid fa-file-circle-check"></i>
+              Acceso a evaluaciones
+            </span>
+
             <h3>ExamPro</h3>
+
             <p>
-              Abrí ExamPro en una pestaña nueva para ver tus exámenes, recuperatorios y devoluciones.
-              Este Classroom queda abierto.
+              Abrí ExamPro en una pestaña nueva para consultar tus exámenes, recuperatorios
+              y devoluciones corregidas. Este Classroom queda abierto para que puedas volver
+              a tus clases y materiales cuando lo necesites.
             </p>
+
+            <ul class="exampro-access-points">
+              <li>
+                <i class="fa-solid fa-clipboard-check"></i>
+                Ver estado de exámenes y recuperatorios.
+              </li>
+              <li>
+                <i class="fa-solid fa-comments"></i>
+                Revisar devoluciones punto por punto.
+              </li>
+              <li>
+                <i class="fa-solid fa-graduation-cap"></i>
+                Acceder desde Classroom sin perder el recorrido del curso.
+              </li>
+            </ul>
+
+            <div class="exampro-access-actions">
+              <a class="btn btn-primary btn-exampro-open" href="https://exampro-backend-1n6d.onrender.com/login" target="_blank" rel="noopener noreferrer">
+                <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                Abrir ExamPro
+              </a>
+
+              <span class="exampro-open-note">
+                <i class="fa-solid fa-window-restore"></i>
+                Se abre en una pestaña nueva.
+              </span>
+            </div>
           </div>
 
-          <a class="btn btn-primary btn-exampro-open" href="https://exampro-backend-1n6d.onrender.com/login" target="_blank" rel="noopener noreferrer">
-            <i class="fa-solid fa-arrow-up-right-from-square"></i>
-            Abrir ExamPro
-          </a>
+          <div class="exampro-visual" aria-hidden="true">
+            <div class="exampro-orb">
+              <i class="fa-solid fa-file-shield"></i>
+              <span>SYSTEM ONLINE</span>
+            </div>
+          </div>
         </div>
       </section>
     </main>
