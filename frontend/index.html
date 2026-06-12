@@ -18,9 +18,10 @@
   <link rel="stylesheet" href="css/styles.css?v=20260610-table-sidebar" />
   <link rel="icon" href="favicon.ico" type="image/x-icon" />
   <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
+  <link rel="stylesheet" href="css/pelusita.css?v=20260611b" />
 </head>
 
-<body>
+<body class="page-home">
   <button class="mobile-menu-toggle" id="mobileMenuToggle" type="button" aria-label="Abrir menú">
     <span></span>
     <span></span>
@@ -181,8 +182,7 @@
           </h2>
 
           <p>
-            La plataforma madre para cursos, clases, materiales, asistencias,
-            recuperatorios, certificados y evaluaciones con ExamPro integrado.
+            Accedé a tus cursos, clases, materiales y evaluaciones desde un solo lugar.
           </p>
 
           <div class="hero-actions">
@@ -202,22 +202,48 @@
           <img class="classroom-logo-orb-img classroom-logo-orb-img-dark" src="media/icons/classroomico.png" alt="" />
           <img class="classroom-logo-orb-img classroom-logo-orb-img-light" src="media/icons/classroomicoclaro.png" alt="" />
         </div>
-        </div>
       </section>
 
       <!-- STUDENT HOME -->
-      <section class="student-home-panel" id="studentHomePanel">
-        <article class="panel recent-activity-panel">
+      <section class="student-home-panel home-student-panel" id="studentHomePanel">
+        <article class="panel recent-activity-panel home-recent-panel">
           <div class="panel-header">
             <div>
               <p class="eyebrow">Avisos</p>
               <h3>Actividad reciente</h3>
             </div>
+
+            <span class="home-panel-pill">
+              <i class="fa-solid fa-paw"></i>
+              Pelusita online
+            </span>
           </div>
 
-          <div class="recent-activity-empty"></div>
-        </article>
+          <div class="home-recent-content">
+            <div class="home-recent-copy">
+              <p>
+                Este espacio va a mostrar novedades del curso, accesos importantes y avisos de ExamPro.
+              </p>
 
+              <div class="home-mini-actions">
+                <a href="cursos.html#ayrpc-2025" class="home-mini-link">
+                  <i class="fa-solid fa-book-open-reader"></i>
+                  Ver AyRPC 2025
+                </a>
+
+                <a href="exampro.html" class="home-mini-link">
+                  <i class="fa-solid fa-file-circle-check"></i>
+                  Ir a ExamPro
+                </a>
+              </div>
+            </div>
+
+            <div class="home-pelusita-card" aria-hidden="true">
+              <img src="media/pelusita/pelusita.png" alt="" />
+              <span>Estoy por acá para guiarte</span>
+            </div>
+          </div>
+        </article>
       </section>
     </main>
   </div>
@@ -227,6 +253,7 @@
   <script src="js/courses-data.js"></script>
  <script src="js/main.js"></script>
   <script src="js/home.js"></script>
+  <script src="js/pelusita.js?v=20260611b"></script>
 </body>
 </html>
 

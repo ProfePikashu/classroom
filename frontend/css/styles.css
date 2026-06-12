@@ -5254,3 +5254,167 @@ html[data-theme="dark"] .classroom-logo-orb-img-dark,
   }
 }
 /* === END CLASSROOM SIDEBAR SCROLL FIX === */
+
+/* === CLASSROOM HOME INDEX POLISH === */
+/* Home: actividad reciente debajo de la hero + Pelusita integrada */
+
+.page-home .student-home-panel.home-student-panel {
+  display: grid;
+  grid-template-columns: 1fr;
+  width: 100%;
+  margin-top: 0;
+}
+
+.page-home .home-recent-panel {
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.page-home .home-recent-panel .panel-header {
+  align-items: center;
+}
+
+.home-panel-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  padding: .42rem .7rem;
+  border: 1px solid rgba(0,245,255,.28);
+  border-radius: 999px;
+  background: rgba(0,245,255,.08);
+  color: var(--cyan);
+  font-size: .78rem;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.home-recent-content {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 220px;
+  align-items: center;
+  gap: 1.25rem;
+  min-height: 150px;
+}
+
+.home-recent-copy {
+  display: grid;
+  gap: .9rem;
+}
+
+.home-recent-copy p {
+  max-width: 760px;
+  color: var(--text-muted);
+  line-height: 1.65;
+}
+
+.home-mini-actions {
+  display: flex;
+  gap: .75rem;
+  flex-wrap: wrap;
+}
+
+.home-mini-link {
+  display: inline-flex;
+  align-items: center;
+  gap: .55rem;
+  min-height: 42px;
+  padding: .65rem .85rem;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--bg-card-strong);
+  color: var(--text-main);
+  text-decoration: none;
+  font-weight: 900;
+  transition: var(--transition);
+}
+
+.home-mini-link i {
+  color: var(--cyan);
+}
+
+.home-mini-link:hover {
+  transform: translateY(-2px);
+  border-color: var(--border-strong);
+  box-shadow: 0 0 24px rgba(0,245,255,.13);
+}
+
+.home-pelusita-card {
+  justify-self: end;
+  width: 210px;
+  min-height: 130px;
+  position: relative;
+  display: grid;
+  place-items: center;
+  padding: .85rem;
+  border: 1px solid rgba(249,115,22,.28);
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 50% 25%, rgba(249,115,22,.18), transparent 44%),
+    rgba(15,5,35,.45);
+  box-shadow: 0 0 34px rgba(249,115,22,.10);
+}
+
+.home-pelusita-card img {
+  width: 112px;
+  height: 112px;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 16px rgba(0,0,0,.35));
+}
+
+.home-pelusita-card span {
+  position: absolute;
+  left: 50%;
+  bottom: .6rem;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: 180px;
+  padding: .32rem .62rem;
+  border: 1px solid rgba(249,115,22,.38);
+  border-radius: 999px;
+  background: rgba(249,115,22,.11);
+  color: #fed7aa;
+  font-size: .72rem;
+  font-weight: 900;
+  text-align: center;
+}
+
+/* En home no queremos la Pelusita flotante duplicada estorbando */
+.page-home .pelusita-wrapper {
+  display: none !important;
+}
+
+@media (max-width: 900px) {
+  .home-recent-content {
+    grid-template-columns: 1fr;
+  }
+
+  .home-pelusita-card {
+    justify-self: center;
+    width: min(100%, 260px);
+  }
+}
+
+@media (max-width: 560px) {
+  .page-home .home-recent-panel .panel-header {
+    display: grid;
+  }
+
+  .home-panel-pill {
+    width: max-content;
+  }
+
+  .home-mini-actions {
+    display: grid;
+  }
+
+  .home-mini-link {
+    justify-content: center;
+    text-align: center;
+  }
+
+  .home-pelusita-card {
+    min-height: 120px;
+  }
+}
+/* === END CLASSROOM HOME INDEX POLISH === */
