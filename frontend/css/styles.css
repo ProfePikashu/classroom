@@ -5339,49 +5339,45 @@ html[data-theme="dark"] .classroom-logo-orb-img-dark,
   box-shadow: 0 0 24px rgba(0,245,255,.13);
 }
 
-.home-pelusita-card {
+.home-pelusita-hint {
   justify-self: end;
-  width: 210px;
-  min-height: 130px;
-  position: relative;
-  display: grid;
-  place-items: center;
-  padding: .85rem;
+  max-width: 300px;
+  display: inline-flex;
+  align-items: center;
+  gap: .65rem;
+  padding: .85rem 1rem;
   border: 1px solid rgba(249,115,22,.28);
-  border-radius: 22px;
+  border-radius: 18px;
   background:
-    radial-gradient(circle at 50% 25%, rgba(249,115,22,.18), transparent 44%),
+    radial-gradient(circle at 15% 20%, rgba(249,115,22,.16), transparent 38%),
     rgba(15,5,35,.45);
-  box-shadow: 0 0 34px rgba(249,115,22,.10);
-}
-
-.home-pelusita-card img {
-  width: 112px;
-  height: 112px;
-  object-fit: contain;
-  filter: drop-shadow(0 8px 16px rgba(0,0,0,.35));
-}
-
-.home-pelusita-card span {
-  position: absolute;
-  left: 50%;
-  bottom: .6rem;
-  transform: translateX(-50%);
-  width: max-content;
-  max-width: 180px;
-  padding: .32rem .62rem;
-  border: 1px solid rgba(249,115,22,.38);
-  border-radius: 999px;
-  background: rgba(249,115,22,.11);
   color: #fed7aa;
-  font-size: .72rem;
-  font-weight: 900;
-  text-align: center;
+  font-size: .9rem;
+  font-weight: 800;
+  line-height: 1.35;
+  box-shadow: 0 0 30px rgba(249,115,22,.09);
 }
 
-/* En home no queremos la Pelusita flotante duplicada estorbando */
+.home-pelusita-hint i {
+  color: #f97316;
+  font-size: 1.15rem;
+  filter: drop-shadow(0 0 8px rgba(249,115,22,.35));
+}
+
+/* En home usamos la Pelusita real del JS, con su animación/interacción */
 .page-home .pelusita-wrapper {
-  display: none !important;
+  display: flex !important;
+  top: auto !important;
+  left: auto !important;
+  right: clamp(18px, 3vw, 42px) !important;
+  bottom: clamp(18px, 3vh, 34px) !important;
+  transform: scale(.88);
+  transform-origin: bottom right;
+  z-index: 6500;
+}
+
+.page-home .pelusita-dialog {
+  width: min(340px, calc(100vw - 34px));
 }
 
 @media (max-width: 900px) {
@@ -5417,4 +5413,18 @@ html[data-theme="dark"] .classroom-logo-orb-img-dark,
     min-height: 120px;
   }
 }
+
+@media (max-width: 720px) {
+  .page-home .pelusita-wrapper {
+    right: 10px !important;
+    bottom: 10px !important;
+    transform: scale(.74) !important;
+  }
+
+  .home-pelusita-hint {
+    justify-self: stretch;
+    max-width: none;
+  }
+}
+
 /* === END CLASSROOM HOME INDEX POLISH === */
