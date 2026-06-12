@@ -5158,3 +5158,99 @@ html[data-theme="dark"] .classroom-logo-orb-img-dark,
   margin-bottom: 0;
 }
 
+/* === CLASSROOM SIDEBAR SCROLL FIX === */
+/* Evita que los submenús de Cursos se recorten en monitores chicos y mobile */
+
+.sidebar{
+  min-height:100vh;
+  max-height:100vh;
+  overflow-y:auto;
+  overflow-x:hidden;
+  scrollbar-width:thin;
+  scrollbar-color:rgba(0,245,255,.28) transparent;
+}
+
+.sidebar::-webkit-scrollbar{
+  width:5px;
+}
+
+.sidebar::-webkit-scrollbar-track{
+  background:transparent;
+}
+
+.sidebar::-webkit-scrollbar-thumb{
+  background:rgba(0,245,255,.24);
+  border-radius:999px;
+}
+
+.sidebar nav,
+.sidebar .nav,
+.sidebar .nav-list,
+.sidebar .sidebar-nav{
+  overflow:visible;
+  min-height:0;
+}
+
+.nav-submenu,
+.submenu,
+.course-submenu{
+  overflow:visible;
+}
+
+.nav-item,
+.nav-sub-item,
+.sidebar a{
+  flex-shrink:0;
+}
+
+/* En pantallas bajas, compactamos un poco el menú para que entren más opciones */
+@media (max-height:760px) and (min-width:901px){
+  .sidebar{
+    padding-top:.9rem;
+    padding-bottom:.9rem;
+  }
+
+  .brand{
+    margin-bottom:.85rem;
+  }
+
+  .nav-item{
+    min-height:42px;
+    padding-top:.58rem;
+    padding-bottom:.58rem;
+  }
+
+  .nav-sub-item{
+    padding-top:.42rem;
+    padding-bottom:.42rem;
+  }
+
+  .sidebar .mini-status,
+  .mini-status{
+    padding:.65rem;
+  }
+}
+
+/* Mobile: la sidebar desplegable también debe scrollear por dentro */
+@media (max-width:900px){
+  .sidebar{
+    max-height:100dvh;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+    overscroll-behavior:contain;
+    padding-bottom:1.25rem;
+  }
+
+  .sidebar.is-open,
+  body.sidebar-open .sidebar,
+  body.menu-open .sidebar{
+    overflow-y:auto;
+  }
+
+  .nav-submenu,
+  .submenu,
+  .course-submenu{
+    max-height:none;
+  }
+}
+/* === END CLASSROOM SIDEBAR SCROLL FIX === */

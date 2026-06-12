@@ -207,14 +207,29 @@
     body.page-exampro .pelusita-wrapper{
       top:auto;
       left:auto;
-      right:54px;
-      bottom:54px;
-      transform:scale(.74);
+      right:clamp(22px,4vw,72px);
+      bottom:clamp(18px,4vh,58px);
+      transform:scale(.92);
       transform-origin:bottom right;
     }
 
+    body.page-exampro .pelusita-char{
+      width:168px;
+      height:168px;
+    }
+
+    body.page-exampro .pelusita-img{
+      width:128px;
+      height:128px;
+    }
+
+    body.page-exampro .pelusita-char:hover .pelusita-img{
+      width:168px;
+      height:168px;
+    }
+
     body.page-exampro .pelusita-dialog{
-      width:300px;
+      width:320px;
     }
 
     @media(max-width:920px){
@@ -238,9 +253,9 @@
       }
 
       body.page-exampro .pelusita-wrapper{
-        right:12px;
-        bottom:10px;
-        transform:scale(.62);
+        right:14px;
+        bottom:12px;
+        transform:scale(.78);
       }
     }
 
