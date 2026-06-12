@@ -15,8 +15,9 @@
   <link rel="stylesheet" href="css/styles.css?v=20260610-table-sidebar" />
   <link rel="icon" href="favicon.ico" type="image/x-icon" />
   <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
+  <link rel="stylesheet" href="css/pelusita.css?v=20260611b" />
 </head>
-<body>
+<body class="page-curso-ayrpc-2025">
   <button class="mobile-menu-toggle" id="mobileMenuToggle" type="button" aria-label="Abrir menú">
     <span></span>
     <span></span>
@@ -125,12 +126,13 @@
     </aside>
 
     <main class="main-content">
-      
+
+      <!-- TOPBAR -->
       <header class="topbar">
         <div>
           <p class="eyebrow">
-            <i class="fa-solid fa-screwdriver-wrench"></i>
-            Armado y Reparación de Computadoras
+            <i class="fa-solid fa-satellite-dish"></i>
+            Campus técnico
           </p>
 
           <h1>AyRPC 2025</h1>
@@ -170,195 +172,147 @@
         </div>
       </header>
 
-      <section class="hero-panel course-detail-hero">
+      <!-- HERO -->
+      <section class="hero-panel ayrpc2025-hero">
         <div class="hero-copy">
           <span class="badge">
-            <i class="fa-solid fa-circle-check"></i>
-            Curso completo
+            <i class="fa-solid fa-screwdriver-wrench"></i>
+            AyRPC 2025
           </span>
 
           <h2>
-            AyRPC 2025
-            <span>Edición finalizada</span>
+            Panel académico
+            <span>AyRPC 2025</span>
           </h2>
 
           <p>
-            Esta edición ya cuenta con materiales, clases grabadas, recuperatorio activo
-            para alumnos aptos, planilla completa de cursada y certificador autogestionable.
+            Revisá tu situación de cursada, asistencias, tiempos registrados y accesos disponibles.
           </p>
 
           <div class="hero-actions">
-            <a href="#" class="btn btn-primary">
-              <i class="fa-solid fa-chart-line"></i>
-              Ver métricas
+            <a href="clases-ayrpc-2025.html" class="btn btn-primary">
+              <i class="fa-solid fa-video"></i>
+              Ver clases
             </a>
 
-            <a href="#" class="btn btn-outline">
-              <i class="fa-solid fa-file-circle-question"></i>
-              Recuperatorio
+            <a href="exampro.html" class="btn btn-outline">
+              <i class="fa-solid fa-file-circle-check"></i>
+              Ir a ExamPro
             </a>
           </div>
         </div>
 
         <div class="hero-orb">
           <div class="orb-inner">
-            <i class="fa-solid fa-screwdriver-wrench"></i>
+            <i class="fa-solid fa-user-graduate"></i>
           </div>
         </div>
       </section>
 
-      <section class="stats-grid">
-        <article class="stat-card">
-          <div class="stat-icon green">
-            <i class="fa-solid fa-circle-check"></i>
+      <section class="ayrpc-student-dashboard">
+        <article class="panel ayrpc-student-card">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Alumno</p>
+              <h3 id="ayrpcStudentName">Cargando datos...</h3>
+            </div>
+
+            <span class="status-badge active" id="ayrpcDataSource">Sincronizando</span>
           </div>
-          <div>
-            <span class="stat-number">Completo</span>
-            <p>Estado del curso</p>
+
+          <div class="ayrpc-student-grid">
+            <div>
+              <span>DNI</span>
+              <strong id="ayrpcStudentDni">—</strong>
+            </div>
+
+            <div>
+              <span>Twitch</span>
+              <strong id="ayrpcStudentTwitch">—</strong>
+            </div>
+
+            <div>
+              <span>Correo</span>
+              <strong id="ayrpcStudentEmail">—</strong>
+            </div>
+
+            <div>
+              <span>Estado examen</span>
+              <strong id="ayrpcStudentExamStatus">Verificando</strong>
+            </div>
           </div>
         </article>
 
-        <article class="stat-card">
-          <div class="stat-icon cyan">
-            <i class="fa-solid fa-file-circle-question"></i>
-          </div>
-          <div>
-            <span class="stat-number">Activo</span>
-            <p>Recuperatorio</p>
-          </div>
-        </article>
+        <article class="panel ayrpc-recovery-card" id="ayrpcRecoveryCard">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Evaluación</p>
+              <h3>Recuperatorio</h3>
+            </div>
 
-        <article class="stat-card">
-          <div class="stat-icon violet">
-            <i class="fa-solid fa-folder-open"></i>
+            <span class="status-badge" id="ayrpcRecoveryBadge">Verificando</span>
           </div>
-          <div>
-            <span class="stat-number">OK</span>
-            <p>Materiales</p>
-          </div>
-        </article>
 
-        <article class="stat-card">
-          <div class="stat-icon pink">
-            <i class="fa-solid fa-certificate"></i>
-          </div>
-          <div>
-            <span class="stat-number">GitHub</span>
-            <p>Certificador</p>
+          <p id="ayrpcRecoveryText">
+            Estamos revisando tu estado académico para saber si corresponde habilitar el acceso.
+          </p>
+
+          <div class="ayrpc-recovery-actions">
+            <a class="btn btn-primary disabled" id="ayrpcRecoveryBtn" href="#" aria-disabled="true">
+              <i class="fa-solid fa-file-circle-question"></i>
+              Abrir recuperatorio
+            </a>
+
+            <a class="btn btn-outline" href="clases-ayrpc-2025.html">
+              <i class="fa-solid fa-list-check"></i>
+              Revisar clases
+            </a>
           </div>
         </article>
       </section>
 
-      <section class="course-detail-grid">
-        <article class="panel course-main-panel">
+      <section class="ayrpc-academic-layout">
+        <article class="panel ayrpc-attendance-panel">
           <div class="panel-header">
             <div>
-              <p class="eyebrow">Resumen académico</p>
-              <h3>Estado general de la edición 2025</h3>
+              <p class="eyebrow">Asistencia</p>
+              <h3>Resumen de clases</h3>
             </div>
-            <span class="status-badge active">Finalizado</span>
+
+            <span class="ayrpc-attendance-total" id="ayrpcAttendanceTotal">—/7</span>
           </div>
 
-          <p>
-            AyRPC 2025 queda como primera edición completa dentro del ecosistema.
-            La idea es usar esta cursada como base histórica para mostrar datos, métricas,
-            materiales, recuperatorios, certificación y seguimiento de alumnos.
-          </p>
+          <div class="ayrpc-attendance-progress">
+            <span id="ayrpcAttendanceProgress"></span>
+          </div>
 
-          <div class="course-metrics-grid">
-            <div>
-              <span>Alumnos</span>
-              <strong>Planilla completa</strong>
-            </div>
-
-            <div>
-              <span>Clases</span>
-              <strong>Twitch / YouTube</strong>
-            </div>
-
-            <div>
-              <span>Recuperatorio</span>
-              <strong>Alumnos aptos</strong>
-            </div>
-
-            <div>
-              <span>Documentación</span>
-              <strong>Certificados / Constancias</strong>
-            </div>
+          <div class="ayrpc-class-list" id="ayrpcClassList">
+            <div class="ayrpc-loading-line">Cargando asistencias...</div>
           </div>
         </article>
 
-        <article class="panel">
+        <article class="panel ayrpc-chart-panel">
           <div class="panel-header">
             <div>
-              <p class="eyebrow">Accesos</p>
-              <h3>Recursos 2025</h3>
+              <p class="eyebrow">Métricas</p>
+              <h3>Tiempo registrado</h3>
             </div>
           </div>
 
-          <div class="module-list module-list-vertical">
-            <button class="module-item">
-              <i class="fa-solid fa-table"></i>
-              <span>Planilla Google Sheets</span>
-            </button>
-
-            <button class="module-item">
-              <i class="fa-solid fa-folder-open"></i>
-              <span>Materiales</span>
-            </button>
-
-            <button class="module-item">
-              <i class="fa-brands fa-youtube"></i>
-              <span>Clases grabadas</span>
-            </button>
-
-            <button class="module-item">
-              <i class="fa-solid fa-certificate"></i>
-              <span>Certificador</span>
-            </button>
-          </div>
-        </article>
-
-        <article class="panel course-main-panel">
-          <div class="panel-header">
+          <div class="ayrpc-chart-summary">
             <div>
-              <p class="eyebrow">Flujo actual</p>
-              <h3>Qué puede hacer el alumno</h3>
+              <span>Total registrado</span>
+              <strong id="ayrpcTotalTime">—</strong>
+            </div>
+
+            <div>
+              <span>Mejor clase</span>
+              <strong id="ayrpcBestClass">—</strong>
             </div>
           </div>
 
-          <div class="timeline">
-            <div class="timeline-item">
-              <span></span>
-              <div>
-                <strong>Consultar materiales</strong>
-                <p>Acceso a contenido de estudio y material trabajado durante la cursada.</p>
-              </div>
-            </div>
-
-            <div class="timeline-item">
-              <span></span>
-              <div>
-                <strong>Ver clases grabadas</strong>
-                <p>Revisión de clases disponibles en Twitch y YouTube.</p>
-              </div>
-            </div>
-
-            <div class="timeline-item">
-              <span></span>
-              <div>
-                <strong>Rendir recuperatorio</strong>
-                <p>Disponible para alumnos aptos según la situación académica.</p>
-              </div>
-            </div>
-
-            <div class="timeline-item">
-              <span></span>
-              <div>
-                <strong>Autogestionar documentación</strong>
-                <p>Certificados de aprobación y constancias mediante el certificador.</p>
-              </div>
-            </div>
+          <div class="ayrpc-time-chart" id="ayrpcTimeChart">
+            <div class="ayrpc-loading-line">Cargando gráfico...</div>
           </div>
         </article>
       </section>
@@ -369,6 +323,8 @@
   <script src="js/roles.js"></script>
   <script src="js/courses-data.js"></script>
   <script src="js/main.js"></script>
+  <script src="js/curso-ayrpc-2025.js?v=20260612-academic-panel"></script>
+  <script src="js/pelusita.js?v=20260611b"></script>
 </body>
 </html>
 

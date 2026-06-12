@@ -5601,3 +5601,589 @@ html[data-theme="dark"] .classroom-logo-orb-img-dark,
   }
 }
 /* === END HOME ACTIVITY SOON ANIMATION === */
+
+/* === CURSOS HUB REDESIGN === */
+
+.courses-hub-panel {
+  padding: clamp(1rem, 2.4vw, 1.45rem);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background:
+    radial-gradient(circle at 12% 0%, rgba(0,245,255,.12), transparent 32%),
+    radial-gradient(circle at 92% 100%, rgba(168,85,247,.16), transparent 38%),
+    var(--bg-card);
+  box-shadow: var(--shadow-card), var(--shadow-glow);
+}
+
+.courses-hub-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.courses-hub-header h3 {
+  font-family: var(--font-title);
+  font-size: clamp(1.35rem, 2.8vw, 2rem);
+}
+
+.courses-hub-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  padding: .42rem .7rem;
+  border: 1px solid rgba(0,245,255,.28);
+  border-radius: 999px;
+  background: rgba(0,245,255,.08);
+  color: var(--cyan);
+  font-size: .78rem;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.courses-hub-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(320px, .9fr);
+  gap: 1rem;
+}
+
+.course-hub-card {
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  gap: 1rem;
+  padding: clamp(1rem, 2vw, 1.25rem);
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 90% 12%, rgba(168,85,247,.16), transparent 32%),
+    var(--bg-card-strong);
+}
+
+.course-hub-card::before {
+  content: '';
+  position: absolute;
+  right: -90px;
+  top: -90px;
+  width: 210px;
+  height: 210px;
+  border-radius: 999px;
+  background: rgba(0,245,255,.08);
+  filter: blur(4px);
+  pointer-events: none;
+}
+
+.course-hub-top,
+.course-hub-copy,
+.course-attendance-panel,
+.course-status-grid,
+.course-submenu-card {
+  position: relative;
+  z-index: 1;
+}
+
+.course-hub-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.course-hub-icon {
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  border-radius: 16px;
+  background: linear-gradient(135deg, var(--violet-dim), var(--cyan-dim));
+  color: #fff;
+  box-shadow: 0 0 24px rgba(0,245,255,.16);
+}
+
+.course-hub-copy h3 {
+  margin-bottom: .45rem;
+  font-family: var(--font-title);
+  font-size: clamp(1.55rem, 3vw, 2.35rem);
+}
+
+.course-hub-copy p {
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.course-attendance-panel {
+  display: grid;
+  gap: .7rem;
+  padding: .9rem;
+  border: 1px solid rgba(0,245,255,.20);
+  border-radius: 18px;
+  background: rgba(0,245,255,.055);
+}
+
+.course-attendance-main {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+}
+
+.course-attendance-main span {
+  color: var(--text-muted);
+  font-weight: 800;
+}
+
+.course-attendance-main strong {
+  font-family: var(--font-title);
+  font-size: 1.45rem;
+  color: var(--cyan);
+}
+
+.course-attendance-bar {
+  height: 10px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255,255,255,.08);
+}
+
+.course-attendance-bar span {
+  display: block;
+  width: 0%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--cyan), var(--violet));
+  box-shadow: 0 0 22px rgba(0,245,255,.25);
+  transition: width .45s ease;
+}
+
+.course-attendance-panel p {
+  color: var(--text-muted);
+  font-size: .92rem;
+  line-height: 1.5;
+}
+
+.course-status-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: .7rem;
+}
+
+.course-status-grid div {
+  padding: .8rem;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: rgba(255,255,255,.035);
+}
+
+.course-status-grid span {
+  display: block;
+  color: var(--text-muted);
+  font-size: .78rem;
+  font-weight: 800;
+  margin-bottom: .25rem;
+}
+
+.course-status-grid strong {
+  color: var(--text-main);
+}
+
+.course-status-recuperatorio.is-active {
+  border-color: rgba(34,197,94,.45);
+  background: rgba(34,197,94,.09);
+}
+
+.course-status-recuperatorio.is-active strong {
+  color: #86efac;
+}
+
+.course-status-recuperatorio.is-locked {
+  border-color: rgba(249,115,22,.35);
+  background: rgba(249,115,22,.08);
+}
+
+.course-status-recuperatorio.is-locked strong {
+  color: #fed7aa;
+}
+
+.course-submenu-card {
+  display: grid;
+  gap: .75rem;
+  padding: .9rem;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: rgba(15,5,35,.36);
+}
+
+.course-submenu-title {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  color: var(--cyan);
+  font-weight: 900;
+  font-size: .88rem;
+}
+
+.course-submenu-actions {
+  display: flex;
+  gap: .7rem;
+  flex-wrap: wrap;
+}
+
+.btn-course-recovery.disabled {
+  opacity: .65;
+  filter: grayscale(.25);
+}
+
+.page-cursos .pelusita-wrapper {
+  display: flex !important;
+  top: auto !important;
+  left: auto !important;
+  right: clamp(18px, 3vw, 42px) !important;
+  bottom: clamp(18px, 3vh, 34px) !important;
+  transform: scale(.84);
+  transform-origin: bottom right;
+}
+
+@media (max-width: 1100px) {
+  .courses-hub-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .courses-hub-header {
+    display: grid;
+  }
+
+  .courses-hub-pill {
+    width: max-content;
+  }
+
+  .course-status-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .course-submenu-actions {
+    display: grid;
+  }
+
+  .course-submenu-actions .btn {
+    justify-content: center;
+    text-align: center;
+  }
+
+  .page-cursos .pelusita-wrapper {
+    right: 10px !important;
+    bottom: 10px !important;
+    transform: scale(.72) !important;
+  }
+}
+/* === END CURSOS HUB REDESIGN === */
+
+/* === AYRPC 2025 ACADEMIC PANEL === */
+
+.ayrpc-student-dashboard {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(320px, .75fr);
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.ayrpc-student-card,
+.ayrpc-recovery-card,
+.ayrpc-attendance-panel,
+.ayrpc-chart-panel {
+  overflow: hidden;
+  position: relative;
+}
+
+.ayrpc-student-card::before,
+.ayrpc-recovery-card::before,
+.ayrpc-attendance-panel::before,
+.ayrpc-chart-panel::before {
+  content: '';
+  position: absolute;
+  inset: -40% auto auto -20%;
+  width: 260px;
+  height: 260px;
+  border-radius: 999px;
+  background: rgba(0,245,255,.075);
+  filter: blur(8px);
+  pointer-events: none;
+}
+
+.ayrpc-student-grid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: .75rem;
+}
+
+.ayrpc-student-grid div,
+.ayrpc-chart-summary div {
+  padding: .85rem;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: rgba(255,255,255,.035);
+  min-width: 0;
+}
+
+.ayrpc-student-grid span,
+.ayrpc-chart-summary span {
+  display: block;
+  color: var(--text-muted);
+  font-size: .78rem;
+  font-weight: 800;
+  margin-bottom: .25rem;
+}
+
+.ayrpc-student-grid strong,
+.ayrpc-chart-summary strong {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--text-main);
+}
+
+.ayrpc-recovery-card.is-active {
+  border-color: rgba(34,197,94,.45);
+  box-shadow: 0 0 34px rgba(34,197,94,.10);
+}
+
+.ayrpc-recovery-card.is-locked {
+  border-color: rgba(249,115,22,.35);
+}
+
+.ayrpc-recovery-card.is-approved {
+  border-color: rgba(0,245,255,.40);
+}
+
+.ayrpc-recovery-card p {
+  color: var(--text-muted);
+  line-height: 1.55;
+  margin-bottom: 1rem;
+}
+
+.ayrpc-recovery-actions {
+  display: flex;
+  gap: .7rem;
+  flex-wrap: wrap;
+}
+
+.ayrpc-recovery-actions .disabled {
+  opacity: .62;
+  filter: grayscale(.35);
+}
+
+.ayrpc-academic-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(320px, .95fr);
+  gap: 1rem;
+}
+
+.ayrpc-attendance-total {
+  font-family: var(--font-title);
+  color: var(--cyan);
+  font-weight: 900;
+  font-size: 1.45rem;
+}
+
+.ayrpc-attendance-progress {
+  height: 11px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255,255,255,.08);
+  margin-bottom: 1rem;
+}
+
+.ayrpc-attendance-progress span {
+  display: block;
+  width: 0%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--cyan), var(--violet));
+  box-shadow: 0 0 24px rgba(0,245,255,.22);
+  transition: width .45s ease;
+}
+
+.ayrpc-class-list {
+  display: grid;
+  gap: .7rem;
+}
+
+.ayrpc-class-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: .8rem;
+  padding: .85rem;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: rgba(255,255,255,.035);
+}
+
+.ayrpc-class-row span {
+  display: block;
+  color: var(--text-muted);
+  font-size: .76rem;
+  font-weight: 900;
+  margin-bottom: .15rem;
+}
+
+.ayrpc-class-row strong {
+  color: var(--text-main);
+}
+
+.ayrpc-class-status {
+  display: grid;
+  justify-items: end;
+  gap: .15rem;
+  text-align: right;
+}
+
+.ayrpc-class-status b {
+  font-size: .82rem;
+}
+
+.ayrpc-class-status small {
+  color: var(--text-muted);
+}
+
+.ayrpc-class-row.ok {
+  border-color: rgba(34,197,94,.35);
+}
+
+.ayrpc-class-row.ok .ayrpc-class-status b {
+  color: #86efac;
+}
+
+.ayrpc-class-row.warn {
+  border-color: rgba(234,179,8,.38);
+}
+
+.ayrpc-class-row.warn .ayrpc-class-status b {
+  color: #fde68a;
+}
+
+.ayrpc-class-row.bad {
+  border-color: rgba(239,68,68,.38);
+}
+
+.ayrpc-class-row.bad .ayrpc-class-status b {
+  color: #fca5a5;
+}
+
+.ayrpc-chart-summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .75rem;
+  margin-bottom: 1rem;
+}
+
+.ayrpc-time-chart {
+  display: grid;
+  gap: .65rem;
+}
+
+.ayrpc-chart-row {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) 86px;
+  align-items: center;
+  gap: .7rem;
+}
+
+.ayrpc-chart-row > span {
+  color: var(--cyan);
+  font-weight: 900;
+}
+
+.ayrpc-chart-row div {
+  height: 12px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255,255,255,.08);
+}
+
+.ayrpc-chart-row b {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--violet), var(--cyan));
+  box-shadow: 0 0 18px rgba(0,245,255,.20);
+}
+
+.ayrpc-chart-row small {
+  color: var(--text-muted);
+  text-align: right;
+  font-size: .78rem;
+}
+
+.ayrpc-loading-line {
+  color: var(--text-muted);
+  font-weight: 800;
+  padding: .9rem;
+  border: 1px dashed var(--border);
+  border-radius: 16px;
+}
+
+.page-curso-ayrpc-2025 .pelusita-wrapper {
+  display: flex !important;
+  top: auto !important;
+  left: auto !important;
+  right: clamp(18px, 3vw, 42px) !important;
+  bottom: clamp(18px, 3vh, 34px) !important;
+  transform: scale(.84);
+  transform-origin: bottom right;
+}
+
+@media (max-width: 1180px) {
+  .ayrpc-student-dashboard,
+  .ayrpc-academic-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .ayrpc-student-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 680px) {
+  .ayrpc-student-grid,
+  .ayrpc-chart-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .ayrpc-class-row {
+    grid-template-columns: 1fr;
+  }
+
+  .ayrpc-class-status {
+    justify-items: start;
+    text-align: left;
+  }
+
+  .ayrpc-recovery-actions {
+    display: grid;
+  }
+
+  .ayrpc-recovery-actions .btn {
+    justify-content: center;
+  }
+
+  .ayrpc-chart-row {
+    grid-template-columns: 36px minmax(0, 1fr);
+  }
+
+  .ayrpc-chart-row small {
+    grid-column: 2;
+    text-align: left;
+  }
+
+  .page-curso-ayrpc-2025 .pelusita-wrapper {
+    right: 10px !important;
+    bottom: 10px !important;
+    transform: scale(.72) !important;
+  }
+}
+/* === END AYRPC 2025 ACADEMIC PANEL === */
