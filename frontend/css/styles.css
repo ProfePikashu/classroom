@@ -6413,3 +6413,12 @@ html[data-theme="dark"] .classroom-logo-orb-img-dark,
   }
 }
 /* === END AYRPC 2026 PROMISE PAGE === */
+
+/* Moderadores: acceso visible al bloque administrativo lateral */
+body.role-moderator .teacher-admin-zone.teacher-only {
+  display: block;
+}
+
+body.role-moderator .sidebar-submenu .teacher-only {
+  display: flex;
+}

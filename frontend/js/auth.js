@@ -1,4 +1,4 @@
-﻿/* ============================================================
+/* ============================================================
    AndyAzhTEC Classroom — auth.js
    Login por DNI + Twitch contra ExamPro
    ============================================================ */
@@ -75,6 +75,50 @@ const ClassroomAuth = {
       .replace(/\s+/g, "");
   },
 
+  findClassroomModerator(cleanDni, cleanTwitch) {
+    if (typeof ClassroomRoles === "undefined") return null;
+
+    const assignments = ClassroomRoles.getAssignments();
+
+    return assignments.find((item) => {
+      const itemTwitch = ClassroomRoles.normalize(item.twitch);
+      const itemDni = ClassroomRoles.normalizeDni(item.dni);
+
+      return item.role === "moderator" && itemTwitch === cleanTwitch && itemDni === cleanDni;
+    }) || null;
+  },
+
+  buildClassroomModeratorSession(cleanDni, cleanTwitch, assignment) {
+    const displayName = assignment?.displayName || assignment?.name || cleanTwitch;
+
+    const session = {
+      dni: cleanDni,
+      twitch: cleanTwitch,
+      email: "",
+      displayName,
+      role: "moderator",
+      roleLabel: assignment?.roleLabel || "Moderador",
+      course: "Classroom",
+      alumno: {
+        DNI: cleanDni,
+        Correo: "",
+        "Nombre Completo": displayName,
+        "Usuario de Twitch": cleanTwitch,
+        "Usuario de Twitch (en caso de no tener, deberá crear uno y usarlo en la cursada)": cleanTwitch,
+      },
+      exampro: null,
+      createdAt: new Date().toISOString(),
+      provider: "classroom-local-moderator",
+    };
+
+    this.setSession(session);
+
+    return {
+      ok: true,
+      session,
+    };
+  },
+
   async loginWithStudent(dni, twitch) {
     const cleanDni = this.normalizeDni(dni);
     const cleanTwitch = this.normalize(twitch);
@@ -84,6 +128,12 @@ const ClassroomAuth = {
         ok: false,
         message: "Ingresá DNI y usuario de Twitch.",
       };
+    }
+
+    const classroomModerator = this.findClassroomModerator(cleanDni, cleanTwitch);
+
+    if (classroomModerator) {
+      return this.buildClassroomModeratorSession(cleanDni, cleanTwitch, classroomModerator);
     }
 
     try {

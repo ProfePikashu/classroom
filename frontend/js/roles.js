@@ -1,4 +1,4 @@
-﻿/* ════════════════════════════════════════════════════════
+/* ════════════════════════════════════════════════════════
    AndyAzhTEC Classroom — roles.js
 ════════════════════════════════════════════════════════ */
 
@@ -14,6 +14,27 @@ const CLASSROOM_TEACHER_TWITCH_USERS = [
 const CLASSROOM_TEACHER_NAMES = [
   "ARTURO ANDRES CORIA",
   "ARTURO ANDRÉS CORIA",
+];
+
+const CLASSROOM_STATIC_ROLE_ASSIGNMENTS = [
+  {
+    twitch: "lanonapupi",
+    dni: "24823085",
+    role: "moderator",
+    roleLabel: "Moderador",
+  },
+  {
+    twitch: "gabestigarribia",
+    dni: "38481942",
+    role: "moderator",
+    roleLabel: "Moderador",
+  },
+  {
+    twitch: "ezequiel_asp",
+    dni: "38505118",
+    role: "moderator",
+    roleLabel: "Moderador",
+  },
 ];
 
 const ClassroomRoles = {
@@ -65,14 +86,22 @@ const ClassroomRoles = {
   },
 
   getAssignments() {
+    let localAssignments = [];
+
     try {
       const raw = localStorage.getItem(this.assignmentsKey);
       const parsed = raw ? JSON.parse(raw) : [];
-
-      return Array.isArray(parsed) ? parsed : [];
+      localAssignments = Array.isArray(parsed) ? parsed : [];
     } catch (error) {
-      return [];
+      localAssignments = [];
     }
+
+    const staticAssignments =
+      typeof CLASSROOM_STATIC_ROLE_ASSIGNMENTS !== "undefined"
+        ? CLASSROOM_STATIC_ROLE_ASSIGNMENTS
+        : [];
+
+    return [...staticAssignments, ...localAssignments];
   },
 
   saveAssignments(assignments) {
