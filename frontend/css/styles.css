@@ -6829,88 +6829,108 @@ body.student-profile-open {
   }
 }
 
-/* === SIDEBAR ADMIN AREA POLISH === */
+/* === SIDEBAR ADMIN AREA CLEAN === */
 .sidebar .teacher-admin-zone,
 .sidebar .staff-only.teacher-admin-zone,
-.sidebar .admin-zone,
 .teacher-admin-zone {
-  position: relative;
-  margin: 1rem 0 0.65rem;
-  padding: 0.8rem;
-  border: 1px solid rgba(139, 92, 246, 0.18);
-  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.42rem;
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0.95rem 0 0.75rem;
+  padding: 0.75rem;
+  border: 1px solid rgba(139, 92, 246, 0.22);
+  border-radius: 18px;
   background:
-    radial-gradient(circle at top left, rgba(139, 92, 246, 0.14), transparent 38%),
-    rgba(15, 23, 42, 0.38);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035);
+    linear-gradient(180deg, rgba(139, 92, 246, 0.10), rgba(15, 23, 42, 0.12)),
+    rgba(15, 23, 42, 0.34);
+  overflow: hidden;
 }
 
 .sidebar .teacher-admin-zone::before,
 .sidebar .staff-only.teacher-admin-zone::before,
-.sidebar .admin-zone::before,
 .teacher-admin-zone::before {
-  content: "ADMINISTRAR";
-  display: block;
-  margin: 0 0 0.55rem;
-  padding: 0 0.25rem;
-  color: var(--text-muted);
-  font-size: 0.68rem;
-  font-weight: 900;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+  content: none !important;
+  display: none !important;
 }
 
 .sidebar .teacher-admin-zone .sidebar-section-title,
 .sidebar .staff-only.teacher-admin-zone .sidebar-section-title,
 .teacher-admin-zone .sidebar-section-title {
-  display: none;
+  display: block !important;
+  margin: 0 0 0.28rem;
+  padding: 0 0.1rem;
+  color: var(--text-muted);
+  font-size: 0.66rem;
+  font-weight: 900;
+  line-height: 1.1;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  white-space: nowrap;
 }
 
 .sidebar .teacher-admin-zone .nav-item,
 .sidebar .staff-only.teacher-admin-zone .nav-item,
-.sidebar .admin-zone .nav-item,
 .teacher-admin-zone .nav-item {
-  min-height: 42px;
-  margin: 0.28rem 0;
-  border-radius: 14px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  min-height: 40px;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0.64rem 0.72rem;
+  border-radius: 13px;
+  border: 1px solid transparent;
   background: rgba(255, 255, 255, 0.025);
+  overflow: hidden;
 }
 
-.sidebar .teacher-admin-zone .nav-item:hover,
-.sidebar .staff-only.teacher-admin-zone .nav-item:hover,
-.sidebar .admin-zone .nav-item:hover,
-.teacher-admin-zone .nav-item:hover {
-  background: rgba(139, 92, 246, 0.14);
-  border-color: rgba(139, 92, 246, 0.24);
-  transform: translateX(2px);
+.sidebar .teacher-admin-zone .nav-item span,
+.sidebar .staff-only.teacher-admin-zone .nav-item span,
+.teacher-admin-zone .nav-item span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .sidebar .teacher-admin-zone .nav-item i,
 .sidebar .staff-only.teacher-admin-zone .nav-item i,
-.sidebar .admin-zone .nav-item i,
 .teacher-admin-zone .nav-item i {
+  flex: 0 0 auto;
   color: var(--accent);
 }
 
-.sidebar-footer,
-.sidebar-user,
-.user-card {
-  margin-top: 0.8rem;
+.sidebar .teacher-admin-zone .nav-item:hover,
+.sidebar .staff-only.teacher-admin-zone .nav-item:hover,
+.teacher-admin-zone .nav-item:hover {
+  background: rgba(139, 92, 246, 0.12);
+  border-color: rgba(139, 92, 246, 0.22);
+  transform: none;
+}
+
+.sidebar .teacher-admin-zone .nav-item.active,
+.sidebar .staff-only.teacher-admin-zone .nav-item.active,
+.teacher-admin-zone .nav-item.active {
+  background: rgba(245, 158, 11, 0.12);
+  border-color: rgba(245, 158, 11, 0.36);
+  color: var(--warning, #fbbf24);
 }
 
 @media (max-height: 780px) {
   .sidebar .teacher-admin-zone,
   .sidebar .staff-only.teacher-admin-zone,
-  .sidebar .admin-zone,
   .teacher-admin-zone {
-    padding: 0.65rem;
-    border-radius: 16px;
+    padding: 0.62rem;
+    border-radius: 15px;
+    gap: 0.34rem;
   }
 
   .sidebar .teacher-admin-zone .nav-item,
   .sidebar .staff-only.teacher-admin-zone .nav-item,
-  .sidebar .admin-zone .nav-item,
   .teacher-admin-zone .nav-item {
-    min-height: 38px;
+    min-height: 36px;
+    padding: 0.52rem 0.62rem;
   }
 }
