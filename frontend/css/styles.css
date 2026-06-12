@@ -6187,3 +6187,229 @@ html[data-theme="dark"] .classroom-logo-orb-img-dark,
   }
 }
 /* === END AYRPC 2025 ACADEMIC PANEL === */
+
+/* === AYRPC 2026 PROMISE PAGE === */
+
+.ayrpc2026-promise-shell {
+  display: grid;
+  gap: 1rem;
+}
+
+.ayrpc2026-promise-card {
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(280px, .85fr);
+  gap: clamp(1rem, 3vw, 2rem);
+  align-items: center;
+  padding: clamp(1.1rem, 3vw, 2rem);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background:
+    radial-gradient(circle at 12% 12%, rgba(0,245,255,.16), transparent 34%),
+    radial-gradient(circle at 92% 88%, rgba(168,85,247,.18), transparent 38%),
+    var(--bg-card);
+  box-shadow: var(--shadow-card), var(--shadow-glow);
+}
+
+.ayrpc2026-promise-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(0,245,255,.06), transparent);
+  transform: translateX(-120%);
+  animation: ayrpc2026Sweep 4.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.ayrpc2026-promise-copy {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 1rem;
+}
+
+.ayrpc2026-promise-copy h2 {
+  font-family: var(--font-title);
+  font-size: clamp(2rem, 5vw, 4.3rem);
+  line-height: .98;
+}
+
+.ayrpc2026-promise-copy h2 span {
+  display: block;
+  color: var(--cyan);
+  font-size: .55em;
+  margin-top: .25rem;
+  text-shadow: 0 0 22px rgba(0,245,255,.22);
+}
+
+.ayrpc2026-promise-copy p {
+  max-width: 760px;
+  color: var(--text-muted);
+  line-height: 1.65;
+}
+
+.ayrpc2026-promise-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .8rem;
+}
+
+.ayrpc2026-promise-visual {
+  position: relative;
+  z-index: 1;
+  min-height: 330px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 1rem;
+  text-align: center;
+  border: 1px solid rgba(0,245,255,.18);
+  border-radius: 26px;
+  background:
+    radial-gradient(circle at center, rgba(0,245,255,.12), transparent 48%),
+    rgba(15,5,35,.38);
+}
+
+.ayrpc2026-orbit {
+  position: relative;
+  width: min(250px, 70vw);
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+}
+
+.ayrpc2026-orbit span {
+  position: absolute;
+  inset: 12%;
+  border: 1px solid rgba(0,245,255,.25);
+  border-radius: 50%;
+  animation: ayrpc2026Orbit 7s linear infinite;
+}
+
+.ayrpc2026-orbit span:nth-child(2) {
+  inset: 22%;
+  border-color: rgba(168,85,247,.32);
+  animation-duration: 5.5s;
+  animation-direction: reverse;
+}
+
+.ayrpc2026-orbit span:nth-child(3) {
+  inset: 32%;
+  border-color: rgba(249,115,22,.28);
+  animation-duration: 4.2s;
+}
+
+.ayrpc2026-orbit i {
+  font-size: clamp(3.2rem, 8vw, 5rem);
+  color: var(--cyan);
+  filter: drop-shadow(0 0 26px rgba(0,245,255,.34));
+  animation: ayrpc2026Pulse 2.5s ease-in-out infinite;
+}
+
+.ayrpc2026-promise-visual strong {
+  font-family: var(--font-title);
+  color: var(--text-main);
+  letter-spacing: .08em;
+  text-shadow: 0 0 20px rgba(0,245,255,.20);
+}
+
+.ayrpc2026-promise-visual small {
+  color: var(--text-muted);
+  font-weight: 800;
+}
+
+.ayrpc2026-soon-panel {
+  padding: clamp(1rem, 2vw, 1.35rem);
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 0% 100%, rgba(168,85,247,.12), transparent 34%),
+    var(--bg-card-strong);
+}
+
+.ayrpc2026-soon-panel h3 {
+  font-family: var(--font-title);
+  margin-bottom: .55rem;
+}
+
+.ayrpc2026-soon-panel p {
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.ayrpc2026-soon-line {
+  height: 10px;
+  overflow: hidden;
+  margin-top: 1rem;
+  border-radius: 999px;
+  background: rgba(255,255,255,.08);
+}
+
+.ayrpc2026-soon-line span {
+  display: block;
+  width: 42%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--violet), var(--cyan));
+  box-shadow: 0 0 24px rgba(0,245,255,.22);
+  animation: ayrpc2026Line 2.8s ease-in-out infinite alternate;
+}
+
+.page-curso-ayrpc-2026 .pelusita-wrapper {
+  display: flex !important;
+  top: auto !important;
+  left: auto !important;
+  right: clamp(18px, 3vw, 42px) !important;
+  bottom: clamp(18px, 3vh, 34px) !important;
+  transform: scale(.84);
+  transform-origin: bottom right;
+}
+
+@keyframes ayrpc2026Sweep {
+  0%, 45% { transform: translateX(-120%); opacity: 0; }
+  55% { opacity: 1; }
+  100% { transform: translateX(120%); opacity: 0; }
+}
+
+@keyframes ayrpc2026Orbit {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes ayrpc2026Pulse {
+  0%, 100% { transform: scale(1); opacity: .86; }
+  50% { transform: scale(1.08); opacity: 1; }
+}
+
+@keyframes ayrpc2026Line {
+  from { width: 28%; }
+  to { width: 78%; }
+}
+
+@media (max-width: 980px) {
+  .ayrpc2026-promise-card {
+    grid-template-columns: 1fr;
+  }
+
+  .ayrpc2026-promise-visual {
+    min-height: 260px;
+  }
+}
+
+@media (max-width: 680px) {
+  .ayrpc2026-promise-actions {
+    display: grid;
+  }
+
+  .ayrpc2026-promise-actions .btn {
+    justify-content: center;
+  }
+
+  .page-curso-ayrpc-2026 .pelusita-wrapper {
+    right: 10px !important;
+    bottom: 10px !important;
+    transform: scale(.72) !important;
+  }
+}
+/* === END AYRPC 2026 PROMISE PAGE === */
