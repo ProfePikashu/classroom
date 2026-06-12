@@ -20,6 +20,8 @@ const EXAMPRO_API_BASE = (
   ? "http://127.0.0.1:8000"
   : "https://exampro-backend-1n6d.onrender.com";
 
+const AYRPC2025_SHEET_API = "https://script.google.com/macros/s/AKfycbxdB1fbiT1S04N5LaiOqHCojJcO12YCOPg7ln21bFrMrEot5GSdyWzy6j6CyEAsuDen/exec";
+
 const ClassroomAuth = {
   storageKey: "andyazh-classroom-session",
 
@@ -143,6 +145,111 @@ const ClassroomAuth = {
     };
   },
 
+  getSheetValue(data, keys, fallback = "") {
+    for (const key of keys) {
+      const value = data?.[key];
+
+      if (value !== undefined && value !== null && String(value).trim() !== "") {
+        return String(value).trim();
+      }
+    }
+
+    return fallback;
+  },
+
+  getSheetTwitch(data) {
+    return this.normalize(
+      this.getSheetValue(data, [
+        "Usuario de Twitch",
+        "Usuario Twitch",
+        "Twitch",
+        "TWITCH",
+        "Usuario de Twitch (en caso de no tener, deberá crear uno y usarlo en la cursada)",
+        "twitch",
+        "twitch_username",
+      ])
+    );
+  },
+
+  async loginWithSheetFallback(cleanDni, cleanTwitch, originalMessage = "") {
+    try {
+      const response = await fetch(`${AYRPC2025_SHEET_API}?dni=${encodeURIComponent(cleanDni)}`, {
+        cache: "no-store",
+      });
+
+      const data = await response.json().catch(() => null);
+
+      if (!response.ok || !data || data.error || data.estado === "BAJA") {
+        return {
+          ok: false,
+          message: originalMessage || "No se pudo validar el acceso con ExamPro ni con Planilla 2025.",
+        };
+      }
+
+      const sheetTwitch = this.getSheetTwitch(data);
+
+      if (!sheetTwitch || sheetTwitch !== cleanTwitch) {
+        return {
+          ok: false,
+          message: "El DNI figura en Planilla 2025, pero el usuario de Twitch no coincide.",
+        };
+      }
+
+      const fullName = this.getSheetValue(data, [
+        "Nombre Completo",
+        "Nombre completo",
+        "NOMBRE COMPLETO",
+        "Alumno",
+        "ALUMNO",
+        "Nombre",
+        "NOMBRE",
+      ], cleanTwitch);
+
+      const email = this.getSheetValue(data, [
+        "Correo",
+        "Correo electrónico",
+        "Correo Electronico",
+        "Email",
+        "EMAIL",
+        "Mail",
+        "MAIL",
+      ], "");
+
+      const session = {
+        dni: this.getSheetValue(data, ["DNI", "dni"], cleanDni),
+        twitch: cleanTwitch,
+        email,
+        displayName: fullName,
+        role: "student",
+        roleLabel: "Alumno",
+        course: "AyRPC 2025",
+        alumno: {
+          ...data,
+          DNI: this.getSheetValue(data, ["DNI", "dni"], cleanDni),
+          Correo: email,
+          "Nombre Completo": fullName,
+          "Usuario de Twitch": cleanTwitch,
+          "Usuario de Twitch (en caso de no tener, deberá crear uno y usarlo en la cursada)": cleanTwitch,
+        },
+        exampro: null,
+        createdAt: new Date().toISOString(),
+        provider: "planilla-ayrpc-2025",
+      };
+
+      this.setSession(session);
+
+      return {
+        ok: true,
+        session,
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        message: originalMessage || "No se pudo conectar con ExamPro ni con Planilla 2025.",
+      };
+    }
+  },
+
   async loginWithStudent(dni, twitch) {
     const cleanDni = this.normalizeDni(dni);
     const cleanTwitch = this.normalize(twitch);
@@ -175,13 +282,11 @@ const ClassroomAuth = {
       const data = await response.json().catch(() => null);
 
       if (!response.ok || !data || !data.ok) {
-        return {
-          ok: false,
-          message:
-            data?.detail ||
-            data?.message ||
-            "No se pudo validar el acceso con ExamPro.",
-        };
+        return await this.loginWithSheetFallback(
+          cleanDni,
+          cleanTwitch,
+          data?.detail || data?.message || "No se pudo validar el acceso con ExamPro."
+        );
       }
 
       const student = data.student || {};
@@ -223,10 +328,11 @@ const ClassroomAuth = {
         session,
       };
     } catch (error) {
-      return {
-        ok: false,
-        message: "No se pudo conectar con ExamPro. Verificá que el backend esté levantado.",
-      };
+      return await this.loginWithSheetFallback(
+        cleanDni,
+        cleanTwitch,
+        "No se pudo conectar con ExamPro. Se intentó validar contra Planilla 2025."
+      );
     }
   },
 
