@@ -177,11 +177,12 @@ const ClassroomStudents = {
               <th>Alumno</th>
               <th>DNI</th>
               <th>Twitch</th>
-              <th>Email</th>
+              <th>Teléfono</th>
+              <th>Correo</th>
               <th>Cursada</th>
               <th>Estado</th>
-              <th>Exámenes</th>
-              <th>PDFs</th>
+              <th>Examen</th>
+              <th>Recup.</th>
               <th>Acciones</th>
             </tr>
           </thead>
@@ -197,18 +198,21 @@ const ClassroomStudents = {
   createStudentRow(student, index) {
     const name = student.full_name || student.nombre || student.twitch || "Alumno sin nombre";
     const twitch = student.twitch ? `@${String(student.twitch).replace(/^@/, "")}` : "—";
-    const email = student.email || "—";
+    const email = student.email || "";
+    const phone = student.telefono || "";
     const dni = student.dni || "—";
     const cursada = student.cursada || "AyRPC 2025";
-    const estado = student.apt_examen || "apto";
-    const exams = student.stats?.examenes_total ?? 0;
-    const pdfs = student.stats?.pdfs_total ?? 0;
+    const estado = this.formatStatus(student.apt_examen || student.estado || "apto");
+    const examStatus = this.getExamStatus(student);
+    const recoveryStatus = this.getRecoveryStatus(student);
+    const mailHref = email ? `mailto:${encodeURIComponent(email)}` : "";
+    const whatsappHref = this.getWhatsappHref(phone);
 
     return `
       <tr>
         <td class="students-table-index">${index + 1}</td>
 
-        <td>
+        <td class="students-table-name-cell">
           <div class="students-table-student">
             <div class="student-table-avatar">
               <i class="fa-solid fa-user-graduate"></i>
@@ -216,14 +220,15 @@ const ClassroomStudents = {
 
             <div>
               <strong>${this.escapeHtml(name)}</strong>
-              <small>ID ExamPro: ${this.escapeHtml(student.id)}</small>
+              <small>ExamPro ID: ${this.escapeHtml(student.id)}</small>
             </div>
           </div>
         </td>
 
-        <td>${this.escapeHtml(dni)}</td>
-        <td>${this.escapeHtml(twitch)}</td>
-        <td class="students-table-email">${this.escapeHtml(email)}</td>
+        <td class="students-table-dni">${this.escapeHtml(dni)}</td>
+        <td class="students-table-twitch">${this.escapeHtml(twitch)}</td>
+        <td class="students-table-phone">${this.escapeHtml(phone || "—")}</td>
+        <td class="students-table-email">${this.escapeHtml(email || "—")}</td>
 
         <td>
           <span class="student-badge course">
@@ -232,23 +237,155 @@ const ClassroomStudents = {
         </td>
 
         <td>
-          <span class="student-badge success">
-            <i class="fa-solid fa-circle-check"></i>
-            ${this.escapeHtml(estado)}
+          <span class="student-badge ${estado.className}">
+            <i class="fa-solid ${estado.icon}"></i>
+            ${this.escapeHtml(estado.label)}
           </span>
         </td>
 
-        <td class="students-table-number">${this.escapeHtml(exams)}</td>
-        <td class="students-table-number">${this.escapeHtml(pdfs)}</td>
+        <td>
+          <span class="student-badge ${examStatus.className}">
+            <i class="fa-solid ${examStatus.icon}"></i>
+            ${this.escapeHtml(examStatus.label)}
+          </span>
+        </td>
 
         <td>
-          <a class="btn btn-outline btn-table" href="alumno.html?id=${encodeURIComponent(student.id)}">
-            <i class="fa-solid fa-address-card"></i>
-            Ficha
-          </a>
+          <span class="student-badge ${recoveryStatus.className}">
+            <i class="fa-solid ${recoveryStatus.icon}"></i>
+            ${this.escapeHtml(recoveryStatus.label)}
+          </span>
+        </td>
+
+        <td>
+          <div class="students-table-actions">
+            <a class="btn btn-outline btn-table" href="alumno.html?id=${encodeURIComponent(student.id)}" title="Ver ficha">
+              <i class="fa-solid fa-address-card"></i>
+              <span>Ficha</span>
+            </a>
+
+            ${email ? `
+              <a class="btn btn-outline btn-table btn-table-contact" href="${mailHref}" title="Enviar correo">
+                <i class="fa-solid fa-envelope"></i>
+                <span>Mail</span>
+              </a>
+            ` : `
+              <span class="btn btn-outline btn-table btn-table-disabled" title="Sin correo">
+                <i class="fa-solid fa-envelope"></i>
+                <span>Mail</span>
+              </span>
+            `}
+
+            ${whatsappHref ? `
+              <a class="btn btn-outline btn-table btn-table-contact" href="${whatsappHref}" target="_blank" rel="noopener" title="Contactar por WhatsApp">
+                <i class="fa-brands fa-whatsapp"></i>
+                <span>WhatsApp</span>
+              </a>
+            ` : `
+              <span class="btn btn-outline btn-table btn-table-disabled" title="Sin teléfono válido">
+                <i class="fa-brands fa-whatsapp"></i>
+                <span>WhatsApp</span>
+              </span>
+            `}
+          </div>
         </td>
       </tr>
     `;
+  },
+
+  formatStatus(value) {
+    const clean = String(value || "").trim().toLowerCase();
+
+    if (clean.includes("no") || clean.includes("desap")) {
+      return {
+        label: "NO APTO",
+        className: "danger",
+        icon: "fa-circle-xmark",
+      };
+    }
+
+    return {
+      label: "APTO",
+      className: "success",
+      icon: "fa-circle-check",
+    };
+  },
+
+  getExamStatus(student) {
+    const exams = Number(student.stats?.examenes_total || 0);
+    const apto = String(student.apt_examen || "").toLowerCase() === "apto";
+
+    if (exams > 0) {
+      return {
+        label: "CON ENTREGA",
+        className: "info",
+        icon: "fa-file-circle-check",
+      };
+    }
+
+    if (apto) {
+      return {
+        label: "SIN ENTREGA",
+        className: "warning",
+        icon: "fa-triangle-exclamation",
+      };
+    }
+
+    return {
+      label: "NO APTO",
+      className: "danger",
+      icon: "fa-circle-xmark",
+    };
+  },
+
+  getRecoveryStatus(student) {
+    const value =
+      student.recuperatorio ||
+      student.recovery_status ||
+      student.stats?.recuperatorio ||
+      "";
+
+    if (!value) {
+      return {
+        label: "—",
+        className: "muted",
+        icon: "fa-minus",
+      };
+    }
+
+    return {
+      label: String(value).toUpperCase(),
+      className: "info",
+      icon: "fa-rotate-right",
+    };
+  },
+
+  getWhatsappHref(value) {
+    const raw = String(value || "").trim();
+
+    if (!raw) return "";
+
+    let digits = raw.replace(/\D/g, "");
+
+    if (!digits) return "";
+
+    if (digits.startsWith("549")) {
+      return `https://wa.me/${digits}`;
+    }
+
+    if (digits.startsWith("54")) {
+      return `https://wa.me/549${digits.slice(2)}`;
+    }
+
+    if (digits.startsWith("9") && digits.length >= 10) {
+      return `https://wa.me/54${digits}`;
+    }
+
+    if (digits.length >= 10) {
+      return `https://wa.me/549${digits}`;
+    }
+
+    return "";
   },
 
   escapeHtml(value) {
