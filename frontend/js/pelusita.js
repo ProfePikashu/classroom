@@ -1,121 +1,246 @@
 (function(){
   const ASSET_BASE = "media/pelusita/";
+  const SOUND_BASE = "media/sounds/";
   const EXAMPRO_URL = "https://exampro-backend-1n6d.onrender.com/login";
 
+  /*
+    Estados visuales de Pelusita
+    --------------------------------
+    pelusita-state1 = standby / idle
+    pelusita-state2 = saludo / welcome
+    pelusita-state3 = pensativa / see
+    pelusita-state4 = festejo / happy
+    pelusita-state5 = alerta / horror
+    pelusita-state6 = entrada / arriving.gif
+  */
+  const PELUSITA_STATES = {
+    "pelusita-state1": {
+      key: "idle",
+      img: ASSET_BASE + "idle.png",
+      anim: "pelusitaFloat 4s ease-in-out infinite",
+      phrases: [
+        "Estoy por acá si necesitás ayuda.",
+        "Classroom listo.",
+        "Tocame cuando quieras consultar algo.",
+        "Te acompaño durante el recorrido."
+      ],
+      // sound: SOUND_BASE + "click.mp3"
+    },
+
+    "pelusita-state2": {
+      key: "welcome",
+      img: ASSET_BASE + "welcome.png",
+      anim: "pelusitaBounce .9s cubic-bezier(.34,1.56,.64,1) forwards",
+      phrases: [
+        "¡Hola! Soy Pelusita.",
+        "Bienvenido al Classroom.",
+        "Estoy lista para ayudarte.",
+        "Vamos paso a paso."
+      ],
+      // sound: SOUND_BASE + "duck.mp3"
+    },
+
+    "pelusita-state3": {
+      key: "see",
+      img: ASSET_BASE + "see.png",
+      anim: "pelusitaWobble .8s ease forwards",
+      phrases: [
+        "A ver...",
+        "Revisemos esto.",
+        "Te explico.",
+        "Miremos bien la información."
+      ],
+      // sound: SOUND_BASE + "close.mp3"
+    },
+
+    "pelusita-state4": {
+      key: "happy",
+      img: ASSET_BASE + "happy.png",
+      anim: "pelusitaBounce .8s cubic-bezier(.34,1.56,.64,1) forwards",
+      phrases: [
+        "¡Perfecto!",
+        "¡Bien ahí!",
+        "Listo, seguimos.",
+        "Eso salió bien."
+      ],
+      // sound: SOUND_BASE + "click.mp3"
+    },
+
+    "pelusita-state5": {
+      key: "horror",
+      img: ASSET_BASE + "horror.png",
+      anim: "pelusitaShake .6s ease forwards",
+      phrases: [
+        "Algo no salió como esperaba.",
+        "Revisemos ese dato.",
+        "Puede faltar información.",
+        "Ojo, acá hay que verificar."
+      ],
+      // sound: SOUND_BASE + "error-simple.mp3"
+    },
+
+    "pelusita-state6": {
+      key: "arriving",
+      img: ASSET_BASE + "arriving.gif",
+      anim: "none",
+      phrases: [
+        "Llegué.",
+        "Pelusita online."
+      ],
+      // sound: SOUND_BASE + "duck.mp3"
+    }
+  };
+
+  const STATE_ALIAS = {
+    idle: "pelusita-state1",
+    standby: "pelusita-state1",
+    welcome: "pelusita-state2",
+    wave: "pelusita-state2",
+    see: "pelusita-state3",
+    think: "pelusita-state3",
+    thinking: "pelusita-state3",
+    happy: "pelusita-state4",
+    success: "pelusita-state4",
+    horror: "pelusita-state5",
+    error: "pelusita-state5",
+    alert: "pelusita-state5",
+    arriving: "pelusita-state6"
+  };
+
   const IMGS = {
-    idle: ASSET_BASE + "idle.png",
-    happy: ASSET_BASE + "happy.png",
-    horror: ASSET_BASE + "horror.png",
-    see: ASSET_BASE + "see.png",
+    idle: PELUSITA_STATES["pelusita-state1"].img,
+    welcome: PELUSITA_STATES["pelusita-state2"].img,
     wave: ASSET_BASE + "wave.png",
-    welcome: ASSET_BASE + "welcome.png",
-    arriving: ASSET_BASE + "arriving.gif"
+    see: PELUSITA_STATES["pelusita-state3"].img,
+    happy: PELUSITA_STATES["pelusita-state4"].img,
+    horror: PELUSITA_STATES["pelusita-state5"].img,
+    arriving: PELUSITA_STATES["pelusita-state6"].img
   };
 
-  const PHRASES = {
-    idle:[
-      "nya~ 🐱",
-      "¿me llamaste? 👀",
-      "*se acomoda* 🐾",
-      "Classroom vigilado, nya~",
-      "no cierres esta pestaña ♡"
-    ],
-    happy:[
-      "¡purrrfecto! ♡",
-      "NYA NYA!! 🎉",
-      "¡bien ahí! 🐾"
-    ],
-    horror:[
-      "NYA?! 😱",
-      "*se eriza*",
-      "algo no cargó, nya..."
-    ],
-    see:[
-      "hmm... purr...",
-      "a ver, nya...",
-      "te explico ♡"
-    ],
-    wave:[
-      "¡NYA! ♡ ¿en qué te ayudo?",
-      "¡hola hola! 🐾",
-      "*agita la patita* nya~"
-    ],
-    welcome:[
-      "¡NYA NYA! ♡",
-      "¡te estaba esperando!",
-      "hola~ 🐱"
-    ]
+  const PAGE_COPY = {
+    home: {
+      intro:
+`¡Hola! Soy Pelusita.
+
+Estoy para guiarte dentro del Classroom. Desde acá podés entrar a tus cursos, revisar materiales, ver avisos y acceder a ExamPro cuando corresponda.`,
+
+      menu: [
+        { text:"📚 Ver cursos", action: () => openUrl("cursos.html"), cls:"pelusita-opt-primary", state:"pelusita-state3" },
+        { text:"📝 Ir a ExamPro", action: () => openExamPro(), cls:"pelusita-opt-primary", state:"pelusita-state4" },
+        { text:"📣 ¿Qué aparecerá en Actividad reciente?", action: () => showCustomMsg("newsletter") },
+        { text:"🆘 Necesito ayuda", action: () => showCustomMsg("soporte") },
+        { text:"Cerrar", action: () => closeDialog() }
+      ]
+    },
+
+    exampro: {
+      intro:
+`Soy Pelusita.
+
+En esta pantalla te dejo el acceso a ExamPro. Se abre en una pestaña nueva para que puedas ver exámenes, recuperatorios y devoluciones sin cerrar el Classroom.`,
+
+      menu: [
+        { text:"🚀 Abrir ExamPro", action: () => openExamPro(), cls:"pelusita-opt-primary", state:"pelusita-state4" },
+        { text:"📘 ¿Para qué sirve esta pantalla?", action: () => showCustomMsg("que_es") },
+        { text:"📝 ¿Cómo veo mis exámenes?", action: () => showCustomMsg("examenes") },
+        { text:"📬 ¿Dónde veo devoluciones?", action: () => showCustomMsg("devoluciones") },
+        { text:"🔐 ¿Por qué se abre aparte?", action: () => showCustomMsg("seguridad") },
+        { text:"🆘 Contactar al profe", action: () => showCustomMsg("soporte") },
+        { text:"Cerrar", action: () => closeDialog() }
+      ]
+    },
+
+    generic: {
+      intro:
+`Soy Pelusita.
+
+Estoy para ayudarte a moverte por el Classroom y encontrar rápido cursos, materiales, avisos y accesos importantes.`,
+
+      menu: [
+        { text:"📚 Ver cursos", action: () => openUrl("cursos.html"), cls:"pelusita-opt-primary", state:"pelusita-state3" },
+        { text:"📝 Ir a ExamPro", action: () => openExamPro(), cls:"pelusita-opt-primary", state:"pelusita-state4" },
+        { text:"🆘 Necesito ayuda", action: () => showCustomMsg("soporte") },
+        { text:"Cerrar", action: () => closeDialog() }
+      ]
+    }
   };
 
-  const ANIMS = {
-    idle: "pelusitaFloat 4s ease-in-out infinite",
-    happy: "pelusitaBounce .8s cubic-bezier(.34,1.56,.64,1) forwards",
-    horror: "pelusitaShake .6s ease forwards",
-    see: "pelusitaWobble .8s ease forwards",
-    wave: "pelusitaWave 1s ease-in-out forwards",
-    welcome: "pelusitaBounce .9s cubic-bezier(.34,1.56,.64,1) forwards"
-  };
+  const MESSAGES = {
+    newsletter: {
+      state: "pelusita-state3",
+      msg:
+`📣 ACTIVIDAD RECIENTE
 
-  const MENUS = {
-    main: [
-      { text:"🚀 Abrir ExamPro", action: () => openExamPro(), cls:"pelusita-opt-primary" },
-      { text:"📘 ¿Para qué sirve esta pantalla?", action: () => showMsg("que_es") },
-      { text:"📝 ¿Cómo veo mis exámenes?", action: () => showMsg("examenes") },
-      { text:"📬 ¿Dónde veo devoluciones?", action: () => showMsg("devoluciones") },
-      { text:"🔐 ¿Por qué se abre aparte?", action: () => showMsg("seguridad") },
-      { text:"🆘 Contactar al profe", action: () => showMsg("soporte") },
-      { text:"¡nya, gracias! ♡", action: () => closeDialog() }
-    ],
+Más adelante este bloque va a funcionar como un panel de novedades: anuncios del curso, recordatorios, accesos importantes y avisos de ExamPro.
+
+Por ahora queda preparado como sección "Próximamente".`,
+      opts: backOpts()
+    },
+
     que_es: {
+      state: "pelusita-state3",
       msg:
 `📘 CLASSROOM + EXAMPRO
 
-Este Classroom queda abierto para que puedas volver a tus cursos, clases, materiales y avisos.
+Classroom concentra el recorrido del curso: clases, materiales, avisos y accesos.
 
-ExamPro se abre en otra pestaña para rendir, consultar resultados o leer devoluciones sin romper la sesión. nya~`,
+ExamPro se usa para consultar evaluaciones, recuperatorios y devoluciones corregidas.`,
       opts: backOpts()
     },
+
     examenes: {
+      state: "pelusita-state3",
       msg:
 `📝 EXÁMENES
 
 Entrá a ExamPro con tu usuario de Twitch y DNI.
 
-Ahí vas a ver los cursos/exámenes habilitados para tu alumno. Si todavía no aparece nada, puede que el profe aún no lo haya habilitado o que tus datos no coincidan.`,
+Ahí vas a ver las evaluaciones o recuperatorios que estén habilitados para tu alumno.`,
       opts: [
-        { text:"🚀 Abrir ExamPro", action: () => openExamPro(), cls:"pelusita-opt-primary" },
+        { text:"🚀 Abrir ExamPro", action: () => openExamPro(), cls:"pelusita-opt-primary", state:"pelusita-state4" },
         { text:"← Volver", action: () => openMain() }
       ]
     },
+
     devoluciones: {
+      state: "pelusita-state3",
       msg:
 `📬 DEVOLUCIONES
 
-Cuando el profe corrija tu examen o recuperatorio, la devolución se consulta desde ExamPro.
+Cuando haya una corrección disponible, vas a poder verla desde ExamPro.
 
-No cierres esta pestaña del Classroom: abrí ExamPro aparte y después volvés acá cuando termines. ♡`,
+El Classroom queda abierto para que puedas volver al curso después.`,
       opts: [
-        { text:"🚀 Abrir ExamPro", action: () => openExamPro(), cls:"pelusita-opt-primary" },
+        { text:"🚀 Abrir ExamPro", action: () => openExamPro(), cls:"pelusita-opt-primary", state:"pelusita-state4" },
         { text:"← Volver", action: () => openMain() }
       ]
     },
+
     seguridad: {
+      state: "pelusita-state3",
       msg:
 `🔐 ¿POR QUÉ SE ABRE APARTE?
 
-Porque dentro de un iframe algunas sesiones pueden fallar por cookies y seguridad del navegador.
+ExamPro se abre en una pestaña nueva para evitar problemas de sesión, cookies o autenticación dentro del Classroom.
 
-Abrir ExamPro en una pestaña nueva evita el error de "No autenticado" y mantiene abierto este Classroom. Pelusita aprueba esta decisión técnica. 🐾`,
+Así se mantiene más estable y no se pierde el recorrido del curso.`,
       opts: backOpts()
     },
-    soporte: {
-      msg:
-`🆘 CONTACTAR AL PROFE
 
-Si no podés entrar, no te aparecen los exámenes o tus datos no coinciden, contactá al profe con tu nombre, DNI y usuario de Twitch.`,
+    soporte: {
+      state: "pelusita-state3",
+      msg:
+`🆘 SOPORTE
+
+Si algo no aparece, tus datos no coinciden o no podés ingresar, contactá al profe indicando:
+
+• Nombre completo
+• DNI
+• Usuario de Twitch
+• Qué problema estás viendo`,
       opts: [
-        { text:"💬 WhatsApp", action: () => window.open("https://wa.me/5492236689580", "_blank", "noopener,noreferrer"), cls:"pelusita-opt-wa" },
-        { text:"✉️ Email", action: () => window.open("mailto:acoria@frba.utn.edu.ar", "_blank", "noopener,noreferrer"), cls:"pelusita-opt-mail" },
+        { text:"💬 WhatsApp", action: () => openUrl("https://wa.me/5492236689580", true), cls:"pelusita-opt-wa", state:"pelusita-state4" },
+        { text:"✉️ Email", action: () => openUrl("mailto:acoria@frba.utn.edu.ar", true), cls:"pelusita-opt-mail", state:"pelusita-state4" },
         { text:"← Volver", action: () => openMain() }
       ]
     }
@@ -124,6 +249,21 @@ Si no podés entrar, no te aparecen los exámenes o tus datos no coinciden, cont
   let open = false;
   let bubbleTimer = null;
   let idleTimer = null;
+
+  function getPageContext(){
+    if(document.body.classList.contains("page-home")) return "home";
+    if(document.body.classList.contains("page-exampro")) return "exampro";
+
+    const file = (location.pathname.split("/").pop() || "").toLowerCase();
+    if(file === "index.html" || file === "") return "home";
+    if(file === "exampro.html") return "exampro";
+
+    return "generic";
+  }
+
+  function resolveState(state){
+    return PELUSITA_STATES[state] ? state : (STATE_ALIAS[state] || "pelusita-state1");
+  }
 
   function backOpts(){
     return [{ text:"← Volver", action: () => openMain() }];
@@ -135,6 +275,23 @@ Si no podés entrar, no te aparecen los exámenes o tus datos no coinciden, cont
 
   function el(id){
     return document.getElementById(id);
+  }
+
+  function playPelusitaSound(state){
+    const stateKey = resolveState(state);
+    const cfg = PELUSITA_STATES[stateKey];
+    if(!cfg || !cfg.sound) return;
+
+    /*
+      Sonidos preparados para activar después.
+      Para habilitarlos, descomentá este bloque.
+
+      try {
+        const audio = new Audio(cfg.sound);
+        audio.volume = 0.35;
+        audio.play().catch(() => {});
+      } catch(e) {}
+    */
   }
 
   function build(){
@@ -151,7 +308,9 @@ Si no podés entrar, no te aparecen los exámenes o tus datos no coinciden, cont
           <div id="pelusitaDialogMsg" class="pelusita-dialog-msg"></div>
           <div id="pelusitaDialogOpts" class="pelusita-dialog-opts"></div>
         </div>
+
         <div id="pelusitaBubble" class="pelusita-bubble"></div>
+
         <div id="pelusitaChar" class="pelusita-char" title="Pelusita — click para ayuda">
           <img id="pelusitaImg" class="pelusita-img" src="${IMGS.idle}" alt="Pelusita">
         </div>
@@ -173,10 +332,15 @@ Si no podés entrar, no te aparecen los exámenes o tus datos no coinciden, cont
   function setImg(state){
     const img = el("pelusitaImg");
     if(!img) return;
-    const src = IMGS[state] || IMGS.idle;
+
+    const stateKey = resolveState(state);
+    const cfg = PELUSITA_STATES[stateKey];
+    const src = cfg?.img || IMGS.idle;
+
     if(img.getAttribute("src") === src) return;
 
     img.classList.add("switching");
+
     setTimeout(() => {
       img.setAttribute("src", src);
       img.classList.remove("switching");
@@ -188,24 +352,33 @@ Si no podés entrar, no te aparecen los exámenes o tus datos no coinciden, cont
     const bubble = el("pelusitaBubble");
     if(!char || !bubble) return;
 
+    const stateKey = resolveState(state);
+    const cfg = PELUSITA_STATES[stateKey] || PELUSITA_STATES["pelusita-state1"];
+
     clearTimeout(bubbleTimer);
     clearTimeout(idleTimer);
 
-    setImg(state);
+    setImg(stateKey);
+    playPelusitaSound(stateKey);
+
+    char.dataset.pelusitaState = stateKey;
     char.style.animation = "none";
     void char.offsetHeight;
-    char.style.animation = ANIMS[state] || ANIMS.idle;
+    char.style.animation = cfg.anim || PELUSITA_STATES["pelusita-state1"].anim;
 
-    if(state !== "idle"){
-      bubble.textContent = rnd(PHRASES[state] || PHRASES.idle);
+    if(stateKey !== "pelusita-state1"){
+      bubble.textContent = rnd(cfg.phrases || PELUSITA_STATES["pelusita-state1"].phrases);
       bubble.classList.add("show");
-      bubbleTimer = setTimeout(() => setState("idle"), 3500);
+      bubbleTimer = setTimeout(() => setState("pelusita-state1"), 3500);
     }else{
       bubble.classList.remove("show");
+
       idleTimer = setTimeout(function tick(){
         if(open) return;
-        bubble.textContent = rnd(PHRASES.idle);
+
+        bubble.textContent = rnd(PELUSITA_STATES["pelusita-state1"].phrases);
         bubble.classList.add("show");
+
         setTimeout(() => bubble.classList.remove("show"), 3000);
         idleTimer = setTimeout(tick, 14000);
       }, 7000);
@@ -223,42 +396,47 @@ Si no podés entrar, no te aparecen los exámenes o tus datos no coinciden, cont
     box.querySelectorAll(".pelusita-opt").forEach(btn => {
       btn.addEventListener("click", function(ev){
         ev.stopPropagation();
+
         const i = parseInt(btn.getAttribute("data-pelusita-opt"), 10);
-        opts[i].action();
+        const opt = opts[i];
+
+        if(opt?.state) setState(opt.state);
+        opt.action();
       });
     });
   }
 
   function openMain(){
-    el("pelusitaDialogMsg").textContent =
-`¡NYA! ♡ Soy Pelusita~
+    const page = PAGE_COPY[getPageContext()] || PAGE_COPY.generic;
 
-Te acompaño en el Classroom para que no te pierdas entre cursos, exámenes y devoluciones. 🐾`;
+    el("pelusitaDialogMsg").textContent = page.intro;
+    renderOptions(page.menu);
 
-    renderOptions(MENUS.main);
     el("pelusitaDialog").classList.add("show");
     open = true;
-    setImg("wave");
-    setState("wave");
+
+    setState("pelusita-state2");
   }
 
-  function showMsg(key){
-    const data = MENUS[key];
+  function showCustomMsg(key){
+    const data = MESSAGES[key];
     if(!data) return;
 
     el("pelusitaDialogMsg").textContent = data.msg;
     renderOptions(data.opts || backOpts());
+
     el("pelusitaDialog").classList.add("show");
     open = true;
-    setImg("see");
-    setState("see");
+
+    setState(data.state || "pelusita-state3");
   }
 
   function closeDialog(){
     const dlg = el("pelusitaDialog");
     if(dlg) dlg.classList.remove("show");
+
     open = false;
-    setState("idle");
+    setState("pelusita-state1");
   }
 
   function toggleDialog(){
@@ -267,12 +445,21 @@ Te acompaño en el Classroom para que no te pierdas entre cursos, exámenes y de
       return;
     }
 
-    setState("welcome");
+    setState("pelusita-state2");
     setTimeout(openMain, 260);
   }
 
+  function openUrl(url, blank=false){
+    if(blank || /^https?:|^mailto:/.test(url)){
+      window.open(url, "_blank", "noopener,noreferrer");
+      return;
+    }
+
+    window.location.href = url;
+  }
+
   function openExamPro(){
-    setState("happy");
+    setState("pelusita-state4");
     window.open(EXAMPRO_URL, "_blank", "noopener,noreferrer");
   }
 
@@ -280,13 +467,18 @@ Te acompaño en el Classroom para que no te pierdas entre cursos, exámenes y de
     const wrap = el("pelusitaWrapper");
     const img = el("pelusitaImg");
     const char = el("pelusitaChar");
+
     if(!wrap || !img || !char) return;
 
     wrap.style.transition = "none";
     wrap.style.transform = "translateY(160px)";
     wrap.style.opacity = "0";
-    img.src = IMGS.arriving;
+
+    img.src = PELUSITA_STATES["pelusita-state6"].img;
+    char.dataset.pelusitaState = "pelusita-state6";
     char.style.animation = "none";
+
+    playPelusitaSound("pelusita-state6");
 
     requestAnimationFrame(() => requestAnimationFrame(() => {
       wrap.style.transition = "transform .55s cubic-bezier(.34,1.56,.64,1),opacity .4s ease";
@@ -298,7 +490,7 @@ Te acompaño en el Classroom para que no te pierdas entre cursos, exámenes y de
       wrap.style.transition = "";
       wrap.style.transform = "";
       wrap.style.opacity = "";
-      setState("idle");
+      setState("pelusita-state1");
     }, 2800);
   }
 
@@ -306,8 +498,9 @@ Te acompaño en el Classroom para que no te pierdas entre cursos, exámenes y de
     open: openMain,
     close: closeDialog,
     state: setState,
-    msg: showMsg,
-    openExamPro
+    msg: showCustomMsg,
+    openExamPro,
+    states: PELUSITA_STATES
   };
 
   document.addEventListener("DOMContentLoaded", build);
