@@ -538,6 +538,207 @@ const ClassroomStudents = {
     `;
   },
 
+  getSortButton(key, label) {
+    const active = this.sortKey === key;
+    const icon = active
+      ? this.sortDirection === "asc"
+        ? "fa-arrow-up-a-z"
+        : "fa-arrow-down-z-a"
+      : "fa-sort";
+
+    return `
+      <button class="students-sort-btn ${active ? "active" : ""}" type="button" data-students-sort="${key}" title="Ordenar ${this.escapeHtml(label)}">
+        <span>${this.escapeHtml(label)}</span>
+        <i class="fa-solid ${icon}"></i>
+      </button>
+    `;
+  },
+
+  toggleSort(key) {
+    if (!key) return;
+
+    if (this.sortKey === key) {
+      this.sortDirection = this.sortDirection === "asc" ? "desc" : "asc";
+    } else {
+      this.sortKey = key;
+      this.sortDirection = "asc";
+    }
+
+    this.renderTable();
+  },
+
+  getSortedStudents(items) {
+    const direction = this.sortDirection === "desc" ? -1 : 1;
+    const key = this.sortKey || "name";
+
+    return [...items].sort((a, b) => {
+      const valueA = this.getSortValue(a, key);
+      const valueB = this.getSortValue(b, key);
+
+      if (key === "dni") {
+        const numA = Number(String(valueA).replace(/\D+/g, "")) || 0;
+        const numB = Number(String(valueB).replace(/\D+/g, "")) || 0;
+        return (numA - numB) * direction;
+      }
+
+      return String(valueA).localeCompare(String(valueB), "es", {
+        sensitivity: "base",
+        numeric: true,
+      }) * direction;
+    });
+  },
+
+  getSortValue(student, key) {
+    if (key === "dni") return student.dni || student.DNI || "";
+    if (key === "twitch") return student.twitch || "";
+    if (key === "cursada") return student.cursada || "";
+    return student.full_name || student.nombre || student.display_name || student.twitch || "";
+  },
+
+  getStudentSourceDetail(student, source, dni, fichaId) {
+    if (source === "Planilla 2025") {
+      return dni && dni !== "—" ? `Planilla 2025 · DNI ${dni}` : "Planilla 2025";
+    }
+
+    if (source === "ExamPro + Planilla 2025") {
+      return dni && dni !== "—" ? `ExamPro + Planilla · DNI ${dni}` : "ExamPro + Planilla";
+    }
+
+    return fichaId ? `ExamPro · ID ${fichaId}` : "ExamPro";
+  },
+
+  openProfileByIndex(index) {
+    const student = this.renderedStudents[index] || this.students[index];
+
+    if (!student) return;
+
+    this.ensureProfileModal();
+
+    const name = student.full_name || student.nombre || student.display_name || student.twitch || "Alumno sin nombre";
+    const twitch = student.twitch ? `@${String(student.twitch).replace(/^@/, "")}` : "—";
+    const dni = student.dni || "—";
+    const email = student.email || "";
+    const phone = student.telefono || "";
+    const cursada = student.cursada || "AyRPC 2025";
+    const source = student.source || this.getSourceLabel();
+    const fichaId = student.exampro?.id || student.id || dni || "";
+    const estado = this.formatStatus(student.apt_examen || student.estado || "");
+    const examStatus = this.getExamStatus(student);
+    const recoveryStatus = this.getRecoveryStatus(student);
+    const mailHref = email ? `mailto:${encodeURIComponent(email)}` : "";
+    const whatsappHref = this.getWhatsappHref(phone);
+
+    this.profileModalBody.innerHTML = `
+      <div class="student-profile-card-floating">
+        <div class="student-profile-top">
+          <div class="student-profile-avatar">
+            <i class="fa-solid fa-user-graduate"></i>
+          </div>
+
+          <div>
+            <p class="eyebrow">${this.escapeHtml(source)}</p>
+            <h3>${this.escapeHtml(name)}</h3>
+            <p>${this.escapeHtml(twitch)} · DNI ${this.escapeHtml(dni)}</p>
+          </div>
+        </div>
+
+        <div class="student-profile-grid">
+          ${this.profileField("Teléfono", phone || "—", "fa-phone")}
+          ${this.profileField("Correo", email || "—", "fa-envelope")}
+          ${this.profileField("Cursada", cursada, "fa-book-open-reader")}
+          ${this.profileField("Estado", estado.label, estado.icon)}
+          ${this.profileField("Examen", examStatus.label, examStatus.icon)}
+          ${this.profileField("Recup.", recoveryStatus.label, recoveryStatus.icon)}
+        </div>
+
+        <div class="student-profile-actions">
+          ${email ? `
+            <a class="btn btn-outline btn-table-contact" href="${mailHref}">
+              <i class="fa-solid fa-envelope"></i>
+              <span>Enviar mail</span>
+            </a>
+          ` : `
+            <span class="btn btn-outline btn-table-disabled">
+              <i class="fa-solid fa-envelope"></i>
+              <span>Sin mail</span>
+            </span>
+          `}
+
+          ${whatsappHref ? `
+            <a class="btn btn-outline btn-table-contact" href="${whatsappHref}" target="_blank" rel="noopener">
+              <i class="fa-brands fa-whatsapp"></i>
+              <span>WhatsApp</span>
+            </a>
+          ` : `
+            <span class="btn btn-outline btn-table-disabled">
+              <i class="fa-brands fa-whatsapp"></i>
+              <span>Sin WhatsApp</span>
+            </span>
+          `}
+        </div>
+
+        <small class="student-profile-source">${this.escapeHtml(this.getStudentSourceDetail(student, source, dni, fichaId))}</small>
+      </div>
+    `;
+
+    this.profileModal.classList.add("show");
+    document.body.classList.add("student-profile-open");
+  },
+
+  profileField(label, value, icon) {
+    return `
+      <div class="student-profile-field">
+        <span>
+          <i class="fa-solid ${this.escapeHtml(icon)}"></i>
+          ${this.escapeHtml(label)}
+        </span>
+        <strong>${this.escapeHtml(value || "—")}</strong>
+      </div>
+    `;
+  },
+
+  ensureProfileModal() {
+    if (this.profileModal) return;
+
+    const modal = document.createElement("div");
+    modal.className = "student-profile-modal";
+    modal.innerHTML = `
+      <div class="student-profile-backdrop" data-student-profile-close></div>
+
+      <section class="student-profile-dialog" role="dialog" aria-modal="true" aria-label="Ficha de alumno">
+        <button class="student-profile-close" type="button" data-student-profile-close aria-label="Cerrar ficha">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+
+        <div class="student-profile-body"></div>
+      </section>
+    `;
+
+    document.body.appendChild(modal);
+
+    this.profileModal = modal;
+    this.profileModalBody = modal.querySelector(".student-profile-body");
+
+    modal.addEventListener("click", (event) => {
+      if (event.target.closest("[data-student-profile-close]")) {
+        this.closeProfile();
+      }
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && this.profileModal?.classList.contains("show")) {
+        this.closeProfile();
+      }
+    });
+  },
+
+  closeProfile() {
+    if (!this.profileModal) return;
+
+    this.profileModal.classList.remove("show");
+    document.body.classList.remove("student-profile-open");
+  },
+
   formatStatus(value) {
     const clean = String(value || "").trim().toLowerCase();
 
