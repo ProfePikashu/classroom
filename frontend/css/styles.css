@@ -6828,3 +6828,89 @@ body.student-profile-open {
     padding: 1rem;
   }
 }
+
+/* === SIDEBAR ADMIN AREA POLISH === */
+.sidebar .teacher-admin-zone,
+.sidebar .staff-only.teacher-admin-zone,
+.sidebar .admin-zone,
+.teacher-admin-zone {
+  position: relative;
+  margin: 1rem 0 0.65rem;
+  padding: 0.8rem;
+  border: 1px solid rgba(139, 92, 246, 0.18);
+  border-radius: 20px;
+  background:
+    radial-gradient(circle at top left, rgba(139, 92, 246, 0.14), transparent 38%),
+    rgba(15, 23, 42, 0.38);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035);
+}
+
+.sidebar .teacher-admin-zone::before,
+.sidebar .staff-only.teacher-admin-zone::before,
+.sidebar .admin-zone::before,
+.teacher-admin-zone::before {
+  content: "ADMINISTRAR";
+  display: block;
+  margin: 0 0 0.55rem;
+  padding: 0 0.25rem;
+  color: var(--text-muted);
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.sidebar .teacher-admin-zone .sidebar-section-title,
+.sidebar .staff-only.teacher-admin-zone .sidebar-section-title,
+.teacher-admin-zone .sidebar-section-title {
+  display: none;
+}
+
+.sidebar .teacher-admin-zone .nav-item,
+.sidebar .staff-only.teacher-admin-zone .nav-item,
+.sidebar .admin-zone .nav-item,
+.teacher-admin-zone .nav-item {
+  min-height: 42px;
+  margin: 0.28rem 0;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.sidebar .teacher-admin-zone .nav-item:hover,
+.sidebar .staff-only.teacher-admin-zone .nav-item:hover,
+.sidebar .admin-zone .nav-item:hover,
+.teacher-admin-zone .nav-item:hover {
+  background: rgba(139, 92, 246, 0.14);
+  border-color: rgba(139, 92, 246, 0.24);
+  transform: translateX(2px);
+}
+
+.sidebar .teacher-admin-zone .nav-item i,
+.sidebar .staff-only.teacher-admin-zone .nav-item i,
+.sidebar .admin-zone .nav-item i,
+.teacher-admin-zone .nav-item i {
+  color: var(--accent);
+}
+
+.sidebar-footer,
+.sidebar-user,
+.user-card {
+  margin-top: 0.8rem;
+}
+
+@media (max-height: 780px) {
+  .sidebar .teacher-admin-zone,
+  .sidebar .staff-only.teacher-admin-zone,
+  .sidebar .admin-zone,
+  .teacher-admin-zone {
+    padding: 0.65rem;
+    border-radius: 16px;
+  }
+
+  .sidebar .teacher-admin-zone .nav-item,
+  .sidebar .staff-only.teacher-admin-zone .nav-item,
+  .sidebar .admin-zone .nav-item,
+  .teacher-admin-zone .nav-item {
+    min-height: 38px;
+  }
+}
