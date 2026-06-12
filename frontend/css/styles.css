@@ -6640,3 +6640,191 @@ body.role-moderator .sidebar-submenu .teacher-only {
     width: 100%;
   }
 }
+
+/* === ALUMNOS COMPACT TABLE + FLOATING PROFILE === */
+.students-table-wrap.compact {
+  overflow-x: auto;
+}
+
+.students-table-compact th,
+.students-table-compact td {
+  white-space: nowrap;
+}
+
+.students-sort-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: 900;
+  cursor: pointer;
+  padding: 0;
+}
+
+.students-sort-btn i {
+  opacity: 0.55;
+  font-size: 0.78rem;
+}
+
+.students-sort-btn.active i {
+  opacity: 1;
+  color: var(--accent);
+}
+
+.student-profile-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+}
+
+.student-profile-modal.show {
+  display: flex;
+}
+
+.student-profile-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(2, 6, 23, 0.72);
+  backdrop-filter: blur(10px);
+}
+
+.student-profile-dialog {
+  position: relative;
+  width: min(620px, 100%);
+  max-height: min(760px, 92vh);
+  overflow: auto;
+  border: 1px solid var(--border-color);
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at top left, rgba(139, 92, 246, 0.22), transparent 34%),
+    var(--surface-main);
+  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.45);
+  padding: 1.35rem;
+}
+
+.student-profile-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  background: var(--surface-soft);
+  color: var(--text-main);
+  cursor: pointer;
+}
+
+.student-profile-top {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  padding-right: 2.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.student-profile-avatar {
+  width: 66px;
+  height: 66px;
+  flex: 0 0 auto;
+  border-radius: 22px;
+  display: grid;
+  place-items: center;
+  background: rgba(139, 92, 246, 0.16);
+  border: 1px solid rgba(139, 92, 246, 0.28);
+  color: var(--accent);
+  font-size: 1.55rem;
+}
+
+.student-profile-top h3 {
+  margin: 0.1rem 0 0.25rem;
+  font-size: clamp(1.25rem, 3vw, 1.75rem);
+}
+
+.student-profile-top p {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.student-profile-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.student-profile-field {
+  border: 1px solid var(--border-color);
+  border-radius: 18px;
+  background: rgba(15, 23, 42, 0.42);
+  padding: 0.9rem;
+  min-width: 0;
+}
+
+.student-profile-field span {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 0.35rem;
+}
+
+.student-profile-field strong {
+  display: block;
+  word-break: break-word;
+}
+
+.student-profile-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-top: 1rem;
+}
+
+.student-profile-source {
+  display: block;
+  margin-top: 1rem;
+  color: var(--text-muted);
+}
+
+body.student-profile-open {
+  overflow: hidden;
+}
+
+/* === SIDEBAR ADMIN POLISH === */
+.sidebar {
+  overflow-y: auto;
+}
+
+.teacher-admin-zone,
+.staff-only.teacher-admin-zone,
+.sidebar .teacher-admin-zone {
+  margin-top: 0.85rem;
+  padding-bottom: 1rem;
+}
+
+.teacher-admin-zone .nav-item,
+.staff-only.teacher-admin-zone .nav-item {
+  margin-bottom: 0.35rem;
+}
+
+@media (max-width: 760px) {
+  .student-profile-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .student-profile-dialog {
+    border-radius: 22px;
+    padding: 1rem;
+  }
+}

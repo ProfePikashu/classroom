@@ -21,7 +21,10 @@ const ClassroomStudents = {
   loading: false,
   currentSearch: "",
   currentSource: "exampro",
+  sortKey: "name",
+  sortDirection: "asc",
   students: [],
+  renderedStudents: [],
 
   sourceLabels: {
     exampro: "ExamPro",
@@ -48,6 +51,24 @@ const ClassroomStudents = {
   },
 
   bindEvents() {
+    if (this.grid && !this.grid.dataset.studentsEventsBound) {
+      this.grid.dataset.studentsEventsBound = "1";
+
+      this.grid.addEventListener("click", (event) => {
+        const sortButton = event.target.closest("[data-students-sort]");
+        if (sortButton) {
+          this.toggleSort(sortButton.dataset.studentsSort);
+          return;
+        }
+
+        const profileButton = event.target.closest("[data-student-profile]");
+        if (profileButton) {
+          this.openProfileByIndex(Number(profileButton.dataset.studentProfile));
+          return;
+        }
+      });
+    }
+
     if (this.refreshBtn) {
       this.refreshBtn.addEventListener("click", () => {
         this.loadStudents(true);
@@ -440,29 +461,26 @@ const ClassroomStudents = {
     if (!this.grid) return;
 
     if (!this.students.length) {
+      this.renderedStudents = [];
       this.grid.innerHTML = "";
       return;
     }
 
-    const rows = this.students
+    this.renderedStudents = this.getSortedStudents(this.students);
+
+    const rows = this.renderedStudents
       .map((student, index) => this.createStudentRow(student, index))
       .join("");
 
     this.grid.innerHTML = `
-      <div class="students-table-wrap">
-        <table class="students-table">
+      <div class="students-table-wrap compact">
+        <table class="students-table students-table-compact">
           <thead>
             <tr>
-              <th>#</th>
-              <th>Alumno</th>
-              <th>DNI</th>
-              <th>Twitch</th>
-              <th>Teléfono</th>
-              <th>Correo</th>
-              <th>Cursada</th>
-              <th>Estado</th>
-              <th>Examen</th>
-              <th>Recup.</th>
+              <th>${this.getSortButton("name", "Alumno")}</th>
+              <th>${this.getSortButton("dni", "DNI")}</th>
+              <th>${this.getSortButton("twitch", "Twitch")}</th>
+              <th>${this.getSortButton("cursada", "Cursada")}</th>
               <th>Acciones</th>
             </tr>
           </thead>
@@ -478,22 +496,14 @@ const ClassroomStudents = {
   createStudentRow(student, index) {
     const name = student.full_name || student.nombre || student.display_name || student.twitch || "Alumno sin nombre";
     const twitch = student.twitch ? `@${String(student.twitch).replace(/^@/, "")}` : "—";
-    const email = student.email || "";
-    const phone = student.telefono || "";
     const dni = student.dni || "—";
     const cursada = student.cursada || "AyRPC 2025";
     const source = student.source || this.getSourceLabel();
-    const estado = this.formatStatus(student.apt_examen || student.estado || "");
-    const examStatus = this.getExamStatus(student);
-    const recoveryStatus = this.getRecoveryStatus(student);
-    const mailHref = email ? `mailto:${encodeURIComponent(email)}` : "";
-    const whatsappHref = this.getWhatsappHref(phone);
     const fichaId = student.exampro?.id || student.id || dni || "";
+    const sourceDetail = this.getStudentSourceDetail(student, source, dni, fichaId);
 
     return `
       <tr>
-        <td class="students-table-index">${index + 1}</td>
-
         <td class="students-table-name-cell">
           <div class="students-table-student">
             <div class="student-table-avatar">
@@ -502,15 +512,13 @@ const ClassroomStudents = {
 
             <div>
               <strong>${this.escapeHtml(name)}</strong>
-              <small>${this.escapeHtml(source)} · ID: ${this.escapeHtml(fichaId || "—")}</small>
+              <small>${this.escapeHtml(sourceDetail)}</small>
             </div>
           </div>
         </td>
 
         <td class="students-table-dni">${this.escapeHtml(dni)}</td>
         <td class="students-table-twitch">${this.escapeHtml(twitch)}</td>
-        <td class="students-table-phone">${this.escapeHtml(phone || "—")}</td>
-        <td class="students-table-email">${this.escapeHtml(email || "—")}</td>
 
         <td>
           <span class="student-badge course">
@@ -519,56 +527,11 @@ const ClassroomStudents = {
         </td>
 
         <td>
-          <span class="student-badge ${estado.className}">
-            <i class="fa-solid ${estado.icon}"></i>
-            ${this.escapeHtml(estado.label)}
-          </span>
-        </td>
-
-        <td>
-          <span class="student-badge ${examStatus.className}">
-            <i class="fa-solid ${examStatus.icon}"></i>
-            ${this.escapeHtml(examStatus.label)}
-          </span>
-        </td>
-
-        <td>
-          <span class="student-badge ${recoveryStatus.className}">
-            <i class="fa-solid ${recoveryStatus.icon}"></i>
-            ${this.escapeHtml(recoveryStatus.label)}
-          </span>
-        </td>
-
-        <td>
           <div class="students-table-actions">
-            <a class="btn btn-outline btn-table" href="alumno.html?id=${encodeURIComponent(fichaId)}" title="Ver ficha">
+            <button class="btn btn-outline btn-table" type="button" data-student-profile="${index}" title="Ver ficha">
               <i class="fa-solid fa-address-card"></i>
               <span>Ficha</span>
-            </a>
-
-            ${email ? `
-              <a class="btn btn-outline btn-table btn-table-contact" href="${mailHref}" title="Enviar correo">
-                <i class="fa-solid fa-envelope"></i>
-                <span>Mail</span>
-              </a>
-            ` : `
-              <span class="btn btn-outline btn-table btn-table-disabled" title="Sin correo">
-                <i class="fa-solid fa-envelope"></i>
-                <span>Mail</span>
-              </span>
-            `}
-
-            ${whatsappHref ? `
-              <a class="btn btn-outline btn-table btn-table-contact" href="${whatsappHref}" target="_blank" rel="noopener" title="Contactar por WhatsApp">
-                <i class="fa-brands fa-whatsapp"></i>
-                <span>WhatsApp</span>
-              </a>
-            ` : `
-              <span class="btn btn-outline btn-table btn-table-disabled" title="Sin teléfono válido">
-                <i class="fa-brands fa-whatsapp"></i>
-                <span>WhatsApp</span>
-              </span>
-            `}
+            </button>
           </div>
         </td>
       </tr>
@@ -671,7 +634,16 @@ const ClassroomStudents = {
 
     const clean = String(value || "").trim();
 
-    if (!clean || clean.toLowerCase().includes("listo para cargar notas")) {
+    const normalized = clean
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "");
+
+    if (
+      !clean ||
+      normalized.includes("listo para cargar notas") ||
+      normalized.includes("hoja recuperatorios")
+    ) {
       return {
         label: "—",
         className: "muted",
