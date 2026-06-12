@@ -168,8 +168,15 @@ const ClassroomStudents = {
 
     const headers = {};
 
-    if (session?.classroomReadToken) {
-      headers.Authorization = `Bearer ${session.classroomReadToken}`;
+    const token =
+      session?.classroomReadToken ||
+      session?.exampro?.accessToken ||
+      session?.exampro?.token ||
+      session?.accessToken ||
+      "";
+
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
     }
 
     return headers;

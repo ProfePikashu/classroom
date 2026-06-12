@@ -1,0 +1,6 @@
+# Basura temporal de parches / scans locales
+/classroom-roles-scan.txt
+/fix_*.py
+/force_replace_*.py
+/*-scan.txt
+/*-review.txt

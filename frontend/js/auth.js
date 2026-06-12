@@ -316,7 +316,19 @@ const ClassroomAuth = {
           apiBase: EXAMPRO_API_BASE,
           portalUrl: data.portal_url || "/portal",
           studentId: student.id || null,
+          accessToken:
+            data.access_token ||
+            data.token ||
+            data.jwt ||
+            data.session_token ||
+            "",
         },
+        classroomReadToken:
+          data.access_token ||
+          data.token ||
+          data.jwt ||
+          data.session_token ||
+          "",
         createdAt: new Date().toISOString(),
         provider: "exampro-api",
       };
