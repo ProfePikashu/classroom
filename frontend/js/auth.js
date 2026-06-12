@@ -88,8 +88,31 @@ const ClassroomAuth = {
     }) || null;
   },
 
-  buildClassroomModeratorSession(cleanDni, cleanTwitch, assignment) {
+  async buildClassroomModeratorSession(cleanDni, cleanTwitch, assignment) {
     const displayName = assignment?.displayName || assignment?.name || cleanTwitch;
+
+    let classroomReadToken = "";
+
+    try {
+      const response = await fetch(`${EXAMPRO_API_BASE}/api/classroom/moderator-login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          dni: cleanDni,
+          twitch: cleanTwitch,
+        }),
+      });
+
+      const data = await response.json().catch(() => null);
+
+      if (response.ok && data?.ok && data?.access_token) {
+        classroomReadToken = data.access_token;
+      }
+    } catch (error) {
+      classroomReadToken = "";
+    }
 
     const session = {
       dni: cleanDni,
@@ -107,6 +130,7 @@ const ClassroomAuth = {
         "Usuario de Twitch (en caso de no tener, deberá crear uno y usarlo en la cursada)": cleanTwitch,
       },
       exampro: null,
+      classroomReadToken,
       createdAt: new Date().toISOString(),
       provider: "classroom-local-moderator",
     };
@@ -133,7 +157,7 @@ const ClassroomAuth = {
     const classroomModerator = this.findClassroomModerator(cleanDni, cleanTwitch);
 
     if (classroomModerator) {
-      return this.buildClassroomModeratorSession(cleanDni, cleanTwitch, classroomModerator);
+      return await this.buildClassroomModeratorSession(cleanDni, cleanTwitch, classroomModerator);
     }
 
     try {

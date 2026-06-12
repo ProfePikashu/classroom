@@ -1,4 +1,4 @@
-﻿/* ============================================================
+/* ============================================================
    AndyAzhTEC Classroom — alumnos.js
    Listado tabular de alumnos desde ExamPro
    ============================================================ */
@@ -92,7 +92,18 @@ const ClassroomStudents = {
     }
 
     try {
-      const response = await fetch(this.buildUrl(reset));
+      const session =
+        typeof ClassroomAuth !== "undefined"
+          ? ClassroomAuth.getSession()
+          : null;
+
+      const headers = {};
+
+      if (session?.classroomReadToken) {
+        headers.Authorization = `Bearer ${session.classroomReadToken}`;
+      }
+
+      const response = await fetch(this.buildUrl(reset), { headers });
       const data = await response.json();
 
       if (!response.ok || !data.ok) {
