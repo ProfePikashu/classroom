@@ -1,4 +1,4 @@
-﻿/* ════════════════════════════════════════════════════════
+/* ════════════════════════════════════════════════════════
    AndyAzhTEC Classroom — main.js
    Tema claro/oscuro + navegación + submenu cursos + sonidos UI
 ════════════════════════════════════════════════════════ */
@@ -261,3 +261,45 @@ const ClassroomApp = {
 document.addEventListener("DOMContentLoaded", () => {
   ClassroomApp.init();
 });
+
+function initNotificationsBell() {
+  const widget = document.getElementById("notificationsWidget");
+  const toggle = document.getElementById("notificationsToggle");
+  const panel = document.getElementById("notificationsPanel");
+
+  if (!widget || !toggle || !panel || widget.dataset.ready === "1") return;
+
+  widget.dataset.ready = "1";
+
+  const close = () => {
+    widget.classList.remove("open");
+    panel.setAttribute("aria-hidden", "true");
+  };
+
+  const open = () => {
+    widget.classList.add("open");
+    panel.setAttribute("aria-hidden", "false");
+  };
+
+  toggle.addEventListener("click", (event) => {
+    event.stopPropagation();
+
+    if (widget.classList.contains("open")) {
+      close();
+    } else {
+      open();
+    }
+  });
+
+  panel.addEventListener("click", (event) => {
+    event.stopPropagation();
+  });
+
+  document.addEventListener("click", close);
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") close();
+  });
+}
+
+document.addEventListener("DOMContentLoaded", initNotificationsBell);
