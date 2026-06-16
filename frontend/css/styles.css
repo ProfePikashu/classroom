@@ -6934,3 +6934,107 @@ body.student-profile-open {
     padding: 0.52rem 0.62rem;
   }
 }
+
+/* === ARCHIVOS / DRIVE EMBED === */
+.files-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.files-hero h2 {
+  margin: 0.25rem 0 0.4rem;
+}
+
+.files-hero p {
+  max-width: 780px;
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.files-drive-panel {
+  border: 1px solid var(--border-color);
+  border-radius: 26px;
+  background:
+    radial-gradient(circle at top left, rgba(34, 211, 238, 0.12), transparent 36%),
+    radial-gradient(circle at top right, rgba(139, 92, 246, 0.14), transparent 32%),
+    var(--surface-main);
+  padding: 1rem;
+  box-shadow: var(--shadow-soft);
+}
+
+.files-drive-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.85rem;
+}
+
+.files-drive-toolbar h3 {
+  margin: 0.15rem 0 0;
+}
+
+.files-drive-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.45rem 0.7rem;
+  border: 1px solid rgba(34, 211, 238, 0.24);
+  border-radius: 999px;
+  background: rgba(34, 211, 238, 0.10);
+  color: var(--accent);
+  font-size: 0.78rem;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.drive-frame-shell {
+  position: relative;
+  width: 100%;
+  min-height: clamp(560px, calc(100vh - 260px), 920px);
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+  border-radius: 22px;
+  background: rgba(15, 23, 42, 0.32);
+}
+
+.drive-files-frame {
+  display: block;
+  width: 100%;
+  height: clamp(560px, calc(100vh - 260px), 920px);
+  border: 0;
+  background: #ffffff;
+}
+
+.files-drive-note {
+  margin: 0.85rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+@media (max-width: 820px) {
+  .files-hero {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .files-drive-panel {
+    padding: 0.75rem;
+    border-radius: 20px;
+  }
+
+  .files-drive-toolbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .drive-frame-shell,
+  .drive-files-frame {
+    min-height: calc(100vh - 230px);
+    height: calc(100vh - 230px);
+    border-radius: 16px;
+  }
+}

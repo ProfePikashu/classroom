@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <title>Alumnos — AndyAzhTEC Classroom</title>
+  <title>Archivos — AndyAzhTEC Classroom</title>
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
 
@@ -65,7 +65,7 @@
           </a>
         </div>
 
-        <a href="archivos.html" class="nav-item">
+        <a href="archivos.html" class="nav-item active">
           <i class="fa-solid fa-folder-open"></i>
           <span>Materiales</span>
         </a>
@@ -117,126 +117,71 @@
     </aside>
 
     <main class="main-content">
-
       <header class="topbar">
         <div>
           <p class="eyebrow">
-            <i class="fa-solid fa-database"></i>
-            ExamPro / Supabase
+            <i class="fa-brands fa-google-drive"></i>
+            Biblioteca del curso
           </p>
 
-          <h1>Alumnos</h1>
+          <h1>Archivos</h1>
         </div>
 
         <div class="topbar-actions">
-          <button class="theme-toggle theme-toggle-icon" id="themeToggle" type="button" aria-label="Cambiar tema">
+          <button class="theme-toggle" id="themeToggle" type="button" aria-label="Cambiar tema">
             <i class="fa-solid fa-moon"></i>
           </button>
 
-          <div class="user-menu" id="userMenu">
-            <button class="user-pill user-menu-toggle" id="userMenuToggle" type="button" aria-label="Abrir menú de usuario">
-              <div class="user-avatar">
-                <i class="fa-solid fa-user-astronaut"></i>
-              </div>
-
-              <div>
-                <strong data-auth-name>Usuario</strong>
-                <small data-auth-role>Rol</small>
-              </div>
-
-              <i class="fa-solid fa-chevron-down user-menu-chevron"></i>
-            </button>
-
-            <div class="user-dropdown" id="userDropdown">
-              <a href="perfil.html">
-                <i class="fa-solid fa-id-card"></i>
-                <span>Mis Datos</span>
-              </a>
-
-              <button type="button" data-auth-logout>
-                <i class="fa-solid fa-right-from-bracket"></i>
-                <span>Cerrar sesión</span>
-              </button>
-            </div>
-          </div>
+          <a class="profile-pill" href="perfil.html">
+            <i class="fa-solid fa-user"></i>
+            <span>Mis datos</span>
+          </a>
         </div>
       </header>
 
-      <section class="students-page-panel">
+      <section class="files-hero panel">
+        <div>
+          <p class="eyebrow">Google Drive integrado</p>
+          <h2>Materiales y archivos del Classroom</h2>
+          <p>
+            Acá se muestra la carpeta enlazada de Drive para consultar materiales, documentos
+            y archivos grandes sin salir del Classroom.
+          </p>
+        </div>
 
-        <article class="panel students-hero-panel">
+        <a class="btn btn-outline" href="https://drive.google.com/drive/folders/1VoQvgIo4D3GujyE9xey7KyTD8M8Tu-my?usp=drive_link" target="_blank" rel="noopener">
+          <i class="fa-brands fa-google-drive"></i>
+          <span>Abrir en Drive</span>
+        </a>
+      </section>
+
+      <section class="files-drive-panel">
+        <div class="files-drive-toolbar">
           <div>
-            <p class="eyebrow">Base unificada Classroom</p>
-            <h2>Alumnos cargados en Classroom</h2>
-            <p>
-              Esta vista puede leer desde ExamPro, Planilla 2025 o una vista unificada de ambas fuentes.
-            </p>
+            <p class="eyebrow">Vista embebida</p>
+            <h3>Contenido de la carpeta</h3>
           </div>
 
-          <div class="students-stats-grid">
-            <div class="student-stat-card">
-              <span>Total</span>
-              <strong id="studentsTotal">—</strong>
-            </div>
+          <span class="files-drive-chip">
+            <i class="fa-solid fa-folder-open"></i>
+            Drive
+          </span>
+        </div>
 
-            <div class="student-stat-card">
-              <span>Mostrados</span>
-              <strong id="studentsShown">—</strong>
-            </div>
+        <div class="drive-frame-shell">
+          <iframe
+            class="drive-files-frame"
+            src="https://drive.google.com/embeddedfolderview?id=1VoQvgIo4D3GujyE9xey7KyTD8M8Tu-my#grid"
+            title="Archivos del curso en Google Drive"
+            loading="lazy"
+            allowfullscreen>
+          </iframe>
+        </div>
 
-            <div class="student-stat-card">
-              <span>Fuente</span>
-              <strong id="studentsSourceLabel">ExamPro</strong>
-            </div>
-          </div>
-        </article>
-
-        <article class="panel students-toolbar">
-          <label class="students-search">
-            <span>Buscar alumno</span>
-            <div class="students-search-box">
-              <i class="fa-solid fa-magnifying-glass"></i>
-              <input id="studentsSearchInput" type="search" placeholder="Nombre, DNI, Twitch o email" autocomplete="off" />
-            </div>
-          </label>
-
-          <label class="students-source-filter">
-            <span>Fuente</span>
-            <select id="studentsSourceSelect">
-              <option value="exampro">ExamPro</option>
-              <option value="sheet2025">Planilla 2025</option>
-              <option value="all">Todos</option>
-            </select>
-          </label>
-
-          <div class="students-toolbar-actions">
-            <button class="btn btn-outline" id="studentsRefreshBtn" type="button">
-              <i class="fa-solid fa-rotate-right"></i>
-              Actualizar
-            </button>
-
-            <button class="btn btn-primary" id="studentsLoadMoreBtn" type="button">
-              <i class="fa-solid fa-plus"></i>
-              Cargar más
-            </button>
-          </div>
-        </article>
-
-        <article class="panel students-list-panel">
-          <div class="panel-header">
-            <div>
-              <p class="eyebrow">Fichas rápidas</p>
-              <h3>Listado de alumnos</h3>
-            </div>
-          </div>
-
-          <div class="students-status" id="studentsStatus">
-            Cargando alumnos desde ExamPro...
-          </div>
-
-          <div class="students-grid" id="studentsGrid"></div>
-        </article>
-
+        <p class="files-drive-note">
+          Si Google Drive no muestra el contenido embebido por permisos o sesión, usá el botón
+          <strong>Abrir en Drive</strong>.
+        </p>
       </section>
     </main>
   </div>
@@ -244,6 +189,5 @@
   <script src="js/auth.js?v=20260612-archivos-drive-v1"></script>
   <script src="js/roles.js?v=20260612-archivos-drive-v1"></script>
   <script src="js/main.js"></script>
-  <script src="js/alumnos.js?v=20260612-archivos-drive-v1"></script>
 </body>
 </html>
