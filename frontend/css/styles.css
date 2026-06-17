@@ -7703,3 +7703,128 @@ body.page-asistencias .main-content > * {
   max-width: 100%;
   min-width: 0;
 }
+
+/* === MOBILE CURSOS HERO FIX === */
+@media (max-width: 760px) {
+  body.page-cursos .hero-orb,
+  body.page-cursos .orb-inner,
+  .page-cursos .hero-orb,
+  .page-cursos .orb-inner {
+    display: none !important;
+  }
+
+  body.page-cursos .hero,
+  body.page-cursos .hero-section,
+  body.page-cursos .courses-hero,
+  body.page-cursos .course-detail-hero,
+  .page-cursos .hero,
+  .page-cursos .hero-section,
+  .page-cursos .courses-hero,
+  .page-cursos .course-detail-hero {
+    min-height: auto !important;
+    padding: 1.15rem !important;
+    overflow: hidden !important;
+  }
+
+  body.page-cursos .hero-copy,
+  body.page-cursos .hero-content,
+  .page-cursos .hero-copy,
+  .page-cursos .hero-content {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  body.page-cursos .hero h1,
+  body.page-cursos .hero h2,
+  body.page-cursos .hero-copy h1,
+  body.page-cursos .hero-copy h2,
+  .page-cursos .hero h1,
+  .page-cursos .hero h2,
+  .page-cursos .hero-copy h1,
+  .page-cursos .hero-copy h2 {
+    font-size: clamp(2rem, 11vw, 3.2rem) !important;
+    line-height: 1.02 !important;
+    word-break: normal !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  body.page-cursos .hero p,
+  body.page-cursos .hero-copy p,
+  .page-cursos .hero p,
+  .page-cursos .hero-copy p {
+    font-size: 0.96rem !important;
+    line-height: 1.55 !important;
+  }
+
+  body.page-cursos .stats-grid,
+  body.page-cursos .course-stats,
+  .page-cursos .stats-grid,
+  .page-cursos .course-stats {
+    grid-template-columns: 1fr !important;
+    gap: 0.85rem !important;
+  }
+
+  body.page-cursos .course-card,
+  body.page-cursos .stat-card,
+  .page-cursos .course-card,
+  .page-cursos .stat-card {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+}
+
+/* === CURSOS MOBILE HARD FIX === */
+@media (max-width: 760px) {
+  body.page-cursos .hero-orb,
+  body.page-cursos .orb-inner,
+  body.page-cursos .hero-orb *,
+  body.page-cursos .orb-inner *,
+  body.page-cursos .hero-visual,
+  body.page-cursos .course-visual,
+  body.page-cursos .course-orb,
+  body.page-cursos .hero-illustration {
+    display: none !important;
+  }
+
+  body.page-cursos .hero,
+  body.page-cursos .hero-section,
+  body.page-cursos .courses-hero,
+  body.page-cursos .course-detail-hero,
+  body.page-cursos section[class*="hero"] {
+    display: block !important;
+    min-height: 0 !important;
+    height: auto !important;
+    padding: 1.05rem !important;
+    margin-bottom: 0.9rem !important;
+    overflow: hidden !important;
+  }
+
+  body.page-cursos .hero-copy,
+  body.page-cursos .hero-content,
+  body.page-cursos section[class*="hero"] > div {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  body.page-cursos .hero-copy h1,
+  body.page-cursos .hero-copy h2,
+  body.page-cursos .hero h1,
+  body.page-cursos .hero h2,
+  body.page-cursos section[class*="hero"] h1,
+  body.page-cursos section[class*="hero"] h2 {
+    font-size: clamp(2rem, 10vw, 3.05rem) !important;
+    line-height: 1.05 !important;
+    margin-bottom: 0.75rem !important;
+  }
+
+  body.page-cursos .hero-copy p,
+  body.page-cursos .hero p,
+  body.page-cursos section[class*="hero"] p {
+    font-size: 0.95rem !important;
+    line-height: 1.5 !important;
+    max-width: 100% !important;
+  }
+}
