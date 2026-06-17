@@ -263,42 +263,81 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function initNotificationsBell() {
-  const widget = document.getElementById("notificationsWidget");
-  const toggle = document.getElementById("notificationsToggle");
-  const panel = document.getElementById("notificationsPanel");
+  const themeToggle = document.getElementById("themeToggle");
+  if (!themeToggle || document.getElementById("notificationsWidget")) return;
 
-  if (!widget || !toggle || !panel || widget.dataset.ready === "1") return;
+  const widget = document.createElement("div");
+  widget.className = "notifications-widget";
+  widget.id = "notificationsWidget";
 
-  widget.dataset.ready = "1";
+  widget.innerHTML = `
+    <button class="notifications-toggle" id="notificationsToggle" type="button" aria-label="Notificaciones">
+      <i class="fa-solid fa-bell"></i>
+      <span class="notifications-dot" id="notificationsDot">2</span>
+    </button>
 
-  const close = () => {
+    <div class="notifications-panel" id="notificationsPanel" aria-hidden="true">
+      <div class="notifications-panel-header">
+        <div>
+          <p class="eyebrow">Centro de avisos</p>
+          <h3>Notificaciones</h3>
+        </div>
+        <span class="notifications-chip">Beta</span>
+      </div>
+
+      <div class="notifications-list" id="notificationsList">
+        <article class="notification-item unread">
+          <div class="notification-icon">
+            <i class="fa-solid fa-bullhorn"></i>
+          </div>
+          <div>
+            <strong>Avisos del Classroom</strong>
+            <p>Acá van a aparecer novedades, avisos generales y mensajes importantes del curso.</p>
+            <small>General</small>
+          </div>
+        </article>
+
+        <article class="notification-item unread staff-notification">
+          <div class="notification-icon">
+            <i class="fa-solid fa-rotate-right"></i>
+          </div>
+          <div>
+            <strong>Recuperaciones y asistencias</strong>
+            <p>Docente y moderadores van a ver alertas cuando haya recuperaciones o cambios pendientes.</p>
+            <small>Administración</small>
+          </div>
+        </article>
+      </div>
+
+      <div class="notifications-panel-footer">
+        <a href="asistencias.html" class="staff-notification">
+          <i class="fa-solid fa-clipboard-check"></i>
+          Ver asistencias
+        </a>
+      </div>
+    </div>
+  `;
+
+  themeToggle.insertAdjacentElement("afterend", widget);
+
+  const toggle = widget.querySelector("#notificationsToggle");
+  const panel = widget.querySelector("#notificationsPanel");
+
+  const closePanel = () => {
     widget.classList.remove("open");
     panel.setAttribute("aria-hidden", "true");
   };
 
-  const open = () => {
-    widget.classList.add("open");
-    panel.setAttribute("aria-hidden", "false");
-  };
-
   toggle.addEventListener("click", (event) => {
     event.stopPropagation();
-
-    if (widget.classList.contains("open")) {
-      close();
-    } else {
-      open();
-    }
+    const open = widget.classList.toggle("open");
+    panel.setAttribute("aria-hidden", open ? "false" : "true");
   });
 
-  panel.addEventListener("click", (event) => {
-    event.stopPropagation();
-  });
-
-  document.addEventListener("click", close);
-
+  panel.addEventListener("click", (event) => event.stopPropagation());
+  document.addEventListener("click", closePanel);
   document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape") close();
+    if (event.key === "Escape") closePanel();
   });
 }
 
