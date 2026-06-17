@@ -262,6 +262,133 @@ document.addEventListener("DOMContentLoaded", () => {
   ClassroomApp.init();
 });
 
+const CLASSROOM_NEWS_STORAGE_KEY = "andyazh-classroom-news-mock";
+const CLASSROOM_NEWS_READ_KEY = "andyazh-classroom-news-read-mock";
+const CLASSROOM_NOTIFICATION_PREFS_KEY = "andyazh-classroom-notification-prefs-mock";
+
+function getClassroomSessionSafe() {
+  try {
+    return JSON.parse(localStorage.getItem("andyazh-classroom-session") || "null");
+  } catch {
+    return null;
+  }
+}
+
+function isClassroomStaff() {
+  const session = getClassroomSessionSafe();
+  const role = String(session?.role || "").toLowerCase();
+
+  return ["teacher", "docente", "moderator", "classroom_moderator", "admin"].includes(role);
+}
+
+function getClassroomNews() {
+  const fallback = [
+    {
+      id: "mock-welcome",
+      title: "Bienvenido al Classroom",
+      description: "Las novedades importantes del curso van a aparecer acá y también en la campanita.",
+      type: "info",
+      course: "Todos",
+      audience: "all",
+      createdAt: new Date().toISOString(),
+      createdBy: "Sistema",
+    },
+    {
+      id: "mock-recovery",
+      title: "Recuperaciones y asistencias",
+      description: "Próximamente se van a registrar avisos cuando un alumno recupere una clase o quede un cambio pendiente de revisar.",
+      type: "admin",
+      course: "AyRPC 2025",
+      audience: "staff",
+      createdAt: new Date().toISOString(),
+      createdBy: "Sistema",
+    },
+  ];
+
+  try {
+    const stored = JSON.parse(localStorage.getItem(CLASSROOM_NEWS_STORAGE_KEY) || "[]");
+    return Array.isArray(stored) && stored.length ? stored : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function saveClassroomNews(items) {
+  localStorage.setItem(CLASSROOM_NEWS_STORAGE_KEY, JSON.stringify(items));
+}
+
+function getReadNewsIds() {
+  try {
+    const stored = JSON.parse(localStorage.getItem(CLASSROOM_NEWS_READ_KEY) || "[]");
+    return Array.isArray(stored) ? stored : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveReadNewsIds(ids) {
+  localStorage.setItem(CLASSROOM_NEWS_READ_KEY, JSON.stringify([...new Set(ids)]));
+}
+
+function getVisibleClassroomNews() {
+  const staff = isClassroomStaff();
+
+  return getClassroomNews()
+    .filter((item) => item.audience !== "staff" || staff)
+    .sort((a, b) => String(b.createdAt || "").localeCompare(String(a.createdAt || "")));
+}
+
+function getNotificationPrefs() {
+  try {
+    const stored = JSON.parse(localStorage.getItem(CLASSROOM_NOTIFICATION_PREFS_KEY) || "{}");
+
+    return {
+      bell: stored.bell ?? true,
+      newsletter: stored.newsletter ?? false,
+      recovery: stored.recovery ?? true,
+    };
+  } catch {
+    return {
+      bell: true,
+      newsletter: false,
+      recovery: true,
+    };
+  }
+}
+
+function saveNotificationPrefs(prefs) {
+  localStorage.setItem(CLASSROOM_NOTIFICATION_PREFS_KEY, JSON.stringify(prefs));
+}
+
+function getNewsTypeIcon(type) {
+  const clean = String(type || "").toLowerCase();
+
+  if (clean === "urgent") return "fa-triangle-exclamation";
+  if (clean === "warning") return "fa-circle-exclamation";
+  if (clean === "admin") return "fa-clipboard-check";
+  if (clean === "reminder") return "fa-clock";
+  return "fa-bullhorn";
+}
+
+function getNewsTypeLabel(type) {
+  const clean = String(type || "").toLowerCase();
+
+  if (clean === "urgent") return "Urgente";
+  if (clean === "warning") return "Importante";
+  if (clean === "admin") return "Administración";
+  if (clean === "reminder") return "Recordatorio";
+  return "Aviso";
+}
+
+function escapeClassroomHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
 function initNotificationsBell() {
   const themeToggle = document.getElementById("themeToggle");
   if (!themeToggle || document.getElementById("notificationsWidget")) return;
@@ -273,7 +400,7 @@ function initNotificationsBell() {
   widget.innerHTML = `
     <button class="notifications-toggle" id="notificationsToggle" type="button" aria-label="Notificaciones">
       <i class="fa-solid fa-bell"></i>
-      <span class="notifications-dot" id="notificationsDot">2</span>
+      <span class="notifications-dot" id="notificationsDot">0</span>
     </button>
 
     <div class="notifications-panel" id="notificationsPanel" aria-hidden="true">
@@ -285,35 +412,13 @@ function initNotificationsBell() {
         <span class="notifications-chip">Beta</span>
       </div>
 
-      <div class="notifications-list" id="notificationsList">
-        <article class="notification-item unread">
-          <div class="notification-icon">
-            <i class="fa-solid fa-bullhorn"></i>
-          </div>
-          <div>
-            <strong>Avisos del Classroom</strong>
-            <p>Acá van a aparecer novedades, avisos generales y mensajes importantes del curso.</p>
-            <small>General</small>
-          </div>
-        </article>
-
-        <article class="notification-item unread staff-notification">
-          <div class="notification-icon">
-            <i class="fa-solid fa-rotate-right"></i>
-          </div>
-          <div>
-            <strong>Recuperaciones y asistencias</strong>
-            <p>Docente y moderadores van a ver alertas cuando haya recuperaciones o cambios pendientes.</p>
-            <small>Administración</small>
-          </div>
-        </article>
-      </div>
+      <div class="notifications-list" id="notificationsList"></div>
 
       <div class="notifications-panel-footer">
-        <a href="asistencias.html" class="staff-notification">
-          <i class="fa-solid fa-clipboard-check"></i>
-          Ver asistencias
-        </a>
+        <button class="notifications-read-all" id="notificationsReadAll" type="button">
+          <i class="fa-solid fa-check-double"></i>
+          Marcar todo como leído
+        </button>
       </div>
     </div>
   `;
@@ -322,6 +427,7 @@ function initNotificationsBell() {
 
   const toggle = widget.querySelector("#notificationsToggle");
   const panel = widget.querySelector("#notificationsPanel");
+  const readAll = widget.querySelector("#notificationsReadAll");
 
   const closePanel = () => {
     widget.classList.remove("open");
@@ -330,15 +436,352 @@ function initNotificationsBell() {
 
   toggle.addEventListener("click", (event) => {
     event.stopPropagation();
+    renderNotificationsBell();
     const open = widget.classList.toggle("open");
     panel.setAttribute("aria-hidden", open ? "false" : "true");
   });
 
   panel.addEventListener("click", (event) => event.stopPropagation());
+
+  readAll?.addEventListener("click", () => {
+    const ids = getVisibleClassroomNews().map((item) => item.id);
+    saveReadNewsIds(ids);
+    renderNotificationsBell();
+    renderClassroomNewsPanel();
+  });
+
   document.addEventListener("click", closePanel);
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape") closePanel();
   });
+
+  renderNotificationsBell();
 }
 
-document.addEventListener("DOMContentLoaded", initNotificationsBell);
+function renderNotificationsBell() {
+  const list = document.getElementById("notificationsList");
+  const dot = document.getElementById("notificationsDot");
+  if (!list || !dot) return;
+
+  const readIds = getReadNewsIds();
+  const news = getVisibleClassroomNews();
+  const unreadCount = news.filter((item) => !readIds.includes(item.id)).length;
+
+  dot.textContent = String(unreadCount);
+  dot.classList.toggle("is-hidden", unreadCount <= 0);
+
+  if (!news.length) {
+    list.innerHTML = `
+      <article class="notification-empty">
+        <i class="fa-regular fa-bell"></i>
+        <strong>Sin notificaciones</strong>
+        <p>Cuando haya novedades del curso van a aparecer acá.</p>
+      </article>
+    `;
+    return;
+  }
+
+  list.innerHTML = news
+    .slice(0, 6)
+    .map((item) => {
+      const unread = !readIds.includes(item.id);
+      const icon = getNewsTypeIcon(item.type);
+
+      return `
+        <article class="notification-item ${unread ? "unread" : ""}">
+          <div class="notification-icon">
+            <i class="fa-solid ${icon}"></i>
+          </div>
+          <div>
+            <strong>${escapeClassroomHtml(item.title)}</strong>
+            <p>${escapeClassroomHtml(item.description)}</p>
+            <small>${escapeClassroomHtml(item.course || "Todos")} · ${escapeClassroomHtml(getNewsTypeLabel(item.type))}</small>
+          </div>
+        </article>
+      `;
+    })
+    .join("");
+}
+
+function renderClassroomNewsPanel() {
+  const panel = document.getElementById("classroomNewsPanel");
+  if (!panel) return;
+
+  const readIds = getReadNewsIds();
+  const news = getVisibleClassroomNews();
+
+  if (!news.length) {
+    panel.innerHTML = `
+      <div class="classroom-news-empty">
+        <i class="fa-regular fa-newspaper"></i>
+        <strong>No hay novedades cargadas</strong>
+        <p>Cuando se publique un aviso, se va a ver en este panel.</p>
+      </div>
+    `;
+    return;
+  }
+
+  panel.innerHTML = news
+    .slice(0, 5)
+    .map((item) => {
+      const unread = !readIds.includes(item.id);
+      const icon = getNewsTypeIcon(item.type);
+
+      return `
+        <article class="classroom-news-item ${unread ? "unread" : ""}">
+          <div class="classroom-news-icon">
+            <i class="fa-solid ${icon}"></i>
+          </div>
+
+          <div>
+            <div class="classroom-news-meta">
+              <span>${escapeClassroomHtml(item.course || "Todos")}</span>
+              <span>${escapeClassroomHtml(getNewsTypeLabel(item.type))}</span>
+            </div>
+
+            <h3>${escapeClassroomHtml(item.title)}</h3>
+            <p>${escapeClassroomHtml(item.description)}</p>
+            <small>Publicado por ${escapeClassroomHtml(item.createdBy || "Docente")}</small>
+          </div>
+        </article>
+      `;
+    })
+    .join("");
+}
+
+function initClassroomNewsHome() {
+  const main = document.querySelector(".main-content");
+  if (!main || document.getElementById("classroomNewsSection")) return;
+
+  const path = window.location.pathname.split("/").pop() || "index.html";
+  if (path !== "index.html" && path !== "") return;
+
+  const staff = isClassroomStaff();
+
+  const section = document.createElement("section");
+  section.className = "classroom-news-section panel";
+  section.id = "classroomNewsSection";
+
+  section.innerHTML = `
+    <div class="classroom-news-header">
+      <div>
+        <p class="eyebrow">Newsletter interno</p>
+        <h2>Novedades del Classroom</h2>
+        <p>Acá aparecen los avisos importantes del curso. También se muestran en la campanita.</p>
+      </div>
+
+      ${staff ? `
+        <button class="btn btn-primary" id="openNewsComposer" type="button">
+          <i class="fa-solid fa-paper-plane"></i>
+          <span>Enviar novedad</span>
+        </button>
+      ` : ""}
+    </div>
+
+    <div class="classroom-news-list" id="classroomNewsPanel"></div>
+  `;
+
+  const topbar = main.querySelector(".topbar");
+  if (topbar) {
+    topbar.insertAdjacentElement("afterend", section);
+  } else {
+    main.prepend(section);
+  }
+
+  if (staff) {
+    document.getElementById("openNewsComposer")?.addEventListener("click", openNewsComposer);
+  }
+
+  renderClassroomNewsPanel();
+}
+
+function ensureNewsComposerModal() {
+  if (document.getElementById("newsComposerModal")) return;
+
+  const modal = document.createElement("div");
+  modal.className = "news-composer-modal";
+  modal.id = "newsComposerModal";
+
+  modal.innerHTML = `
+    <div class="news-composer-backdrop" data-news-close></div>
+
+    <section class="news-composer-dialog" role="dialog" aria-modal="true" aria-label="Enviar novedad">
+      <button class="news-composer-close" type="button" data-news-close aria-label="Cerrar">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <div class="news-composer-header">
+        <p class="eyebrow">Docente / Staff</p>
+        <h2>Enviar novedad</h2>
+        <p>Esto todavía es una maqueta local. Después lo conectamos al backend para que llegue a todos.</p>
+      </div>
+
+      <form class="news-composer-form" id="newsComposerForm">
+        <label>
+          <span>Título</span>
+          <input id="newsTitle" type="text" placeholder="Cierre recuperatorio" required>
+        </label>
+
+        <label>
+          <span>Descripción</span>
+          <textarea id="newsDescription" rows="5" placeholder="Se reitera que el día 30 de junio..." required></textarea>
+        </label>
+
+        <div class="news-composer-grid">
+          <label>
+            <span>Curso destino</span>
+            <select id="newsCourse">
+              <option value="Todos">Todos</option>
+              <option value="AyRPC 2025">AyRPC 2025</option>
+              <option value="AyRPC 2026">AyRPC 2026</option>
+            </select>
+          </label>
+
+          <label>
+            <span>Tipo</span>
+            <select id="newsType">
+              <option value="info">Aviso</option>
+              <option value="warning">Importante</option>
+              <option value="urgent">Urgente</option>
+              <option value="reminder">Recordatorio</option>
+            </select>
+          </label>
+        </div>
+
+        <label class="news-mail-option disabled">
+          <input type="checkbox" disabled>
+          <span>Enviar también por mail cuando conectemos newsletter</span>
+        </label>
+
+        <div class="news-composer-actions">
+          <button class="btn btn-outline" type="button" data-news-close>Cancelar</button>
+          <button class="btn btn-primary" type="submit">
+            <i class="fa-solid fa-paper-plane"></i>
+            Enviar novedad
+          </button>
+        </div>
+      </form>
+    </section>
+  `;
+
+  document.body.appendChild(modal);
+
+  modal.addEventListener("click", (event) => {
+    if (event.target.closest("[data-news-close]")) closeNewsComposer();
+  });
+
+  modal.querySelector("#newsComposerForm")?.addEventListener("submit", (event) => {
+    event.preventDefault();
+
+    const session = getClassroomSessionSafe();
+    const title = modal.querySelector("#newsTitle")?.value.trim();
+    const description = modal.querySelector("#newsDescription")?.value.trim();
+    const course = modal.querySelector("#newsCourse")?.value || "Todos";
+    const type = modal.querySelector("#newsType")?.value || "info";
+
+    if (!title || !description) return;
+
+    const news = getClassroomNews();
+
+    news.unshift({
+      id: `local-${Date.now()}`,
+      title,
+      description,
+      course,
+      type,
+      audience: "all",
+      createdAt: new Date().toISOString(),
+      createdBy: session?.student?.full_name || session?.alumno?.["Nombre Completo"] || "Docente",
+    });
+
+    saveClassroomNews(news);
+    closeNewsComposer();
+    renderClassroomNewsPanel();
+    renderNotificationsBell();
+  });
+}
+
+function openNewsComposer() {
+  ensureNewsComposerModal();
+
+  const modal = document.getElementById("newsComposerModal");
+  modal.classList.add("show");
+  document.body.classList.add("news-composer-open");
+
+  setTimeout(() => document.getElementById("newsTitle")?.focus(), 50);
+}
+
+function closeNewsComposer() {
+  const modal = document.getElementById("newsComposerModal");
+  modal?.classList.remove("show");
+  document.body.classList.remove("news-composer-open");
+
+  const form = document.getElementById("newsComposerForm");
+  form?.reset();
+}
+
+function initNotificationPrefsCard() {
+  const main = document.querySelector(".main-content");
+  if (!main || document.getElementById("notificationPrefsCard")) return;
+
+  const path = window.location.pathname.split("/").pop() || "";
+  if (path !== "perfil.html") return;
+
+  const prefs = getNotificationPrefs();
+
+  const card = document.createElement("section");
+  card.className = "notification-prefs-card panel";
+  card.id = "notificationPrefsCard";
+
+  card.innerHTML = `
+    <div class="notification-prefs-header">
+      <div>
+        <p class="eyebrow">Preferencias</p>
+        <h2>Notificaciones</h2>
+        <p>Configuración visual/local de avisos. Después lo conectamos al backend.</p>
+      </div>
+    </div>
+
+    <div class="notification-prefs-list">
+      <label class="notification-pref-row locked">
+        <div>
+          <strong>Campanita interna</strong>
+          <p>Los avisos académicos aparecen dentro del Classroom.</p>
+        </div>
+        <input type="checkbox" checked disabled>
+      </label>
+
+      <label class="notification-pref-row">
+        <div>
+          <strong>Newsletter por mail</strong>
+          <p>Recibir novedades importantes también por correo cuando esté conectado.</p>
+        </div>
+        <input type="checkbox" data-pref="newsletter" ${prefs.newsletter ? "checked" : ""}>
+      </label>
+
+      <label class="notification-pref-row">
+        <div>
+          <strong>Avisos de recuperatorios</strong>
+          <p>Alertas relacionadas con entregas, recuperaciones y fechas límite.</p>
+        </div>
+        <input type="checkbox" data-pref="recovery" ${prefs.recovery ? "checked" : ""}>
+      </label>
+    </div>
+  `;
+
+  main.appendChild(card);
+
+  card.querySelectorAll("[data-pref]").forEach((input) => {
+    input.addEventListener("change", () => {
+      const current = getNotificationPrefs();
+      current[input.dataset.pref] = input.checked;
+      saveNotificationPrefs(current);
+    });
+  });
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  initNotificationsBell();
+  initClassroomNewsHome();
+  initNotificationPrefsCard();
+});
