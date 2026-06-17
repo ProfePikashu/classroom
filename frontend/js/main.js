@@ -262,6 +262,66 @@ document.addEventListener("DOMContentLoaded", () => {
   ClassroomApp.init();
 });
 
+const CLASSROOM_API_BASE_URL = "https://exampro-backend-1n6d.onrender.com";
+
+function getClassroomAuthToken() {
+  const session = getClassroomSessionSafe();
+
+  return (
+    session?.classroomReadToken ||
+    session?.exampro?.accessToken ||
+    session?.exampro?.token ||
+    session?.accessToken ||
+    ""
+  );
+}
+
+function getClassroomAuthHeaders() {
+  const token = getClassroomAuthToken();
+
+  return token
+    ? {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      }
+    : {
+        "Content-Type": "application/json",
+      };
+}
+
+async function classroomApiFetch(path, options = {}) {
+  const response = await fetch(`${CLASSROOM_API_BASE_URL}${path}`, {
+    ...options,
+    headers: {
+      ...getClassroomAuthHeaders(),
+      ...(options.headers || {}),
+    },
+  });
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok || data?.ok === false) {
+    throw new Error(data?.detail || data?.message || `Error HTTP ${response.status}`);
+  }
+
+  return data;
+}
+
+function normalizeApiNotification(item) {
+  return {
+    id: String(item.id),
+    title: item.title || "Sin título",
+    description: item.description || "",
+    type: item.type || "info",
+    course: item.course || "Todos",
+    audience: item.audience || "all",
+    createdAt: item.published_at || item.created_at || new Date().toISOString(),
+    createdBy: item.created_by_name || item.created_by_twitch || "Docente",
+    read: Boolean(item.read),
+    source: "api",
+  };
+}
+
 const CLASSROOM_NEWS_STORAGE_KEY = "andyazh-classroom-news-mock";
 const CLASSROOM_NEWS_READ_KEY = "andyazh-classroom-news-read-mock";
 const CLASSROOM_NOTIFICATION_PREFS_KEY = "andyazh-classroom-notification-prefs-mock";
@@ -332,6 +392,12 @@ function saveReadNewsIds(ids) {
 
 function getVisibleClassroomNews() {
   const staff = isClassroomStaff();
+
+  const apiCache = window.__classroomNewsApiCache;
+
+  if (Array.isArray(apiCache)) {
+    return apiCache;
+  }
 
   return getClassroomNews()
     .filter((item) => item.audience !== "staff" || staff)
@@ -443,11 +509,17 @@ function initNotificationsBell() {
 
   panel.addEventListener("click", (event) => event.stopPropagation());
 
-  readAll?.addEventListener("click", () => {
+  readAll?.addEventListener("click", async () => {
     const ids = getVisibleClassroomNews().map((item) => item.id);
     saveReadNewsIds(ids);
-    renderNotificationsBell();
-    renderClassroomNewsPanel();
+
+    try {
+      await markAllClassroomNewsReadApi();
+      await refreshClassroomNewsFromApi();
+    } catch {
+      renderNotificationsBell();
+      renderClassroomNewsPanel();
+    }
   });
 
   document.addEventListener("click", closePanel);
@@ -456,6 +528,100 @@ function initNotificationsBell() {
   });
 
   renderNotificationsBell();
+}
+
+async function refreshClassroomNewsFromApi() {
+  const token = getClassroomAuthToken();
+
+  if (!token) {
+    window.__classroomNewsApiCache = null;
+    renderNotificationsBell();
+    renderClassroomNewsPanel();
+    return false;
+  }
+
+  try {
+    const data = await classroomApiFetch("/api/classroom/notifications");
+    const items = Array.isArray(data.items) ? data.items.map(normalizeApiNotification) : [];
+
+    window.__classroomNewsApiCache = items;
+
+    const readIds = items.filter((item) => item.read).map((item) => item.id);
+    saveReadNewsIds(readIds);
+
+    renderNotificationsBell();
+    renderClassroomNewsPanel();
+
+    return true;
+  } catch (error) {
+    console.warn("No se pudieron cargar novedades desde API. Uso fallback local.", error);
+    window.__classroomNewsApiCache = null;
+    renderNotificationsBell();
+    renderClassroomNewsPanel();
+    return false;
+  }
+}
+
+async function createClassroomNewsApi(payload) {
+  return classroomApiFetch("/api/classroom/notifications", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+async function markAllClassroomNewsReadApi() {
+  return classroomApiFetch("/api/classroom/notifications/read-all", {
+    method: "POST",
+    body: JSON.stringify({}),
+  });
+}
+
+async function loadNotificationPrefsFromApi() {
+  const token = getClassroomAuthToken();
+  if (!token) return null;
+
+  try {
+    const data = await classroomApiFetch("/api/classroom/notification-preferences");
+    const prefs = data.preferences || null;
+
+    if (prefs) {
+      const normalized = {
+        bell: prefs.bell_enabled ?? true,
+        newsletter: prefs.newsletter_email_enabled ?? false,
+        recovery: prefs.recovery_alerts_enabled ?? true,
+        email: prefs.email || "",
+      };
+
+      saveNotificationPrefs(normalized);
+      return normalized;
+    }
+  } catch (error) {
+    console.warn("No se pudieron cargar preferencias desde API. Uso fallback local.", error);
+  }
+
+  return null;
+}
+
+async function saveNotificationPrefsToApi(prefs) {
+  const token = getClassroomAuthToken();
+  if (!token) return false;
+
+  try {
+    await classroomApiFetch("/api/classroom/notification-preferences", {
+      method: "POST",
+      body: JSON.stringify({
+        email: prefs.email || null,
+        bell_enabled: true,
+        newsletter_email_enabled: Boolean(prefs.newsletter),
+        recovery_alerts_enabled: Boolean(prefs.recovery),
+      }),
+    });
+
+    return true;
+  } catch (error) {
+    console.warn("No se pudieron guardar preferencias en API. Quedan locales.", error);
+    return false;
+  }
 }
 
 function renderNotificationsBell() {
@@ -670,7 +836,7 @@ function ensureNewsComposerModal() {
     if (event.target.closest("[data-news-close]")) closeNewsComposer();
   });
 
-  modal.querySelector("#newsComposerForm")?.addEventListener("submit", (event) => {
+  modal.querySelector("#newsComposerForm")?.addEventListener("submit", async (event) => {
     event.preventDefault();
 
     const session = getClassroomSessionSafe();
@@ -680,6 +846,24 @@ function ensureNewsComposerModal() {
     const type = modal.querySelector("#newsType")?.value || "info";
 
     if (!title || !description) return;
+
+    const payload = {
+      title,
+      description,
+      course,
+      type,
+      audience: "all",
+      send_email: false,
+    };
+
+    try {
+      await createClassroomNewsApi(payload);
+      closeNewsComposer();
+      await refreshClassroomNewsFromApi();
+      return;
+    } catch (error) {
+      console.warn("No se pudo publicar en API. Guardo novedad local.", error);
+    }
 
     const news = getClassroomNews();
 
@@ -720,14 +904,14 @@ function closeNewsComposer() {
   form?.reset();
 }
 
-function initNotificationPrefsCard() {
+async function initNotificationPrefsCard() {
   const main = document.querySelector(".main-content");
   if (!main || document.getElementById("notificationPrefsCard")) return;
 
   const path = window.location.pathname.split("/").pop() || "";
   if (path !== "perfil.html") return;
 
-  const prefs = getNotificationPrefs();
+  const prefs = (await loadNotificationPrefsFromApi()) || getNotificationPrefs();
 
   const card = document.createElement("section");
   card.className = "notification-prefs-card panel";
@@ -776,6 +960,7 @@ function initNotificationPrefsCard() {
       const current = getNotificationPrefs();
       current[input.dataset.pref] = input.checked;
       saveNotificationPrefs(current);
+      saveNotificationPrefsToApi(current);
     });
   });
 }
@@ -784,4 +969,5 @@ document.addEventListener("DOMContentLoaded", () => {
   initNotificationsBell();
   initClassroomNewsHome();
   initNotificationPrefsCard();
+  refreshClassroomNewsFromApi();
 });
