@@ -18,9 +18,7 @@
 
       if (active) {
         const panel = link.closest("[data-sidebar-panel]");
-        if (panel) {
-          openPanel(panel.getAttribute("data-sidebar-panel"));
-        }
+        if (panel) openPanel(panel.getAttribute("data-sidebar-panel"));
       }
     });
 
@@ -33,8 +31,7 @@
     ];
 
     if (coursePages.includes(current)) {
-      const coursesToggle = document.querySelector('[data-sidebar-toggle="courses"]');
-      coursesToggle?.classList.add("active");
+      document.querySelector('[data-sidebar-toggle="courses"]')?.classList.add("active");
       openPanel("courses");
     }
   }
@@ -94,23 +91,50 @@
     });
   }
 
-  function bindPelusitaFooter() {
-    document.getElementById("sidebarPelusitaBtn")?.addEventListener("click", () => {
-      if (window.PelusitaClassroom?.open) {
-        window.PelusitaClassroom.open();
+  function dockPelusita(attempt = 0) {
+    const dock = document.getElementById("sidebarPelusitaDock");
+    const pelusita = document.querySelector(".pelusita-wrapper");
+
+    if (!dock) return;
+
+    if (!pelusita) {
+      if (attempt < 30) {
+        setTimeout(() => dockPelusita(attempt + 1), 120);
+      }
+      return;
+    }
+
+    if (pelusita.dataset.sidebarDocked === "true") return;
+
+    pelusita.dataset.sidebarDocked = "true";
+    pelusita.classList.add("pelusita-sidebar-docked");
+
+    dock.innerHTML = "";
+    dock.appendChild(pelusita);
+
+    dock.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+
+      if (window.PelusitaBot?.open) {
+        window.PelusitaBot.open();
         return;
       }
 
-      const pelusita = document.querySelector(".pelusita-wrapper");
-      if (pelusita) pelusita.classList.toggle("show");
+      if (window.PelusitaClassroom?.open) {
+        window.PelusitaClassroom.open();
+      }
     });
   }
 
   function init() {
     bindCourseToggle();
     bindAdminPopover();
-    bindPelusitaFooter();
     setActiveRoute();
+
+    window.addEventListener("load", () => dockPelusita());
+    setTimeout(() => dockPelusita(), 300);
+    setTimeout(() => dockPelusita(), 900);
   }
 
   document.addEventListener("DOMContentLoaded", init);

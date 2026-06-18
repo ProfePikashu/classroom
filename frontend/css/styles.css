@@ -9138,3 +9138,542 @@ body.page-asistencias .main-content > * {
 }
 
 /* === END CLASSROOM SIDEBAR V2 === */
+
+/* === SIDEBAR PELUSITA DOCK === */
+
+.sidebar-v2-pelusita {
+  display: none !important;
+}
+
+.sidebar-v2-pelusita-dock {
+  flex: 0 0 auto;
+  min-height: 92px;
+  display: grid;
+  place-items: center;
+  position: relative;
+  overflow: visible;
+  border: 1px solid rgba(0,245,255,.24);
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 50% 10%, rgba(0,245,255,.13), transparent 42%),
+    radial-gradient(circle at 20% 90%, rgba(168,85,247,.16), transparent 48%),
+    rgba(15,5,35,.52);
+  box-shadow: 0 0 26px rgba(0,245,255,.08);
+  cursor: pointer;
+}
+
+/* La Pelusita real deja de ser flotante y pasa a vivir dentro del dock */
+.sidebar-v2-pelusita-dock .pelusita-wrapper,
+.pelusita-wrapper.pelusita-sidebar-docked {
+  position: static !important;
+  inset: auto !important;
+  top: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  left: auto !important;
+  transform: none !important;
+  z-index: 1 !important;
+  display: grid !important;
+  place-items: center !important;
+  width: 100% !important;
+  height: auto !important;
+  pointer-events: auto !important;
+}
+
+/* Ocultamos el globo/dialog dentro del sidebar; el diálogo se abre con la interacción normal */
+.sidebar-v2-pelusita-dock .pelusita-bubble,
+.sidebar-v2-pelusita-dock .pelusita-dialog {
+  display: none !important;
+}
+
+.sidebar-v2-pelusita-dock .pelusita-char {
+  width: 82px !important;
+  height: 82px !important;
+  display: grid !important;
+  place-items: center !important;
+  animation: sidebarPelusitaFloat 2.6s ease-in-out infinite;
+}
+
+.sidebar-v2-pelusita-dock .pelusita-img {
+  width: 78px !important;
+  height: 78px !important;
+  object-fit: contain !important;
+  filter:
+    drop-shadow(0 0 10px rgba(0,245,255,.20))
+    drop-shadow(0 0 14px rgba(168,85,247,.14));
+}
+
+.sidebar-v2-pelusita-dock::after {
+  content: "Pelusita";
+  position: absolute;
+  right: .7rem;
+  bottom: .45rem;
+  color: var(--cyan);
+  font-family: var(--font-title);
+  font-size: .72rem;
+  font-weight: 900;
+  opacity: .9;
+  text-shadow: 0 0 12px rgba(0,245,255,.28);
+}
+
+@keyframes sidebarPelusitaFloat {
+  0%, 100% {
+    transform: translateY(0) rotate(-1deg);
+  }
+
+  50% {
+    transform: translateY(-5px) rotate(1deg);
+  }
+}
+
+/* Pantallas bajas: Pelusita compacta pero viva */
+@media (max-height: 760px) {
+  .sidebar-v2-pelusita-dock {
+    min-height: 72px;
+  }
+
+  .sidebar-v2-pelusita-dock .pelusita-char {
+    width: 62px !important;
+    height: 62px !important;
+  }
+
+  .sidebar-v2-pelusita-dock .pelusita-img {
+    width: 60px !important;
+    height: 60px !important;
+  }
+
+  .sidebar-v2-pelusita-dock::after {
+    display: none;
+  }
+}
+
+/* Alturas muy bajas: no la matamos, la dejamos modo mini */
+@media (max-height: 640px) {
+  .sidebar-v2-pelusita-dock {
+    min-height: 54px;
+  }
+
+  .sidebar-v2-pelusita-dock .pelusita-char {
+    width: 48px !important;
+    height: 48px !important;
+  }
+
+  .sidebar-v2-pelusita-dock .pelusita-img {
+    width: 46px !important;
+    height: 46px !important;
+  }
+}
+
+/* === END SIDEBAR PELUSITA DOCK === */
+
+/* === SIDEBAR PELUSITA DOCK FIX V2 === */
+
+/* Sacamos la jaula rara: Pelusita vive en el footer, pero sin parecer botón cuadrado */
+.sidebar-v2-pelusita-dock {
+  min-height: 86px !important;
+  display: grid !important;
+  place-items: center !important;
+  position: relative !important;
+  overflow: visible !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  cursor: pointer !important;
+  padding: 0 !important;
+}
+
+.sidebar-v2-pelusita-dock::after {
+  display: none !important;
+}
+
+/* Pelusita animada, libre y centrada */
+.sidebar-v2-pelusita-dock .pelusita-wrapper,
+.pelusita-wrapper.pelusita-sidebar-docked {
+  position: static !important;
+  inset: auto !important;
+  transform: none !important;
+  width: 100% !important;
+  height: auto !important;
+  display: grid !important;
+  place-items: center !important;
+  pointer-events: auto !important;
+  z-index: 10 !important;
+}
+
+.sidebar-v2-pelusita-dock .pelusita-char {
+  width: 86px !important;
+  height: 86px !important;
+  display: grid !important;
+  place-items: center !important;
+  animation: sidebarPelusitaFloat 2.6s ease-in-out infinite !important;
+}
+
+.sidebar-v2-pelusita-dock .pelusita-img {
+  width: 84px !important;
+  height: 84px !important;
+  object-fit: contain !important;
+  filter:
+    drop-shadow(0 0 10px rgba(0,245,255,.22))
+    drop-shadow(0 0 14px rgba(168,85,247,.18)) !important;
+}
+
+/* El globito chico no va en sidebar */
+.sidebar-v2-pelusita-dock .pelusita-bubble {
+  display: none !important;
+}
+
+/*
+  El diálogo NO vive dentro del cuadrito del footer.
+  Aunque el wrapper esté dentro del sidebar, el diálogo se posiciona fixed contra la ventana.
+*/
+.sidebar-v2-pelusita-dock .pelusita-dialog,
+.pelusita-wrapper.pelusita-sidebar-docked .pelusita-dialog {
+  position: fixed !important;
+  left: clamp(285px, 24vw, 360px) !important;
+  right: auto !important;
+  bottom: 24px !important;
+  width: min(360px, calc(100vw - 330px)) !important;
+  max-width: 360px !important;
+  z-index: 9999 !important;
+  display: none !important;
+}
+
+/* Cuando Pelusita abre diálogo */
+.sidebar-v2-pelusita-dock .pelusita-dialog.show,
+.pelusita-wrapper.pelusita-sidebar-docked .pelusita-dialog.show {
+  display: block !important;
+}
+
+/* Por si el JS usa clase open en vez de show */
+.sidebar-v2-pelusita-dock .pelusita-dialog.open,
+.pelusita-wrapper.pelusita-sidebar-docked .pelusita-dialog.open {
+  display: block !important;
+}
+
+/* Mobile / sidebar offcanvas: el diálogo aparece arriba de la side, no cortado */
+@media (max-width: 760px) {
+  .sidebar-v2-pelusita-dock .pelusita-dialog,
+  .pelusita-wrapper.pelusita-sidebar-docked .pelusita-dialog {
+    left: 14px !important;
+    right: 14px !important;
+    bottom: 18px !important;
+    width: auto !important;
+    max-width: none !important;
+  }
+}
+
+/* Pantallas bajas: Pelusita más compacta */
+@media (max-height: 760px) {
+  .sidebar-v2-pelusita-dock {
+    min-height: 68px !important;
+  }
+
+  .sidebar-v2-pelusita-dock .pelusita-char {
+    width: 64px !important;
+    height: 64px !important;
+  }
+
+  .sidebar-v2-pelusita-dock .pelusita-img {
+    width: 62px !important;
+    height: 62px !important;
+  }
+}
+
+@media (max-height: 640px) {
+  .sidebar-v2-pelusita-dock {
+    min-height: 52px !important;
+  }
+
+  .sidebar-v2-pelusita-dock .pelusita-char {
+    width: 50px !important;
+    height: 50px !important;
+  }
+
+  .sidebar-v2-pelusita-dock .pelusita-img {
+    width: 48px !important;
+    height: 48px !important;
+  }
+}
+
+/* === END SIDEBAR PELUSITA DOCK FIX V2 === */
+
+/* === PELUSITA GLOBAL HELP DIALOG === */
+
+.pelusita-global-dialog {
+  position: fixed;
+  left: clamp(285px, 24vw, 365px);
+  bottom: 22px;
+  width: min(390px, calc(100vw - 330px));
+  max-width: 390px;
+  z-index: 12000;
+  display: grid;
+  gap: .8rem;
+  padding: .95rem;
+  border: 1px solid rgba(0,245,255,.34);
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 8% 12%, rgba(0,245,255,.18), transparent 38%),
+    radial-gradient(circle at 92% 100%, rgba(168,85,247,.20), transparent 42%),
+    rgba(12, 5, 28, .96);
+  box-shadow:
+    0 24px 70px rgba(0,0,0,.52),
+    0 0 32px rgba(0,245,255,.15);
+  color: var(--text-main);
+  opacity: 0;
+  transform: translateY(14px) scale(.98);
+  pointer-events: none;
+  transition:
+    opacity .18s ease,
+    transform .18s ease;
+}
+
+.pelusita-global-dialog.show {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+.pelusita-global-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: .75rem;
+}
+
+.pelusita-global-kicker {
+  display: block;
+  color: var(--cyan);
+  font-size: .72rem;
+  font-weight: 900;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  margin-bottom: .22rem;
+}
+
+.pelusita-global-head h3 {
+  margin: 0;
+  font-family: var(--font-title);
+  font-size: 1.22rem;
+  color: var(--text-main);
+}
+
+.pelusita-global-close {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 12px;
+  background: rgba(255,255,255,.045);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.pelusita-global-close:hover {
+  color: var(--cyan);
+  border-color: rgba(0,245,255,.32);
+  background: rgba(0,245,255,.08);
+}
+
+.pelusita-global-body {
+  padding: .8rem;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 16px;
+  background: rgba(255,255,255,.035);
+}
+
+.pelusita-global-body p {
+  margin: 0;
+  color: var(--text-muted);
+  white-space: pre-line;
+  line-height: 1.55;
+  font-weight: 700;
+}
+
+.pelusita-global-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: .55rem;
+}
+
+.pelusita-global-action {
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .45rem;
+  padding: .65rem .75rem;
+  border: 1px solid rgba(0,245,255,.25);
+  border-radius: 14px;
+  background: rgba(0,245,255,.06);
+  color: var(--cyan);
+  text-decoration: none;
+  font-weight: 900;
+  cursor: pointer;
+  transition: var(--transition);
+  font-family: var(--font-text);
+}
+
+.pelusita-global-primary {
+  grid-column: span 2;
+  color: #fff;
+  border-color: rgba(168,85,247,.38);
+  background: linear-gradient(135deg, var(--violet), var(--pink));
+  box-shadow: 0 0 22px rgba(168,85,247,.18);
+}
+
+.pelusita-global-action:hover {
+  transform: translateY(-2px);
+  border-color: var(--cyan);
+  box-shadow: 0 0 22px rgba(0,245,255,.13);
+}
+
+.pelusita-global-action.is-disabled {
+  opacity: .48;
+  cursor: not-allowed;
+  filter: grayscale(.35);
+  pointer-events: none;
+}
+
+.pelusita-global-action .fa-whatsapp {
+  color: #22c55e;
+}
+
+.pelusita-global-action .fa-envelope {
+  color: #facc15;
+}
+
+/* En mobile el globo se centra abajo */
+@media (max-width: 760px) {
+  .pelusita-global-dialog {
+    left: 12px;
+    right: 12px;
+    bottom: 14px;
+    width: auto;
+    max-width: none;
+  }
+}
+
+@media (max-width: 420px) {
+  .pelusita-global-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .pelusita-global-primary {
+    grid-column: auto;
+  }
+}
+
+/* === END PELUSITA GLOBAL HELP DIALOG === */
+
+/* === PELUSITA GLOBAL HELP DIALOG COMPACT === */
+
+.pelusita-global-dialog {
+  width: min(330px, calc(100vw - 320px)) !important;
+  max-width: 330px !important;
+  padding: .72rem !important;
+  gap: .58rem !important;
+  border-radius: 18px !important;
+}
+
+.pelusita-global-kicker {
+  font-size: .64rem !important;
+  margin-bottom: .15rem !important;
+}
+
+.pelusita-global-head h3 {
+  font-size: 1rem !important;
+}
+
+.pelusita-global-close {
+  width: 30px !important;
+  height: 30px !important;
+  border-radius: 10px !important;
+}
+
+.pelusita-global-body {
+  padding: .62rem !important;
+  border-radius: 14px !important;
+}
+
+.pelusita-global-body p {
+  font-size: .86rem !important;
+  line-height: 1.45 !important;
+}
+
+.pelusita-global-actions {
+  grid-template-columns: 1fr !important;
+  gap: .45rem !important;
+}
+
+.pelusita-global-primary {
+  grid-column: auto !important;
+}
+
+.pelusita-global-action {
+  min-height: 38px !important;
+  padding: .55rem .65rem !important;
+  border-radius: 12px !important;
+  font-size: .86rem !important;
+}
+
+.pelusita-contact-panel {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: .45rem;
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition:
+    max-height .2s ease,
+    opacity .18s ease;
+}
+
+.pelusita-contact-panel.show {
+  max-height: 70px;
+  opacity: 1;
+}
+
+.pelusita-contact-link {
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .42rem;
+  padding: .5rem .55rem;
+  border: 1px solid rgba(0,245,255,.22);
+  border-radius: 12px;
+  background: rgba(0,245,255,.055);
+  color: var(--cyan);
+  text-decoration: none;
+  font-weight: 900;
+  font-size: .82rem;
+  transition: var(--transition);
+}
+
+.pelusita-contact-link:hover {
+  transform: translateY(-2px);
+  border-color: var(--cyan);
+  box-shadow: 0 0 18px rgba(0,245,255,.12);
+}
+
+.pelusita-contact-link.whatsapp i {
+  color: #22c55e;
+}
+
+.pelusita-contact-link.mail i {
+  color: #facc15;
+}
+
+@media (max-width: 760px) {
+  .pelusita-global-dialog {
+    width: auto !important;
+    max-width: none !important;
+    left: 12px !important;
+    right: 12px !important;
+  }
+}
+
+/* === END PELUSITA GLOBAL HELP DIALOG COMPACT === */
