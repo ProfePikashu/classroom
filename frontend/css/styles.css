@@ -9677,3 +9677,13 @@ body.page-asistencias .main-content > * {
 }
 
 /* === END PELUSITA GLOBAL HELP DIALOG COMPACT === */
+
+/* === LOGIN NO PELUSITA FLOAT === */
+
+body.page-login .pelusita-wrapper,
+body.login-page .pelusita-wrapper,
+body[data-page="login"] .pelusita-wrapper {
+  display: none !important;
+}
+
+/* === END LOGIN NO PELUSITA FLOAT === */
