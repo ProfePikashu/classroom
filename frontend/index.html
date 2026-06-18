@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
@@ -15,7 +15,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600;700;800&display=swap" rel="stylesheet" />
 
   <!-- Classroom CSS -->
-  <link rel="stylesheet" href="css/styles.css?v=20260612-newsletter-mock-v1" />
+  <link rel="stylesheet" href="css/styles.css?v=20260612-sidebar-v2" />
   <link rel="icon" href="favicon.ico" type="image/x-icon" />
   <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
   <link rel="stylesheet" href="css/pelusita.css?v=20260611b" />
@@ -32,92 +32,114 @@
   <div class="app-shell">
 
     <!-- SIDEBAR -->
-    <aside class="sidebar">
-      <div class="brand">
-        <div class="brand-logo">
-          <i class="fa-solid fa-graduation-cap"></i>
-        </div>
+    <aside class="sidebar sidebar-v2" id="classroomSidebar">
+      <div class="sidebar-v2-brand">
+        <a href="index.html" class="sidebar-v2-brand-link" aria-label="Ir al inicio">
+          <div class="sidebar-v2-logo">
+            <i class="fa-solid fa-graduation-cap"></i>
+          </div>
 
-        <div class="brand-text">
-          <span class="brand-main">
-            Andy<span>Azh</span><strong>TEC</strong>
-          </span>
-          <small>Classroom</small>
-        </div>
+          <div class="sidebar-v2-brand-text">
+            <span>Andy<span>Azh</span><strong>TEC</strong></span>
+            <small>Classroom</small>
+          </div>
+        </a>
       </div>
 
-      <nav class="sidebar-nav" aria-label="Navegación principal">
-        <a href="#" class="nav-item active">
+      <nav class="sidebar-v2-nav" aria-label="Navegación principal">
+        <a href="index.html" class="sidebar-v2-link" data-sidebar-route="index.html">
           <i class="fa-solid fa-table-columns"></i>
           <span>Inicio</span>
         </a>
 
-        <a href="cursos.html" class="nav-item nav-item-parent" data-submenu-toggle="coursesSubmenu">
+        <button class="sidebar-v2-link sidebar-v2-toggle" type="button" data-sidebar-toggle="courses" aria-expanded="false">
           <i class="fa-solid fa-book-open-reader"></i>
           <span>Cursos</span>
-          <i class="fa-solid fa-chevron-down submenu-chevron"></i>
-        </a>
+          <i class="fa-solid fa-chevron-down sidebar-v2-chevron"></i>
+        </button>
 
-        <div class="sidebar-submenu" id="coursesSubmenu">
-          <a href="cursos.html#ayrpc-2025" class="submenu-item" data-course-id="ayrpc-2025">
+        <div class="sidebar-v2-submenu" data-sidebar-panel="courses">
+          <a href="curso-ayrpc-2025.html" class="sidebar-v2-subitem" data-sidebar-route="curso-ayrpc-2025.html">
             <span class="submenu-dot complete"></span>
             <span>AyRPC 2025</span>
           </a>
 
-          <a href="cursos.html#ayrpc-2026" class="submenu-item" data-course-id="ayrpc-2026">
+          <a href="clases-ayrpc-2025.html" class="sidebar-v2-subitem" data-sidebar-route="clases-ayrpc-2025.html">
+            <span class="submenu-line"></span>
+            <span>Clases</span>
+          </a>
+
+          <a href="rubricas-ayrpc-2025.html" class="sidebar-v2-subitem staff-only" data-sidebar-route="rubricas-ayrpc-2025.html">
+            <span class="submenu-line"></span>
+            <span>Rúbricas</span>
+          </a>
+
+          <a href="curso-ayrpc-2026.html" class="sidebar-v2-subitem" data-sidebar-route="curso-ayrpc-2026.html">
             <span class="submenu-dot soon"></span>
             <span>AyRPC 2026</span>
           </a>
         </div>
 
-        <a href="archivos.html" class="nav-item">
+        <a href="archivos.html" class="sidebar-v2-link" data-sidebar-route="archivos.html">
           <i class="fa-solid fa-folder-open"></i>
           <span>Materiales</span>
         </a>
 
-        <a href="exampro.html" class="nav-item nav-item-featured">
+        <a href="exampro.html" class="sidebar-v2-link sidebar-v2-featured" data-sidebar-route="exampro.html">
           <i class="fa-solid fa-file-circle-check"></i>
           <span>ExamPro</span>
         </a>
 
-        <a href="gestion.html" class="nav-item">
+        <a href="gestion.html" class="sidebar-v2-link" data-sidebar-route="gestion.html">
           <i class="fa-solid fa-folder-tree"></i>
           <span>Gestión</span>
         </a>
 
-        <a href="#" class="nav-item">
+        <a href="#" class="sidebar-v2-link" data-sidebar-route="comunidad">
           <i class="fa-solid fa-comments"></i>
           <span>Comunidad</span>
         </a>
+      </nav>
 
-        <div class="teacher-admin-zone staff-only">
-          <span class="teacher-admin-label">ADMINISTRAR</span>
-          <a href="asistencias.html" class="nav-item admin-nav-item">
+      <div class="sidebar-v2-spacer"></div>
+
+      <div class="sidebar-v2-staff staff-only">
+        <button class="sidebar-v2-admin-btn" id="sidebarAdminToggle" type="button" aria-expanded="false">
+          <i class="fa-solid fa-screwdriver-wrench"></i>
+          <span>Administrar</span>
+          <i class="fa-solid fa-chevron-up"></i>
+        </button>
+
+        <div class="sidebar-v2-admin-popover" id="sidebarAdminPopover">
+          <a href="asistencias.html" data-sidebar-route="asistencias.html">
             <i class="fa-solid fa-clipboard-check"></i>
             <span>Asistencias</span>
           </a>
-          <a href="alumnos.html" class="nav-item admin-nav-item">
+
+          <a href="alumnos.html" data-sidebar-route="alumnos.html">
             <i class="fa-solid fa-users"></i>
             <span>Alumnos</span>
           </a>
 
-
-          <a href="admin.html" class="nav-item admin-nav-item">
+          <a href="admin.html" data-sidebar-route="admin.html">
             <i class="fa-solid fa-user-shield"></i>
             <span>Roles y permisos</span>
           </a>
-        </div>
-      </nav>
 
-      <div class="sidebar-footer">
-        <div class="mini-status">
-          <span class="pulse-dot"></span>
-          <div>
-            <strong>Sistema operativo</strong>
-            <small>MVP local</small>
-          </div>
+          <a href="rubricas-ayrpc-2025.html" data-sidebar-route="rubricas-ayrpc-2025.html">
+            <i class="fa-solid fa-clipboard-list"></i>
+            <span>Rúbricas</span>
+          </a>
         </div>
       </div>
+
+      <button class="sidebar-v2-pelusita" type="button" id="sidebarPelusitaBtn">
+        <img src="media/pelusita/idle.png" alt="Pelusita" />
+        <div>
+          <strong>Pelusita</strong>
+          <small>¿Necesitás ayuda?</small>
+        </div>
+      </button>
     </aside>
 
     <!-- MAIN -->
@@ -250,5 +272,16 @@
  <script src="js/main.js?v=20260612-newsletter-api-v1"></script>
   <script src="js/home.js"></script>
   <script src="js/pelusita.js?v=20260611b"></script>
+  <script src="js/sidebar-v2.js?v=20260612-v2"></script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
