@@ -9687,3 +9687,30 @@ body[data-page="login"] .pelusita-wrapper {
 }
 
 /* === END LOGIN NO PELUSITA FLOAT === */
+
+/* === LOGIN COPY CLEAN === */
+
+.login-lead,
+.login-side-lead {
+  max-width: 36rem;
+  margin: .8rem 0 1.35rem;
+  color: var(--text-muted);
+  font-weight: 700;
+  line-height: 1.55;
+}
+
+.login-side-lead {
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.login-hint {
+  margin-top: .85rem;
+  color: var(--text-muted);
+  font-size: .82rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+/* === END LOGIN COPY CLEAN === */
