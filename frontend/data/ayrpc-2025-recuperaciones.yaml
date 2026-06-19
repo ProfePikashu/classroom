@@ -1,0 +1,246 @@
+﻿curso: "AyRPC 2025"
+tipo: "recuperaciones"
+version: "2026-06-17"
+
+criterio_general:
+  preguntas_totales: 6
+  minimo_aprobacion: 5
+  estado_al_aprobar: "RECUPERADA"
+  nota_al_aprobar: "APROBADO"
+  nota_al_desaprobar: "DESAPROBADO"
+  mostrar_rubrica_al_alumno: true
+
+clases:
+  - id: "clase-1"
+    numero: 1
+    titulo: "Armado y Componentes"
+    descripcion: "Recuperación de la primera clase de AyRPC 2025 sobre ensamble, compatibilidad, memorias, almacenamiento y gestión de cableado."
+    consigna_general: "Respondé las siguientes preguntas con tus palabras. Para aprobar la recuperación necesitás responder correctamente al menos 5 de 6 preguntas."
+    criterio_aprobacion:
+      preguntas_totales: 6
+      minimo_correctas: 5
+
+    preguntas:
+      - id: "clase-1-p1"
+        orden: 1
+        tipo: "texto"
+        pregunta: "Enliste paso a paso un correcto ensamble de una computadora de escritorio."
+        respuesta_esperada: "Debe mencionar un orden lógico de ensamble: medidas de seguridad, verificación de compatibilidad, preensamble o prearmado fuera del gabinete, instalación de componentes principales, montaje en gabinete, gestión de cables, conexión de alimentación/datos y verificación de ventilación/flujo de aire."
+        conceptos_obligatorios:
+          - "medidas de seguridad"
+          - "compatibilidad"
+          - "preensamble"
+          - "gestión de cables"
+          - "ventilación"
+        aceptar_si_menciona:
+          medidas_de_seguridad:
+            - "descarga electrostática"
+            - "antiestática"
+            - "pulsera antiestática"
+            - "trabajar sin corriente"
+            - "desconectar fuente"
+            - "cuidar estática"
+          compatibilidad:
+            - "compatibilidad"
+            - "socket"
+            - "chipset"
+            - "ram compatible"
+            - "placa madre compatible"
+            - "fuente suficiente"
+            - "form factor"
+            - "gabinete compatible"
+          preensamble:
+            - "preensamble"
+            - "pre ensamblado"
+            - "preensamblado"
+            - "prearmado"
+            - "armar fuera del gabinete"
+            - "probar fuera del gabinete"
+            - "test bench"
+          gestion_cables:
+            - "gestión de cables"
+            - "ordenar cables"
+            - "cable management"
+            - "acomodar cableado"
+            - "organizar cables"
+          ventilacion:
+            - "ventilación"
+            - "flujo de aire"
+            - "airflow"
+            - "circulación de aire"
+            - "temperatura"
+        rubrica:
+          correcto: "La respuesta enumera un proceso ordenado de ensamble e incluye seguridad, compatibilidad, preensamble/prearmado, montaje, cableado y ventilación."
+          parcial: "La respuesta menciona varios pasos reales de armado, pero omite conceptos importantes como compatibilidad, preensamble, gestión de cables o ventilación."
+          incorrecto: "La respuesta es desordenada, muy incompleta o no describe un procedimiento real de ensamble."
+        feedback:
+          correcto: "Muy bien. El orden de armado y los puntos críticos están claros."
+          parcial: "Vas bien, pero faltó reforzar compatibilidad, preensamble, cableado o ventilación."
+          incorrecto: "Revisá el proceso completo de armado. La respuesta necesita un orden técnico más claro."
+
+      - id: "clase-1-p2"
+        orden: 2
+        tipo: "texto"
+        pregunta: "¿Cuál es la diferencia de velocidad en transferencia de datos entre un M.2 SATA y un U.2 NVMe?"
+        respuesta_esperada: "Debe indicar que M.2 SATA trabaja aproximadamente hasta 600 MB/s por límite de SATA III, mientras que U.2 NVMe puede alcanzar velocidades cercanas a 7 GB/s dependiendo de la generación PCIe y del dispositivo."
+        conceptos_obligatorios:
+          - "M.2 SATA cerca de 600 MB/s"
+          - "U.2 NVMe cerca de 7 GB/s"
+          - "NVMe es más rápido por usar PCIe"
+        aceptar_si_menciona:
+          m2_sata:
+            - "600 MB/s"
+            - "600 mb/s"
+            - "600mb"
+            - "600 mbps"
+            - "sata 3"
+            - "sata iii"
+            - "6 gbps"
+          u2_nvme:
+            - "7 GB/s"
+            - "7gb/s"
+            - "7000 MB/s"
+            - "7000mb/s"
+            - "nvme"
+            - "pcie"
+          razonamiento:
+            - "sata limita"
+            - "límite de sata"
+            - "nvme usa pcie"
+            - "pcie es más rápido"
+            - "protocolo nvme"
+        rubrica:
+          correcto: "La respuesta compara ambas velocidades y explica que M.2 SATA queda limitado por SATA, mientras que U.2 NVMe usa PCIe/NVMe y es mucho más rápido."
+          parcial: "La respuesta menciona que NVMe es más rápido, pero no da valores aproximados o no explica la razón técnica."
+          incorrecto: "La respuesta confunde SATA con NVMe o no identifica diferencias de velocidad."
+        feedback:
+          correcto: "Correcto. La diferencia de velocidad y la razón técnica están bien identificadas."
+          parcial: "Bien encaminado, pero conviene sumar valores aproximados y mencionar SATA/PCIe."
+          incorrecto: "Revisá la diferencia entre interfaz SATA y protocolo NVMe sobre PCIe."
+
+      - id: "clase-1-p3"
+        orden: 3
+        tipo: "texto"
+        pregunta: "¿Cómo se setea el Dual Channel? ¿Y el Quad Channel?"
+        respuesta_esperada: "Debe mencionar la distribución de memorias por bancos/canales. Para Dual Channel se aceptan combinaciones 1-3 y 2-4. Para Quad Channel se aceptan 1-3-5-7 y 2-4-6-8, o una explicación equivalente según manual/colores de slots."
+        conceptos_obligatorios:
+          - "Dual Channel: 1-3 / 2-4"
+          - "Quad Channel: 1-3-5-7 / 2-4-6-8"
+        aceptar_si_menciona:
+          dual_channel:
+            - "1 3"
+            - "1-3"
+            - "slots 1 y 3"
+            - "2 4"
+            - "2-4"
+            - "slots 2 y 4"
+            - "mismo color"
+            - "bancos alternados"
+          quad_channel:
+            - "1 3 5 7"
+            - "1-3-5-7"
+            - "2 4 6 8"
+            - "2-4-6-8"
+            - "cuatro canales"
+            - "ocho slots"
+          criterio:
+            - "según manual"
+            - "manual de la placa"
+            - "colores de slots"
+            - "canales de memoria"
+        rubrica:
+          correcto: "La respuesta indica correctamente las combinaciones 1-3 / 2-4 para Dual Channel y 1-3-5-7 / 2-4-6-8 para Quad Channel, o una explicación equivalente basada en manual/canales."
+          parcial: "La respuesta entiende que las memorias van en slots alternados o del mismo canal, pero no especifica bien las combinaciones."
+          incorrecto: "La respuesta indica slots al azar o no comprende cómo se distribuyen las memorias por canales."
+        feedback:
+          correcto: "Correcto. Identificaste bien la distribución por canales."
+          parcial: "La idea está, pero faltó ser más preciso con los slots."
+          incorrecto: "Revisá cómo se ocupan los bancos de memoria para activar canales."
+
+      - id: "clase-1-p4"
+        orden: 4
+        tipo: "texto"
+        pregunta: "Mencione el modelo de placa madre DDR3 que se mostró en vivo."
+        respuesta_esperada: "ECS H61H2-MV."
+        conceptos_obligatorios:
+          - "ECS H61H2-MV"
+        aceptar_si_menciona:
+          modelo:
+            - "ECS H61H2-MV"
+            - "ECS H61H2 MV"
+            - "H61H2-MV"
+            - "H61H2 MV"
+            - "ECS H61"
+        rubrica:
+          correcto: "La respuesta menciona el modelo ECS H61H2-MV o una variante claramente equivalente."
+          parcial: "La respuesta menciona ECS o H61, pero no identifica el modelo completo."
+          incorrecto: "La respuesta menciona otro modelo o no recuerda la placa mostrada."
+        feedback:
+          correcto: "Correcto. Ese fue el modelo mostrado en vivo."
+          parcial: "Estuviste cerca, pero faltó el modelo completo."
+          incorrecto: "Revisá la clase: el modelo era ECS H61H2-MV."
+
+      - id: "clase-1-p5"
+        orden: 5
+        tipo: "texto"
+        pregunta: "¿Dónde se inicia la búsqueda de compatibilidad entre componentes?"
+        respuesta_esperada: "Debe responder que la búsqueda se inicia en la página oficial del fabricante y/o en el manual de usuario de la placa madre o componente."
+        conceptos_obligatorios:
+          - "página del fabricante"
+          - "manual de usuario"
+        aceptar_si_menciona:
+          fabricante:
+            - "página del fabricante"
+            - "web del fabricante"
+            - "sitio oficial"
+            - "página oficial"
+            - "manufacturer"
+          manual:
+            - "manual"
+            - "manual de usuario"
+            - "manual de la placa"
+            - "qvl"
+            - "lista de compatibilidad"
+            - "support list"
+        rubrica:
+          correcto: "La respuesta indica que la compatibilidad se verifica desde la página oficial del fabricante y el manual/listas de compatibilidad."
+          parcial: "La respuesta menciona buscar en internet o revisar especificaciones, pero no identifica fabricante/manual como fuente principal."
+          incorrecto: "La respuesta propone fuentes no confiables o no responde dónde iniciar la búsqueda."
+        feedback:
+          correcto: "Correcto. Fabricante y manual son las fuentes principales."
+          parcial: "Bien, pero conviene ser más específico: página oficial y manual."
+          incorrecto: "Revisá el criterio de compatibilidad: primero fabricante y manual."
+
+      - id: "clase-1-p6"
+        orden: 6
+        tipo: "texto"
+        pregunta: "¿Qué puede pasar si nuestra gestión de cable no es óptima?"
+        respuesta_esperada: "Debe mencionar que una mala gestión de cables puede generar mal flujo de aire, temperaturas más altas, obstrucciones, daño en cables/conectores o problemas físicos dentro del gabinete."
+        conceptos_obligatorios:
+          - "mal flujo de aire"
+          - "daño de cableado"
+        aceptar_si_menciona:
+          flujo_aire:
+            - "mal flujo de aire"
+            - "mala ventilación"
+            - "airflow"
+            - "temperatura"
+            - "calentamiento"
+            - "sobrecalentamiento"
+            - "obstrucción"
+          cableado:
+            - "daño de cableado"
+            - "dañar cables"
+            - "cables cortados"
+            - "cables pellizcados"
+            - "conectores dañados"
+            - "interferencia con ventiladores"
+            - "cables tocando fans"
+        rubrica:
+          correcto: "La respuesta menciona pérdida de flujo de aire/ventilación y posible daño físico al cableado o interferencia con componentes."
+          parcial: "La respuesta menciona solo temperatura o solo desorden de cables, pero no desarrolla consecuencias."
+          incorrecto: "La respuesta no identifica problemas reales causados por mala gestión de cables."
+        feedback:
+          correcto: "Correcto. La mala gestión de cables afecta ventilación y puede dañar componentes o cableado."
+          parcial: "Bien, pero faltó mencionar flujo de aire y posible daño de cables."
+          incorrecto: "Revisá por qué el cable management no es solo estética: también afecta temperatura y seguridad."
