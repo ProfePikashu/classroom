@@ -703,6 +703,37 @@
     }
   }
 
+  function toggleFiltersPanel() {
+    if (!els.filtersPanel || !els.filterToggle) return;
+
+    const isOpen = !els.filtersPanel.classList.contains("is-collapsed");
+
+    els.filtersPanel.classList.toggle("is-collapsed", isOpen);
+    els.filterToggle.classList.toggle("active", !isOpen);
+    els.filterToggle.setAttribute("aria-expanded", isOpen ? "false" : "true");
+
+    const label = els.filterToggle.querySelector("span");
+    const icon = els.filterToggle.querySelector("i");
+
+    if (label) label.textContent = isOpen ? "Filtros" : "Ocultar filtros";
+    if (icon) icon.className = isOpen ? "fa-solid fa-sliders" : "fa-solid fa-xmark";
+  }
+
+  function closeFiltersOnMobileAfterChange() {
+    if (!els.filtersPanel || !els.filterToggle) return;
+    if (!window.matchMedia("(max-width: 760px)").matches) return;
+
+    els.filtersPanel.classList.add("is-collapsed");
+    els.filterToggle.classList.remove("active");
+    els.filterToggle.setAttribute("aria-expanded", "false");
+
+    const label = els.filterToggle.querySelector("span");
+    const icon = els.filterToggle.querySelector("i");
+
+    if (label) label.textContent = "Filtros";
+    if (icon) icon.className = "fa-solid fa-sliders";
+  }
+
   function bindEvents() {
     els.openComposer?.addEventListener("click", openComposer);
     els.closeComposer?.addEventListener("click", closeComposer);
@@ -716,7 +747,13 @@
 
     [els.search, els.typeFilter, els.statusFilter, els.courseFilter].forEach((input) => {
       input?.addEventListener("input", renderPosts);
-      input?.addEventListener("change", renderPosts);
+      input?.addEventListener("change", () => {
+        renderPosts();
+
+        if (input !== els.search) {
+          closeFiltersOnMobileAfterChange();
+        }
+      });
     });
 
     document.querySelectorAll("[data-community-quick]").forEach((button) => {

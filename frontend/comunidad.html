@@ -224,19 +224,11 @@
 
       <!-- COMMUNITY APP -->
       <section class="community-shell" aria-label="Comunidad">
-        <aside class="community-panel community-filters-panel">
+        <aside class="community-panel community-filters-panel is-collapsed" id="communityFiltersPanel">
           <div class="panel-header">
             <div>
               <p class="eyebrow">Filtros</p>
               <h3>Ordenar hilos</h3>
-            </div>
-          </div>
-
-          <div class="community-filter-group">
-            <label for="communitySearch">Buscar</label>
-            <div class="community-search-box">
-              <i class="fa-solid fa-magnifying-glass"></i>
-              <input id="communitySearch" type="search" placeholder="SSD, BIOS, Windows, drivers..." autocomplete="off" />
             </div>
           </div>
 
@@ -277,6 +269,18 @@
         </aside>
 
         <div class="community-main-area">
+          <div class="community-top-controls">
+            <div class="community-search-box community-search-box-main">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input id="communitySearch" type="search" placeholder="Buscar hilos: SSD, BIOS, Windows, drivers..." autocomplete="off" />
+            </div>
+
+            <button class="btn btn-outline community-filter-toggle" id="communityFilterToggle" type="button" aria-expanded="false" aria-controls="communityFiltersPanel">
+              <i class="fa-solid fa-sliders"></i>
+              <span>Filtros</span>
+            </button>
+          </div>
+
           <article class="community-panel community-composer-panel" id="communityComposerPanel" hidden>
             <div class="panel-header">
               <div>
