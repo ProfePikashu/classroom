@@ -318,6 +318,21 @@
                   <label for="communityContent">Contenido</label>
                   <textarea id="communityContent" name="content" rows="6" maxlength="1600" placeholder="Contá el contexto, qué probaste, qué error aparece o qué querés compartir..." required></textarea>
                 </div>
+
+                <div class="community-field community-field-wide community-attachments-field">
+                  <label for="communityImages">Capturas / imágenes</label>
+
+                  <div class="community-file-drop">
+                    <input id="communityImages" name="images" type="file" accept="image/png,image/jpeg,image/webp,image/gif" multiple />
+                    <div>
+                      <i class="fa-solid fa-images"></i>
+                      <strong>Adjuntar capturas</strong>
+                      <span>PNG, JPG, WEBP o GIF · hasta 4 imágenes · 2 MB c/u</span>
+                    </div>
+                  </div>
+
+                  <div class="community-attachment-preview" id="communityAttachmentPreview" hidden></div>
+                </div>
               </div>
 
               <div class="community-form-actions">

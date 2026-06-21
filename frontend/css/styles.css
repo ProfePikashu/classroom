@@ -10276,3 +10276,238 @@ html[data-theme="light"] .community-reply-form textarea {
     flex-direction: column;
   }
 }
+
+/* === Comunidad Adjuntos Imagenes 20260620 === */
+
+.community-file-drop {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 132px;
+  border: 1px dashed rgba(120, 255, 245, 0.28);
+  border-radius: 20px;
+  background:
+    radial-gradient(circle at top left, rgba(120, 255, 245, 0.12), transparent 32%),
+    rgba(255, 255, 255, 0.035);
+  overflow: hidden;
+}
+
+.community-file-drop input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.community-file-drop div {
+  display: grid;
+  gap: 0.35rem;
+  justify-items: center;
+  text-align: center;
+  padding: 1rem;
+  pointer-events: none;
+}
+
+.community-file-drop i {
+  font-size: 2rem;
+  color: var(--accent, #77f7ff);
+  filter: drop-shadow(0 0 14px rgba(120, 255, 245, 0.35));
+}
+
+.community-file-drop strong {
+  color: var(--text-main, #eef7ff);
+}
+
+.community-file-drop span {
+  color: var(--text-muted, rgba(235, 245, 255, 0.68));
+  font-size: 0.85rem;
+}
+
+.community-attachment-preview {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.community-attachment-preview-item {
+  display: grid;
+  grid-template-columns: 74px minmax(0, 1fr) 36px;
+  align-items: center;
+  gap: 0.75rem;
+  border: 1px solid rgba(120, 255, 245, 0.14);
+  border-radius: 18px;
+  padding: 0.55rem;
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.community-attachment-preview-item img {
+  width: 74px;
+  height: 58px;
+  object-fit: cover;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.11);
+}
+
+.community-attachment-preview-item div {
+  min-width: 0;
+  display: grid;
+  gap: 0.2rem;
+}
+
+.community-attachment-preview-item strong,
+.community-attachment-preview-item span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.community-attachment-preview-item strong {
+  color: var(--text-main, #eef7ff);
+  font-size: 0.9rem;
+}
+
+.community-attachment-preview-item span {
+  color: var(--text-muted, rgba(235, 245, 255, 0.64));
+  font-size: 0.78rem;
+}
+
+.community-attachment-remove {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255, 94, 123, 0.25);
+  border-radius: 12px;
+  background: rgba(255, 94, 123, 0.08);
+  color: #ff9bad;
+  cursor: pointer;
+}
+
+.community-attachments-gallery {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.65rem;
+  margin-top: 0.95rem;
+}
+
+.community-attachment-thumb {
+  position: relative;
+  border: 1px solid rgba(120, 255, 245, 0.15);
+  border-radius: 16px;
+  padding: 0;
+  aspect-ratio: 16 / 10;
+  background: rgba(255, 255, 255, 0.04);
+  overflow: hidden;
+  cursor: zoom-in;
+}
+
+.community-attachment-thumb::after {
+  content: "\\f00e";
+  font-family: "Font Awesome 6 Free";
+  font-weight: 900;
+  position: absolute;
+  right: 0.45rem;
+  bottom: 0.45rem;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.52);
+  opacity: 0;
+  transform: translateY(4px);
+  transition: 0.18s ease;
+}
+
+.community-attachment-thumb:hover::after {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.community-attachment-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.18s ease;
+}
+
+.community-attachment-thumb:hover img {
+  transform: scale(1.04);
+}
+
+.community-attachment-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: none;
+  place-items: center;
+  padding: 1rem;
+}
+
+.community-attachment-modal.open {
+  display: grid;
+}
+
+.community-attachment-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.78);
+  backdrop-filter: blur(8px);
+}
+
+.community-attachment-modal-dialog {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 0.75rem;
+  max-width: min(980px, 96vw);
+  max-height: 92vh;
+  padding: 0.85rem;
+  border: 1px solid rgba(120, 255, 245, 0.2);
+  border-radius: 22px;
+  background: rgba(11, 16, 30, 0.92);
+  box-shadow: 0 24px 90px rgba(0, 0, 0, 0.45);
+}
+
+.community-attachment-modal-dialog img {
+  max-width: 100%;
+  max-height: 78vh;
+  object-fit: contain;
+  border-radius: 16px;
+}
+
+.community-attachment-modal-dialog strong {
+  color: var(--text-muted, rgba(235, 245, 255, 0.72));
+  font-size: 0.9rem;
+  overflow-wrap: anywhere;
+}
+
+.community-attachment-modal-close {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  background: rgba(0, 0, 0, 0.48);
+}
+
+html[data-theme="light"] .community-file-drop,
+html[data-theme="light"] .community-attachment-preview-item,
+html[data-theme="light"] .community-attachment-thumb {
+  background: rgba(255, 255, 255, 0.72);
+}
+
+@media (max-width: 760px) {
+  .community-attachment-preview,
+  .community-attachments-gallery {
+    grid-template-columns: 1fr;
+  }
+
+  .community-attachment-preview-item {
+    grid-template-columns: 68px minmax(0, 1fr) 34px;
+  }
+
+  .community-attachment-preview-item img {
+    width: 68px;
+    height: 54px;
+  }
+}

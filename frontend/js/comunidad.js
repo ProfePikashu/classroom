@@ -3,6 +3,11 @@
   "use strict";
 
   const STORAGE_KEY = "andyazh-classroom-community-posts-v1";
+  const ATTACHMENT_MAX_FILES = 4;
+  const ATTACHMENT_MAX_SIZE = 2 * 1024 * 1024;
+  const ATTACHMENT_ALLOWED_TYPES = ["image/png", "image/jpeg", "image/webp", "image/gif"];
+
+  let pendingAttachments = [];
 
   const TYPE_LABELS = {
     consulta: "Consulta",
@@ -136,6 +141,7 @@
     const visiblePosts = filteredPosts(posts);
 
     renderStats(posts);
+    updateSeedDemoButton();
 
     if (!els.list || !els.empty) return;
 
@@ -144,6 +150,189 @@
 
     bindPostActions();
   }
+
+
+  function bytesToReadable(size) {
+    const n = Number(size) || 0;
+
+    if (n >= 1024 * 1024) return `${(n / 1024 / 1024).toFixed(1)} MB`;
+    if (n >= 1024) return `${Math.round(n / 1024)} KB`;
+
+    return `${n} B`;
+  }
+
+  function readFileAsDataUrl(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+
+      reader.onload = () => {
+        resolve({
+          id: uid("attachment"),
+          name: file.name,
+          type: file.type,
+          size: file.size,
+          dataUrl: reader.result,
+        });
+      };
+
+      reader.onerror = () => reject(reader.error || new Error("No se pudo leer la imagen."));
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function renderAttachmentPreview() {
+    if (!els.attachmentPreview) return;
+
+    if (!pendingAttachments.length) {
+      els.attachmentPreview.hidden = true;
+      els.attachmentPreview.innerHTML = "";
+      return;
+    }
+
+    els.attachmentPreview.hidden = false;
+    els.attachmentPreview.innerHTML = pendingAttachments.map((attachment) => `
+      <article class="community-attachment-preview-item" data-attachment-id="${escapeHtml(attachment.id)}">
+        <img src="${escapeHtml(attachment.dataUrl)}" alt="${escapeHtml(attachment.name)}" />
+        <div>
+          <strong>${escapeHtml(attachment.name)}</strong>
+          <span>${escapeHtml(bytesToReadable(attachment.size))}</span>
+        </div>
+        <button type="button" class="community-attachment-remove" data-remove-attachment="${escapeHtml(attachment.id)}" aria-label="Quitar imagen">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </article>
+    `).join("");
+
+    els.attachmentPreview.querySelectorAll("[data-remove-attachment]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const id = button.dataset.removeAttachment;
+        pendingAttachments = pendingAttachments.filter((attachment) => attachment.id !== id);
+
+        if (els.images) els.images.value = "";
+
+        renderAttachmentPreview();
+      });
+    });
+  }
+
+  async function handleImageSelection(event) {
+    const files = Array.from(event.target.files || []);
+
+    if (!files.length) return;
+
+    const slotsLeft = ATTACHMENT_MAX_FILES - pendingAttachments.length;
+
+    if (slotsLeft <= 0) {
+      window.alert(`Máximo ${ATTACHMENT_MAX_FILES} imágenes por hilo.`);
+      event.target.value = "";
+      return;
+    }
+
+    const selected = files.slice(0, slotsLeft);
+    const rejected = [];
+
+    const validFiles = selected.filter((file) => {
+      if (!ATTACHMENT_ALLOWED_TYPES.includes(file.type)) {
+        rejected.push(`${file.name}: formato no permitido`);
+        return false;
+      }
+
+      if (file.size > ATTACHMENT_MAX_SIZE) {
+        rejected.push(`${file.name}: supera 2 MB`);
+        return false;
+      }
+
+      return true;
+    });
+
+    if (files.length > slotsLeft) {
+      rejected.push(`Solo se agregaron ${slotsLeft} imagen/es porque el máximo es ${ATTACHMENT_MAX_FILES}.`);
+    }
+
+    if (rejected.length) {
+      window.alert(`Algunas imágenes no se agregaron:\n\n${rejected.join("\n")}`);
+    }
+
+    try {
+      const loaded = await Promise.all(validFiles.map(readFileAsDataUrl));
+      pendingAttachments = [...pendingAttachments, ...loaded].slice(0, ATTACHMENT_MAX_FILES);
+      renderAttachmentPreview();
+    } catch (error) {
+      window.alert("No se pudo cargar una de las imágenes.");
+    } finally {
+      event.target.value = "";
+    }
+  }
+
+  function renderPostAttachments(post) {
+    const attachments = Array.isArray(post.attachments) ? post.attachments : [];
+
+    if (!attachments.length) return "";
+
+    return `
+      <div class="community-attachments-gallery">
+        ${attachments.map((attachment) => `
+          <button class="community-attachment-thumb" type="button" data-open-attachment="${escapeHtml(attachment.dataUrl)}" data-attachment-name="${escapeHtml(attachment.name)}">
+            <img src="${escapeHtml(attachment.dataUrl)}" alt="${escapeHtml(attachment.name)}" loading="lazy" />
+          </button>
+        `).join("")}
+      </div>
+    `;
+  }
+
+  function openAttachmentModal(src, name) {
+    if (!src) return;
+
+    let modal = document.getElementById("communityAttachmentModal");
+
+    if (!modal) {
+      modal = document.createElement("div");
+      modal.id = "communityAttachmentModal";
+      modal.className = "community-attachment-modal";
+      modal.innerHTML = `
+        <div class="community-attachment-modal-backdrop" data-close-attachment-modal></div>
+        <div class="community-attachment-modal-dialog">
+          <button class="community-icon-btn community-attachment-modal-close" type="button" data-close-attachment-modal aria-label="Cerrar imagen">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+          <img id="communityAttachmentModalImg" src="" alt="" />
+          <strong id="communityAttachmentModalName"></strong>
+        </div>
+      `;
+
+      document.body.appendChild(modal);
+
+      modal.querySelectorAll("[data-close-attachment-modal]").forEach((button) => {
+        button.addEventListener("click", closeAttachmentModal);
+      });
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") closeAttachmentModal();
+      });
+    }
+
+    const img = modal.querySelector("#communityAttachmentModalImg");
+    const label = modal.querySelector("#communityAttachmentModalName");
+
+    if (img) {
+      img.src = src;
+      img.alt = name || "Imagen adjunta";
+    }
+
+    if (label) {
+      label.textContent = name || "Imagen adjunta";
+    }
+
+    modal.classList.add("open");
+  }
+
+  function closeAttachmentModal() {
+    const modal = document.getElementById("communityAttachmentModal");
+    if (!modal) return;
+
+    modal.classList.remove("open");
+  }
+
 
   function renderPostCard(post) {
     const comments = post.comments || [];
@@ -187,6 +376,8 @@
         <h3>${escapeHtml(post.title)}</h3>
 
         <p class="community-post-content">${escapeHtml(post.content)}</p>
+
+        ${renderPostAttachments(post)}
 
         <div class="community-post-meta">
           <span><i class="fa-solid fa-user-astronaut"></i> ${escapeHtml(post.author)}</span>
@@ -278,6 +469,12 @@
 
         addComment(postId, content);
       });
+
+      card.querySelectorAll("[data-open-attachment]").forEach((button) => {
+        button.addEventListener("click", () => {
+          openAttachmentModal(button.dataset.openAttachment, button.dataset.attachmentName);
+        });
+      });
     });
   }
 
@@ -321,6 +518,7 @@
       author: currentUserName(),
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
+      attachments: pendingAttachments.map((attachment) => ({ ...attachment })),
       comments: [],
     });
 
@@ -335,6 +533,8 @@
     });
 
     els.form.reset();
+    pendingAttachments = [];
+    renderAttachmentPreview();
     closeComposer();
     renderPosts();
   }
@@ -418,14 +618,19 @@
     if (!els.composer) return;
 
     els.composer.hidden = true;
+    pendingAttachments = [];
+    renderAttachmentPreview();
+
+    if (els.images) els.images.value = "";
   }
 
   function seedDemoPosts() {
     const existing = loadPosts();
+    const hasDemoPosts = existing.some((post) => post.demoSeed === "community-mvp-v1");
 
-    if (existing.length > 0) {
-      const ok = window.confirm("Ya hay hilos cargados. ¿Agregar ejemplos igual?");
-      if (!ok) return;
+    if (hasDemoPosts) {
+      window.alert("Los ejemplos de Comunidad ya están cargados. No los dupliqué, animalito del localStorage.");
+      return;
     }
 
     const now = new Date();
@@ -439,6 +644,7 @@
         course: "ayrpc-2026",
         status: "abierto",
         author: "Alumno Demo",
+        demoSeed: "community-mvp-v1",
         createdAt: new Date(now.getTime() - 1000 * 60 * 35).toISOString(),
         updatedAt: new Date(now.getTime() - 1000 * 60 * 35).toISOString(),
         comments: [],
@@ -451,6 +657,7 @@
         course: "general",
         status: "resuelto",
         author: "Profe Demo",
+        demoSeed: "community-mvp-v1",
         createdAt: new Date(now.getTime() - 1000 * 60 * 90).toISOString(),
         updatedAt: new Date(now.getTime() - 1000 * 60 * 60).toISOString(),
         comments: [
@@ -470,6 +677,7 @@
         course: "ayrpc-2025",
         status: "abierto",
         author: "Técnico Demo",
+        demoSeed: "community-mvp-v1",
         createdAt: new Date(now.getTime() - 1000 * 60 * 140).toISOString(),
         updatedAt: new Date(now.getTime() - 1000 * 60 * 140).toISOString(),
         comments: [],
@@ -480,11 +688,27 @@
     renderPosts();
   }
 
+  function updateSeedDemoButton() {
+    if (!els.seedDemo) return;
+
+    const hasDemoPosts = loadPosts().some((post) => post.demoSeed === "community-mvp-v1");
+
+    els.seedDemo.disabled = hasDemoPosts;
+    els.seedDemo.classList.toggle("is-disabled", hasDemoPosts);
+
+    if (hasDemoPosts) {
+      els.seedDemo.innerHTML = '<i class="fa-solid fa-circle-check"></i> Ejemplos cargados';
+    } else {
+      els.seedDemo.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> Cargar ejemplos';
+    }
+  }
+
   function bindEvents() {
     els.openComposer?.addEventListener("click", openComposer);
     els.closeComposer?.addEventListener("click", closeComposer);
     els.form?.addEventListener("submit", createPost);
     els.seedDemo?.addEventListener("click", seedDemoPosts);
+    els.images?.addEventListener("change", handleImageSelection);
 
     document.querySelectorAll("[data-community-open]").forEach((button) => {
       button.addEventListener("click", openComposer);
@@ -514,6 +738,8 @@
     els.form = $("#communityForm");
     els.title = $("#communityTitle");
     els.content = $("#communityContent");
+    els.images = $("#communityImages");
+    els.attachmentPreview = $("#communityAttachmentPreview");
     els.type = $("#communityType");
     els.course = $("#communityCourse");
     els.search = $("#communitySearch");
