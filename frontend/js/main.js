@@ -1025,8 +1025,8 @@ async function initNotificationPrefsCard() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  initNotificationsBell();
+  if (!window.ClassroomUseLocalNotifications) initNotificationsBell();
   initClassroomNewsHome();
-  initNotificationPrefsCard();
+  if (!window.ClassroomUseLocalNotifications) initNotificationPrefsCard();
   refreshClassroomNewsFromApi();
 });

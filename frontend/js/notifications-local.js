@@ -2,6 +2,8 @@
 (() => {
   "use strict";
 
+  window.ClassroomUseLocalNotifications = true;
+
   const NOTIFICATIONS_KEY = "andyazh-classroom-notifications-v2";
   const PREFS_KEY = "andyazh-classroom-notification-prefs-mock";
   const MAX_ITEMS = 80;
@@ -174,12 +176,40 @@
     render();
   }
 
+
+  function clearLegacyNotificationStores() {
+    const keysToRemove = [];
+
+    for (let i = 0; i < localStorage.length; i += 1) {
+      const key = localStorage.key(i);
+
+      if (!key) continue;
+      if (!key.startsWith("andyazh-classroom-")) continue;
+
+      const normalized = key.toLowerCase();
+      const looksLikeNotifications = normalized.includes("notification") || normalized.includes("notificacion") || normalized.includes("news");
+      const isPrefs = normalized.includes("pref");
+
+      if (looksLikeNotifications && !isPrefs) {
+        keysToRemove.push(key);
+      }
+    }
+
+    keysToRemove.forEach((key) => {
+      localStorage.removeItem(key);
+    });
+  }
+
+
   function clearAll() {
     const ok = window.confirm("¿Limpiar todas las notificaciones locales?");
     if (!ok) return;
 
+    clearLegacyNotificationStores();
     saveItems([]);
     render();
+
+    setTimeout(render, 120);
   }
 
   function seedDemo() {
