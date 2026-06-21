@@ -4,20 +4,24 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <title>AyRPC 2025 — AndyAzhTEC Classroom</title>
+  <title>Comunidad | AndyAzhTEC Classroom</title>
 
+  <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
 
+  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600;700;800&display=swap" rel="stylesheet" />
 
+  <!-- Classroom CSS -->
   <link rel="stylesheet" href="css/styles.css?v=20260612-pelusita-guide-compact" />
   <link rel="icon" href="favicon.ico" type="image/x-icon" />
   <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
   <link rel="stylesheet" href="css/pelusita.css?v=20260611b" />
 </head>
-<body class="page-curso-ayrpc-2025 page-ayrpc2025-mobilefix">
+
+<body class="page-community">
   <button class="mobile-menu-toggle" id="mobileMenuToggle" type="button" aria-label="Abrir menú">
     <span></span>
     <span></span>
@@ -26,7 +30,8 @@
 
   <div class="mobile-sidebar-overlay" id="mobileSidebarOverlay"></div>
   <div class="app-shell">
-    
+
+    <!-- SIDEBAR -->
     <aside class="sidebar sidebar-v2" id="classroomSidebar">
       <div class="sidebar-v2-brand">
         <a href="index.html" class="sidebar-v2-brand-link" aria-label="Ir al inicio">
@@ -131,17 +136,18 @@
       <div class="sidebar-v2-pelusita-dock" id="sidebarPelusitaDock" aria-label="Pelusita asistente"></div>
     </aside>
 
+    <!-- MAIN -->
     <main class="main-content">
 
       <!-- TOPBAR -->
       <header class="topbar">
         <div>
           <p class="eyebrow">
-            <i class="fa-solid fa-satellite-dish"></i>
-            Campus técnico
+            <i class="fa-solid fa-comments"></i>
+            Comunidad técnica
           </p>
 
-          <h1>AyRPC 2025</h1>
+          <h1>Comunidad</h1>
         </div>
 
         <div class="topbar-actions">
@@ -179,159 +185,193 @@
         </div>
       </header>
 
-      <!-- HERO -->
-      <section class="hero-panel ayrpc2025-hero">
-        <div class="hero-copy">
+      <!-- COMMUNITY HERO -->
+      <section class="community-hero-panel">
+        <div class="community-hero-copy">
           <span class="badge">
-            <i class="fa-solid fa-screwdriver-wrench"></i>
-            AyRPC 2025
+            <i class="fa-solid fa-comments"></i>
+            Comunidad técnica
           </span>
 
           <h2>
-            Panel académico
-            <span>AyRPC 2025</span>
+            Abro hilo
+            <span>consultas, aportes y recomendaciones</span>
           </h2>
 
           <p>
-            Revisá tu situación de cursada, asistencias, tiempos registrados y accesos disponibles.
+            Un espacio del Classroom para preguntar, compartir soluciones, dejar consejos técnicos
+            y encontrar respuestas sin depender siempre de WhatsApp o mail.
           </p>
 
-          <div class="hero-actions">
-            <a href="clases-ayrpc-2025.html" class="btn btn-primary">
-              <i class="fa-solid fa-video"></i>
-              Ver clases
-            </a>
+          <div class="community-hero-actions">
+            <button class="btn btn-primary" type="button" id="communityOpenComposer">
+              <i class="fa-solid fa-plus"></i>
+              Abro hilo
+            </button>
 
-            <a href="exampro.html" class="btn btn-outline">
-              <i class="fa-solid fa-file-circle-check"></i>
-              Ir a ExamPro
-            </a>
+            <button class="btn btn-outline" type="button" id="communitySeedDemo">
+              <i class="fa-solid fa-wand-magic-sparkles"></i>
+              Cargar ejemplos
+            </button>
           </div>
         </div>
 
-        <div class="hero-orb">
-          <div class="orb-inner">
-            <i class="fa-solid fa-user-graduate"></i>
-          </div>
+        <div class="community-orb" aria-hidden="true">
+          <i class="fa-solid fa-network-wired"></i>
+          <span></span>
         </div>
       </section>
 
-      <section class="ayrpc-student-dashboard">
-        <article class="panel ayrpc-student-card">
+      <!-- COMMUNITY APP -->
+      <section class="community-shell" aria-label="Comunidad">
+        <aside class="community-panel community-filters-panel">
           <div class="panel-header">
             <div>
-              <p class="eyebrow">Alumno</p>
-              <h3 id="ayrpcStudentName">Cargando datos...</h3>
-            </div>
-
-            <span class="status-badge active" id="ayrpcDataSource">Sincronizando</span>
-          </div>
-
-          <div class="ayrpc-student-grid">
-            <div>
-              <span>DNI</span>
-              <strong id="ayrpcStudentDni">—</strong>
-            </div>
-
-            <div>
-              <span>Twitch</span>
-              <strong id="ayrpcStudentTwitch">—</strong>
-            </div>
-
-            <div>
-              <span>Correo</span>
-              <strong id="ayrpcStudentEmail">—</strong>
-            </div>
-
-            <div>
-              <span>Estado examen</span>
-              <strong id="ayrpcStudentExamStatus">Verificando</strong>
+              <p class="eyebrow">Filtros</p>
+              <h3>Ordenar hilos</h3>
             </div>
           </div>
-        </article>
 
-        <article class="panel ayrpc-recovery-card" id="ayrpcRecoveryCard">
-          <div class="panel-header">
-            <div>
-              <p class="eyebrow">Evaluación</p>
-              <h3>Recuperatorio</h3>
+          <div class="community-filter-group">
+            <label for="communitySearch">Buscar</label>
+            <div class="community-search-box">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input id="communitySearch" type="search" placeholder="SSD, BIOS, Windows, drivers..." autocomplete="off" />
+            </div>
+          </div>
+
+          <div class="community-filter-group">
+            <label for="communityTypeFilter">Tipo</label>
+            <select id="communityTypeFilter">
+              <option value="todos">Todos</option>
+              <option value="consulta">Consulta</option>
+              <option value="aporte">Aporte</option>
+              <option value="recomendacion">Recomendación</option>
+            </select>
+          </div>
+
+          <div class="community-filter-group">
+            <label for="communityStatusFilter">Estado</label>
+            <select id="communityStatusFilter">
+              <option value="todos">Todos</option>
+              <option value="abierto">Abierto</option>
+              <option value="resuelto">Resuelto</option>
+            </select>
+          </div>
+
+          <div class="community-filter-group">
+            <label for="communityCourseFilter">Curso</label>
+            <select id="communityCourseFilter">
+              <option value="todos">Todos</option>
+              <option value="general">General</option>
+              <option value="ayrpc-2025">AyRPC 2025</option>
+              <option value="ayrpc-2026">AyRPC 2026</option>
+            </select>
+          </div>
+
+          <div class="community-mini-stats" id="communityMiniStats">
+            <span><strong>0</strong> hilos</span>
+            <span><strong>0</strong> abiertos</span>
+            <span><strong>0</strong> resueltos</span>
+          </div>
+        </aside>
+
+        <div class="community-main-area">
+          <article class="community-panel community-composer-panel" id="communityComposerPanel" hidden>
+            <div class="panel-header">
+              <div>
+                <p class="eyebrow">Nueva publicación</p>
+                <h3>Abro hilo</h3>
+              </div>
+
+              <button class="community-icon-btn" type="button" id="communityCloseComposer" aria-label="Cerrar formulario">
+                <i class="fa-solid fa-xmark"></i>
+              </button>
             </div>
 
-            <span class="status-badge" id="ayrpcRecoveryBadge">Verificando</span>
+            <form class="community-form" id="communityForm">
+              <div class="community-form-grid">
+                <div class="community-field community-field-wide">
+                  <label for="communityTitle">Título</label>
+                  <input id="communityTitle" name="title" type="text" maxlength="90" placeholder="Ej: No me reconoce el SSD M.2 en BIOS" required />
+                </div>
+
+                <div class="community-field">
+                  <label for="communityType">Tipo</label>
+                  <select id="communityType" name="type" required>
+                    <option value="consulta">Consulta</option>
+                    <option value="aporte">Aporte</option>
+                    <option value="recomendacion">Recomendación</option>
+                  </select>
+                </div>
+
+                <div class="community-field">
+                  <label for="communityCourse">Curso</label>
+                  <select id="communityCourse" name="course" required>
+                    <option value="general">General</option>
+                    <option value="ayrpc-2025">AyRPC 2025</option>
+                    <option value="ayrpc-2026">AyRPC 2026</option>
+                  </select>
+                </div>
+
+                <div class="community-field community-field-wide">
+                  <label for="communityContent">Contenido</label>
+                  <textarea id="communityContent" name="content" rows="6" maxlength="1600" placeholder="Contá el contexto, qué probaste, qué error aparece o qué querés compartir..." required></textarea>
+                </div>
+              </div>
+
+              <div class="community-form-actions">
+                <span class="community-form-hint">
+                  <i class="fa-solid fa-circle-info"></i>
+                  Esta primera versión guarda los hilos en este navegador.
+                </span>
+
+                <button class="btn btn-primary" type="submit">
+                  <i class="fa-solid fa-paper-plane"></i>
+                  Publicar hilo
+                </button>
+              </div>
+            </form>
+          </article>
+
+          <div class="community-toolbar">
+            <div>
+              <p class="eyebrow">Hilos</p>
+              <h3>Publicaciones recientes</h3>
+            </div>
+
+            <div class="community-sort-pills" role="group" aria-label="Accesos rápidos">
+              <button type="button" class="community-pill active" data-community-quick="todos">Todos</button>
+              <button type="button" class="community-pill" data-community-quick="abiertos">Abiertos</button>
+              <button type="button" class="community-pill" data-community-quick="sin-responder">Sin responder</button>
+            </div>
           </div>
 
-          <p id="ayrpcRecoveryText">
-            Estamos revisando tu estado académico para saber si corresponde habilitar el acceso.
-          </p>
-
-          <div class="ayrpc-recovery-actions">
-            <a class="btn btn-primary disabled" id="ayrpcRecoveryBtn" href="#" aria-disabled="true">
-              <i class="fa-solid fa-file-circle-question"></i>
-              Abrir recuperatorio
-            </a>
-
-            <a class="btn btn-outline" href="clases-ayrpc-2025.html">
-              <i class="fa-solid fa-list-check"></i>
-              Revisar clases
-            </a>
+          <div class="community-empty" id="communityEmpty" hidden>
+            <div class="community-empty-icon">
+              <i class="fa-regular fa-comments"></i>
+            </div>
+            <h3>Todavía no hay hilos</h3>
+            <p>Creá la primera consulta, aporte o recomendación de la comunidad.</p>
+            <button class="btn btn-primary" type="button" data-community-open>
+              <i class="fa-solid fa-plus"></i>
+              Abro hilo
+            </button>
           </div>
-        </article>
+
+          <div class="community-list" id="communityList"></div>
+        </div>
       </section>
 
-      <section class="ayrpc-academic-layout">
-        <article class="panel ayrpc-attendance-panel">
-          <div class="panel-header">
-            <div>
-              <p class="eyebrow">Asistencia</p>
-              <h3>Resumen de clases</h3>
-            </div>
-
-            <span class="ayrpc-attendance-total" id="ayrpcAttendanceTotal">—/7</span>
-          </div>
-
-          <div class="ayrpc-attendance-progress">
-            <span id="ayrpcAttendanceProgress"></span>
-          </div>
-
-          <div class="ayrpc-class-list" id="ayrpcClassList">
-            <div class="ayrpc-loading-line">Cargando asistencias...</div>
-          </div>
-        </article>
-
-        <article class="panel ayrpc-chart-panel">
-          <div class="panel-header">
-            <div>
-              <p class="eyebrow">Métricas</p>
-              <h3>Tiempo registrado</h3>
-            </div>
-          </div>
-
-          <div class="ayrpc-chart-summary">
-            <div>
-              <span>Total registrado</span>
-              <strong id="ayrpcTotalTime">—</strong>
-            </div>
-
-            <div>
-              <span>Mejor clase</span>
-              <strong id="ayrpcBestClass">—</strong>
-            </div>
-          </div>
-
-          <div class="ayrpc-time-chart" id="ayrpcTimeChart">
-            <div class="ayrpc-loading-line">Cargando gráfico...</div>
-          </div>
-        </article>
-      </section>
     </main>
   </div>
 
-  <script src="js/auth.js?v=20260612-notifications-global-v2"></script>
+ <script src="js/auth.js?v=20260612-notifications-global-v2"></script>
   <script src="js/roles.js?v=20260612-notifications-global-v2"></script>
   <script src="js/courses-data.js"></script>
-  <script src="js/main.js?v=20260612-newsletter-api-v1"></script>
+ <script src="js/main.js?v=20260612-newsletter-api-v1"></script>
   <script src="js/notifications-local.js?v=20260620-community-notifications-v2"></script>
-  <script src="js/curso-ayrpc-2025.js?v=20260612-academic-panel"></script>
+  <script src="js/comunidad.js?v=20260620-community-mvp"></script>
   <script src="js/pelusita.js?v=20260611b"></script>  <script src="js/pelusita-dialog.js?v=20260612-guide-compact"></script>
   <script src="js/sidebar-v2.js?v=20260612-pelusita-dock-v2"></script>
 </body>
