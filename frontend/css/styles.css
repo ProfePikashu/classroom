@@ -12131,3 +12131,354 @@ html[data-theme="light"] .notification-action-btn:hover {
     width: 100% !important;
   }
 }
+
+/* === Home CMD Terminal Feed FORCED 20260621 === */
+
+.home-terminal-feed-section {
+  margin-top: 1.15rem;
+}
+
+.home-terminal-feed {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(120, 255, 245, 0.18);
+  border-radius: 26px;
+  padding: 1rem;
+  background:
+    linear-gradient(rgba(120, 255, 245, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(120, 255, 245, 0.025) 1px, transparent 1px),
+    radial-gradient(circle at top left, rgba(0, 229, 255, 0.12), transparent 34%),
+    radial-gradient(circle at bottom right, rgba(159, 92, 255, 0.14), transparent 38%),
+    rgba(3, 8, 20, 0.96);
+  background-size: 28px 28px, 28px 28px, auto, auto, auto;
+  box-shadow:
+    0 22px 50px rgba(0, 0, 0, 0.28),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.025),
+    inset 0 0 34px rgba(0, 229, 255, 0.035);
+  font-family: "Roboto Mono", "Consolas", "Courier New", monospace;
+}
+
+.home-terminal-feed::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg, transparent, rgba(120, 255, 245, 0.035), transparent);
+  opacity: 0.72;
+  transform: translateY(-70%);
+  animation: terminalScan 7s linear infinite;
+}
+
+@keyframes terminalScan {
+  to {
+    transform: translateY(70%);
+  }
+}
+
+.home-terminal-feed-top {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.25rem 0.25rem 0.85rem;
+  border-bottom: 1px solid rgba(120, 255, 245, 0.11);
+  margin-bottom: 1rem;
+}
+
+.home-terminal-window {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.8rem;
+  min-width: 0;
+}
+
+.home-terminal-dots {
+  display: flex;
+  gap: 0.42rem;
+}
+
+.home-terminal-dots span {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  box-shadow: 0 0 15px currentColor;
+}
+
+.home-terminal-dots span:nth-child(1) {
+  background: #ff5f57;
+  color: #ff5f57;
+}
+
+.home-terminal-dots span:nth-child(2) {
+  background: #febb2e;
+  color: #febb2e;
+}
+
+.home-terminal-dots span:nth-child(3) {
+  background: #28c840;
+  color: #28c840;
+}
+
+.home-terminal-title,
+.home-terminal-path,
+.home-terminal-status,
+.home-terminal-prompt,
+.home-terminal-tags span,
+.home-terminal-entry small {
+  font-family: "Roboto Mono", "Consolas", "Courier New", monospace;
+}
+
+.home-terminal-title {
+  color: rgba(235, 245, 255, 0.78);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.home-terminal-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.home-terminal-path {
+  color: rgba(235, 245, 255, 0.62);
+  font-size: 0.78rem;
+}
+
+.home-terminal-status {
+  padding: 0.22rem 0.58rem;
+  border: 1px solid rgba(120, 255, 245, 0.18);
+  border-radius: 999px;
+  background: rgba(120, 255, 245, 0.08);
+  color: #78fff5;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.home-terminal-feed-head {
+  position: relative;
+  z-index: 1;
+  margin-bottom: 1rem;
+}
+
+.home-terminal-feed-head h3 {
+  margin: 0.15rem 0 0.35rem;
+  color: #eaf7ff;
+  font-family: "Roboto Mono", "Consolas", "Courier New", monospace;
+  font-size: clamp(1.35rem, 2.2vw, 1.95rem);
+  line-height: 1.14;
+  text-shadow: 0 0 16px rgba(120, 255, 245, 0.18);
+}
+
+.home-terminal-feed-head p:last-child {
+  max-width: 920px;
+  margin: 0;
+  color: rgba(220, 235, 255, 0.70);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.home-terminal-console {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 0.8rem;
+}
+
+.home-terminal-entry {
+  display: grid;
+  grid-template-columns: 142px minmax(0, 1fr);
+  gap: 0.9rem;
+  align-items: start;
+  border: 1px solid rgba(120, 255, 245, 0.11);
+  border-radius: 18px;
+  padding: 0.95rem 1rem;
+  background:
+    linear-gradient(135deg, rgba(0, 229, 255, 0.055), rgba(159, 92, 255, 0.045)),
+    rgba(6, 13, 29, 0.78);
+}
+
+.home-terminal-entry.is-highlight {
+  border-color: rgba(120, 255, 245, 0.22);
+  box-shadow:
+    0 0 0 1px rgba(120, 255, 245, 0.045),
+    0 16px 34px rgba(0, 0, 0, 0.18);
+}
+
+.home-terminal-entry.is-muted {
+  opacity: 0.9;
+}
+
+.home-terminal-prompt {
+  color: #78fff5;
+  font-size: 0.86rem;
+  font-weight: 800;
+  white-space: nowrap;
+  text-shadow: 0 0 12px rgba(120, 255, 245, 0.24);
+}
+
+.home-terminal-entry-body {
+  min-width: 0;
+}
+
+.home-terminal-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.42rem;
+  margin-bottom: 0.45rem;
+}
+
+.home-terminal-tags span {
+  padding: 0.18rem 0.48rem;
+  border: 1px solid rgba(120, 255, 245, 0.16);
+  border-radius: 999px;
+  background: rgba(120, 255, 245, 0.08);
+  color: #78fff5;
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.home-terminal-entry h4 {
+  margin: 0 0 0.35rem;
+  color: #f0f8ff;
+  font-size: 1rem;
+  line-height: 1.28;
+  font-weight: 800;
+}
+
+.home-terminal-entry p {
+  margin: 0;
+  color: rgba(220, 235, 255, 0.72);
+  font-size: 0.92rem;
+  line-height: 1.58;
+}
+
+.home-terminal-entry small {
+  display: inline-block;
+  margin-top: 0.55rem;
+  color: rgba(120, 255, 245, 0.66);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+html[data-theme="light"] .home-terminal-feed {
+  background:
+    linear-gradient(rgba(79, 70, 229, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(79, 70, 229, 0.025) 1px, transparent 1px),
+    radial-gradient(circle at top left, rgba(37, 99, 235, 0.08), transparent 34%),
+    radial-gradient(circle at bottom right, rgba(124, 58, 237, 0.10), transparent 38%),
+    rgba(255, 255, 255, 0.94);
+  background-size: 28px 28px, 28px 28px, auto, auto, auto;
+  border-color: rgba(79, 70, 229, 0.16);
+  box-shadow: 0 18px 42px rgba(50, 35, 90, 0.10);
+}
+
+html[data-theme="light"] .home-terminal-feed-top {
+  border-bottom-color: rgba(79, 70, 229, 0.12);
+}
+
+html[data-theme="light"] .home-terminal-title,
+html[data-theme="light"] .home-terminal-path {
+  color: rgba(32, 23, 53, 0.68);
+}
+
+html[data-theme="light"] .home-terminal-feed-head h3,
+html[data-theme="light"] .home-terminal-entry h4 {
+  color: #201735;
+  text-shadow: none;
+}
+
+html[data-theme="light"] .home-terminal-feed-head p:last-child,
+html[data-theme="light"] .home-terminal-entry p {
+  color: rgba(32, 23, 53, 0.70);
+}
+
+html[data-theme="light"] .home-terminal-status,
+html[data-theme="light"] .home-terminal-tags span {
+  color: #4f46e5;
+  border-color: rgba(79, 70, 229, 0.18);
+  background: rgba(79, 70, 229, 0.07);
+}
+
+html[data-theme="light"] .home-terminal-prompt {
+  color: #2563eb;
+  text-shadow: none;
+}
+
+html[data-theme="light"] .home-terminal-entry {
+  background:
+    linear-gradient(135deg, rgba(37, 99, 235, 0.045), rgba(124, 58, 237, 0.04)),
+    rgba(255, 255, 255, 0.78);
+  border-color: rgba(79, 70, 229, 0.12);
+}
+
+html[data-theme="light"] .home-terminal-entry small {
+  color: rgba(79, 70, 229, 0.62);
+}
+
+@media (max-width: 860px) {
+  .home-terminal-feed {
+    padding: 0.9rem;
+    border-radius: 22px;
+  }
+
+  .home-terminal-feed-top {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .home-terminal-meta {
+    justify-content: flex-start;
+  }
+
+  .home-terminal-entry {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+}
+
+@media (max-width: 520px) {
+  .home-terminal-title,
+  .home-terminal-path {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .home-terminal-feed-head h3 {
+    font-size: 1.32rem;
+  }
+
+  .home-terminal-feed-head p:last-child,
+  .home-terminal-entry p {
+    font-size: 0.9rem;
+  }
+
+  .home-terminal-entry {
+    padding: 0.82rem;
+  }
+}
+
+/* === Home Avisos Novedades Title 20260621 === */
+
+.home-terminal-feed-head h3#homeTerminalFeedTitle {
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #78fff5;
+}
+
+.home-terminal-title {
+  text-transform: none;
+}
+
+html[data-theme="light"] .home-terminal-feed-head h3#homeTerminalFeedTitle {
+  color: #2563eb;
+}

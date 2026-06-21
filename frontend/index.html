@@ -12,7 +12,7 @@
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600;700;800&family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
 
   <!-- Classroom CSS -->
   <link rel="stylesheet" href="css/styles.css?v=20260612-pelusita-guide-compact" />
@@ -221,42 +221,81 @@
         </div>
       </section>
 
-      <!-- STUDENT HOME -->
-      <section class="student-home-panel home-student-panel" id="studentHomePanel">
-        <article class="panel recent-activity-panel home-recent-panel">
-          <div class="panel-header">
-            <div>
-              <p class="eyebrow">Avisos</p>
-              <h3>Actividad reciente</h3>
+      <!-- STUDENT HOME / CONSOLA CMD -->
+      <section class="student-home-panel home-student-panel home-terminal-feed-section" id="studentHomePanel">
+        <article class="home-terminal-feed" aria-labelledby="homeTerminalFeedTitle">
+          <div class="home-terminal-feed-top">
+            <div class="home-terminal-window">
+              <div class="home-terminal-dots" aria-hidden="true">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+
+              <span class="home-terminal-title">AndyAzhTEC Classroom</span>
             </div>
 
-            <span class="home-panel-pill">
-              <i class="fa-solid fa-paw"></i>
-              Pelusita online
-            </span>
+            <div class="home-terminal-meta">
+              <span class="home-terminal-path">C:\AndyAzhTEC\Classroom\avisos</span>
+              <span class="home-terminal-status">online</span>
+            </div>
           </div>
 
-          <div class="home-newsletter-soon" aria-label="Actividad reciente próximamente">
-            <div class="home-newsletter-orb">
-              <i class="fa-solid fa-satellite-dish"></i>
-            </div>
+          <div class="home-terminal-feed-head">
+            <p class="eyebrow">Avisos + novedades</p>
+            <h3 id="homeTerminalFeedTitle">AVISOS - NOVEDADES</h3>
+            <p>Centro unificado para anuncios del curso, accesos importantes y actividad reciente.</p>
+          </div>
 
-            <div class="home-newsletter-copy">
-              <span class="home-newsletter-kicker">Newsletter del curso</span>
-              <strong>Próximamente</strong>
-              <p>
-                Acá van a aparecer anuncios, novedades, accesos importantes y avisos del curso.
-              </p>
-            </div>
+          <div class="home-terminal-console">
+            <article class="home-terminal-entry is-highlight">
+              <div class="home-terminal-prompt">C:\classroom&gt;</div>
 
-            <div class="home-newsletter-signal" aria-hidden="true">
-              <span></span>
-              <span></span>
-              <span></span>
-            </div>
+              <div class="home-terminal-entry-body">
+                <div class="home-terminal-tags">
+                  <span>AVISO</span>
+                  <span>SISTEMA</span>
+                </div>
+
+                <h4>Recuperaciones y asistencias</h4>
+                <p>Próximamente se van a registrar avisos cuando un alumno recupere una clase o quede un cambio pendiente de revisar.</p>
+                <small>Publicado por Sistema</small>
+              </div>
+            </article>
+
+            <article class="home-terminal-entry">
+              <div class="home-terminal-prompt">C:\classroom&gt;</div>
+
+              <div class="home-terminal-entry-body">
+                <div class="home-terminal-tags">
+                  <span>NOVEDAD</span>
+                  <span>CURSO</span>
+                </div>
+
+                <h4>Novedades del curso</h4>
+                <p>Acá van a aparecer anuncios, accesos importantes, cambios de cursada y comunicaciones internas del Classroom.</p>
+                <small>Canal interno AndyAzhTEC</small>
+              </div>
+            </article>
+
+            <article class="home-terminal-entry is-muted">
+              <div class="home-terminal-prompt">C:\classroom&gt;</div>
+
+              <div class="home-terminal-entry-body">
+                <div class="home-terminal-tags">
+                  <span>LOG</span>
+                  <span>ACTIVIDAD</span>
+                </div>
+
+                <h4>Actividad reciente</h4>
+                <p>Este espacio centraliza avisos, novedades y actividad reciente del Classroom.</p>
+                <small>Pelusita online · avisos activos</small>
+              </div>
+            </article>
           </div>
         </article>
       </section>
+
     </main>
   </div>
 
