@@ -160,6 +160,34 @@
     return item;
   }
 
+  function deleteNotification(id) {
+    if (!id) return;
+
+    const ok = window.confirm("¿Eliminar esta notificación?");
+    if (!ok) return;
+
+    const items = loadItems().filter((item) => item.id !== id);
+
+    saveItems(items);
+    render();
+
+    window.dispatchEvent(new CustomEvent("classroom:notifications-updated", {
+      detail: { deletedId: id, items },
+    }));
+  }
+
+  function toggleRead(id) {
+    if (!id) return;
+
+    const items = loadItems().map((item) => {
+      if (item.id !== id) return item;
+      return { ...item, read: !item.read };
+    });
+
+    saveItems(items);
+    render();
+  }
+
   function markRead(id) {
     const items = loadItems().map((item) => {
       if (item.id !== id) return item;
@@ -269,9 +297,8 @@
             Configurar
           </a>
 
-          <button class="notifications-read-all danger" id="notificationsClearAll" type="button">
-            <i class="fa-solid fa-trash"></i>
-            Limpiar
+          <button class="notifications-clear-all-icon" id="notificationsClearAll" type="button" title="Limpiar todas las notificaciones" aria-label="Limpiar todas las notificaciones">
+            <i class="fa-solid fa-broom"></i>
           </button>
         </div>
       </div>
@@ -351,25 +378,40 @@
       const icon = TYPE_ICONS[item.type] || TYPE_ICONS.system;
       const unreadClass = item.read ? "" : "unread";
 
+      const readLabel = item.read ? "Marcar no leída" : "Marcar leída";
+      const readIcon = item.read ? "fa-envelope" : "fa-envelope-open";
+
       return `
-        <article class="notification-item ${unreadClass}" data-notification-id="${escapeHtml(item.id)}" data-notification-link="${escapeHtml(item.link)}">
+        <article class="notification-item ${unreadClass}" data-notification-id="${escapeHtml(item.id)}" data-notification-link="${escapeHtml(item.link || "")}">
+          <button class="notification-delete-btn" type="button" data-notification-delete="${escapeHtml(item.id)}" aria-label="Eliminar notificación" title="Eliminar notificación">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+
           <div class="notification-icon">
             <i class="fa-solid ${icon}"></i>
           </div>
 
-          <div>
+          <div class="notification-content">
             <strong>${escapeHtml(item.title)}</strong>
             <p>${escapeHtml(item.body)}</p>
             <small>
               ${escapeHtml(item.actor || "Classroom")} · ${escapeHtml(formatDate(item.createdAt))}
             </small>
+
+            <div class="notification-actions">
+              <button class="notification-action-btn" type="button" data-notification-toggle-read="${escapeHtml(item.id)}">
+                <i class="fa-solid ${readIcon}"></i>
+                ${readLabel}
+              </button>
+            </div>
           </div>
         </article>
       `;
     }).join("");
 
     list.querySelectorAll("[data-notification-id]").forEach((itemEl) => {
-      itemEl.addEventListener("click", () => {
+      itemEl.addEventListener("click", (event) => {
+        if (event.target.closest("button")) return;
         const id = itemEl.dataset.notificationId;
         const link = itemEl.dataset.notificationLink;
 
@@ -546,6 +588,8 @@
     create: createNotification,
     render,
     markAllRead,
+    toggleRead,
+    deleteNotification,
     clearAll,
     seedDemo,
     loadItems,
