@@ -202,7 +202,7 @@
 
 
   function clearAll() {
-    const ok = window.confirm("¿Limpiar todas las notificaciones locales?");
+    const ok = window.confirm("¿Eliminar todas las notificaciones? Esta acción no se puede deshacer.");
     if (!ok) return;
 
     clearLegacyNotificationStores();
