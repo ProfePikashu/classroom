@@ -11585,3 +11585,278 @@ html[data-theme="light"] .sound-toggle.is-muted {
     height: 42px;
   }
 }
+
+/* === Comunidad Filters Toggle Fix 20260620 === */
+
+/* Estado cerrado */
+.community-filters-panel.is-collapsed {
+  display: none !important;
+}
+
+/* Estado abierto */
+.community-filters-panel:not(.is-collapsed) {
+  display: grid !important;
+  max-height: none !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+  transform: none !important;
+  border-width: 1px !important;
+  padding: 1rem !important;
+}
+
+/* Que los hijos no queden ocultos por una regla anterior */
+.community-filters-panel:not(.is-collapsed) > * {
+  visibility: visible !important;
+}
+
+/* Desktop: filtros en fila prolija */
+@media (min-width: 920px) {
+  .community-filters-panel:not(.is-collapsed) {
+    grid-template-columns: 1.2fr repeat(3, minmax(170px, 1fr)) !important;
+    gap: 0.95rem !important;
+    align-items: end !important;
+  }
+
+  .community-filters-panel:not(.is-collapsed) .community-mini-stats {
+    grid-column: 1 / -1 !important;
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+}
+
+/* Mobile: filtros abajo del botón, pero no invasivos */
+@media (max-width: 919px) {
+  .community-filters-panel:not(.is-collapsed) {
+    grid-template-columns: 1fr !important;
+    gap: 0.85rem !important;
+  }
+}
+
+/* === Comunidad Filters Front Layer Fix 20260620 === */
+
+.community-main-area {
+  position: relative;
+  z-index: 2;
+}
+
+.community-top-controls {
+  position: relative;
+  z-index: 8;
+}
+
+.community-filters-panel {
+  position: relative !important;
+  z-index: 12 !important;
+  margin-top: 0.85rem !important;
+  order: initial !important;
+}
+
+.community-filters-panel.is-collapsed {
+  display: none !important;
+}
+
+.community-filters-panel:not(.is-collapsed) {
+  display: grid !important;
+  position: relative !important;
+  z-index: 20 !important;
+  max-height: none !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  transform: none !important;
+  pointer-events: auto !important;
+  margin-top: 0.85rem !important;
+  margin-bottom: 0.3rem !important;
+  padding: 1rem !important;
+  border-radius: 24px !important;
+  border: 1px solid rgba(120, 255, 245, 0.18) !important;
+  background:
+    radial-gradient(circle at top left, rgba(120, 255, 245, 0.08), transparent 34%),
+    radial-gradient(circle at top right, rgba(153, 87, 255, 0.08), transparent 36%),
+    rgba(11, 16, 30, 0.78) !important;
+  box-shadow: 0 18px 46px rgba(0, 0, 0, 0.22) !important;
+}
+
+.community-filters-panel:not(.is-collapsed) > * {
+  visibility: visible !important;
+}
+
+.community-list,
+.community-toolbar,
+.community-empty {
+  position: relative;
+  z-index: 1;
+}
+
+@media (min-width: 920px) {
+  .community-filters-panel:not(.is-collapsed) {
+    grid-template-columns: 1.15fr repeat(3, minmax(170px, 1fr)) !important;
+    gap: 0.95rem !important;
+    align-items: end !important;
+  }
+
+  .community-filters-panel:not(.is-collapsed) .community-mini-stats {
+    grid-column: 1 / -1 !important;
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 919px) {
+  .community-filters-panel:not(.is-collapsed) {
+    grid-template-columns: 1fr !important;
+    gap: 0.85rem !important;
+  }
+}
+
+html[data-theme="light"] .community-filters-panel:not(.is-collapsed) {
+  background:
+    radial-gradient(circle at top left, rgba(79, 70, 229, 0.06), transparent 34%),
+    radial-gradient(circle at top right, rgba(124, 58, 237, 0.06), transparent 36%),
+    rgba(255, 255, 255, 0.92) !important;
+  border-color: rgba(79, 70, 229, 0.16) !important;
+  box-shadow: 0 16px 40px rgba(70, 45, 120, 0.12) !important;
+}
+
+/* === Comunidad Desktop Filters Layout Fix 20260620 === */
+
+/*
+  Desktop:
+  - buscador + botón en una barra superior prolija
+  - panel de filtros debajo en ancho completo
+  - publicaciones debajo
+*/
+
+.community-main-area {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 1rem !important;
+  align-items: stretch !important;
+}
+
+.community-top-controls {
+  display: grid !important;
+  grid-template-columns: minmax(360px, 1fr) auto !important;
+  gap: 0.85rem !important;
+  align-items: center !important;
+  width: 100% !important;
+  max-width: none !important;
+}
+
+.community-search-box-main {
+  width: 100% !important;
+  max-width: none !important;
+}
+
+.community-search-box-main input {
+  width: 100% !important;
+  max-width: none !important;
+}
+
+.community-filter-toggle {
+  width: auto !important;
+  min-width: 190px !important;
+  justify-content: center !important;
+}
+
+/* El panel abierto siempre va debajo de la barra, ocupando todo el ancho */
+.community-filters-panel {
+  width: 100% !important;
+  max-width: none !important;
+  grid-column: 1 / -1 !important;
+}
+
+.community-filters-panel:not(.is-collapsed) {
+  display: grid !important;
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  grid-column: 1 / -1 !important;
+}
+
+/* Desktop: header pequeño + tres selects + stats abajo */
+@media (min-width: 920px) {
+  .community-filters-panel:not(.is-collapsed) {
+    grid-template-columns: minmax(180px, 0.85fr) repeat(3, minmax(190px, 1fr)) !important;
+    gap: 1rem !important;
+    align-items: end !important;
+  }
+
+  .community-filters-panel:not(.is-collapsed) .panel-header {
+    align-self: center !important;
+    margin: 0 !important;
+  }
+
+  .community-filters-panel:not(.is-collapsed) .community-filter-group {
+    margin: 0 !important;
+  }
+
+  .community-filters-panel:not(.is-collapsed) .community-mini-stats {
+    grid-column: 1 / -1 !important;
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 0.75rem !important;
+    margin-top: 0.2rem !important;
+  }
+}
+
+/* Toolbar de hilos separada del panel */
+.community-toolbar {
+  margin-top: 0.25rem !important;
+}
+
+/* Desktop grande: que no quede todo pegado a los bordes */
+@media (min-width: 1200px) {
+  .community-top-controls,
+  .community-filters-panel:not(.is-collapsed),
+  .community-toolbar,
+  .community-list,
+  .community-empty {
+    max-width: 1280px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    width: 100% !important;
+  }
+}
+
+/* Mobile/tablet: apilado limpio */
+@media (max-width: 919px) {
+  .community-top-controls {
+    grid-template-columns: 1fr !important;
+  }
+
+  .community-filter-toggle {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .community-filters-panel:not(.is-collapsed) {
+    grid-template-columns: 1fr !important;
+    gap: 0.85rem !important;
+  }
+
+  .community-filters-panel:not(.is-collapsed) .community-filter-group {
+    margin-top: 0 !important;
+  }
+}
+
+/* === Comunidad Hero Filters Spacing 20260620 === */
+
+/* Separación visual entre el hero de Comunidad y la barra de búsqueda/filtros */
+.page-community .community-main-area {
+  margin-top: 1.35rem !important;
+}
+
+/* En desktop grande le damos un poco más de aire */
+@media (min-width: 920px) {
+  .page-community .community-main-area {
+    margin-top: 1.65rem !important;
+  }
+}
+
+/* En mobile un poco menos para no robar pantalla */
+@media (max-width: 680px) {
+  .page-community .community-main-area {
+    margin-top: 1rem !important;
+  }
+}
