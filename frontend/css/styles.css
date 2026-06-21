@@ -10788,3 +10788,335 @@ html[data-theme="light"] .notification-pref-tag {
     grid-template-columns: 1fr;
   }
 }
+
+/* === Light Theme Contrast Blue Violet 20260620 === */
+
+/*
+  En modo claro bajamos el cian/amarillo neón a tonos azul/violeta.
+  El objetivo es mantener la estética tech sin perder legibilidad.
+*/
+
+html[data-theme="light"] {
+  --accent: #4f46e5;
+  --accent-2: #7c3aed;
+  --accent-soft: rgba(79, 70, 229, 0.12);
+  --accent-border: rgba(79, 70, 229, 0.24);
+}
+
+/* Títulos hero / títulos grandes donde el span venía cian neón */
+html[data-theme="light"] .hero-copy h2 span,
+html[data-theme="light"] .community-hero-copy h2 span,
+html[data-theme="light"] .section-title span,
+html[data-theme="light"] .course-hero h2 span,
+html[data-theme="light"] .page-title span,
+html[data-theme="light"] .hero-panel h2 span,
+html[data-theme="light"] .classroom-title-accent {
+  color: #2563eb !important;
+  text-shadow: 0 8px 28px rgba(37, 99, 235, 0.18) !important;
+}
+
+/* Títulos o textos que quedaron directamente con colores neón */
+html[data-theme="light"] .text-cyan,
+html[data-theme="light"] .text-accent,
+html[data-theme="light"] .accent-text,
+html[data-theme="light"] .cyber-accent,
+html[data-theme="light"] .neon-text,
+html[data-theme="light"] .home-newsletter-kicker,
+html[data-theme="light"] .community-mini-stats strong {
+  color: #2563eb !important;
+  text-shadow: none !important;
+}
+
+/* Eyebrows / labels superiores */
+html[data-theme="light"] .eyebrow,
+html[data-theme="light"] .badge,
+html[data-theme="light"] .panel-header .eyebrow,
+html[data-theme="light"] .home-panel-pill,
+html[data-theme="light"] .community-form-hint,
+html[data-theme="light"] .community-filter-group label,
+html[data-theme="light"] .community-field label,
+html[data-theme="light"] .community-reply-form label {
+  color: #4f46e5 !important;
+  text-shadow: none !important;
+}
+
+/* Badges tipo Nueva etapa / AyRPC 2025 */
+html[data-theme="light"] .badge {
+  background: rgba(124, 58, 237, 0.10) !important;
+  border-color: rgba(124, 58, 237, 0.26) !important;
+  box-shadow: 0 8px 22px rgba(124, 58, 237, 0.10) !important;
+}
+
+html[data-theme="light"] .badge i {
+  color: #7c3aed !important;
+}
+
+/* Botones primarios: violeta legible sobre claro */
+html[data-theme="light"] .btn-primary {
+  background: linear-gradient(135deg, #7c3aed, #4f46e5) !important;
+  color: #ffffff !important;
+  border-color: rgba(79, 70, 229, 0.18) !important;
+  box-shadow: 0 14px 30px rgba(79, 70, 229, 0.22) !important;
+}
+
+html[data-theme="light"] .btn-primary i,
+html[data-theme="light"] .btn-primary span {
+  color: inherit !important;
+}
+
+/* Botones outline que antes quedaban cian lavado */
+html[data-theme="light"] .btn-outline {
+  color: #4338ca !important;
+  background: rgba(255, 255, 255, 0.72) !important;
+  border-color: rgba(67, 56, 202, 0.32) !important;
+  box-shadow: 0 10px 26px rgba(67, 56, 202, 0.10) !important;
+}
+
+html[data-theme="light"] .btn-outline:hover {
+  color: #312e81 !important;
+  background: rgba(238, 242, 255, 0.95) !important;
+  border-color: rgba(67, 56, 202, 0.42) !important;
+}
+
+html[data-theme="light"] .btn-outline i,
+html[data-theme="light"] .btn-outline span {
+  color: inherit !important;
+}
+
+/* Tarjetas/hero con bordes cian: pasarlos a violeta suave */
+html[data-theme="light"] .hero-panel,
+html[data-theme="light"] .community-hero-panel,
+html[data-theme="light"] .panel,
+html[data-theme="light"] .community-panel,
+html[data-theme="light"] .community-post-card {
+  border-color: rgba(79, 70, 229, 0.16) !important;
+}
+
+/* Comunidad: badges de tipo/estado/curso con contraste real */
+html[data-theme="light"] .community-badge.type-consulta {
+  color: #1d4ed8 !important;
+  background: rgba(37, 99, 235, 0.10) !important;
+  border-color: rgba(37, 99, 235, 0.20) !important;
+}
+
+html[data-theme="light"] .community-badge.type-aporte {
+  color: #6d28d9 !important;
+  background: rgba(124, 58, 237, 0.11) !important;
+  border-color: rgba(124, 58, 237, 0.20) !important;
+}
+
+html[data-theme="light"] .community-badge.type-recomendacion {
+  color: #047857 !important;
+  background: rgba(5, 150, 105, 0.10) !important;
+  border-color: rgba(5, 150, 105, 0.20) !important;
+}
+
+html[data-theme="light"] .community-badge.status-abierto {
+  color: #7c2d12 !important;
+  background: rgba(234, 88, 12, 0.11) !important;
+  border-color: rgba(234, 88, 12, 0.22) !important;
+}
+
+html[data-theme="light"] .community-badge.status-resuelto {
+  color: #047857 !important;
+  background: rgba(5, 150, 105, 0.10) !important;
+  border-color: rgba(5, 150, 105, 0.20) !important;
+}
+
+html[data-theme="light"] .community-badge.course {
+  color: #312e81 !important;
+  background: rgba(79, 70, 229, 0.08) !important;
+  border-color: rgba(79, 70, 229, 0.18) !important;
+}
+
+/* Pills y chips */
+html[data-theme="light"] .community-pill {
+  color: #4338ca !important;
+  background: rgba(255, 255, 255, 0.72) !important;
+  border-color: rgba(67, 56, 202, 0.18) !important;
+}
+
+html[data-theme="light"] .community-pill.active {
+  color: #312e81 !important;
+  background: rgba(224, 231, 255, 0.92) !important;
+  border-color: rgba(67, 56, 202, 0.34) !important;
+}
+
+/* Íconos/orbes que usaban cian muy brillante */
+html[data-theme="light"] .community-orb i,
+html[data-theme="light"] .home-newsletter-orb i,
+html[data-theme="light"] .community-empty-icon,
+html[data-theme="light"] .community-file-drop i {
+  color: #4f46e5 !important;
+  filter: drop-shadow(0 0 14px rgba(79, 70, 229, 0.18)) !important;
+}
+
+html[data-theme="light"] .community-orb,
+html[data-theme="light"] .home-newsletter-orb,
+html[data-theme="light"] .community-empty-icon {
+  border-color: rgba(79, 70, 229, 0.16) !important;
+  background: rgba(79, 70, 229, 0.08) !important;
+}
+
+/* Sidebar: amarillos/celestes activos en modo claro pasan a violeta/azul */
+html[data-theme="light"] .sidebar-v2-link.active,
+html[data-theme="light"] .sidebar-v2-subitem.active,
+html[data-theme="light"] .sidebar-v2-admin-popover a.active {
+  color: #312e81 !important;
+  background: rgba(224, 231, 255, 0.92) !important;
+  border-color: rgba(67, 56, 202, 0.18) !important;
+}
+
+html[data-theme="light"] .sidebar-v2-link.active i,
+html[data-theme="light"] .sidebar-v2-link.active span,
+html[data-theme="light"] .sidebar-v2-subitem.active span,
+html[data-theme="light"] .sidebar-v2-admin-popover a.active i,
+html[data-theme="light"] .sidebar-v2-admin-popover a.active span {
+  color: #312e81 !important;
+}
+
+/* Administrar: evitar amarillo lavado */
+html[data-theme="light"] .sidebar-v2-admin-btn,
+html[data-theme="light"] .sidebar-v2-admin-btn i,
+html[data-theme="light"] .sidebar-v2-admin-btn span {
+  color: #312e81 !important;
+}
+
+/* Inputs/selects con foco más visible */
+html[data-theme="light"] .community-filter-group input:focus,
+html[data-theme="light"] .community-filter-group select:focus,
+html[data-theme="light"] .community-field input:focus,
+html[data-theme="light"] .community-field select:focus,
+html[data-theme="light"] .community-field textarea:focus,
+html[data-theme="light"] .community-reply-form textarea:focus {
+  border-color: rgba(79, 70, 229, 0.42) !important;
+  box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.10) !important;
+}
+
+/* Por si algún componente dejó color inline mediante clases antiguas */
+html[data-theme="light"] [class*="cyan"],
+html[data-theme="light"] [class*="neon"] {
+  text-shadow: none;
+}
+
+/* === Light Notifications Panel Polish 20260620 === */
+
+/* Panel completo de notificaciones en modo claro */
+html[data-theme="light"] .notifications-panel {
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.97) !important;
+  border: 1px solid rgba(79, 70, 229, 0.18) !important;
+  color: #201735 !important;
+}
+
+/* Header superior de la campanita */
+html[data-theme="light"] .notifications-panel-header {
+  background:
+    linear-gradient(135deg, rgba(238, 242, 255, 0.98), rgba(245, 243, 255, 0.98)) !important;
+  border-bottom: 1px solid rgba(79, 70, 229, 0.14) !important;
+}
+
+html[data-theme="light"] .notifications-panel-header .eyebrow {
+  color: #4f46e5 !important;
+  text-shadow: none !important;
+}
+
+html[data-theme="light"] .notifications-panel-header h3 {
+  color: #201735 !important;
+  text-shadow: none !important;
+}
+
+html[data-theme="light"] .notifications-chip {
+  background: rgba(124, 58, 237, 0.11) !important;
+  color: #5b21b6 !important;
+  border: 1px solid rgba(124, 58, 237, 0.20) !important;
+}
+
+/* Lista */
+html[data-theme="light"] .notifications-list {
+  background: rgba(255, 255, 255, 0.72) !important;
+}
+
+/* Footer/botonera */
+html[data-theme="light"] .notifications-panel-footer,
+html[data-theme="light"] .notifications-panel-footer-v2 {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 0.5rem !important;
+  padding: 0.75rem !important;
+  background: rgba(248, 244, 255, 0.95) !important;
+  border-top: 1px solid rgba(79, 70, 229, 0.14) !important;
+}
+
+html[data-theme="light"] .notifications-read-all,
+html[data-theme="light"] .notifications-settings-link {
+  min-height: 38px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.4rem !important;
+  margin: 0 !important;
+  padding: 0.55rem 0.65rem !important;
+  border-radius: 12px !important;
+  background: rgba(255, 255, 255, 0.86) !important;
+  border: 1px solid rgba(79, 70, 229, 0.18) !important;
+  color: #312e81 !important;
+  font-weight: 800 !important;
+  text-decoration: none !important;
+  box-shadow: 0 8px 18px rgba(79, 70, 229, 0.08) !important;
+}
+
+html[data-theme="light"] .notifications-read-all i,
+html[data-theme="light"] .notifications-settings-link i {
+  color: inherit !important;
+}
+
+html[data-theme="light"] .notifications-read-all:hover,
+html[data-theme="light"] .notifications-settings-link:hover {
+  background: rgba(224, 231, 255, 0.94) !important;
+  border-color: rgba(79, 70, 229, 0.30) !important;
+  color: #1e1b4b !important;
+}
+
+html[data-theme="light"] .notifications-read-all.danger {
+  grid-column: 1 / -1 !important;
+  color: #be123c !important;
+  background: rgba(255, 241, 242, 0.94) !important;
+  border-color: rgba(225, 29, 72, 0.22) !important;
+  box-shadow: 0 8px 18px rgba(225, 29, 72, 0.07) !important;
+}
+
+html[data-theme="light"] .notifications-read-all.danger:hover {
+  background: rgba(255, 228, 230, 0.98) !important;
+  color: #9f1239 !important;
+}
+
+/* Dark también recibe una mejora de respiración sin cambiar estética */
+.notifications-panel-footer-v2 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.notifications-panel-footer-v2 .notifications-read-all,
+.notifications-panel-footer-v2 .notifications-settings-link {
+  margin: 0;
+}
+
+.notifications-panel-footer-v2 .notifications-read-all.danger {
+  grid-column: 1 / -1;
+}
+
+/* Mobile */
+@media (max-width: 520px) {
+  html[data-theme="light"] .notifications-panel-footer,
+  html[data-theme="light"] .notifications-panel-footer-v2,
+  .notifications-panel-footer-v2 {
+    grid-template-columns: 1fr !important;
+  }
+
+  html[data-theme="light"] .notifications-read-all.danger,
+  .notifications-panel-footer-v2 .notifications-read-all.danger {
+    grid-column: auto !important;
+  }
+}
