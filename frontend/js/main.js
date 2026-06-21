@@ -12,12 +12,68 @@ const ClassroomApp = {
     }
     this.initTheme();
     this.initUiSounds();
+    this.initSoundToggle();
     this.bindThemeToggle();
     this.bindUserMenu();
     this.bindMobileSidebar();
     this.bindSidebarSubmenus();
     this.bindCurrentHashCourse();
     this.bindModuleButtons();
+  },
+
+  soundStorageKey: "andyazh-classroom-sounds-muted",
+
+  areSoundsMuted() {
+    return localStorage.getItem(this.soundStorageKey) === "true";
+  },
+
+  setSoundsMuted(muted) {
+    localStorage.setItem(this.soundStorageKey, muted ? "true" : "false");
+    this.updateSoundToggle();
+
+    if (!muted) {
+      this.playSound("click", { force: true });
+    }
+  },
+
+  toggleSoundsMuted() {
+    this.setSoundsMuted(!this.areSoundsMuted());
+  },
+
+  initSoundToggle() {
+    const themeToggle = document.getElementById("themeToggle");
+
+    if (!themeToggle || document.getElementById("soundToggle")) return;
+
+    const button = document.createElement("button");
+    button.className = "sound-toggle sound-toggle-icon";
+    button.id = "soundToggle";
+    button.type = "button";
+    button.setAttribute("aria-label", "Activar o desactivar sonidos del Classroom");
+
+    themeToggle.insertAdjacentElement("afterend", button);
+
+    button.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      this.toggleSoundsMuted();
+    });
+
+    this.updateSoundToggle();
+  },
+
+  updateSoundToggle() {
+    const button = document.getElementById("soundToggle");
+    if (!button) return;
+
+    const muted = this.areSoundsMuted();
+
+    button.classList.toggle("is-muted", muted);
+    button.setAttribute("aria-pressed", muted ? "true" : "false");
+    button.title = muted ? "Sonidos desactivados" : "Sonidos activados";
+    button.innerHTML = muted
+      ? '<i class="fa-solid fa-volume-xmark"></i>'
+      : '<i class="fa-solid fa-volume-high"></i>';
   },
 
   initUiSounds() {
@@ -55,7 +111,8 @@ const ClassroomApp = {
     });
   },
 
-  playSound(soundName) {
+  playSound(soundName, options = {}) {
+    if (!options.force && this.areSoundsMuted()) return;
     if (!this.sounds || !this.sounds[soundName]) return;
 
     const sound = this.sounds[soundName];
@@ -103,6 +160,8 @@ const ClassroomApp = {
   },
 
   playDuckSound() {
+    if (this.areSoundsMuted()) return;
+
     const duckSound = new Audio("media/sounds/duck.mp3");
     const fallbackSound = new Audio("media/sounds/click.mp3");
 
