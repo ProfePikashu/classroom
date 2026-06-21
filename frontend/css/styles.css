@@ -12923,3 +12923,181 @@ html[data-theme="light"] .profile-change-request-panel .profile-change-request-h
     margin-left: 0;
   }
 }
+
+/* === Pelusita Light Mode Dialogs Definitive Fix 20260621 === */
+
+/*
+  Fix definitivo:
+  En modo claro, cualquier globo/card/dialog de Pelusita debe pasar a superficie clara.
+  Esto pisa estilos viejos que quedaban oscuros por gradientes globales o componentes legacy.
+*/
+
+html[data-theme="light"] .pelusita-dialog,
+html[data-theme="light"] .pelusita-dialog-card,
+html[data-theme="light"] .pelusita-dialog-panel,
+html[data-theme="light"] .pelusita-dialog-box,
+html[data-theme="light"] .pelusita-bubble,
+html[data-theme="light"] .pelusita-message,
+html[data-theme="light"] .pelusita-tooltip,
+html[data-theme="light"] .pelusita-popover,
+html[data-theme="light"] .pelusita-chat,
+html[data-theme="light"] .pelusita-chatbox,
+html[data-theme="light"] .pelusita-speech,
+html[data-theme="light"] .pelusita-speech-bubble,
+html[data-theme="light"] [class*="pelusita"][class*="dialog"],
+html[data-theme="light"] [class*="pelusita"][class*="bubble"],
+html[data-theme="light"] [class*="pelusita"][class*="message"],
+html[data-theme="light"] [class*="pelusita"][class*="tooltip"],
+html[data-theme="light"] [class*="pelusita"][class*="popover"] {
+  background:
+    radial-gradient(circle at top left, rgba(79, 70, 229, 0.08), transparent 34%),
+    radial-gradient(circle at bottom right, rgba(124, 58, 237, 0.08), transparent 38%),
+    rgba(255, 255, 255, 0.96) !important;
+  border-color: rgba(79, 70, 229, 0.18) !important;
+  color: #201735 !important;
+  box-shadow:
+    0 18px 44px rgba(50, 35, 90, 0.14),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.72) !important;
+  backdrop-filter: blur(18px);
+}
+
+/* Texto interno */
+html[data-theme="light"] .pelusita-dialog *,
+html[data-theme="light"] .pelusita-dialog-card *,
+html[data-theme="light"] .pelusita-dialog-panel *,
+html[data-theme="light"] .pelusita-dialog-box *,
+html[data-theme="light"] .pelusita-bubble *,
+html[data-theme="light"] .pelusita-message *,
+html[data-theme="light"] .pelusita-tooltip *,
+html[data-theme="light"] .pelusita-popover *,
+html[data-theme="light"] .pelusita-chat *,
+html[data-theme="light"] .pelusita-chatbox *,
+html[data-theme="light"] .pelusita-speech *,
+html[data-theme="light"] .pelusita-speech-bubble *,
+html[data-theme="light"] [class*="pelusita"][class*="dialog"] *,
+html[data-theme="light"] [class*="pelusita"][class*="bubble"] *,
+html[data-theme="light"] [class*="pelusita"][class*="message"] *,
+html[data-theme="light"] [class*="pelusita"][class*="tooltip"] *,
+html[data-theme="light"] [class*="pelusita"][class*="popover"] * {
+  color: inherit;
+}
+
+/* Títulos / strong */
+html[data-theme="light"] .pelusita-dialog h1,
+html[data-theme="light"] .pelusita-dialog h2,
+html[data-theme="light"] .pelusita-dialog h3,
+html[data-theme="light"] .pelusita-dialog h4,
+html[data-theme="light"] .pelusita-dialog strong,
+html[data-theme="light"] .pelusita-bubble h1,
+html[data-theme="light"] .pelusita-bubble h2,
+html[data-theme="light"] .pelusita-bubble h3,
+html[data-theme="light"] .pelusita-bubble h4,
+html[data-theme="light"] .pelusita-bubble strong,
+html[data-theme="light"] [class*="pelusita"][class*="dialog"] h1,
+html[data-theme="light"] [class*="pelusita"][class*="dialog"] h2,
+html[data-theme="light"] [class*="pelusita"][class*="dialog"] h3,
+html[data-theme="light"] [class*="pelusita"][class*="dialog"] h4,
+html[data-theme="light"] [class*="pelusita"][class*="dialog"] strong,
+html[data-theme="light"] [class*="pelusita"][class*="bubble"] h1,
+html[data-theme="light"] [class*="pelusita"][class*="bubble"] h2,
+html[data-theme="light"] [class*="pelusita"][class*="bubble"] h3,
+html[data-theme="light"] [class*="pelusita"][class*="bubble"] h4,
+html[data-theme="light"] [class*="pelusita"][class*="bubble"] strong {
+  color: #201735 !important;
+}
+
+/* Párrafos / textos secundarios */
+html[data-theme="light"] .pelusita-dialog p,
+html[data-theme="light"] .pelusita-dialog small,
+html[data-theme="light"] .pelusita-dialog span,
+html[data-theme="light"] .pelusita-bubble p,
+html[data-theme="light"] .pelusita-bubble small,
+html[data-theme="light"] .pelusita-bubble span,
+html[data-theme="light"] [class*="pelusita"][class*="dialog"] p,
+html[data-theme="light"] [class*="pelusita"][class*="dialog"] small,
+html[data-theme="light"] [class*="pelusita"][class*="dialog"] span,
+html[data-theme="light"] [class*="pelusita"][class*="bubble"] p,
+html[data-theme="light"] [class*="pelusita"][class*="bubble"] small,
+html[data-theme="light"] [class*="pelusita"][class*="bubble"] span {
+  color: rgba(32, 23, 53, 0.76) !important;
+}
+
+/* Links / acentos */
+html[data-theme="light"] .pelusita-dialog a,
+html[data-theme="light"] .pelusita-bubble a,
+html[data-theme="light"] [class*="pelusita"][class*="dialog"] a,
+html[data-theme="light"] [class*="pelusita"][class*="bubble"] a {
+  color: #2563eb !important;
+}
+
+/* Iconos dentro del globo */
+html[data-theme="light"] .pelusita-dialog i,
+html[data-theme="light"] .pelusita-bubble i,
+html[data-theme="light"] [class*="pelusita"][class*="dialog"] i,
+html[data-theme="light"] [class*="pelusita"][class*="bubble"] i {
+  color: #4f46e5 !important;
+}
+
+/* Botones internos */
+html[data-theme="light"] .pelusita-dialog button,
+html[data-theme="light"] .pelusita-bubble button,
+html[data-theme="light"] [class*="pelusita"][class*="dialog"] button,
+html[data-theme="light"] [class*="pelusita"][class*="bubble"] button {
+  color: #201735;
+}
+
+/* Flechita del globo si existe */
+html[data-theme="light"] .pelusita-dialog::before,
+html[data-theme="light"] .pelusita-dialog::after,
+html[data-theme="light"] .pelusita-bubble::before,
+html[data-theme="light"] .pelusita-bubble::after,
+html[data-theme="light"] .pelusita-speech-bubble::before,
+html[data-theme="light"] .pelusita-speech-bubble::after,
+html[data-theme="light"] [class*="pelusita"][class*="dialog"]::before,
+html[data-theme="light"] [class*="pelusita"][class*="dialog"]::after,
+html[data-theme="light"] [class*="pelusita"][class*="bubble"]::before,
+html[data-theme="light"] [class*="pelusita"][class*="bubble"]::after {
+  border-color: rgba(255, 255, 255, 0.96) !important;
+}
+
+/* Casos donde el globo se renderiza como card genérica dentro del dock */
+html[data-theme="light"] .sidebar-v2-pelusita-dock .panel,
+html[data-theme="light"] .sidebar-v2-pelusita-dock .card,
+html[data-theme="light"] .sidebar-v2-pelusita-dock [role="dialog"],
+html[data-theme="light"] .sidebar-v2-pelusita-dock [aria-live],
+html[data-theme="light"] .pelusita-widget .panel,
+html[data-theme="light"] .pelusita-widget .card,
+html[data-theme="light"] .pelusita-widget [role="dialog"],
+html[data-theme="light"] .pelusita-widget [aria-live] {
+  background:
+    radial-gradient(circle at top left, rgba(79, 70, 229, 0.08), transparent 34%),
+    rgba(255, 255, 255, 0.96) !important;
+  border-color: rgba(79, 70, 229, 0.18) !important;
+  color: #201735 !important;
+}
+
+/* Inputs si algún diálogo de Pelusita los trae */
+html[data-theme="light"] .pelusita-dialog input,
+html[data-theme="light"] .pelusita-dialog textarea,
+html[data-theme="light"] .pelusita-bubble input,
+html[data-theme="light"] .pelusita-bubble textarea,
+html[data-theme="light"] [class*="pelusita"][class*="dialog"] input,
+html[data-theme="light"] [class*="pelusita"][class*="dialog"] textarea,
+html[data-theme="light"] [class*="pelusita"][class*="bubble"] input,
+html[data-theme="light"] [class*="pelusita"][class*="bubble"] textarea {
+  background: rgba(255, 255, 255, 0.88) !important;
+  border-color: rgba(79, 70, 229, 0.18) !important;
+  color: #201735 !important;
+}
+
+/* Placeholder */
+html[data-theme="light"] .pelusita-dialog input::placeholder,
+html[data-theme="light"] .pelusita-dialog textarea::placeholder,
+html[data-theme="light"] .pelusita-bubble input::placeholder,
+html[data-theme="light"] .pelusita-bubble textarea::placeholder,
+html[data-theme="light"] [class*="pelusita"][class*="dialog"] input::placeholder,
+html[data-theme="light"] [class*="pelusita"][class*="dialog"] textarea::placeholder,
+html[data-theme="light"] [class*="pelusita"][class*="bubble"] input::placeholder,
+html[data-theme="light"] [class*="pelusita"][class*="bubble"] textarea::placeholder {
+  color: rgba(32, 23, 53, 0.42) !important;
+}
