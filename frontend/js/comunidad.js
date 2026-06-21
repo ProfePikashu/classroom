@@ -703,42 +703,65 @@
     }
   }
 
-  function toggleFiltersPanel() {
-    if (!els.filtersPanel || !els.filterToggle) return;
 
-    const isOpen = !els.filtersPanel.classList.contains("is-collapsed");
+  function getFiltersPanel() {
+    return document.getElementById("communityFiltersPanel") || document.querySelector(".community-filters-panel");
+  }
 
-    els.filtersPanel.classList.toggle("is-collapsed", isOpen);
-    els.filterToggle.classList.toggle("active", !isOpen);
-    els.filterToggle.setAttribute("aria-expanded", isOpen ? "false" : "true");
+  function getFilterToggle() {
+    return document.getElementById("communityFilterToggle") || document.querySelector(".community-filter-toggle");
+  }
 
-    const label = els.filterToggle.querySelector("span");
-    const icon = els.filterToggle.querySelector("i");
+  function setFiltersOpen(open) {
+    const panel = getFiltersPanel();
+    const button = getFilterToggle();
 
-    if (label) label.textContent = isOpen ? "Filtros" : "Ocultar filtros";
-    if (icon) icon.className = isOpen ? "fa-solid fa-sliders" : "fa-solid fa-xmark";
+    if (!panel || !button) {
+      console.warn("Comunidad: no encontré panel o botón de filtros", { panel, button });
+      return;
+    }
+
+    panel.classList.toggle("is-collapsed", !open);
+    button.classList.toggle("active", open);
+    button.setAttribute("aria-expanded", open ? "true" : "false");
+
+    const label = button.querySelector("span");
+    const icon = button.querySelector("i");
+
+    if (label) label.textContent = open ? "Ocultar filtros" : "Filtros";
+    if (icon) icon.className = open ? "fa-solid fa-xmark" : "fa-solid fa-sliders";
+  }
+
+  function toggleFiltersPanel(event) {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+
+    const panel = getFiltersPanel();
+
+    if (!panel) {
+      console.warn("Comunidad: no encontré #communityFiltersPanel");
+      return;
+    }
+
+    const nextOpen = panel.classList.contains("is-collapsed");
+    setFiltersOpen(nextOpen);
   }
 
   function closeFiltersOnMobileAfterChange() {
-    if (!els.filtersPanel || !els.filterToggle) return;
     if (!window.matchMedia("(max-width: 760px)").matches) return;
-
-    els.filtersPanel.classList.add("is-collapsed");
-    els.filterToggle.classList.remove("active");
-    els.filterToggle.setAttribute("aria-expanded", "false");
-
-    const label = els.filterToggle.querySelector("span");
-    const icon = els.filterToggle.querySelector("i");
-
-    if (label) label.textContent = "Filtros";
-    if (icon) icon.className = "fa-solid fa-sliders";
+    setFiltersOpen(false);
   }
+
 
   function bindEvents() {
     els.openComposer?.addEventListener("click", openComposer);
     els.closeComposer?.addEventListener("click", closeComposer);
     els.form?.addEventListener("submit", createPost);
     els.seedDemo?.addEventListener("click", seedDemoPosts);
+
+    getFilterToggle()?.addEventListener("click", toggleFiltersPanel);
     els.images?.addEventListener("change", handleImageSelection);
 
     document.querySelectorAll("[data-community-open]").forEach((button) => {
@@ -780,6 +803,8 @@
     els.type = $("#communityType");
     els.course = $("#communityCourse");
     els.search = $("#communitySearch");
+    els.filterToggle = $("#communityFilterToggle");
+    els.filtersPanel = $("#communityFiltersPanel");
     els.typeFilter = $("#communityTypeFilter");
     els.statusFilter = $("#communityStatusFilter");
     els.courseFilter = $("#communityCourseFilter");
