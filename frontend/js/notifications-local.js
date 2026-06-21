@@ -383,7 +383,7 @@
       const readIcon = item.read ? "fa-envelope" : "fa-envelope-open";
 
       return `
-        <article class="notification-item ${unreadClass}" data-notification-id="${escapeHtml(item.id)}" data-notification-link="${escapeHtml(item.link || "")}">
+        <article class="notification-item ${unreadClass} ${severityClass}" data-notification-id="${escapeHtml(item.id)}" data-notification-link="${escapeHtml(item.link || "")}">
           <button class="notification-delete-btn" type="button" data-notification-delete="${escapeHtml(item.id)}" aria-label="Eliminar notificación" title="Eliminar notificación">
             <i class="fa-solid fa-xmark"></i>
           </button>

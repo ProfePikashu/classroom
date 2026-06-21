@@ -900,3 +900,213 @@ const ClassroomStudents = {
 document.addEventListener("DOMContentLoaded", () => {
   ClassroomStudents.init();
 });
+
+/* === Alumnos Data Change Requests Admin 20260621 === */
+(function initAlumnosDataChangeRequestsAdmin() {
+  "use strict";
+
+  const STORAGE_KEY = "andyazh-classroom-data-change-requests-v1";
+
+  function safeJson(value, fallback) {
+    try {
+      return JSON.parse(value) || fallback;
+    } catch {
+      return fallback;
+    }
+  }
+
+  function getRequests() {
+    return safeJson(localStorage.getItem(STORAGE_KEY), []);
+  }
+
+  function saveRequests(items) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+    window.dispatchEvent(new CustomEvent("classroom:data-change-requests-updated", {
+      detail: { items },
+    }));
+  }
+
+  function formatDate(value) {
+    if (!value) return "";
+    try {
+      return new Intl.DateTimeFormat("es-AR", {
+        dateStyle: "short",
+        timeStyle: "short",
+      }).format(new Date(value));
+    } catch {
+      return value;
+    }
+  }
+
+  function escapeHtml(value) {
+    return String(value ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  function ensurePanel() {
+    let panel = document.getElementById("solicitudes-cambios-datos");
+
+    if (panel) return panel;
+
+    const main = document.querySelector("main .main-content")
+      || document.querySelector("main")
+      || document.body;
+
+    panel = document.createElement("section");
+    panel.id = "solicitudes-cambios-datos";
+    panel.className = "admin-data-change-panel panel";
+    panel.innerHTML = `
+      <div class="admin-data-change-head">
+        <div>
+          <p class="eyebrow danger">Revisión requerida</p>
+          <h2>Solicitudes de cambio de datos</h2>
+          <p>Pedidos enviados por alumnos cuando detectan un dato incorrecto en su perfil.</p>
+        </div>
+
+        <span class="admin-data-change-counter" id="adminDataChangeCounter">0 pendientes</span>
+      </div>
+
+      <div class="admin-data-change-list" id="adminDataChangeList"></div>
+    `;
+
+    const firstPanel = main.querySelector(".panel, section, article");
+    if (firstPanel) {
+      firstPanel.insertAdjacentElement("beforebegin", panel);
+    } else {
+      main.prepend(panel);
+    }
+
+    return panel;
+  }
+
+  function render() {
+    const panel = ensurePanel();
+    const list = panel.querySelector("#adminDataChangeList");
+    const counter = panel.querySelector("#adminDataChangeCounter");
+
+    const requests = getRequests();
+    const pending = requests.filter((item) => item.status !== "resuelta");
+
+    counter.textContent = `${pending.length} pendiente${pending.length === 1 ? "" : "s"}`;
+
+    if (!requests.length) {
+      panel.classList.add("is-empty");
+      list.innerHTML = `
+        <div class="admin-data-change-empty">
+          <i class="fa-solid fa-circle-check"></i>
+          <span>No hay solicitudes de cambio de datos por ahora.</span>
+        </div>
+      `;
+      return;
+    }
+
+    panel.classList.remove("is-empty");
+
+    list.innerHTML = requests.map((item) => {
+      const isResolved = item.status === "resuelta";
+
+      return `
+        <article class="admin-data-change-item ${isResolved ? "is-resolved" : "is-pending"}" data-request-id="${escapeHtml(item.id)}">
+          <div class="admin-data-change-alert">
+            <i class="fa-solid ${isResolved ? "fa-circle-check" : "fa-triangle-exclamation"}"></i>
+          </div>
+
+          <div class="admin-data-change-body">
+            <div class="admin-data-change-titleline">
+              <strong>${escapeHtml(item.studentName || "Alumno")}</strong>
+              <span>${isResolved ? "Resuelta" : "Pendiente"}</span>
+            </div>
+
+            <p>${escapeHtml(item.detail || "")}</p>
+
+            <div class="admin-data-change-meta">
+              ${item.dni ? `<span>DNI: ${escapeHtml(item.dni)}</span>` : ""}
+              ${item.twitch ? `<span>Twitch: ${escapeHtml(item.twitch)}</span>` : ""}
+              ${item.email ? `<span>Email: ${escapeHtml(item.email)}</span>` : ""}
+              <span>${escapeHtml(formatDate(item.createdAt))}</span>
+            </div>
+
+            <div class="admin-data-change-actions">
+              <button type="button" data-request-resolve="${escapeHtml(item.id)}">
+                <i class="fa-solid fa-check"></i>
+                ${isResolved ? "Marcar pendiente" : "Marcar revisada"}
+              </button>
+
+              <button type="button" class="danger" data-request-delete="${escapeHtml(item.id)}">
+                <i class="fa-solid fa-trash"></i>
+                Eliminar
+              </button>
+            </div>
+          </div>
+        </article>
+      `;
+    }).join("");
+  }
+
+  function bindDelegatedActions() {
+    if (window.__classroomDataChangeAdminBound) return;
+    window.__classroomDataChangeAdminBound = true;
+
+    document.addEventListener("click", (event) => {
+      const resolveButton = event.target.closest("[data-request-resolve]");
+      if (resolveButton) {
+        const id = resolveButton.dataset.requestResolve;
+        const requests = getRequests().map((item) => {
+          if (item.id !== id) return item;
+
+          return {
+            ...item,
+            status: item.status === "resuelta" ? "pendiente" : "resuelta",
+            updatedAt: new Date().toISOString(),
+          };
+        });
+
+        saveRequests(requests);
+        render();
+        return;
+      }
+
+      const deleteButton = event.target.closest("[data-request-delete]");
+      if (deleteButton) {
+        const ok = window.confirm("¿Eliminar esta solicitud de cambio de datos?");
+        if (!ok) return;
+
+        const id = deleteButton.dataset.requestDelete;
+        const requests = getRequests().filter((item) => item.id !== id);
+
+        saveRequests(requests);
+        render();
+      }
+    });
+  }
+
+  function init() {
+    render();
+    bindDelegatedActions();
+
+    if (window.location.hash === "#solicitudes-cambios-datos") {
+      setTimeout(() => {
+        document.getElementById("solicitudes-cambios-datos")?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }, 150);
+    }
+  }
+
+  window.addEventListener("storage", (event) => {
+    if (event.key === STORAGE_KEY) render();
+  });
+
+  window.addEventListener("classroom:data-change-requests-updated", render);
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+})();
