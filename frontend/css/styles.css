@@ -11435,3 +11435,84 @@ html[data-theme="light"] .community-filters-panel:not(.is-collapsed) {
     min-width: 0 !important;
   }
 }
+
+/* === Pelusita Mobile Sidebar Dock 20260620 === */
+
+/*
+  En mobile Pelusita no puede quedar enterrada abajo del menú.
+  La dejamos como dock fijo dentro de la sidebar, visible al abrir el panel.
+*/
+
+@media (max-width: 860px) {
+  .sidebar-v2 {
+    position: fixed;
+    overflow-y: auto;
+    padding-bottom: 128px !important;
+  }
+
+  .sidebar-v2-pelusita-dock {
+    position: sticky !important;
+    bottom: 0 !important;
+    z-index: 12 !important;
+    display: grid !important;
+    place-items: center !important;
+    min-height: 96px !important;
+    margin-top: 1rem !important;
+    padding: 0.55rem 0.5rem 0.8rem !important;
+    background:
+      linear-gradient(to top, rgba(3, 5, 18, 0.98), rgba(3, 5, 18, 0.84), rgba(3, 5, 18, 0)) !important;
+    border-top: 1px solid rgba(120, 255, 245, 0.10) !important;
+    pointer-events: auto !important;
+  }
+
+  .pelusita-sidebar-docked {
+    position: relative !important;
+    inset: auto !important;
+    transform: none !important;
+    width: auto !important;
+    max-width: 100% !important;
+    margin: 0 auto !important;
+    display: grid !important;
+    place-items: center !important;
+  }
+
+  .pelusita-sidebar-docked img,
+  .pelusita-sidebar-docked .pelusita-img,
+  .pelusita-sidebar-docked .pelusita-avatar,
+  .pelusita-sidebar-docked canvas {
+    max-width: 82px !important;
+    max-height: 82px !important;
+    object-fit: contain !important;
+  }
+
+  .pelusita-sidebar-docked .pelusita-label,
+  .pelusita-sidebar-docked .pelusita-tooltip,
+  .pelusita-sidebar-docked .pelusita-bubble {
+    display: none !important;
+  }
+
+  html[data-theme="light"] .sidebar-v2-pelusita-dock {
+    background:
+      linear-gradient(to top, rgba(255, 255, 255, 0.98), rgba(255, 255, 255, 0.88), rgba(255, 255, 255, 0)) !important;
+    border-top-color: rgba(79, 70, 229, 0.12) !important;
+  }
+}
+
+@media (max-width: 520px) {
+  .sidebar-v2 {
+    padding-bottom: 112px !important;
+  }
+
+  .sidebar-v2-pelusita-dock {
+    min-height: 86px !important;
+    padding-bottom: 0.65rem !important;
+  }
+
+  .pelusita-sidebar-docked img,
+  .pelusita-sidebar-docked .pelusita-img,
+  .pelusita-sidebar-docked .pelusita-avatar,
+  .pelusita-sidebar-docked canvas {
+    max-width: 74px !important;
+    max-height: 74px !important;
+  }
+}
