@@ -189,7 +189,7 @@
             <span>Certificados, constancias y baja</span>
           </h2>
 
-          <p>{ASIGNAR DESCRIPCION}</p>
+          <p>Gestión rápida desde el Classroom.</p>
         </div>
       </section>
 
@@ -202,8 +202,21 @@
           <div>
             <p class="eyebrow">Documento</p>
             <h3>Certificado de aprobación</h3>
-            <p>{ASIGNAR DESCRIPCION}</p>
+            <p>Disponible para alumnos que aprobaron el examen final. Elegí el curso y generá tu certificado de aprobación.</p>
           </div>
+          <div class="gestion-course-selector" data-cert-course-selector>
+            <label for="certificateCourse">
+              <i class="fa-solid fa-book-open-reader"></i>
+              Curso para certificado
+            </label>
+
+            <select id="certificateCourse" name="certificateCourse" data-certificate-course>
+              <option value="ayrpc-2025" selected>AyRPC 2025</option>
+            </select>
+
+            <small>El certificado se habilita únicamente para alumnos con examen aprobado.</small>
+          </div>
+
 
           <button class="btn btn-primary" id="btnGestionCertificado" type="button">
             <i class="fa-solid fa-file-pdf"></i>
@@ -219,7 +232,7 @@
           <div>
             <p class="eyebrow">Documento</p>
             <h3>Constancia de alumno</h3>
-            <p>{ASIGNAR DESCRIPCION}</p>
+            <p>Generá una constancia de cursada para acreditar tu participación en el recorrido académico.</p>
           </div>
 
           <button class="btn btn-primary" id="btnGestionConstancia" type="button">
@@ -236,7 +249,7 @@
           <div>
             <p class="eyebrow">Solicitud</p>
             <h3>Pedir baja de curso</h3>
-            <p>{ASIGNAR DESCRIPCION}</p>
+            <p>Solicitá la baja de la cursada. El equipo docente revisará el pedido antes de confirmarlo.</p>
           </div>
 
           <button class="btn btn-outline danger-btn" id="btnGestionBaja" type="button">

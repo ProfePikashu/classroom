@@ -13101,3 +13101,72 @@ html[data-theme="light"] [class*="pelusita"][class*="bubble"] input::placeholder
 html[data-theme="light"] [class*="pelusita"][class*="bubble"] textarea::placeholder {
   color: rgba(32, 23, 53, 0.42) !important;
 }
+
+/* === Gestion Certificate Course Selector 20260621 === */
+
+.gestion-course-selector {
+  display: grid;
+  gap: 0.45rem;
+  margin: 0.9rem 0 0.85rem;
+  padding: 0.85rem;
+  border: 1px solid rgba(120, 255, 245, 0.16);
+  border-radius: 16px;
+  background:
+    radial-gradient(circle at top left, rgba(120, 255, 245, 0.08), transparent 38%),
+    rgba(4, 8, 20, 0.42);
+}
+
+.gestion-course-selector label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: #78fff5;
+  font-weight: 900;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.gestion-course-selector select {
+  width: 100%;
+  min-height: 42px;
+  border: 1px solid rgba(120, 255, 245, 0.20);
+  border-radius: 13px;
+  background: rgba(5, 8, 20, 0.82);
+  color: rgba(245, 248, 255, 0.94);
+  padding: 0 0.75rem;
+  font-weight: 850;
+  outline: none;
+}
+
+.gestion-course-selector select:focus {
+  border-color: rgba(120, 255, 245, 0.46);
+  box-shadow: 0 0 0 3px rgba(120, 255, 245, 0.08);
+}
+
+.gestion-course-selector small {
+  color: rgba(230, 240, 255, 0.62);
+  line-height: 1.45;
+}
+
+/* Modo claro */
+html[data-theme="light"] .gestion-course-selector {
+  background:
+    radial-gradient(circle at top left, rgba(79, 70, 229, 0.08), transparent 38%),
+    rgba(255, 255, 255, 0.78);
+  border-color: rgba(79, 70, 229, 0.16);
+}
+
+html[data-theme="light"] .gestion-course-selector label {
+  color: #4f46e5;
+}
+
+html[data-theme="light"] .gestion-course-selector select {
+  background: rgba(255, 255, 255, 0.92);
+  color: #201735;
+  border-color: rgba(79, 70, 229, 0.18);
+}
+
+html[data-theme="light"] .gestion-course-selector small {
+  color: rgba(32, 23, 53, 0.62);
+}
