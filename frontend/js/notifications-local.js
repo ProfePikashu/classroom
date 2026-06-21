@@ -234,6 +234,11 @@
             Demo
           </button>
 
+          <a class="notifications-read-all notifications-settings-link" id="notificationsSettingsLink" href="perfil.html#notificationPrefsCard">
+            <i class="fa-solid fa-gear"></i>
+            Configurar
+          </a>
+
           <button class="notifications-read-all danger" id="notificationsClearAll" type="button">
             <i class="fa-solid fa-trash"></i>
             Limpiar
@@ -252,6 +257,7 @@
     const readAll = widget.querySelector("#notificationsReadAll");
     const seed = widget.querySelector("#notificationsSeedDemo");
     const clear = widget.querySelector("#notificationsClearAll");
+    const settings = widget.querySelector("#notificationsSettingsLink");
 
     toggle?.addEventListener("click", (event) => {
       event.preventDefault();
@@ -270,6 +276,11 @@
     readAll?.addEventListener("click", markAllRead);
     seed?.addEventListener("click", seedDemo);
     clear?.addEventListener("click", clearAll);
+
+    settings?.addEventListener("click", () => {
+      widget.classList.remove("open");
+      panel?.setAttribute("aria-hidden", "true");
+    });
 
     document.addEventListener("click", (event) => {
       if (!widget.classList.contains("open")) return;
@@ -420,11 +431,33 @@
     `;
   }
 
+  function scrollToPrefsFromHash() {
+    if (window.location.hash !== "#notificationPrefsCard") return;
+
+    setTimeout(() => {
+      const card = document.getElementById("notificationPrefsCard");
+
+      if (!card) return;
+
+      card.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+
+      card.classList.add("notification-prefs-highlight");
+
+      setTimeout(() => {
+        card.classList.remove("notification-prefs-highlight");
+      }, 1600);
+    }, 220);
+  }
+
   function init() {
     savePrefs(loadPrefs());
     ensureWidget();
     render();
     renderPrefsCard();
+    scrollToPrefsFromHash();
 
     window.addEventListener("classroom:community-notification", (event) => {
       createNotification(event.detail || {});
