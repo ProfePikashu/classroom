@@ -372,19 +372,60 @@
         <div>
           <p class="eyebrow">Preferencias</p>
           <h2>Notificaciones</h2>
-          <p>Elegí qué querés recibir dentro del Classroom. Las opciones de email quedan preparadas visualmente, pero todavía no envían correos.</p>
+          <p>Configurá qué querés recibir dentro del Classroom y qué quedará preparado para correo cuando conectemos el backend.</p>
         </div>
       </div>
 
-      <div class="notification-prefs-list">
-        ${prefRow("bell", "Campanita interna", "Activa o desactiva las notificaciones dentro del Classroom.", prefs.bell)}
-        ${prefRow("community", "Comunidad", "Recibir actividad general de la sección Comunidad.", prefs.community)}
-        ${prefRow("communityNewPosts", "Nuevos hilos", "Avisar cuando se crea una consulta, aporte o recomendación.", prefs.communityNewPosts)}
-        ${prefRow("communityReplies", "Respuestas en hilos", "Avisar cuando alguien responde un hilo.", prefs.communityReplies)}
-        ${prefRow("communityStatus", "Hilos resueltos/reabiertos", "Avisar cuando un hilo cambia de estado.", prefs.communityStatus)}
-        ${prefRow("announcements", "Avisos oficiales", "Reservado para novedades importantes del curso.", prefs.announcements)}
-        ${prefRow("emailCommunity", "Email de Comunidad", "Preparado para más adelante. Hoy solo guarda la preferencia.", prefs.emailCommunity, "visual")}
-        ${prefRow("emailAnnouncements", "Email de avisos oficiales", "Preparado para más adelante. Hoy solo guarda la preferencia.", prefs.emailAnnouncements, "visual")}
+      <div class="notification-prefs-sections">
+        <section class="notification-pref-section">
+          <div class="notification-pref-section-head">
+            <i class="fa-solid fa-comments"></i>
+            <div>
+              <h3>Comunidad</h3>
+              <p>Actividad interna de hilos, respuestas y estados.</p>
+            </div>
+          </div>
+
+          <div class="notification-prefs-list">
+            ${prefRow("bell", "Campanita interna", "Activa o desactiva las notificaciones dentro del Classroom.", prefs.bell)}
+            ${prefRow("community", "Comunidad", "Recibir actividad general de la sección Comunidad.", prefs.community)}
+            ${prefRow("communityNewPosts", "Nuevos hilos", "Avisar cuando se crea una consulta, aporte o recomendación.", prefs.communityNewPosts)}
+            ${prefRow("communityReplies", "Respuestas en hilos", "Avisar cuando alguien responde un hilo.", prefs.communityReplies)}
+            ${prefRow("communityStatus", "Hilos resueltos/reabiertos", "Avisar cuando un hilo cambia de estado.", prefs.communityStatus)}
+          </div>
+        </section>
+
+        <section class="notification-pref-section">
+          <div class="notification-pref-section-head">
+            <i class="fa-solid fa-envelope"></i>
+            <div>
+              <h3>Correo</h3>
+              <p>Preferencias preparadas para cuando conectemos envío real por backend.</p>
+            </div>
+          </div>
+
+          <div class="notification-prefs-list">
+            ${prefRow("emailCommunity", "Resumen o actividad de Comunidad", "Recibir por correo respuestas, menciones o actividad importante de Comunidad.", prefs.emailCommunity, "pendiente")}
+            ${prefRow("emailAnnouncements", "Avisos oficiales", "Recibir por correo comunicados importantes del curso.", prefs.emailAnnouncements, "pendiente")}
+            ${prefRow("newsletter", "Newsletter del curso", "Recibir resúmenes generales, novedades y recordatorios.", prefs.newsletter, "pendiente")}
+          </div>
+        </section>
+
+        <section class="notification-pref-section">
+          <div class="notification-pref-section-head">
+            <i class="fa-solid fa-bullhorn"></i>
+            <div>
+              <h3>Novedades</h3>
+              <p>Información general que puede aparecer como aviso o novedad dentro del Classroom.</p>
+            </div>
+          </div>
+
+          <div class="notification-prefs-list">
+            ${prefRow("announcements", "Avisos oficiales", "Fechas, habilitaciones, cambios importantes o comunicados del curso.", prefs.announcements)}
+            ${prefRow("courseNews", "Siguientes cursos", "Novedades sobre nuevas cursadas, próximas aperturas o contenidos futuros.", prefs.courseNews)}
+            ${prefRow("attendance", "Correcciones y estado académico", "Actualizaciones de asistencia, revisiones, recuperatorios o correcciones.", prefs.attendance)}
+          </div>
+        </section>
       </div>
     `;
 

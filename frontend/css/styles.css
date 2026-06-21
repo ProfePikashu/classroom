@@ -10540,3 +10540,251 @@ html[data-theme="light"] .community-attachment-thumb {
     transform: translateY(0);
   }
 }
+
+/* === Light Theme Fix Notifications Admin Pelusita 20260620 === */
+
+/* Campanita / notificaciones en modo claro */
+html[data-theme="light"] .notifications-widget {
+  color: #201735;
+}
+
+html[data-theme="light"] .notifications-toggle {
+  background: rgba(255, 255, 255, 0.92);
+  color: #201735;
+  border-color: rgba(91, 55, 160, 0.18);
+  box-shadow: 0 10px 28px rgba(91, 55, 160, 0.13);
+}
+
+html[data-theme="light"] .notifications-toggle:hover {
+  background: rgba(246, 240, 255, 0.98);
+  color: #140c24;
+}
+
+html[data-theme="light"] .notifications-toggle i {
+  color: #201735;
+}
+
+html[data-theme="light"] .notifications-panel {
+  background:
+    radial-gradient(circle at top left, rgba(126, 87, 194, 0.12), transparent 34%),
+    rgba(255, 255, 255, 0.96);
+  border-color: rgba(91, 55, 160, 0.16);
+  color: #201735;
+  box-shadow: 0 24px 70px rgba(70, 45, 120, 0.18);
+}
+
+html[data-theme="light"] .notifications-panel .eyebrow,
+html[data-theme="light"] .notifications-panel-header h3,
+html[data-theme="light"] .notification-item strong {
+  color: #201735;
+}
+
+html[data-theme="light"] .notification-item {
+  background: rgba(248, 244, 255, 0.78);
+  border-color: rgba(91, 55, 160, 0.11);
+}
+
+html[data-theme="light"] .notification-item.unread {
+  background: rgba(235, 226, 255, 0.95);
+  border-color: rgba(126, 87, 194, 0.24);
+}
+
+html[data-theme="light"] .notification-item p,
+html[data-theme="light"] .notification-item small,
+html[data-theme="light"] .notification-empty p {
+  color: rgba(32, 23, 53, 0.72);
+}
+
+html[data-theme="light"] .notification-empty strong {
+  color: #201735;
+}
+
+html[data-theme="light"] .notification-icon {
+  background: rgba(126, 87, 194, 0.12);
+  color: #5e35b1;
+}
+
+html[data-theme="light"] .notifications-chip {
+  background: rgba(126, 87, 194, 0.10);
+  border-color: rgba(126, 87, 194, 0.18);
+  color: #5e35b1;
+}
+
+html[data-theme="light"] .notifications-read-all {
+  background: rgba(255, 255, 255, 0.78);
+  border-color: rgba(91, 55, 160, 0.16);
+  color: #352257;
+}
+
+html[data-theme="light"] .notifications-read-all:hover {
+  background: rgba(238, 229, 255, 0.92);
+}
+
+html[data-theme="light"] .notifications-read-all.danger {
+  color: #bd3151;
+  border-color: rgba(189, 49, 81, 0.24);
+  background: rgba(255, 240, 244, 0.75);
+}
+
+/* Sidebar Administrar / staff en modo claro */
+html[data-theme="light"] .sidebar-v2-staff,
+html[data-theme="light"] .sidebar-v2-admin-popover {
+  background: rgba(255, 255, 255, 0.92);
+  border-color: rgba(32, 23, 53, 0.16);
+  color: #201735;
+  box-shadow: 0 18px 44px rgba(70, 45, 120, 0.14);
+}
+
+html[data-theme="light"] .sidebar-v2-admin-btn {
+  background: rgba(255, 255, 255, 0.88);
+  border-color: rgba(32, 23, 53, 0.20);
+  color: #201735;
+}
+
+html[data-theme="light"] .sidebar-v2-admin-btn i,
+html[data-theme="light"] .sidebar-v2-admin-btn span {
+  color: #201735;
+}
+
+html[data-theme="light"] .sidebar-v2-admin-popover a {
+  color: rgba(32, 23, 53, 0.78);
+}
+
+html[data-theme="light"] .sidebar-v2-admin-popover a:hover,
+html[data-theme="light"] .sidebar-v2-admin-popover a.active {
+  background: rgba(255, 206, 45, 0.20);
+  color: #201735;
+}
+
+/* Pelusita / globos en modo claro */
+html[data-theme="light"] .pelusita-dialog,
+html[data-theme="light"] .pelusita-panel,
+html[data-theme="light"] .pelusita-card,
+html[data-theme="light"] .pelusita-message,
+html[data-theme="light"] .pelusita-bubble,
+html[data-theme="light"] .pelusita-chat,
+html[data-theme="light"] .pelusita-guide-card {
+  background:
+    radial-gradient(circle at top left, rgba(126, 87, 194, 0.10), transparent 34%),
+    rgba(255, 255, 255, 0.96) !important;
+  color: #201735 !important;
+  border-color: rgba(91, 55, 160, 0.16) !important;
+  box-shadow: 0 22px 60px rgba(70, 45, 120, 0.16) !important;
+}
+
+html[data-theme="light"] .pelusita-dialog *,
+html[data-theme="light"] .pelusita-panel *,
+html[data-theme="light"] .pelusita-card *,
+html[data-theme="light"] .pelusita-message *,
+html[data-theme="light"] .pelusita-bubble *,
+html[data-theme="light"] .pelusita-chat *,
+html[data-theme="light"] .pelusita-guide-card * {
+  color: inherit;
+}
+
+html[data-theme="light"] .pelusita-dialog .eyebrow,
+html[data-theme="light"] .pelusita-panel .eyebrow,
+html[data-theme="light"] .pelusita-guide-card .eyebrow {
+  color: #008fa3 !important;
+}
+
+html[data-theme="light"] .pelusita-dialog button,
+html[data-theme="light"] .pelusita-panel button,
+html[data-theme="light"] .pelusita-card button {
+  border-color: rgba(91, 55, 160, 0.16);
+}
+
+/* Preferencias seccionadas */
+.notification-prefs-sections {
+  display: grid;
+  gap: 1rem;
+}
+
+.notification-pref-section {
+  border: 1px solid rgba(120, 255, 245, 0.14);
+  border-radius: 22px;
+  padding: 1rem;
+  background:
+    radial-gradient(circle at top left, rgba(120, 255, 245, 0.07), transparent 32%),
+    rgba(255, 255, 255, 0.035);
+}
+
+.notification-pref-section-head {
+  display: flex;
+  gap: 0.85rem;
+  align-items: flex-start;
+  margin-bottom: 0.85rem;
+}
+
+.notification-pref-section-head > i {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border-radius: 15px;
+  background: rgba(120, 255, 245, 0.10);
+  color: var(--accent, #77f7ff);
+  border: 1px solid rgba(120, 255, 245, 0.16);
+}
+
+.notification-pref-section-head h3 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.notification-pref-section-head p {
+  margin: 0.25rem 0 0;
+  color: var(--text-muted, rgba(235, 245, 255, 0.68));
+  line-height: 1.45;
+}
+
+.notification-pref-section .notification-prefs-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+html[data-theme="light"] .notification-pref-section {
+  background: rgba(255, 255, 255, 0.74);
+  border-color: rgba(91, 55, 160, 0.13);
+}
+
+html[data-theme="light"] .notification-pref-section-head > i {
+  background: rgba(126, 87, 194, 0.10);
+  color: #5e35b1;
+  border-color: rgba(126, 87, 194, 0.15);
+}
+
+html[data-theme="light"] .notification-pref-section-head h3 {
+  color: #201735;
+}
+
+html[data-theme="light"] .notification-pref-section-head p {
+  color: rgba(32, 23, 53, 0.68);
+}
+
+html[data-theme="light"] .notification-pref-row {
+  background: rgba(248, 244, 255, 0.72);
+  border-color: rgba(91, 55, 160, 0.12);
+}
+
+html[data-theme="light"] .notification-pref-row strong {
+  color: #201735;
+}
+
+html[data-theme="light"] .notification-pref-row p {
+  color: rgba(32, 23, 53, 0.66);
+}
+
+html[data-theme="light"] .notification-pref-tag {
+  background: rgba(126, 87, 194, 0.10);
+  color: #5e35b1;
+  border-color: rgba(126, 87, 194, 0.18);
+}
+
+@media (max-width: 880px) {
+  .notification-pref-section .notification-prefs-list {
+    grid-template-columns: 1fr;
+  }
+}
