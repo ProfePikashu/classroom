@@ -166,7 +166,8 @@
     const ok = window.confirm("¿Eliminar esta notificación?");
     if (!ok) return;
 
-    const items = loadItems().filter((item) => item.id !== id);
+    const before = loadItems();
+    const items = before.filter((item) => String(item.id) !== String(id));
 
     saveItems(items);
     render();
@@ -565,7 +566,35 @@
     }, 220);
   }
 
+
+  /* === Delegated notification actions 20260621 === */
+  function initDelegatedNotificationActions() {
+    if (window.__classroomNotificationDelegatedActionsReady) return;
+    window.__classroomNotificationDelegatedActionsReady = true;
+
+    document.addEventListener("click", (event) => {
+      const deleteButton = event.target.closest("[data-notification-delete]");
+      if (deleteButton) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        deleteNotification(deleteButton.dataset.notificationDelete);
+        return;
+      }
+
+      const toggleButton = event.target.closest("[data-notification-toggle-read]");
+      if (toggleButton) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        toggleRead(toggleButton.dataset.notificationToggleRead);
+      }
+    }, true);
+  }
+
+
   function init() {
+    initDelegatedNotificationActions();
     savePrefs(loadPrefs());
     ensureWidget();
     render();
