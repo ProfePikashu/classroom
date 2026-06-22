@@ -5,7 +5,7 @@
 "use strict";
 
 const GESTION_API_CONSTANCIA = "https://script.google.com/macros/s/AKfycbwwMlT9cIOV3Nm057_XPfHT-tXaeKYv6cHZS4yMbtj5gd4q6NZZELCaMDRCb0YUD8v_hg/exec";
-const GESTION_API_CERTIFICADO = "https://script.google.com/macros/s/AKfycbyeFYWpfUel-6aWGBgfCmXOS7-KaDGBkZe5bkfxZRkyjgw9jezNJEJ68pmO4FAhoQ3o/exec";
+const GESTION_API_CERTIFICADO = "https://script.google.com/macros/s/AKfycbyglMr8TlH5BjsCfg57wmsSVhUqIwrSveAh6FH1fxIOJUgX4e35Jc5nuJ9Cl261rZ9dkQ/exec";
 const GESTION_API_BAJA = "{ASIGNAR_ENDPOINT_BAJA}";
 
 const ClassroomGestion = {
@@ -131,3 +131,4 @@ const ClassroomGestion = {
 document.addEventListener("DOMContentLoaded", () => {
   ClassroomGestion.init();
 });
+
