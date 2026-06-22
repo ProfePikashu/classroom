@@ -1036,3 +1036,326 @@
     schedule: scheduleRender,
   };
 })();
+
+/* === Supabase Backend Notifications Bridge 20260621 === */
+(function supabaseBackendNotificationsBridge() {
+  "use strict";
+
+  const SESSION_KEY = "andyazh-classroom-session";
+  const STORAGE_KEY = "andyazh-classroom-notifications-v2";
+
+  function getApiBase() {
+    const host = window.location.hostname;
+
+    if (host === "localhost" || host === "127.0.0.1" || host === "") {
+      return "http://127.0.0.1:8000";
+    }
+
+    return "https://exampro-backend-1n6d.onrender.com";
+  }
+
+  function safeJson(value, fallback) {
+    try {
+      return JSON.parse(value) || fallback;
+    } catch {
+      return fallback;
+    }
+  }
+
+  function loadSession() {
+    return safeJson(localStorage.getItem(SESSION_KEY), {});
+  }
+
+  function saveSession(session) {
+    localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+  }
+
+  function loadLocalItems() {
+    const items = safeJson(localStorage.getItem(STORAGE_KEY), []);
+    return Array.isArray(items) ? items : [];
+  }
+
+  function saveLocalItems(items) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+    window.dispatchEvent(new CustomEvent("classroom:notifications-updated", {
+      detail: { items, source: "backend-sync" },
+    }));
+  }
+
+  function getSessionToken(session) {
+    return (
+      session.access_token ||
+      session.accessToken ||
+      session.token ||
+      session.student_token ||
+      session.exampro_token ||
+      session.jwt ||
+      session?.exampro?.access_token ||
+      session?.exampro?.token ||
+      ""
+    );
+  }
+
+  function normalizeRoleForFrontend(role) {
+    const raw = String(role || "").trim().toLowerCase();
+
+    if (raw === "docente") return "teacher";
+    if (raw === "classroom_moderator") return "moderator";
+    if (raw === "alumno") return "student";
+
+    return role || "";
+  }
+
+  function normalizeRoleForBackend(role) {
+    const raw = String(role || "").trim().toLowerCase();
+
+    if (raw === "teacher") return "docente";
+    if (raw === "moderator") return "classroom_moderator";
+    if (raw === "student") return "alumno";
+
+    return role || "";
+  }
+
+  async function ensureBackendToken() {
+    const session = loadSession();
+    const existingToken = getSessionToken(session);
+
+    if (existingToken) return existingToken;
+
+    const dni = String(session.dni || session?.alumno?.dni || "").trim();
+    const twitch = String(session.twitch || session?.alumno?.twitch || session?.alumno?.twitch_username || "").trim();
+
+    if (!dni || !twitch) {
+      throw new Error("La sesión no tiene DNI/Twitch para pedir token.");
+    }
+
+    const response = await fetch(`${getApiBase()}/api/classroom/student-login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ dni, twitch }),
+    });
+
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok || !data.access_token) {
+      throw new Error(data.detail || "No se pudo obtener token de Classroom.");
+    }
+
+    const updatedSession = {
+      ...session,
+      access_token: data.access_token,
+      token_type: data.token_type || "bearer",
+      backendRole: data.role || session.backendRole || normalizeRoleForBackend(session.role),
+      role: session.role || normalizeRoleForFrontend(data.role),
+      roleLabel: session.roleLabel || data.roleLabel || data.role_label || "",
+      exampro: {
+        ...(session.exampro && typeof session.exampro === "object" ? session.exampro : {}),
+        access_token: data.access_token,
+        token_type: data.token_type || "bearer",
+        role: data.role,
+      },
+    };
+
+    saveSession(updatedSession);
+
+    return data.access_token;
+  }
+
+  function getNotificationBody(item) {
+    return item.body || item.description || item.message || item.content || item.text || "";
+  }
+
+  function getNotificationLink(item) {
+    return item.link || item.link_url || item.url || "";
+  }
+
+  function normalizeBackendNotification(item) {
+    const createdAt = item.createdAt || item.created_at || item.created_at_iso || item.updatedAt || item.updated_at || new Date().toISOString();
+
+    return {
+      id: String(item.id),
+      title: item.title || "Notificación",
+      body: getNotificationBody(item),
+      description: getNotificationBody(item),
+
+      type: item.type || "system",
+      severity: item.severity || "neutral",
+
+      link: getNotificationLink(item),
+      link_url: getNotificationLink(item),
+
+      audience: item.audience || item.audience_type || "all",
+      audience_type: item.audience_type || item.audience || "all",
+      course: item.course || "",
+
+      actor: item.actor || item.created_by_name || "Classroom",
+
+      read: Boolean(item.read || item.read_at || item.readAt),
+      read_at: item.read_at || item.readAt || null,
+      dismissed_at: item.dismissed_at || item.dismissedAt || null,
+
+      createdAt,
+      created_at: createdAt,
+      updatedAt: item.updatedAt || item.updated_at || createdAt,
+      updated_at: item.updated_at || item.updatedAt || createdAt,
+
+      source: "supabase",
+      backendSyncedAt: new Date().toISOString(),
+    };
+  }
+
+  function mergeBackendItems(backendItems) {
+    const normalizedBackend = backendItems.map(normalizeBackendNotification);
+    const backendIds = new Set(normalizedBackend.map((item) => String(item.id)));
+
+    const localOnly = loadLocalItems().filter((item) => {
+      if (!item || !item.id) return false;
+
+      const isBackend = item.source === "supabase" || backendIds.has(String(item.id));
+      const isDismissed = item.dismissedAt || item.dismissed_at || item.dismissed_at;
+
+      return !isBackend && !isDismissed;
+    });
+
+    const merged = [...normalizedBackend, ...localOnly]
+      .filter((item) => !item.dismissed_at && !item.dismissedAt)
+      .sort((a, b) => new Date(b.createdAt || b.created_at || 0) - new Date(a.createdAt || a.created_at || 0));
+
+    saveLocalItems(merged);
+
+    return merged;
+  }
+
+  async function apiFetch(path, options = {}) {
+    const token = await ensureBackendToken();
+
+    const response = await fetch(`${getApiBase()}${path}`, {
+      ...options,
+      headers: {
+        "Content-Type": "application/json",
+        ...(options.headers || {}),
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      throw new Error(data.detail || `Error backend ${response.status}`);
+    }
+
+    return data;
+  }
+
+  async function syncNotificationsFromBackend() {
+    const data = await apiFetch("/api/classroom/notifications/me");
+
+    const items = Array.isArray(data.items) ? data.items : [];
+    const merged = mergeBackendItems(items);
+
+    if (window.ClassroomUnifiedBellRenderer?.schedule) {
+      window.ClassroomUnifiedBellRenderer.schedule();
+    }
+
+    return {
+      ok: true,
+      items: merged,
+      unread: data.unread ?? merged.filter((item) => !item.read).length,
+    };
+  }
+
+  async function markBackendNotificationRead(id) {
+    await apiFetch(`/api/classroom/notifications/${encodeURIComponent(id)}/read`, {
+      method: "POST",
+    });
+
+    await syncNotificationsFromBackend();
+  }
+
+  async function markBackendNotificationUnread(id) {
+    await apiFetch(`/api/classroom/notifications/${encodeURIComponent(id)}/unread`, {
+      method: "POST",
+    });
+
+    await syncNotificationsFromBackend();
+  }
+
+  async function dismissBackendNotification(id) {
+    await apiFetch(`/api/classroom/notifications/${encodeURIComponent(id)}/dismiss`, {
+      method: "POST",
+    });
+
+    await syncNotificationsFromBackend();
+  }
+
+  function isSupabaseNotification(id) {
+    const item = loadLocalItems().find((entry) => String(entry.id) === String(id));
+    return item?.source === "supabase";
+  }
+
+  document.addEventListener("click", (event) => {
+    const deleteButton = event.target.closest("[data-notification-delete]");
+    const readButton = event.target.closest("[data-notification-toggle-read]");
+
+    if (deleteButton) {
+      const id = deleteButton.getAttribute("data-notification-delete");
+
+      if (id && isSupabaseNotification(id)) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        dismissBackendNotification(id).catch((error) => {
+          console.warn("[Classroom] No se pudo eliminar notificación backend:", error);
+        });
+      }
+
+      return;
+    }
+
+    if (readButton) {
+      const id = readButton.getAttribute("data-notification-toggle-read");
+
+      if (id && isSupabaseNotification(id)) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        const item = loadLocalItems().find((entry) => String(entry.id) === String(id));
+
+        if (item?.read) {
+          markBackendNotificationUnread(id).catch((error) => {
+            console.warn("[Classroom] No se pudo marcar no leída en backend:", error);
+          });
+        } else {
+          markBackendNotificationRead(id).catch((error) => {
+            console.warn("[Classroom] No se pudo marcar leída en backend:", error);
+          });
+        }
+      }
+    }
+  }, true);
+
+  function scheduleInitialSync() {
+    setTimeout(() => {
+      syncNotificationsFromBackend().catch((error) => {
+        console.warn("[Classroom] Notificaciones backend no disponibles, usando fallback localStorage:", error);
+      });
+    }, 500);
+  }
+
+  window.ClassroomBackendNotifications = {
+    getApiBase,
+    ensureBackendToken,
+    sync: syncNotificationsFromBackend,
+    markRead: markBackendNotificationRead,
+    markUnread: markBackendNotificationUnread,
+    dismiss: dismissBackendNotification,
+  };
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", scheduleInitialSync);
+  } else {
+    scheduleInitialSync();
+  }
+})();

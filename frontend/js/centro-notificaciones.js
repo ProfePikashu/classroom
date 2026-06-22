@@ -430,3 +430,522 @@
     init();
   }
 })();
+
+/* === Centro Notificaciones Backend Bridge 20260621 === */
+(function centroNotificacionesBackendBridge() {
+  "use strict";
+
+  const STORAGE_KEY = "andyazh-classroom-notifications-v2";
+
+  function getBackendApi() {
+    return window.ClassroomBackendNotifications || null;
+  }
+
+  function escapeHtml(value) {
+    return String(value ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  function safeJson(value, fallback) {
+    try {
+      return JSON.parse(value) || fallback;
+    } catch {
+      return fallback;
+    }
+  }
+
+  function getApiBase() {
+    if (getBackendApi()?.getApiBase) {
+      return getBackendApi().getApiBase();
+    }
+
+    const host = window.location.hostname;
+
+    if (host === "localhost" || host === "127.0.0.1" || host === "") {
+      return "http://127.0.0.1:8000";
+    }
+
+    return "https://exampro-backend-1n6d.onrender.com";
+  }
+
+  function loadSession() {
+    return safeJson(localStorage.getItem("andyazh-classroom-session"), {});
+  }
+
+  function getToken(session) {
+    return (
+      session.access_token ||
+      session.accessToken ||
+      session.token ||
+      session.student_token ||
+      session.exampro_token ||
+      session.jwt ||
+      session?.exampro?.access_token ||
+      session?.exampro?.token ||
+      ""
+    );
+  }
+
+  async function ensureToken() {
+    if (getBackendApi()?.ensureBackendToken) {
+      return getBackendApi().ensureBackendToken();
+    }
+
+    const session = loadSession();
+    const existing = getToken(session);
+
+    if (existing) return existing;
+
+    const dni = String(session.dni || session?.alumno?.dni || "").trim();
+    const twitch = String(session.twitch || session?.alumno?.twitch || session?.alumno?.twitch_username || "").trim();
+
+    if (!dni || !twitch) {
+      throw new Error("No hay DNI/Twitch para autenticar contra Classroom.");
+    }
+
+    const response = await fetch(`${getApiBase()}/api/classroom/student-login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ dni, twitch }),
+    });
+
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok || !data.access_token) {
+      throw new Error(data.detail || "No se pudo iniciar sesión en backend.");
+    }
+
+    const updated = {
+      ...session,
+      access_token: data.access_token,
+      token_type: data.token_type || "bearer",
+      backendRole: data.role,
+      exampro: {
+        ...(session.exampro && typeof session.exampro === "object" ? session.exampro : {}),
+        access_token: data.access_token,
+        token_type: data.token_type || "bearer",
+        role: data.role,
+      },
+    };
+
+    localStorage.setItem("andyazh-classroom-session", JSON.stringify(updated));
+
+    return data.access_token;
+  }
+
+  async function apiFetch(path, options = {}) {
+    const token = await ensureToken();
+
+    const response = await fetch(`${getApiBase()}${path}`, {
+      ...options,
+      headers: {
+        "Content-Type": "application/json",
+        ...(options.headers || {}),
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      throw new Error(data.detail || `Error backend ${response.status}`);
+    }
+
+    return data;
+  }
+
+  function normalizeAudience(value) {
+    const raw = String(value || "all").trim();
+
+    if (raw === "course-ayrpc-2025") return { audience_type: "course", course: "AyRPC 2025" };
+    if (raw === "course-ayrpc-2026") return { audience_type: "course", course: "AyRPC 2026" };
+
+    return {
+      audience_type: raw || "all",
+      course: null,
+    };
+  }
+
+  function normalizeItem(item) {
+    const createdAt = item.createdAt || item.created_at || new Date().toISOString();
+
+    return {
+      ...item,
+      id: String(item.id),
+      title: item.title || "Notificación",
+      body: item.body || item.description || "",
+      description: item.body || item.description || "",
+      link: item.link || item.link_url || "",
+      link_url: item.link_url || item.link || "",
+      audience: item.audience || item.audience_type || "all",
+      audience_type: item.audience_type || item.audience || "all",
+      createdAt,
+      created_at: createdAt,
+      source: "supabase",
+    };
+  }
+
+  function getFormPayload() {
+    const form = document.querySelector("#notificationAdminForm, [data-notification-admin-form]");
+    if (!form) throw new Error("No encontré el formulario del Centro de notificaciones.");
+
+    const formData = new FormData(form);
+
+    const title =
+      formData.get("title") ||
+      form.querySelector('[name="title"], #notificationTitle')?.value ||
+      "";
+
+    const body =
+      formData.get("body") ||
+      formData.get("description") ||
+      form.querySelector('[name="body"], [name="description"], #notificationBody')?.value ||
+      "";
+
+    const type =
+      formData.get("type") ||
+      form.querySelector('[name="type"], #notificationType')?.value ||
+      "announcement";
+
+    const severity =
+      formData.get("severity") ||
+      form.querySelector('[name="severity"], #notificationSeverity')?.value ||
+      "";
+
+    const audienceRaw =
+      formData.get("audience") ||
+      formData.get("audience_type") ||
+      form.querySelector('[name="audience"], [name="audience_type"], #notificationAudience')?.value ||
+      "all";
+
+    const explicitCourse =
+      formData.get("course") ||
+      form.querySelector('[name="course"], #notificationCourse')?.value ||
+      "";
+
+    const link =
+      formData.get("link") ||
+      formData.get("link_url") ||
+      form.querySelector('[name="link"], [name="link_url"], #notificationLink')?.value ||
+      "";
+
+    const audience = normalizeAudience(audienceRaw);
+
+    return {
+      title: String(title).trim(),
+      body: String(body).trim(),
+      type: String(type || "announcement").trim(),
+      severity: String(severity || "").trim() || null,
+      audience_type: audience.audience_type,
+      audience: audience.audience_type,
+      course: String(explicitCourse || audience.course || "").trim() || null,
+      link_url: String(link || "").trim() || null,
+      send_email: false,
+      email_required: false,
+    };
+  }
+
+  function getEditingId() {
+    return (
+      document.querySelector("#notificationEditId")?.value ||
+      document.querySelector('[name="notificationEditId"]')?.value ||
+      document.querySelector('[name="editId"]')?.value ||
+      document.querySelector("[data-notification-edit-id]")?.value ||
+      ""
+    ).trim();
+  }
+
+  function clearEditingId() {
+    const candidates = [
+      document.querySelector("#notificationEditId"),
+      document.querySelector('[name="notificationEditId"]'),
+      document.querySelector('[name="editId"]'),
+      document.querySelector("[data-notification-edit-id]"),
+    ].filter(Boolean);
+
+    candidates.forEach((el) => {
+      el.value = "";
+    });
+  }
+
+  function fillEditForm(item) {
+    const form = document.querySelector("#notificationAdminForm, [data-notification-admin-form]");
+    if (!form) return;
+
+    const set = (selector, value) => {
+      const el = form.querySelector(selector);
+      if (el) {
+        el.value = value ?? "";
+        el.dispatchEvent(new Event("change", { bubbles: true }));
+      }
+    };
+
+    const audienceValue =
+      item.audience_type === "course" && String(item.course || "").includes("2026")
+        ? "course-ayrpc-2026"
+        : item.audience_type === "course"
+          ? "course-ayrpc-2025"
+          : item.audience_type || item.audience || "all";
+
+    set('[name="title"], #notificationTitle', item.title || "");
+    set('[name="body"], [name="description"], #notificationBody', item.body || item.description || "");
+    set('[name="type"], #notificationType', item.type || "announcement");
+    set('[name="severity"], #notificationSeverity', item.severity || "");
+    set('[name="audience"], [name="audience_type"], #notificationAudience', audienceValue);
+    set('[name="course"], #notificationCourse', item.course || "");
+    set('[name="link"], [name="link_url"], #notificationLink', item.link_url || item.link || "");
+
+    const idInput =
+      form.querySelector("#notificationEditId") ||
+      form.querySelector('[name="notificationEditId"]') ||
+      form.querySelector('[name="editId"]') ||
+      form.querySelector("[data-notification-edit-id]");
+
+    if (idInput) idInput.value = item.id;
+
+    form.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function renderBackendAdminList(items) {
+    const list =
+      document.querySelector("#notificationAdminList") ||
+      document.querySelector("#notificationsAdminList") ||
+      document.querySelector("[data-notification-admin-list]") ||
+      document.querySelector(".notification-admin-list");
+
+    if (!list) return;
+
+    if (!items.length) {
+      list.innerHTML = `
+        <div class="notification-admin-empty">
+          <i class="fa-regular fa-bell"></i>
+          <strong>No hay notificaciones todavía</strong>
+          <p>Cuando crees avisos desde este centro, van a aparecer acá.</p>
+        </div>
+      `;
+      return;
+    }
+
+    list.innerHTML = items.map((item) => {
+      const severity = item.severity || "neutral";
+      const type = item.type || "system";
+      const body = item.body || item.description || "";
+      const recipients = item.recipients_count ?? item.recipientsCreated ?? item.recipients_created ?? 0;
+      const unread = item.unread_count ?? item.unread ?? 0;
+
+      return `
+        <article class="notification-admin-item is-${escapeHtml(severity)}" data-admin-notification-id="${escapeHtml(item.id)}">
+          <div class="notification-admin-item-main">
+            <div class="notification-admin-item-head">
+              <strong>${escapeHtml(item.title)}</strong>
+              <span>${escapeHtml(type)} · ${escapeHtml(severity)}</span>
+            </div>
+
+            <p>${escapeHtml(body)}</p>
+
+            <small>
+              Audiencia: ${escapeHtml(item.audience_type || item.audience || "all")}
+              ${item.course ? " · Curso: " + escapeHtml(item.course) : ""}
+              · Destinatarios: ${escapeHtml(recipients)}
+              · No leídas: ${escapeHtml(unread)}
+            </small>
+          </div>
+
+          <div class="notification-admin-item-actions">
+            <button type="button" data-backend-notification-edit="${escapeHtml(item.id)}">
+              <i class="fa-solid fa-pen"></i>
+              Editar
+            </button>
+            <button type="button" data-backend-notification-resend="${escapeHtml(item.id)}">
+              <i class="fa-solid fa-paper-plane"></i>
+              Reenviar
+            </button>
+            <button type="button" data-backend-notification-delete="${escapeHtml(item.id)}">
+              <i class="fa-solid fa-trash"></i>
+              Borrar
+            </button>
+          </div>
+        </article>
+      `;
+    }).join("");
+  }
+
+  async function loadAdminNotifications() {
+    const data = await apiFetch("/api/classroom/notifications/admin");
+    const items = Array.isArray(data.items) ? data.items.map(normalizeItem) : [];
+
+    window.ClassroomNotificationAdminItems = items;
+
+    renderBackendAdminList(items);
+
+    return items;
+  }
+
+  async function saveNotificationToBackend() {
+    const payload = getFormPayload();
+
+    if (!payload.title || !payload.body) {
+      alert("Falta título o mensaje.");
+      return;
+    }
+
+    const editingId = getEditingId();
+
+    const data = editingId
+      ? await apiFetch(`/api/classroom/notifications/${encodeURIComponent(editingId)}`, {
+          method: "PATCH",
+          body: JSON.stringify(payload),
+        })
+      : await apiFetch("/api/classroom/notifications", {
+          method: "POST",
+          body: JSON.stringify(payload),
+        });
+
+    clearEditingId();
+
+    document.querySelector("#notificationAdminForm, [data-notification-admin-form]")?.reset();
+
+    await loadAdminNotifications();
+
+    if (getBackendApi()?.sync) {
+      await getBackendApi().sync().catch(() => {});
+    }
+
+    alert(editingId ? "Notificación actualizada." : "Notificación creada en Supabase.");
+
+    return data;
+  }
+
+  async function deleteNotificationFromBackend(id) {
+    if (!confirm("¿Borrar esta notificación para todos?")) return;
+
+    await apiFetch(`/api/classroom/notifications/${encodeURIComponent(id)}`, {
+      method: "DELETE",
+    });
+
+    await loadAdminNotifications();
+
+    if (getBackendApi()?.sync) {
+      await getBackendApi().sync().catch(() => {});
+    }
+  }
+
+  async function resendNotificationFromBackend(id) {
+    if (!confirm("¿Reenviar esta notificación como nueva?")) return;
+
+    await apiFetch(`/api/classroom/notifications/${encodeURIComponent(id)}/resend`, {
+      method: "POST",
+    });
+
+    await loadAdminNotifications();
+
+    if (getBackendApi()?.sync) {
+      await getBackendApi().sync().catch(() => {});
+    }
+  }
+
+  function hijackForm() {
+    const form = document.querySelector("#notificationAdminForm, [data-notification-admin-form]");
+    if (!form || form.dataset.backendBridgeAttached === "1") return;
+
+    form.dataset.backendBridgeAttached = "1";
+
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+
+      saveNotificationToBackend().catch((error) => {
+        console.error("[Centro Notificaciones] Error guardando en backend:", error);
+        alert(error.message || "No se pudo guardar la notificación.");
+      });
+    }, true);
+  }
+
+  function hijackButtons() {
+    document.addEventListener("click", (event) => {
+      const editButton = event.target.closest("[data-backend-notification-edit]");
+      const deleteButton = event.target.closest("[data-backend-notification-delete]");
+      const resendButton = event.target.closest("[data-backend-notification-resend]");
+
+      if (editButton) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        const id = editButton.getAttribute("data-backend-notification-edit");
+        const item = (window.ClassroomNotificationAdminItems || []).find((entry) => String(entry.id) === String(id));
+
+        if (item) fillEditForm(item);
+        return;
+      }
+
+      if (deleteButton) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        deleteNotificationFromBackend(deleteButton.getAttribute("data-backend-notification-delete"))
+          .catch((error) => {
+            console.error("[Centro Notificaciones] Error borrando:", error);
+            alert(error.message || "No se pudo borrar.");
+          });
+
+        return;
+      }
+
+      if (resendButton) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        resendNotificationFromBackend(resendButton.getAttribute("data-backend-notification-resend"))
+          .catch((error) => {
+            console.error("[Centro Notificaciones] Error reenviando:", error);
+            alert(error.message || "No se pudo reenviar.");
+          });
+      }
+    }, true);
+  }
+
+  function addBackendBadge() {
+    const hero =
+      document.querySelector(".page-hero, .admin-hero, .content-hero") ||
+      document.querySelector("main");
+
+    if (!hero || document.querySelector("#notificationBackendBadge")) return;
+
+    const badge = document.createElement("div");
+    badge.id = "notificationBackendBadge";
+    badge.className = "notification-admin-mail-note";
+    badge.innerHTML = `
+      <i class="fa-solid fa-database"></i>
+      Centro conectado a Supabase. El email sigue desactivado por defecto.
+    `;
+
+    hero.appendChild(badge);
+  }
+
+  function init() {
+    hijackForm();
+    hijackButtons();
+    addBackendBadge();
+
+    loadAdminNotifications().catch((error) => {
+      console.warn("[Centro Notificaciones] Backend no disponible, queda fallback local:", error);
+    });
+  }
+
+  window.ClassroomNotificationCenterBackend = {
+    load: loadAdminNotifications,
+    save: saveNotificationToBackend,
+    delete: deleteNotificationFromBackend,
+    resend: resendNotificationFromBackend,
+  };
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", () => setTimeout(init, 250));
+  } else {
+    setTimeout(init, 250);
+  }
+})();
