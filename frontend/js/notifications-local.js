@@ -2257,12 +2257,12 @@
   }
 })();
 
-/* === Home Avisos Single Renderer Final 20260622 === */
-(function homeAvisosSingleRendererFinal() {
+/* === Home Avisos Renderer Clean Final 20260622 === */
+(function homeAvisosRendererCleanFinal() {
   "use strict";
 
   const STORAGE_KEY = "andyazh-classroom-notifications-v2";
-  let renderScheduled = false;
+  let lastRenderedHtml = "";
 
   function safeJson(value, fallback) {
     try {
@@ -2329,7 +2329,6 @@
 
     const type = normalizeType(item);
 
-    if (type === "community") return "info";
     if (type === "announcement") return "warning";
     if (type === "academic") return "danger";
 
@@ -2363,666 +2362,26 @@
     return ["announcement", "academic", "system"].includes(type);
   }
 
-  function buildShellHtml() {
-    return `
-      <section id="homeAvisosShell" class="home-avisos-shell home-avisos-final" data-home-avisos-final="1">
-        <div class="home-avisos-topbar">
-          <div class="home-avisos-window-dots" aria-hidden="true">
-            <span></span><span></span><span></span>
-          </div>
-
-          <strong>AndyAzhTEC Classroom</strong>
-
-          <div class="home-avisos-path">
-            C:\\AndyAzhTEC\\Classroom\\avisos
-            <span>ONLINE</span>
-          </div>
-        </div>
-
-        <header class="home-avisos-header">
-          <p class="eyebrow">AVISOS + NOVEDADES</p>
-          <h2>AVISOS - NOVEDADES</h2>
-          <p>Centro unificado para anuncios del curso, accesos importantes y actividad reciente.</p>
-        </header>
-
-        <div id="homeAvisosDynamicFeed" class="home-avisos-dynamic-feed"></div>
-
-        <footer class="home-avisos-footer">
-          <div class="home-avisos-window-dots" aria-hidden="true">
-            <span></span><span></span><span></span>
-          </div>
-
-          <strong>AndyAzhTEC Classroom</strong>
-        </footer>
-      </section>
-    `;
-  }
-
-  function findMainMount() {
-    return (
-      document.querySelector("#homeMainContent") ||
-      document.querySelector(".dashboard-content") ||
-      document.querySelector(".page-content") ||
-      document.querySelector("main") ||
-      document.body
-    );
-  }
-
-  function removeCompetingAvisosBlocks() {
-    const shells = Array.from(document.querySelectorAll(
-      "#homeAvisosShell, .home-avisos-shell, .home-cmd-window, .home-terminal-window, .home-newsletter-terminal"
-    ));
-
-    const finalShells = shells.filter((node) => node.getAttribute("data-home-avisos-final") === "1");
-    const keep = finalShells[0] || null;
-
-    shells.forEach((node) => {
-      if (node === keep) return;
-
-      const text = (node.textContent || "").toLowerCase();
-
-      if (
-        text.includes("avisos - novedades") ||
-        text.includes("andyazhtech classroom") ||
-        text.includes("c:\\classroom")
-      ) {
-        node.remove();
-      }
-    });
-
-    // Notificaciones flotantes que quedaron afuera del shell.
-    document.querySelectorAll("[data-home-notification-id]").forEach((node) => {
-      const shell = document.querySelector('[data-home-avisos-final="1"]');
-      if (shell && !shell.contains(node)) {
-        node.remove();
-      }
-    });
-  }
-
-  function ensureShell() {
-    let shell = document.querySelector('[data-home-avisos-final="1"]');
-
-    if (shell) return shell;
-
-    const mount = findMainMount();
-
-    mount.insertAdjacentHTML("beforeend", buildShellHtml());
-
-    return document.querySelector('[data-home-avisos-final="1"]');
-  }
-
-  function noticeLabel(type) {
-    if (type === "academic") return "IMPORTANTE";
-    if (type === "announcement") return "AVISO";
-    return "SISTEMA";
-  }
-
-  function buildNoticeCard(item) {
-    const type = normalizeType(item);
-    const severity = normalizeSeverity(item);
-    const body = getBody(item);
-    const link = getLink(item);
-    const createdAt = item.createdAt || item.created_at || item.updatedAt || item.updated_at || "";
-    const actor = item.actor || item.created_by_name || "Classroom";
-
-    const linkHtml = link
-      ? `
-        <a class="home-notice-link" href="${escapeHtml(link)}" target="_blank" rel="noopener noreferrer">
-          <i class="fa-solid fa-arrow-up-right-from-square"></i>
-          Abrir link
-        </a>
-      `
-      : "";
-
-    return `
-      <article class="home-cmd-card home-notice-card is-${escapeHtml(severity)}" data-home-notification-id="${escapeHtml(item.id)}">
-        <div class="home-cmd-prompt">C:\\classroom&gt;</div>
-
-        <div class="home-cmd-content">
-          <div class="home-cmd-tags">
-            <span>${escapeHtml(noticeLabel(type))}</span>
-            <span>${escapeHtml(type.toUpperCase())}</span>
-          </div>
-
-          <h3>${escapeHtml(item.title || "Notificación")}</h3>
-          <p>${escapeHtml(body)}</p>
-
-          <div class="home-notice-meta">
-            <strong>Publicado por ${escapeHtml(actor)}</strong>
-            ${createdAt ? `<span>${escapeHtml(formatDate(createdAt))}</span>` : ""}
-          </div>
-
-          ${linkHtml}
-        </div>
-      </article>
-    `;
-  }
-
-  function buildDefaultCards() {
-    return `
-      <article class="home-cmd-card home-notice-card is-info" data-home-default-card="1">
-        <div class="home-cmd-prompt">C:\\classroom&gt;</div>
-        <div class="home-cmd-content">
-          <div class="home-cmd-tags">
-            <span>AVISO</span>
-            <span>SISTEMA</span>
-          </div>
-          <h3>Recuperaciones y asistencias</h3>
-          <p>Próximamente se van a registrar avisos cuando un alumno recupere una clase o quede un cambio pendiente de revisar.</p>
-          <div class="home-notice-meta">
-            <strong>Publicado por Sistema</strong>
-          </div>
-        </div>
-      </article>
-
-      <article class="home-cmd-card home-notice-card is-info" data-home-default-card="1">
-        <div class="home-cmd-prompt">C:\\classroom&gt;</div>
-        <div class="home-cmd-content">
-          <div class="home-cmd-tags">
-            <span>NOVEDAD</span>
-            <span>CURSO</span>
-          </div>
-          <h3>Novedades del curso</h3>
-          <p>Acá van a aparecer anuncios, accesos importantes, cambios de cursada y comunicaciones internas del Classroom.</p>
-          <div class="home-notice-meta">
-            <strong>Canal interno AndyAzhTEC</strong>
-          </div>
-        </div>
-      </article>
-
-      <article class="home-cmd-card home-notice-card is-neutral" data-home-default-card="1">
-        <div class="home-cmd-prompt">C:\\classroom&gt;</div>
-        <div class="home-cmd-content">
-          <div class="home-cmd-tags">
-            <span>LOG</span>
-            <span>ACTIVIDAD</span>
-          </div>
-          <h3>Actividad reciente</h3>
-          <p>Este espacio centraliza avisos, novedades y actividad reciente del Classroom.</p>
-          <div class="home-notice-meta">
-            <strong>Pelusita online · avisos activos</strong>
-          </div>
-        </div>
-      </article>
-    `;
-  }
-
-  function render() {
-    if (!isHomePage()) return;
-
-    removeCompetingAvisosBlocks();
-
-    const shell = ensureShell();
-    const feed = shell?.querySelector("#homeAvisosDynamicFeed");
-
-    if (!feed) return;
-
-    const notices = loadItems()
-      .filter(shouldShowInHome)
-      .sort((a, b) => new Date(b.createdAt || b.created_at || 0) - new Date(a.createdAt || a.created_at || 0))
-      .slice(0, 8);
-
-    feed.innerHTML = notices.length
-      ? notices.map(buildNoticeCard).join("")
-      : buildDefaultCards();
-  }
-
-  function scheduleRender() {
-    if (renderScheduled) return;
-
-    renderScheduled = true;
-
-    requestAnimationFrame(() => {
-      renderScheduled = false;
-      render();
-    });
-  }
-
-  window.addEventListener("classroom:notifications-updated", scheduleRender);
-
-  window.addEventListener("storage", (event) => {
-    if (event.key === STORAGE_KEY) scheduleRender();
-  });
-
-  function init() {
-    scheduleRender();
-
-    // Estos tiempos cazan renders viejos/demorados y los limpian.
-    setTimeout(scheduleRender, 400);
-    setTimeout(scheduleRender, 1000);
-    setTimeout(scheduleRender, 2200);
-  }
-
-  window.ClassroomHomeAvisosFinal = {
-    render,
-    cleanup: removeCompetingAvisosBlocks,
-  };
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", init);
-  } else {
-    init();
-  }
-})();
-
-/* === Home Avisos Single Panel Merge Fix 20260622 === */
-(function homeAvisosSinglePanelMergeFix() {
-  "use strict";
-
-  const STORAGE_KEY = "andyazh-classroom-notifications-v2";
-
-  function safeJson(value, fallback) {
-    try {
-      return JSON.parse(value) || fallback;
-    } catch {
-      return fallback;
-    }
-  }
-
-  function loadItems() {
-    const items = safeJson(localStorage.getItem(STORAGE_KEY), []);
-    return Array.isArray(items) ? items : [];
-  }
-
-  function escapeHtml(value) {
-    return String(value ?? "")
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#039;");
-  }
-
-  function formatDate(value) {
-    if (!value) return "";
-
-    try {
-      return new Intl.DateTimeFormat("es-AR", {
-        dateStyle: "short",
-        timeStyle: "short",
-      }).format(new Date(value));
-    } catch {
-      return String(value);
-    }
-  }
-
-  function isHomePage() {
-    const path = window.location.pathname;
-
-    return (
-      /index\.html$/i.test(path) ||
-      path.endsWith("/frontend/") ||
-      path.endsWith("/frontend") ||
-      path.endsWith("/")
-    );
-  }
-
-  function normalizeType(item) {
-    const raw = String(item?.type || item?.category || "system").toLowerCase();
-
-    if (raw.includes("community") || raw.includes("comunidad")) return "community";
-    if (raw.includes("announcement") || raw.includes("aviso") || raw.includes("news")) return "announcement";
-    if (raw.includes("academic") || raw.includes("exam") || raw.includes("nota") || raw.includes("recuperatorio")) return "academic";
-
-    return raw || "system";
-  }
-
-  function normalizeSeverity(item) {
-    const explicit = String(item?.severity || "").toLowerCase();
-
-    if (["info", "warning", "danger", "neutral"].includes(explicit)) return explicit;
-
-    const type = normalizeType(item);
-
-    if (type === "announcement") return "warning";
-    if (type === "academic") return "danger";
-
-    return "neutral";
-  }
-
-  function getBody(item) {
-    return item?.body || item?.description || item?.message || item?.content || "";
-  }
-
-  function getLink(item) {
-    return item?.link || item?.link_url || item?.url || "";
-  }
-
-  function isDismissed(item) {
-    return Boolean(
-      item?.dismissedAt ||
-      item?.dismissed_at ||
-      item?.deletedAt ||
-      item?.deleted_at ||
-      item?.hidden
-    );
-  }
-
-  function shouldShowInHome(item) {
-    if (!item || isDismissed(item)) return false;
-
-    const type = normalizeType(item);
-
-    return ["announcement", "academic", "system"].includes(type);
-  }
-
-  function getNoticeLabel(type) {
-    if (type === "academic") return "IMPORTANTE";
-    if (type === "announcement") return "AVISO";
-    return "SISTEMA";
-  }
-
-  function buildNoticeCard(item) {
-    const type = normalizeType(item);
-    const severity = normalizeSeverity(item);
-    const body = getBody(item);
-    const link = getLink(item);
-    const createdAt = item.createdAt || item.created_at || item.updatedAt || item.updated_at || "";
-    const actor = item.actor || item.created_by_name || "Classroom";
-
-    const linkHtml = link
-      ? `
-        <a class="home-notice-link" href="${escapeHtml(link)}" target="_blank" rel="noopener noreferrer">
-          <i class="fa-solid fa-arrow-up-right-from-square"></i>
-          Abrir link
-        </a>
-      `
-      : "";
-
-    return `
-      <article class="home-cmd-card home-notice-card is-${escapeHtml(severity)}" data-home-notification-id="${escapeHtml(item.id)}">
-        <div class="home-cmd-prompt">C:\\classroom&gt;</div>
-
-        <div class="home-cmd-content">
-          <div class="home-cmd-tags">
-            <span>${escapeHtml(getNoticeLabel(type))}</span>
-            <span>${escapeHtml(type.toUpperCase())}</span>
-          </div>
-
-          <h3>${escapeHtml(item.title || "Notificación")}</h3>
-          <p>${escapeHtml(body)}</p>
-
-          <div class="home-notice-meta">
-            <strong>Publicado por ${escapeHtml(actor)}</strong>
-            ${createdAt ? `<span>${escapeHtml(formatDate(createdAt))}</span>` : ""}
-          </div>
-
-          ${linkHtml}
-        </div>
-      </article>
-    `;
-  }
-
-  function buildDefaultCards() {
-    return `
-      <article class="home-cmd-card home-notice-card is-info" data-home-default-card="1">
-        <div class="home-cmd-prompt">C:\\classroom&gt;</div>
-        <div class="home-cmd-content">
-          <div class="home-cmd-tags">
-            <span>AVISO</span>
-            <span>SISTEMA</span>
-          </div>
-          <h3>Recuperaciones y asistencias</h3>
-          <p>Próximamente se van a registrar avisos cuando un alumno recupere una clase o quede un cambio pendiente de revisar.</p>
-          <div class="home-notice-meta">
-            <strong>Publicado por Sistema</strong>
-          </div>
-        </div>
-      </article>
-
-      <article class="home-cmd-card home-notice-card is-info" data-home-default-card="1">
-        <div class="home-cmd-prompt">C:\\classroom&gt;</div>
-        <div class="home-cmd-content">
-          <div class="home-cmd-tags">
-            <span>NOVEDAD</span>
-            <span>CURSO</span>
-          </div>
-          <h3>Novedades del curso</h3>
-          <p>Acá van a aparecer anuncios, accesos importantes, cambios de cursada y comunicaciones internas del Classroom.</p>
-          <div class="home-notice-meta">
-            <strong>Canal interno AndyAzhTEC</strong>
-          </div>
-        </div>
-      </article>
-
-      <article class="home-cmd-card home-notice-card is-neutral" data-home-default-card="1">
-        <div class="home-cmd-prompt">C:\\classroom&gt;</div>
-        <div class="home-cmd-content">
-          <div class="home-cmd-tags">
-            <span>LOG</span>
-            <span>ACTIVIDAD</span>
-          </div>
-          <h3>Actividad reciente</h3>
-          <p>Este espacio centraliza avisos, novedades y actividad reciente del Classroom.</p>
-          <div class="home-notice-meta">
-            <strong>Pelusita online · avisos activos</strong>
-          </div>
-        </div>
-      </article>
-    `;
-  }
-
-  function getAvisosPanels() {
-    return Array.from(document.querySelectorAll(
-      ".home-avisos-shell, .home-cmd-window, .home-terminal-window, .home-newsletter-terminal, [data-home-avisos-final]"
-    )).filter((node) => {
-      const text = (node.textContent || "").toLowerCase();
-      return (
-        text.includes("avisos - novedades") ||
-        text.includes("recuperaciones y asistencias") ||
-        text.includes("novedades del curso") ||
-        text.includes("c:\\andyazhtech\\classroom\\avisos")
-      );
-    });
-  }
-
-  function choosePrettyPanel(panels) {
-    // Preferimos el primer panel que ya trae los default cards lindos.
-    return panels.find((node) => {
-      const text = (node.textContent || "").toLowerCase();
-      return (
-        text.includes("recuperaciones y asistencias") &&
-        text.includes("novedades del curso") &&
-        text.includes("actividad reciente")
-      );
-    }) || panels[0] || null;
-  }
-
-  function ensureFeedInside(panel) {
-    let feed =
-      panel.querySelector("#homeAvisosDynamicFeed") ||
-      panel.querySelector("[data-home-avisos-feed]") ||
-      panel.querySelector(".home-avisos-dynamic-feed") ||
-      panel.querySelector(".home-notifications-feed") ||
-      panel.querySelector(".home-cmd-feed") ||
-      panel.querySelector(".home-terminal-feed");
-
-    if (feed) {
-      feed.id = "homeAvisosDynamicFeed";
-      feed.classList.add("home-avisos-dynamic-feed");
-      return feed;
-    }
-
-    feed = document.createElement("div");
-    feed.id = "homeAvisosDynamicFeed";
-    feed.className = "home-avisos-dynamic-feed";
-
-    const footer =
-      panel.querySelector(".home-avisos-footer") ||
-      Array.from(panel.children).at(-1);
-
-    if (footer && footer !== panel) {
-      panel.insertBefore(feed, footer);
-    } else {
-      panel.appendChild(feed);
-    }
-
-    return feed;
-  }
-
-  function removeDuplicatePanels(keep) {
-    getAvisosPanels().forEach((panel) => {
-      if (panel === keep) return;
-      panel.remove();
-    });
-
-    document.querySelectorAll("[data-home-notification-id]").forEach((node) => {
-      if (!keep.contains(node)) node.remove();
-    });
-  }
-
-  function render() {
-    if (!isHomePage()) return;
-
-    const panels = getAvisosPanels();
-    const keep = choosePrettyPanel(panels);
-
-    if (!keep) return;
-
-    keep.id = "homeAvisosShell";
-    keep.setAttribute("data-home-avisos-final", "1");
-    keep.classList.add("home-avisos-shell", "home-avisos-final", "home-avisos-single-panel");
-
-    removeDuplicatePanels(keep);
-
-    const feed = ensureFeedInside(keep);
-
-    const notices = loadItems()
-      .filter(shouldShowInHome)
-      .sort((a, b) => new Date(b.createdAt || b.created_at || 0) - new Date(a.createdAt || a.created_at || 0))
-      .slice(0, 8);
-
-    feed.innerHTML = notices.length
-      ? notices.map(buildNoticeCard).join("")
-      : buildDefaultCards();
-  }
-
-  function scheduleRender() {
-    setTimeout(render, 30);
-    setTimeout(render, 350);
-    setTimeout(render, 1000);
-  }
-
-  window.addEventListener("classroom:notifications-updated", scheduleRender);
-  window.addEventListener("storage", (event) => {
-    if (event.key === STORAGE_KEY) scheduleRender();
-  });
-
-  function init() {
-    scheduleRender();
-  }
-
-  window.ClassroomHomeAvisosSinglePanel = {
-    render,
-    panels: getAvisosPanels,
-  };
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", init);
-  } else {
-    init();
-  }
-})();
-
-/* === Home Avisos One Panel Enforcer 20260622 === */
-(function homeAvisosOnePanelEnforcer() {
-  "use strict";
-
-  const STORAGE_KEY = "andyazh-classroom-notifications-v2";
-  let enforcing = false;
-  let lastHtml = "";
-
-  function safeJson(value, fallback) {
-    try {
-      return JSON.parse(value) || fallback;
-    } catch {
-      return fallback;
-    }
-  }
-
-  function loadItems() {
-    const items = safeJson(localStorage.getItem(STORAGE_KEY), []);
-    return Array.isArray(items) ? items : [];
-  }
-
-  function escapeHtml(value) {
-    return String(value ?? "")
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#039;");
-  }
-
-  function formatDate(value) {
-    if (!value) return "";
-
-    try {
-      return new Intl.DateTimeFormat("es-AR", {
-        dateStyle: "short",
-        timeStyle: "short",
-      }).format(new Date(value));
-    } catch {
-      return String(value);
-    }
-  }
-
-  function isHomePage() {
-    const path = window.location.pathname;
-    return /index\.html$/i.test(path) || path.endsWith("/frontend/") || path.endsWith("/frontend") || path.endsWith("/");
-  }
-
-  function normalizeType(item) {
-    const raw = String(item?.type || item?.category || "system").toLowerCase();
-
-    if (raw.includes("community") || raw.includes("comunidad")) return "community";
-    if (raw.includes("announcement") || raw.includes("aviso") || raw.includes("news")) return "announcement";
-    if (raw.includes("academic") || raw.includes("exam") || raw.includes("nota") || raw.includes("recuperatorio")) return "academic";
-
-    return raw || "system";
-  }
-
-  function normalizeSeverity(item) {
-    const explicit = String(item?.severity || "").toLowerCase();
-
-    if (["info", "warning", "danger", "neutral"].includes(explicit)) return explicit;
-
-    const type = normalizeType(item);
-    if (type === "announcement") return "warning";
-    if (type === "academic") return "danger";
-    return "neutral";
-  }
-
-  function getBody(item) {
-    return item?.body || item?.description || item?.message || item?.content || "";
-  }
-
-  function getLink(item) {
-    return item?.link || item?.link_url || item?.url || "";
-  }
-
-  function isDismissed(item) {
-    return Boolean(item?.dismissedAt || item?.dismissed_at || item?.deletedAt || item?.deleted_at || item?.hidden);
-  }
-
-  function shouldShowInHome(item) {
-    if (!item || isDismissed(item)) return false;
-    return ["announcement", "academic", "system"].includes(normalizeType(item));
-  }
-
   function labelFor(type) {
     if (type === "academic") return "IMPORTANTE";
     if (type === "announcement") return "AVISO";
     return "SISTEMA";
   }
 
+  function getNoticeItems() {
+    return loadItems()
+      .filter(shouldShowInHome)
+      .sort((a, b) => new Date(b.createdAt || b.created_at || 0) - new Date(a.createdAt || a.created_at || 0))
+      .slice(0, 8);
+  }
+
   function buildNoticeCard(item) {
     const type = normalizeType(item);
     const severity = normalizeSeverity(item);
     const body = getBody(item);
     const link = getLink(item);
-    const actor = item.actor || item.created_by_name || "Classroom";
     const createdAt = item.createdAt || item.created_at || item.updatedAt || item.updated_at || "";
+    const actor = item.actor || item.created_by_name || "Classroom";
 
     const linkHtml = link
       ? `
@@ -3036,6 +2395,7 @@
     return `
       <article class="home-cmd-card home-notice-card is-${escapeHtml(severity)}" data-home-notification-id="${escapeHtml(item.id)}">
         <div class="home-cmd-prompt">C:\\classroom&gt;</div>
+
         <div class="home-cmd-content">
           <div class="home-cmd-tags">
             <span>${escapeHtml(labelFor(type))}</span>
@@ -3105,27 +2465,46 @@
     `;
   }
 
-  function getAvisosPanels() {
+  function isAvisosPanel(node) {
+    if (!node || node.nodeType !== 1) return false;
+
+    const text = (node.textContent || "").toLowerCase();
+
+    return (
+      text.includes("avisos - novedades") ||
+      text.includes("recuperaciones y asistencias") ||
+      text.includes("novedades del curso") ||
+      text.includes("c:\\andyazhtech\\classroom\\avisos")
+    );
+  }
+
+  function getPanels() {
     return Array.from(document.querySelectorAll(
-      ".home-avisos-shell, .home-cmd-window, .home-terminal-window, .home-newsletter-terminal, [data-home-avisos-final], [data-home-avisos-panel]"
-    )).filter((node) => {
-      const text = (node.textContent || "").toLowerCase();
-      return (
-        text.includes("avisos - novedades") ||
-        text.includes("recuperaciones y asistencias") ||
-        text.includes("novedades del curso") ||
-        text.includes("c:\\andyazhtech\\classroom\\avisos")
-      );
-    });
+      ".home-avisos-shell, .home-cmd-window, .home-terminal-window, .home-newsletter-terminal, [data-home-avisos-panel], [data-home-avisos-final]"
+    )).filter(isAvisosPanel);
   }
 
   function choosePanel() {
-    const panels = getAvisosPanels();
+    const panels = getPanels();
 
     if (!panels.length) return null;
 
-    // El primero en el DOM es el panel lindo original.
+    // El primero visual/DOM es el panel original lindo.
     return panels[0];
+  }
+
+  function removeDuplicates(keep) {
+    getPanels().forEach((panel) => {
+      if (panel !== keep) {
+        panel.remove();
+      }
+    });
+
+    document.querySelectorAll("[data-home-notification-id]").forEach((node) => {
+      if (!keep.contains(node)) {
+        node.remove();
+      }
+    });
   }
 
   function getOrCreateFeed(panel) {
@@ -3137,131 +2516,85 @@
       panel.querySelector(".home-cmd-feed") ||
       panel.querySelector(".home-terminal-feed");
 
-    if (feed) {
-      feed.id = "homeAvisosDynamicFeed";
-      feed.dataset.homeAvisosFeed = "1";
-      feed.classList.add("home-avisos-dynamic-feed");
-      return feed;
-    }
-
-    feed = document.createElement("div");
-    feed.id = "homeAvisosDynamicFeed";
-    feed.dataset.homeAvisosFeed = "1";
-    feed.className = "home-avisos-dynamic-feed";
-
-    const footer = panel.querySelector(".home-avisos-footer");
-    if (footer) {
-      panel.insertBefore(feed, footer);
-    } else {
+    if (!feed) {
+      feed = document.createElement("div");
       panel.appendChild(feed);
     }
+
+    feed.id = "homeAvisosDynamicFeed";
+    feed.dataset.homeAvisosFeed = "1";
+    feed.classList.add("home-avisos-dynamic-feed");
 
     return feed;
   }
 
-  function removeAllOtherPanels(keep) {
-    getAvisosPanels().forEach((panel) => {
-      if (panel === keep) return;
-      panel.remove();
-    });
+  function render() {
+    if (!isHomePage()) return;
 
-    document.querySelectorAll("[data-home-notification-id]").forEach((node) => {
-      if (!keep.contains(node)) node.remove();
-    });
-  }
+    const panel = choosePanel();
+    if (!panel) return;
 
-  function disableOldRenderers() {
-    // Evita que otros bridges vuelvan a crear otro panel después.
-    if (window.ClassroomHomeAvisosFinal) {
-      window.ClassroomHomeAvisosFinal.render = () => enforce();
-      window.ClassroomHomeAvisosFinal.cleanup = () => removeAllOtherPanels(choosePanel());
-    }
+    panel.id = "homeAvisosShell";
+    panel.dataset.homeAvisosPanel = "1";
+    panel.classList.add("home-avisos-shell", "home-avisos-clean-final");
 
-    if (window.ClassroomHomeAvisosSinglePanel) {
-      window.ClassroomHomeAvisosSinglePanel.render = () => enforce();
-    }
+    removeDuplicates(panel);
 
-    if (window.ClassroomHomeAvisosPersistentShell) {
-      window.ClassroomHomeAvisosPersistentShell.render = () => enforce();
-    }
+    const feed = getOrCreateFeed(panel);
+    const notices = getNoticeItems();
 
-    if (window.ClassroomNotificationLinksAndHomeAvisos) {
-      window.ClassroomNotificationLinksAndHomeAvisos.renderHomeAvisos = () => enforce();
-    }
-  }
+    const html = notices.length
+      ? notices.map(buildNoticeCard).join("")
+      : buildDefaultCards();
 
-  function enforce() {
-    if (!isHomePage() || enforcing) return;
-
-    enforcing = true;
-
-    try {
-      disableOldRenderers();
-
-      const keep = choosePanel();
-      if (!keep) return;
-
-      keep.id = "homeAvisosShell";
-      keep.dataset.homeAvisosPanel = "1";
-      keep.dataset.homeAvisosFinal = "1";
-      keep.classList.add("home-avisos-shell", "home-avisos-single-panel", "home-avisos-locked");
-
-      removeAllOtherPanels(keep);
-
-      const feed = getOrCreateFeed(keep);
-
-      const notices = loadItems()
-        .filter(shouldShowInHome)
-        .sort((a, b) => new Date(b.createdAt || b.created_at || 0) - new Date(a.createdAt || a.created_at || 0))
-        .slice(0, 8);
-
-      const html = notices.length
-        ? notices.map(buildNoticeCard).join("")
-        : buildDefaultCards();
-
-      if (html !== lastHtml) {
-        feed.innerHTML = html;
-        lastHtml = html;
-      }
-    } finally {
-      enforcing = false;
+    if (html !== lastRenderedHtml) {
+      feed.innerHTML = html;
+      lastRenderedHtml = html;
     }
   }
 
   function schedule() {
-    setTimeout(enforce, 20);
-    setTimeout(enforce, 250);
-    setTimeout(enforce, 900);
+    setTimeout(render, 20);
+    setTimeout(render, 300);
+    setTimeout(render, 900);
   }
 
-  const observer = new MutationObserver(() => {
-    if (!enforcing) {
-      setTimeout(enforce, 50);
-    }
-  });
+  function neutralizeOldGlobals() {
+    [
+      "ClassroomHomeAvisosPersistentShell",
+      "ClassroomHomeAvisosFinal",
+      "ClassroomHomeAvisosSinglePanel",
+      "ClassroomHomeAvisosOnePanel",
+      "ClassroomNotificationLinksAndHomeAvisos",
+    ].forEach((name) => {
+      if (window[name]) {
+        Object.keys(window[name]).forEach((key) => {
+          if (typeof window[name][key] === "function") {
+            window[name][key] = render;
+          }
+        });
+      }
+    });
+  }
 
   function init() {
-    disableOldRenderers();
+    neutralizeOldGlobals();
     schedule();
 
-    observer.observe(document.body, {
-      childList: true,
-      subtree: true,
-    });
-
     window.addEventListener("classroom:notifications-updated", schedule);
+
     window.addEventListener("storage", (event) => {
       if (event.key === STORAGE_KEY) schedule();
     });
-
-    // Refuerzo por si algún setTimeout viejo crea duplicado tarde.
-    setTimeout(schedule, 1800);
-    setTimeout(schedule, 3500);
   }
 
-  window.ClassroomHomeAvisosOnePanel = {
-    enforce,
-    panels: getAvisosPanels,
+  window.ClassroomHomeAvisosCleanFinal = {
+    render,
+    panels: getPanels,
+    cleanup() {
+      const panel = choosePanel();
+      if (panel) removeDuplicates(panel);
+    },
   };
 
   if (document.readyState === "loading") {
