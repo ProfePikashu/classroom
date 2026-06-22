@@ -51,6 +51,60 @@ const ClassroomGestion = {
 
     const originalHtml = button.innerHTML;
 
+    // Abrimos la pestaña en el click del usuario para evitar bloqueo de popups.
+    const certTab = window.open("about:blank", "_blank");
+
+    if (certTab) {
+      certTab.document.write(`
+        <!doctype html>
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <title>Generando certificado...</title>
+            <style>
+              body {
+                margin: 0;
+                min-height: 100vh;
+                display: grid;
+                place-items: center;
+                background: #08051a;
+                color: #eaf6ff;
+                font-family: system-ui, Segoe UI, Arial;
+              }
+
+              .card {
+                max-width: 420px;
+                padding: 24px;
+                border: 1px solid rgba(0,245,255,.28);
+                border-radius: 18px;
+                background: rgba(18,8,42,.92);
+                box-shadow: 0 0 28px rgba(0,245,255,.12);
+                text-align: center;
+              }
+
+              h1 {
+                margin: 0 0 10px;
+                font-size: 22px;
+              }
+
+              p {
+                margin: 0;
+                opacity: .8;
+                line-height: 1.45;
+              }
+            </style>
+          </head>
+          <body>
+            <div class="card">
+              <h1>Generando certificado...</h1>
+              <p>Un momento, estamos preparando tu PDF.</p>
+            </div>
+          </body>
+        </html>
+      `);
+      certTab.document.close();
+    }
+
     button.disabled = true;
     button.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Generando...';
 
@@ -59,14 +113,20 @@ const ClassroomGestion = {
       const data = await response.json();
 
       if (data.error) {
+        if (certTab && !certTab.closed) certTab.close();
         alert("Error: " + data.error);
         return;
       }
 
       if (data.url) {
-        window.open(data.url, "_blank");
+        if (certTab && !certTab.closed) {
+          certTab.location.href = data.url;
+        } else {
+          window.location.href = data.url;
+        }
       }
     } catch (error) {
+      if (certTab && !certTab.closed) certTab.close();
       alert("No se pudo generar el certificado.");
     } finally {
       button.disabled = false;
