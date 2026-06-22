@@ -1734,3 +1734,184 @@
     init();
   }
 })();
+
+/* === Supabase Notification Dismiss Tombstone Fix 20260622 === */
+(function supabaseNotificationDismissTombstoneFix() {
+  "use strict";
+
+  const STORAGE_KEY = "andyazh-classroom-notifications-v2";
+  const TOMBSTONE_KEY = "andyazh-classroom-notification-dismissed-supabase-v1";
+
+  function safeJson(value, fallback) {
+    try {
+      return JSON.parse(value) || fallback;
+    } catch {
+      return fallback;
+    }
+  }
+
+  function loadItems() {
+    const items = safeJson(localStorage.getItem(STORAGE_KEY), []);
+    return Array.isArray(items) ? items : [];
+  }
+
+  function saveItems(items) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+    window.dispatchEvent(new CustomEvent("classroom:notifications-updated", {
+      detail: { items, source: "dismiss-tombstone-fix" },
+    }));
+  }
+
+  function loadTombstones() {
+    const data = safeJson(localStorage.getItem(TOMBSTONE_KEY), {});
+    return data && typeof data === "object" && !Array.isArray(data) ? data : {};
+  }
+
+  function saveTombstones(data) {
+    localStorage.setItem(TOMBSTONE_KEY, JSON.stringify(data || {}));
+  }
+
+  function addTombstone(id) {
+    if (!id) return;
+
+    const data = loadTombstones();
+    data[String(id)] = new Date().toISOString();
+    saveTombstones(data);
+  }
+
+  function isTombstoned(id) {
+    if (!id) return false;
+    return Boolean(loadTombstones()[String(id)]);
+  }
+
+  function isSupabaseItem(id) {
+    const item = loadItems().find((entry) => String(entry.id) === String(id));
+
+    return Boolean(
+      item &&
+      (
+        item.source === "supabase" ||
+        item.backendSyncedAt ||
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(String(item.id))
+      )
+    );
+  }
+
+  function hideLocally(id) {
+    const now = new Date().toISOString();
+
+    const items = loadItems().map((item) => {
+      if (String(item.id) !== String(id)) return item;
+
+      return {
+        ...item,
+        dismissed_at: item.dismissed_at || now,
+        dismissedAt: item.dismissedAt || now,
+        hidden: true,
+      };
+    }).filter((item) => String(item.id) !== String(id));
+
+    saveItems(items);
+
+    if (window.ClassroomBellBadgeAutoRefresh?.update) {
+      window.ClassroomBellBadgeAutoRefresh.update();
+    }
+
+    if (window.ClassroomUnifiedBellRenderer?.schedule) {
+      window.ClassroomUnifiedBellRenderer.schedule();
+    }
+  }
+
+  async function dismissBackend(id) {
+    if (window.ClassroomBackendNotifications?.dismiss) {
+      await window.ClassroomBackendNotifications.dismiss(id);
+      return;
+    }
+
+    throw new Error("ClassroomBackendNotifications.dismiss no está disponible.");
+  }
+
+  function patchMergeFilter() {
+    const originalSync = window.ClassroomBackendNotifications?.sync;
+
+    if (!originalSync || originalSync.__dismissTombstonePatched) return;
+
+    const patchedSync = async function patchedDismissTombstoneSync(...args) {
+      const result = await originalSync.apply(this, args);
+
+      const tombstones = loadTombstones();
+      const items = loadItems().filter((item) => !tombstones[String(item.id)]);
+
+      saveItems(items);
+
+      if (window.ClassroomBellBadgeAutoRefresh?.update) {
+        window.ClassroomBellBadgeAutoRefresh.update();
+      }
+
+      if (window.ClassroomUnifiedBellRenderer?.schedule) {
+        window.ClassroomUnifiedBellRenderer.schedule();
+      }
+
+      return {
+        ...(result || {}),
+        items,
+        unread: items.filter((item) => !(item.read || item.read_at || item.readAt)).length,
+      };
+    };
+
+    patchedSync.__dismissTombstonePatched = true;
+    window.ClassroomBackendNotifications.sync = patchedSync;
+  }
+
+  document.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-notification-delete]");
+    if (!button) return;
+
+    const id = button.getAttribute("data-notification-delete");
+    if (!id || !isSupabaseItem(id)) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+
+    addTombstone(id);
+    hideLocally(id);
+
+    dismissBackend(id)
+      .then(() => {
+        setTimeout(() => {
+          if (window.ClassroomBackendNotifications?.sync) {
+            window.ClassroomBackendNotifications.sync().catch(() => {});
+          }
+        }, 250);
+      })
+      .catch((error) => {
+        console.warn("[Classroom] No se pudo confirmar dismiss backend, queda oculto localmente:", error);
+      });
+  }, true);
+
+  window.ClassroomNotificationDismissTombstones = {
+    add: addTombstone,
+    has: isTombstoned,
+    all: loadTombstones,
+    clear() {
+      localStorage.removeItem(TOMBSTONE_KEY);
+      if (window.ClassroomBackendNotifications?.sync) {
+        window.ClassroomBackendNotifications.sync().catch(() => {});
+      }
+    },
+  };
+
+  function init() {
+    patchMergeFilter();
+
+    setTimeout(patchMergeFilter, 500);
+    setTimeout(patchMergeFilter, 1500);
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+})();
