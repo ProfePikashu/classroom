@@ -2580,3 +2580,350 @@
     init();
   }
 })();
+
+/* === Home Avisos Persistent Shell Fix 20260622 === */
+(function homeAvisosPersistentShellFix() {
+  "use strict";
+
+  const STORAGE_KEY = "andyazh-classroom-notifications-v2";
+
+  function safeJson(value, fallback) {
+    try {
+      return JSON.parse(value) || fallback;
+    } catch {
+      return fallback;
+    }
+  }
+
+  function loadItems() {
+    const items = safeJson(localStorage.getItem(STORAGE_KEY), []);
+    return Array.isArray(items) ? items : [];
+  }
+
+  function escapeHtml(value) {
+    return String(value ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  function formatDate(value) {
+    if (!value) return "";
+
+    try {
+      return new Intl.DateTimeFormat("es-AR", {
+        dateStyle: "short",
+        timeStyle: "short",
+      }).format(new Date(value));
+    } catch {
+      return String(value);
+    }
+  }
+
+  function normalizeType(item) {
+    const raw = String(item?.type || item?.category || "system").toLowerCase();
+
+    if (raw.includes("community") || raw.includes("comunidad")) return "community";
+    if (raw.includes("announcement") || raw.includes("aviso") || raw.includes("news")) return "announcement";
+    if (raw.includes("academic") || raw.includes("exam") || raw.includes("nota") || raw.includes("recuperatorio")) return "academic";
+
+    return raw || "system";
+  }
+
+  function normalizeSeverity(item) {
+    const explicit = String(item?.severity || "").toLowerCase();
+
+    if (["info", "warning", "danger", "neutral"].includes(explicit)) {
+      return explicit;
+    }
+
+    const type = normalizeType(item);
+
+    if (type === "community") return "info";
+    if (type === "announcement") return "warning";
+    if (type === "academic") return "danger";
+
+    return "neutral";
+  }
+
+  function getBody(item) {
+    return item?.body || item?.description || item?.message || item?.content || "";
+  }
+
+  function getLink(item) {
+    return item?.link || item?.link_url || item?.url || "";
+  }
+
+  function isDismissed(item) {
+    return Boolean(
+      item?.dismissedAt ||
+      item?.dismissed_at ||
+      item?.deletedAt ||
+      item?.deleted_at ||
+      item?.hidden
+    );
+  }
+
+  function shouldShowInHome(item) {
+    if (!item || isDismissed(item)) return false;
+
+    const type = normalizeType(item);
+
+    // Comunidad queda fuera de la cartelera institucional.
+    return ["announcement", "academic", "system"].includes(type);
+  }
+
+  function isHomePage() {
+    const path = window.location.pathname;
+
+    return (
+      /index\.html$/i.test(path) ||
+      path.endsWith("/frontend/") ||
+      path.endsWith("/frontend") ||
+      path.endsWith("/")
+    );
+  }
+
+  function buildShellHtml() {
+    return `
+      <section id="homeAvisosShell" class="home-avisos-shell">
+        <div class="home-avisos-topbar">
+          <div class="home-avisos-window-dots" aria-hidden="true">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+
+          <strong>AndyAzhTEC Classroom</strong>
+
+          <div class="home-avisos-path">
+            C:\\AndyAzhTEC\\Classroom\\avisos
+            <span>ONLINE</span>
+          </div>
+        </div>
+
+        <header class="home-avisos-header">
+          <p class="eyebrow">AVISOS + NOVEDADES</p>
+          <h2>AVISOS - NOVEDADES</h2>
+          <p>Centro unificado para anuncios del curso, accesos importantes y actividad reciente.</p>
+        </header>
+
+        <div id="homeAvisosDynamicFeed" class="home-avisos-dynamic-feed"></div>
+
+        <footer class="home-avisos-footer">
+          <div class="home-avisos-window-dots" aria-hidden="true">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+
+          <strong>AndyAzhTEC Classroom</strong>
+        </footer>
+      </section>
+    `;
+  }
+
+  function findOldAvisosBlock() {
+    const candidates = Array.from(document.querySelectorAll(
+      "#homeAvisosShell, .home-cmd-window, .home-terminal-window, .home-newsletter-terminal, .home-avisos-shell"
+    ));
+
+    return candidates.find((node) => {
+      const text = (node.textContent || "").toLowerCase();
+      return text.includes("avisos - novedades") || text.includes("andyazhtech classroom");
+    }) || null;
+  }
+
+  function findMountPoint() {
+    return (
+      document.querySelector("#homeMainContent") ||
+      document.querySelector(".dashboard-content") ||
+      document.querySelector(".page-content") ||
+      document.querySelector("main")
+    );
+  }
+
+  function ensureShell() {
+    let shell = document.getElementById("homeAvisosShell");
+
+    if (shell) return shell;
+
+    const oldBlock = findOldAvisosBlock();
+
+    if (oldBlock) {
+      oldBlock.outerHTML = buildShellHtml();
+      return document.getElementById("homeAvisosShell");
+    }
+
+    const mount = findMountPoint();
+    if (!mount) return null;
+
+    mount.insertAdjacentHTML("beforeend", buildShellHtml());
+
+    return document.getElementById("homeAvisosShell");
+  }
+
+  function noticeLabel(type) {
+    if (type === "academic") return "IMPORTANTE";
+    if (type === "announcement") return "AVISO";
+    return "SISTEMA";
+  }
+
+  function buildNoticeCard(item) {
+    const type = normalizeType(item);
+    const severity = normalizeSeverity(item);
+    const body = getBody(item);
+    const link = getLink(item);
+    const createdAt = item.createdAt || item.created_at || item.updatedAt || item.updated_at || "";
+    const actor = item.actor || item.created_by_name || "Classroom";
+
+    const linkHtml = link
+      ? `
+        <a class="home-notice-link" href="${escapeHtml(link)}" target="_blank" rel="noopener noreferrer">
+          <i class="fa-solid fa-arrow-up-right-from-square"></i>
+          Abrir link
+        </a>
+      `
+      : "";
+
+    return `
+      <article class="home-cmd-card home-notice-card is-${escapeHtml(severity)}" data-home-notification-id="${escapeHtml(item.id)}">
+        <div class="home-cmd-prompt">C:\\classroom&gt;</div>
+
+        <div class="home-cmd-content">
+          <div class="home-cmd-tags">
+            <span>${escapeHtml(noticeLabel(type))}</span>
+            <span>${escapeHtml(type.toUpperCase())}</span>
+          </div>
+
+          <h3>${escapeHtml(item.title || "Notificación")}</h3>
+          <p>${escapeHtml(body)}</p>
+
+          <div class="home-notice-meta">
+            <strong>Publicado por ${escapeHtml(actor)}</strong>
+            ${createdAt ? `<span>${escapeHtml(formatDate(createdAt))}</span>` : ""}
+          </div>
+
+          ${linkHtml}
+        </div>
+      </article>
+    `;
+  }
+
+  function buildDefaultCards() {
+    return `
+      <article class="home-cmd-card home-notice-card is-info" data-home-default-card="1">
+        <div class="home-cmd-prompt">C:\\classroom&gt;</div>
+        <div class="home-cmd-content">
+          <div class="home-cmd-tags">
+            <span>AVISO</span>
+            <span>SISTEMA</span>
+          </div>
+          <h3>Recuperaciones y asistencias</h3>
+          <p>Próximamente se van a registrar avisos cuando un alumno recupere una clase o quede un cambio pendiente de revisar.</p>
+          <div class="home-notice-meta">
+            <strong>Publicado por Sistema</strong>
+          </div>
+        </div>
+      </article>
+
+      <article class="home-cmd-card home-notice-card is-info" data-home-default-card="1">
+        <div class="home-cmd-prompt">C:\\classroom&gt;</div>
+        <div class="home-cmd-content">
+          <div class="home-cmd-tags">
+            <span>NOVEDAD</span>
+            <span>CURSO</span>
+          </div>
+          <h3>Novedades del curso</h3>
+          <p>Acá van a aparecer anuncios, accesos importantes, cambios de cursada y comunicaciones internas del Classroom.</p>
+          <div class="home-notice-meta">
+            <strong>Canal interno AndyAzhTEC</strong>
+          </div>
+        </div>
+      </article>
+
+      <article class="home-cmd-card home-notice-card is-neutral" data-home-default-card="1">
+        <div class="home-cmd-prompt">C:\\classroom&gt;</div>
+        <div class="home-cmd-content">
+          <div class="home-cmd-tags">
+            <span>LOG</span>
+            <span>ACTIVIDAD</span>
+          </div>
+          <h3>Actividad reciente</h3>
+          <p>Este espacio centraliza avisos, novedades y actividad reciente del Classroom.</p>
+          <div class="home-notice-meta">
+            <strong>Pelusita online · avisos activos</strong>
+          </div>
+        </div>
+      </article>
+    `;
+  }
+
+  function renderPersistentAvisos() {
+    if (!isHomePage()) return;
+
+    const shell = ensureShell();
+    if (!shell) return;
+
+    const feed = shell.querySelector("#homeAvisosDynamicFeed");
+    if (!feed) return;
+
+    const notices = loadItems()
+      .filter(shouldShowInHome)
+      .sort((a, b) => new Date(b.createdAt || b.created_at || 0) - new Date(a.createdAt || a.created_at || 0))
+      .slice(0, 8);
+
+    if (!notices.length) {
+      feed.innerHTML = buildDefaultCards();
+      return;
+    }
+
+    feed.innerHTML = notices.map(buildNoticeCard).join("");
+  }
+
+  function removeFloatingDynamicAvisosOutsideShell() {
+    if (!isHomePage()) return;
+
+    const shell = document.getElementById("homeAvisosShell");
+    if (!shell) return;
+
+    document.querySelectorAll("[data-home-notification-id]").forEach((node) => {
+      if (!shell.contains(node)) {
+        node.remove();
+      }
+    });
+  }
+
+  function scheduleRender() {
+    setTimeout(renderPersistentAvisos, 40);
+    setTimeout(removeFloatingDynamicAvisosOutsideShell, 80);
+    setTimeout(renderPersistentAvisos, 260);
+  }
+
+  window.addEventListener("classroom:notifications-updated", scheduleRender);
+  window.addEventListener("storage", (event) => {
+    if (event.key === STORAGE_KEY) scheduleRender();
+  });
+
+  function init() {
+    scheduleRender();
+
+    // Corre después de los bridges viejos que reemplazaban el bloque completo.
+    setTimeout(scheduleRender, 800);
+    setTimeout(scheduleRender, 1600);
+    setTimeout(scheduleRender, 3000);
+  }
+
+  window.ClassroomHomeAvisosPersistentShell = {
+    render: renderPersistentAvisos,
+    shell: ensureShell,
+  };
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+})();
