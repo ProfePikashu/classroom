@@ -2516,14 +2516,14 @@ if (String(item.id) !== String(id)) return item;
           <strong>AndyAzhTEC Classroom</strong>
 
           <div class="home-avisos-stable-path">
-            C:\\AndyAzhTEC\\Classroom\\avisos
+            Canal de novedades
             <span>ONLINE</span>
           </div>
         </div>
 
         <header class="home-avisos-stable-header">
-          <p>AVISOS + NOVEDADES</p>
-          <h2>AVISOS - NOVEDADES</h2>
+          <p>NEWSLETTER</p>
+          <h2>Avisos y novedades</h2>
           <small>Centro unificado para anuncios del curso, accesos importantes y actividad reciente.</small>
         </header>
 
