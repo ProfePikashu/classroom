@@ -1915,3 +1915,516 @@
     init();
   }
 })();
+
+/* === Notification Links And Home Avisos Bridge 20260622 === */
+(function notificationLinksAndHomeAvisosBridge() {
+  "use strict";
+
+  const STORAGE_KEY = "andyazh-classroom-notifications-v2";
+
+  function safeJson(value, fallback) {
+    try {
+      return JSON.parse(value) || fallback;
+    } catch {
+      return fallback;
+    }
+  }
+
+  function loadItems() {
+    const items = safeJson(localStorage.getItem(STORAGE_KEY), []);
+    return Array.isArray(items) ? items : [];
+  }
+
+  function escapeHtml(value) {
+    return String(value ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  function formatDate(value) {
+    if (!value) return "";
+
+    try {
+      return new Intl.DateTimeFormat("es-AR", {
+        dateStyle: "short",
+        timeStyle: "short",
+      }).format(new Date(value));
+    } catch {
+      return String(value);
+    }
+  }
+
+  function getLink(item) {
+    return item.link || item.link_url || item.url || "";
+  }
+
+  function getBody(item) {
+    return item.body || item.description || item.message || item.content || "";
+  }
+
+  function isDismissed(item) {
+    return Boolean(item.dismissedAt || item.dismissed_at || item.deletedAt || item.deleted_at || item.hidden);
+  }
+
+  function normalizeType(item) {
+    const raw = String(item.type || item.category || "system").toLowerCase();
+
+    if (raw.includes("community") || raw.includes("comunidad")) return "community";
+    if (raw.includes("announcement") || raw.includes("aviso") || raw.includes("news")) return "announcement";
+    if (raw.includes("academic") || raw.includes("exam") || raw.includes("nota") || raw.includes("recuperatorio")) return "academic";
+
+    return raw || "system";
+  }
+
+  function normalizeSeverity(item) {
+    const explicit = String(item.severity || "").toLowerCase();
+
+    if (["info", "warning", "danger", "neutral"].includes(explicit)) {
+      return explicit;
+    }
+
+    const type = normalizeType(item);
+
+    if (type === "community") return "info";
+    if (type === "announcement") return "warning";
+    if (type === "academic") return "danger";
+
+    return "neutral";
+  }
+
+  function shouldShowInHome(item) {
+    if (!item || isDismissed(item)) return false;
+
+    const type = normalizeType(item);
+
+    // Comunidad queda solo en campanita/foro, no en Avisos + Novedades.
+    if (type === "community") return false;
+
+    return ["announcement", "academic", "system"].includes(type);
+  }
+
+  function findNotificationArticleByButton(button) {
+    return button.closest("[data-notification-id], .notification-item");
+  }
+
+  function enhanceBellLinks() {
+    const articles = document.querySelectorAll(".notification-item[data-notification-id], [data-notification-id].notification-item");
+
+    articles.forEach((article) => {
+      if (article.dataset.linkEnhanced === "1") return;
+
+      const id = article.getAttribute("data-notification-id");
+      const item = loadItems().find((entry) => String(entry.id) === String(id));
+      const link = getLink(item || {}) || article.getAttribute("data-notification-link") || "";
+
+      if (!link) return;
+
+      article.dataset.linkEnhanced = "1";
+      article.setAttribute("data-notification-link", link);
+
+      const actions =
+        article.querySelector(".notification-actions") ||
+        article.querySelector(".notification-content") ||
+        article;
+
+      const openButton = document.createElement("button");
+      openButton.type = "button";
+      openButton.className = "notification-action-btn notification-link-btn";
+      openButton.setAttribute("data-notification-open-link", id || "");
+      openButton.innerHTML = '<i class="fa-solid fa-arrow-up-right-from-square"></i> Abrir link';
+
+      actions.appendChild(openButton);
+    });
+  }
+
+  function openNotificationLink(id, article) {
+    const item = loadItems().find((entry) => String(entry.id) === String(id));
+    const link = getLink(item || {}) || article?.getAttribute("data-notification-link") || "";
+
+    if (!link) {
+      alert("Esta notificación no tiene link cargado.");
+      return;
+    }
+
+    window.open(link, "_blank", "noopener,noreferrer");
+  }
+
+  function buildHomeNoticeCard(item) {
+    const type = normalizeType(item);
+    const severity = normalizeSeverity(item);
+    const link = getLink(item);
+    const body = getBody(item);
+    const createdAt = item.createdAt || item.created_at || item.updatedAt || item.updated_at || "";
+    const actor = item.actor || item.created_by_name || "Classroom";
+
+    const label =
+      type === "academic"
+        ? "IMPORTANTE"
+        : type === "announcement"
+          ? "AVISO"
+          : "SISTEMA";
+
+    const linkHtml = link
+      ? `
+        <a class="home-notice-link" href="${escapeHtml(link)}" target="_blank" rel="noopener noreferrer">
+          <i class="fa-solid fa-arrow-up-right-from-square"></i>
+          Abrir link
+        </a>
+      `
+      : "";
+
+    return `
+      <article class="home-cmd-card home-notice-card is-${escapeHtml(severity)}" data-home-notification-id="${escapeHtml(item.id)}">
+        <div class="home-cmd-prompt">C:\\classroom&gt;</div>
+
+        <div class="home-cmd-content">
+          <div class="home-cmd-tags">
+            <span>${escapeHtml(label)}</span>
+            <span>${escapeHtml(type.toUpperCase())}</span>
+          </div>
+
+          <h3>${escapeHtml(item.title || "Notificación")}</h3>
+          <p>${escapeHtml(body)}</p>
+
+          <div class="home-notice-meta">
+            <strong>Publicado por ${escapeHtml(actor)}</strong>
+            ${createdAt ? `<span>${escapeHtml(formatDate(createdAt))}</span>` : ""}
+          </div>
+
+          ${linkHtml}
+        </div>
+      </article>
+    `;
+  }
+
+  function findHomeAvisosContainer() {
+    return (
+      document.querySelector("#homeNotificationsFeed") ||
+      document.querySelector("[data-home-notifications-feed]") ||
+      document.querySelector(".home-notifications-feed") ||
+      document.querySelector(".home-cmd-feed") ||
+      document.querySelector(".home-terminal-feed") ||
+      document.querySelector(".home-activity-feed")
+    );
+  }
+
+  function findHomeAvisosMount() {
+    return (
+      document.querySelector("#homeAvisosNovedades") ||
+      document.querySelector("[data-home-avisos]") ||
+      document.querySelector(".home-cmd-window") ||
+      document.querySelector(".page-content") ||
+      document.querySelector("main")
+    );
+  }
+
+  function ensureHomeContainer() {
+    let container = findHomeAvisosContainer();
+
+    if (container) {
+      container.id = container.id || "homeNotificationsFeed";
+      container.classList.add("home-notifications-feed");
+      return container;
+    }
+
+    const mount = findHomeAvisosMount();
+    if (!mount) return null;
+
+    container = document.createElement("section");
+    container.id = "homeNotificationsFeed";
+    container.className = "home-notifications-feed";
+
+    mount.appendChild(container);
+
+    return container;
+  }
+
+  function renderHomeAvisos() {
+    const isHome =
+      /index\.html$/i.test(window.location.pathname) ||
+      window.location.pathname.endsWith("/frontend/") ||
+      window.location.pathname.endsWith("/frontend") ||
+      window.location.pathname.endsWith("/");
+
+    if (!isHome) return;
+
+    const container = ensureHomeContainer();
+    if (!container) return;
+
+    const notices = loadItems()
+      .filter(shouldShowInHome)
+      .sort((a, b) => new Date(b.createdAt || b.created_at || 0) - new Date(a.createdAt || a.created_at || 0))
+      .slice(0, 8);
+
+    const demoCards = Array.from(container.children).filter((child) => {
+      const text = (child.textContent || "").toLowerCase();
+      return !child.hasAttribute("data-home-notification-id") && (
+        text.includes("recuperaciones y asistencias") ||
+        text.includes("novedades del curso") ||
+        text.includes("actividad reciente")
+      );
+    });
+
+    if (!notices.length) {
+      demoCards.forEach((child) => {
+        child.style.display = "";
+      });
+      return;
+    }
+
+    demoCards.forEach((child) => {
+      child.style.display = "none";
+    });
+
+    const existingDynamic = container.querySelectorAll("[data-home-notification-id]");
+    existingDynamic.forEach((node) => node.remove());
+
+    container.insertAdjacentHTML("afterbegin", notices.map(buildHomeNoticeCard).join(""));
+  }
+
+  document.addEventListener("click", (event) => {
+    const linkButton = event.target.closest("[data-notification-open-link]");
+
+    if (!linkButton) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    const article = findNotificationArticleByButton(linkButton);
+    const id = linkButton.getAttribute("data-notification-open-link") || article?.getAttribute("data-notification-id") || "";
+
+    openNotificationLink(id, article);
+  }, true);
+
+  window.addEventListener("classroom:notifications-updated", () => {
+    setTimeout(enhanceBellLinks, 40);
+    setTimeout(enhanceBellLinks, 180);
+    setTimeout(renderHomeAvisos, 80);
+    setTimeout(renderHomeAvisos, 260);
+  });
+
+  document.addEventListener("click", (event) => {
+    if (
+      event.target.closest("#notificationsToggle") ||
+      event.target.closest(".notifications-toggle") ||
+      event.target.closest("[data-notifications-toggle]") ||
+      event.target.closest(".notifications-panel")
+    ) {
+      setTimeout(enhanceBellLinks, 80);
+      setTimeout(enhanceBellLinks, 260);
+    }
+  }, true);
+
+  function init() {
+    setTimeout(enhanceBellLinks, 700);
+    setTimeout(renderHomeAvisos, 900);
+
+    setInterval(() => {
+      enhanceBellLinks();
+      renderHomeAvisos();
+    }, 5000);
+  }
+
+  window.ClassroomNotificationLinksAndHomeAvisos = {
+    enhanceBellLinks,
+    renderHomeAvisos,
+  };
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+})();
+
+/* === Notification Link Stable Button And Online Badge Fix 20260622 === */
+(function notificationLinkStableButtonAndOnlineBadgeFix() {
+  "use strict";
+
+  const STORAGE_KEY = "andyazh-classroom-notifications-v2";
+
+  let enhanceScheduled = false;
+
+  function safeJson(value, fallback) {
+    try {
+      return JSON.parse(value) || fallback;
+    } catch {
+      return fallback;
+    }
+  }
+
+  function loadItems() {
+    const items = safeJson(localStorage.getItem(STORAGE_KEY), []);
+    return Array.isArray(items) ? items : [];
+  }
+
+  function getLink(item) {
+    return item?.link || item?.link_url || item?.url || "";
+  }
+
+  function setOnlineBadge() {
+    const candidates = Array.from(document.querySelectorAll(
+      ".notifications-panel span, .notifications-panel .badge, .notifications-panel [class*='badge'], .notifications-panel [class*='pill'], .notifications-panel [class*='tag']"
+    ));
+
+    candidates.forEach((el) => {
+      const text = (el.textContent || "").trim().toLowerCase();
+
+      if (
+        text === "local v2" ||
+        text === "local" ||
+        text.includes("local v2")
+      ) {
+        el.textContent = "ONLINE";
+        el.title = "Notificaciones sincronizadas con Supabase";
+        el.classList.add("notification-online-badge");
+      }
+    });
+  }
+
+  function removeDuplicateLinkButtons(article) {
+    const buttons = Array.from(article.querySelectorAll("[data-notification-open-link]"));
+
+    if (buttons.length <= 1) return;
+
+    buttons.slice(1).forEach((btn) => btn.remove());
+  }
+
+  function enhanceOneArticle(article) {
+    if (!article) return;
+
+    const id = article.getAttribute("data-notification-id");
+    if (!id) return;
+
+    const item = loadItems().find((entry) => String(entry.id) === String(id));
+    const link = getLink(item) || article.getAttribute("data-notification-link") || "";
+
+    removeDuplicateLinkButtons(article);
+
+    if (!link) return;
+
+    article.setAttribute("data-notification-link", link);
+
+    const existing = article.querySelector("[data-notification-open-link]");
+    if (existing) {
+      existing.setAttribute("data-notification-open-link", id);
+      existing.classList.add("notification-link-btn");
+      existing.hidden = false;
+      return;
+    }
+
+    const actions =
+      article.querySelector(".notification-actions") ||
+      article.querySelector(".notification-content") ||
+      article;
+
+    const openButton = document.createElement("button");
+    openButton.type = "button";
+    openButton.className = "notification-action-btn notification-link-btn";
+    openButton.setAttribute("data-notification-open-link", id);
+    openButton.innerHTML = '<i class="fa-solid fa-arrow-up-right-from-square"></i> Abrir link';
+
+    actions.appendChild(openButton);
+  }
+
+  function enhanceStableLinks() {
+    document
+      .querySelectorAll(".notification-item[data-notification-id], [data-notification-id].notification-item")
+      .forEach(enhanceOneArticle);
+
+    setOnlineBadge();
+  }
+
+  function scheduleEnhance() {
+    if (enhanceScheduled) return;
+
+    enhanceScheduled = true;
+
+    requestAnimationFrame(() => {
+      enhanceScheduled = false;
+      enhanceStableLinks();
+    });
+  }
+
+  document.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-notification-open-link]");
+
+    if (!button) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+
+    const article = button.closest("[data-notification-id]");
+    const id = button.getAttribute("data-notification-open-link") || article?.getAttribute("data-notification-id") || "";
+    const item = loadItems().find((entry) => String(entry.id) === String(id));
+    const link = getLink(item) || article?.getAttribute("data-notification-link") || "";
+
+    if (!link) {
+      alert("Esta notificación no tiene link cargado.");
+      return;
+    }
+
+    window.open(link, "_blank", "noopener,noreferrer");
+  }, true);
+
+  window.addEventListener("classroom:notifications-updated", () => {
+    setTimeout(scheduleEnhance, 80);
+  });
+
+  document.addEventListener("click", (event) => {
+    if (
+      event.target.closest("#notificationsToggle") ||
+      event.target.closest(".notifications-toggle") ||
+      event.target.closest("[data-notifications-toggle]") ||
+      event.target.closest(".notifications-panel")
+    ) {
+      setTimeout(scheduleEnhance, 80);
+    }
+  }, true);
+
+  const observer = new MutationObserver(() => {
+    scheduleEnhance();
+  });
+
+  function initObserver() {
+    const panel =
+      document.querySelector(".notifications-panel") ||
+      document.querySelector("#notificationsPanel") ||
+      document.body;
+
+    observer.observe(panel, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+    });
+  }
+
+  function killOldIntervalJitter() {
+    // Neutraliza el efecto visual de reinyecciones anteriores:
+    // si hay varios botones, queda uno solo y estable.
+    setTimeout(scheduleEnhance, 200);
+    setTimeout(scheduleEnhance, 700);
+    setTimeout(scheduleEnhance, 1500);
+  }
+
+  function init() {
+    initObserver();
+    scheduleEnhance();
+    killOldIntervalJitter();
+  }
+
+  window.ClassroomNotificationStableLinks = {
+    enhance: enhanceStableLinks,
+    badge: setOnlineBadge,
+  };
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+})();

@@ -13757,3 +13757,134 @@ html[data-theme="light"] .notification-item.is-system .notification-action-btn {
   border-color: rgba(124, 58, 237, 0.20) !important;
   color: #5b21b6 !important;
 }
+
+/* === Notification Links And Home Avisos Styles 20260622 === */
+
+.notification-link-btn {
+  border-color: rgba(34, 211, 238, 0.28) !important;
+  background: rgba(34, 211, 238, 0.10) !important;
+  color: #67e8f9 !important;
+}
+
+.notification-link-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0 18px rgba(34, 211, 238, 0.16);
+}
+
+.home-notifications-feed {
+  display: grid;
+  gap: 14px;
+}
+
+.home-notice-card {
+  position: relative;
+}
+
+.home-notice-card.is-info {
+  border-color: rgba(59, 130, 246, 0.30) !important;
+}
+
+.home-notice-card.is-warning {
+  border-color: rgba(255, 221, 87, 0.36) !important;
+  background:
+    radial-gradient(circle at top left, rgba(255, 221, 87, 0.08), transparent 42%),
+    rgba(7, 12, 24, 0.72) !important;
+}
+
+.home-notice-card.is-danger {
+  border-color: rgba(255, 71, 104, 0.40) !important;
+  background:
+    radial-gradient(circle at top left, rgba(255, 71, 104, 0.10), transparent 42%),
+    rgba(7, 12, 24, 0.72) !important;
+}
+
+.home-notice-card.is-neutral {
+  border-color: rgba(153, 87, 255, 0.32) !important;
+}
+
+.home-notice-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  align-items: center;
+  margin-top: 10px;
+  color: var(--text-muted, #94a3b8);
+  font-size: 0.82rem;
+}
+
+.home-notice-meta strong {
+  color: rgba(103, 232, 249, 0.86);
+}
+
+.home-notice-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+  margin-top: 12px;
+  padding: 8px 12px;
+  border: 1px solid rgba(34, 211, 238, 0.28);
+  border-radius: 999px;
+  background: rgba(34, 211, 238, 0.10);
+  color: #67e8f9;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.home-notice-link:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0 18px rgba(34, 211, 238, 0.16);
+}
+
+html[data-theme="light"] .notification-link-btn {
+  background: rgba(14, 165, 233, 0.08) !important;
+  border-color: rgba(14, 165, 233, 0.22) !important;
+  color: #0369a1 !important;
+}
+
+html[data-theme="light"] .home-notice-link {
+  background: rgba(14, 165, 233, 0.08);
+  border-color: rgba(14, 165, 233, 0.22);
+  color: #0369a1;
+}
+
+/* === Notification Stable Link Button And Online Badge Styles 20260622 === */
+
+.notification-link-btn {
+  animation: none !important;
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    background 160ms ease,
+    color 160ms ease,
+    box-shadow 160ms ease !important;
+}
+
+.notification-link-btn i {
+  animation: none !important;
+}
+
+.notification-online-badge {
+  border-color: rgba(34, 211, 238, 0.38) !important;
+  background: rgba(34, 211, 238, 0.12) !important;
+  color: #67e8f9 !important;
+  box-shadow: 0 0 18px rgba(34, 211, 238, 0.10);
+}
+
+.notifications-panel .notification-online-badge::before {
+  content: "";
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 7px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 10px rgba(34, 197, 94, 0.75);
+  vertical-align: middle;
+}
+
+html[data-theme="light"] .notification-online-badge {
+  border-color: rgba(14, 165, 233, 0.30) !important;
+  background: rgba(14, 165, 233, 0.08) !important;
+  color: #0369a1 !important;
+}
