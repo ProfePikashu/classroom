@@ -181,7 +181,9 @@
     if (!id) return;
 
     const items = loadItems().map((item) => {
-      if (item.id !== id) return item;
+      
+      var severityClass = "is-" + String((item && item.severity) || (typeof severityOf === "function" ? severityOf(item) : "") || (typeof normalizeSeverity === "function" ? normalizeSeverity(item) : "") || "neutral").replace(/^is-/, "");
+if (item.id !== id) return item;
       return { ...item, read: !item.read };
     });
 
@@ -191,7 +193,9 @@
 
   function markRead(id) {
     const items = loadItems().map((item) => {
-      if (item.id !== id) return item;
+      
+      var severityClass = "is-" + String((item && item.severity) || (typeof severityOf === "function" ? severityOf(item) : "") || (typeof normalizeSeverity === "function" ? normalizeSeverity(item) : "") || "neutral").replace(/^is-/, "");
+if (item.id !== id) return item;
       return { ...item, read: true };
     });
 
@@ -376,14 +380,16 @@
     }
 
     list.innerHTML = items.map((item) => {
-      const icon = TYPE_ICONS[item.type] || TYPE_ICONS.system;
+      
+      var severityClass = "is-" + String((item && item.severity) || (typeof severityOf === "function" ? severityOf(item) : "") || (typeof normalizeSeverity === "function" ? normalizeSeverity(item) : "") || "neutral").replace(/^is-/, "");
+const icon = TYPE_ICONS[item.type] || TYPE_ICONS.system;
       const unreadClass = item.read ? "" : "unread";
 
       const readLabel = item.read ? "Marcar no leída" : "Marcar leída";
       const readIcon = item.read ? "fa-envelope" : "fa-envelope-open";
 
       return `
-        <article class="notification-item ${unreadClass} ${severityClass}" data-notification-id="${escapeHtml(item.id)}" data-notification-link="${escapeHtml(item.link || "")}">
+        <article class="notification-item ${unreadClass} ${(() => { const __severity = (item && item.severity) || (typeof severityOf === "function" ? severityOf(item) : "") || (typeof normalizeSeverity === "function" ? normalizeSeverity(item) : "") || "neutral"; const __clean = String(__severity || "neutral").replace(/^is-/, ""); return "is-" + __clean; })()}" data-notification-id="${escapeHtml(item.id)}" data-notification-link="${escapeHtml(item.link || "")}">
           <button class="notification-delete-btn" type="button" data-notification-delete="${escapeHtml(item.id)}" aria-label="Eliminar notificación" title="Eliminar notificación">
             <i class="fa-solid fa-xmark"></i>
           </button>
@@ -716,16 +722,18 @@
     if (!panelLooksEmpty(list)) return;
 
     list.innerHTML = items.map((item) => {
-      const id = item.id;
+      
+      var severityClass = "is-" + String((item && item.severity) || (typeof severityOf === "function" ? severityOf(item) : "") || (typeof normalizeSeverity === "function" ? normalizeSeverity(item) : "") || "neutral").replace(/^is-/, "");
+const id = item.id;
       const link = item.link || item.link_url || "";
       const severity = severityOf(item);
       const unreadClass = item.read ? "" : "is-unread";
-      const severityClass = `is-${severity}`;
+      var severityClass = `is-${severity}`;
       const readLabel = item.read ? "Marcar no leída" : "Marcar leída";
       const readIcon = item.read ? "fa-envelope" : "fa-envelope-open";
 
       return `
-        <article class="notification-item ${unreadClass} ${severityClass}" data-notification-id="${escapeHtml(id)}" data-notification-link="${escapeHtml(link)}">
+        <article class="notification-item ${unreadClass} ${(() => { const __severity = (item && item.severity) || (typeof severityOf === "function" ? severityOf(item) : "") || (typeof normalizeSeverity === "function" ? normalizeSeverity(item) : "") || "neutral"; const __clean = String(__severity || "neutral").replace(/^is-/, ""); return "is-" + __clean; })()}" data-notification-id="${escapeHtml(id)}" data-notification-link="${escapeHtml(link)}">
           <button class="notification-delete-btn" type="button" data-notification-delete="${escapeHtml(id)}" aria-label="Eliminar notificación" title="Eliminar notificación">
             <i class="fa-solid fa-xmark"></i>
           </button>
@@ -968,13 +976,15 @@
     }
 
     list.innerHTML = items.map((item) => {
-      const unreadClass = item.read ? "" : "is-unread";
-      const severityClass = `is-${item.severity}`;
+      
+      var severityClass = "is-" + String((item && item.severity) || (typeof severityOf === "function" ? severityOf(item) : "") || (typeof normalizeSeverity === "function" ? normalizeSeverity(item) : "") || "neutral").replace(/^is-/, "");
+const unreadClass = item.read ? "" : "is-unread";
+      var severityClass = `is-${item.severity}`;
       const readLabel = item.read ? "Marcar no leída" : "Marcar leída";
       const readIcon = item.read ? "fa-envelope" : "fa-envelope-open";
 
       return `
-        <article class="notification-item ${unreadClass} ${severityClass}" data-notification-id="${escapeHtml(item.id)}" data-notification-link="${escapeHtml(item.link)}">
+        <article class="notification-item ${unreadClass} ${(() => { const __severity = (item && item.severity) || (typeof severityOf === "function" ? severityOf(item) : "") || (typeof normalizeSeverity === "function" ? normalizeSeverity(item) : "") || "neutral"; const __clean = String(__severity || "neutral").replace(/^is-/, ""); return "is-" + __clean; })()}" data-notification-id="${escapeHtml(item.id)}" data-notification-link="${escapeHtml(item.link)}">
           <button class="notification-delete-btn" type="button" data-notification-delete="${escapeHtml(item.id)}" aria-label="Eliminar notificación" title="Eliminar notificación">
             <i class="fa-solid fa-xmark"></i>
           </button>
@@ -1801,7 +1811,9 @@
     const now = new Date().toISOString();
 
     const items = loadItems().map((item) => {
-      if (String(item.id) !== String(id)) return item;
+      
+      var severityClass = "is-" + String((item && item.severity) || (typeof severityOf === "function" ? severityOf(item) : "") || (typeof normalizeSeverity === "function" ? normalizeSeverity(item) : "") || "neutral").replace(/^is-/, "");
+if (String(item.id) !== String(id)) return item;
 
       return {
         ...item,
@@ -2257,12 +2269,13 @@
   }
 })();
 
-/* === Home Avisos Renderer Clean Final 20260622 === */
-(function homeAvisosRendererCleanFinal() {
+/* === Home Avisos Stable Final Renderer 20260622 === */
+(function homeAvisosStableFinalRenderer() {
   "use strict";
 
   const STORAGE_KEY = "andyazh-classroom-notifications-v2";
-  let lastRenderedHtml = "";
+  const SHELL_ID = "homeAvisosStableShell";
+  let lastStableAvisosHtml = "";
 
   function safeJson(value, fallback) {
     try {
@@ -2311,32 +2324,30 @@
   }
 
   function normalizeType(item) {
-    const raw = String(item?.type || item?.category || "system").toLowerCase();
+    const raw = String(item?.type || item?.category || item?.audience || "system").toLowerCase();
 
-    if (raw.includes("community") || raw.includes("comunidad")) return "community";
-    if (raw.includes("announcement") || raw.includes("aviso") || raw.includes("news")) return "announcement";
+    if (raw.includes("community") || raw.includes("comunidad") || raw.includes("reply") || raw.includes("thread")) return "community";
     if (raw.includes("academic") || raw.includes("exam") || raw.includes("nota") || raw.includes("recuperatorio")) return "academic";
+    if (raw.includes("announcement") || raw.includes("aviso") || raw.includes("warning") || raw.includes("news")) return "announcement";
 
-    return raw || "system";
+    return "system";
   }
 
   function normalizeSeverity(item) {
     const explicit = String(item?.severity || "").toLowerCase();
 
-    if (["info", "warning", "danger", "neutral"].includes(explicit)) {
-      return explicit;
-    }
+    if (["info", "warning", "danger", "neutral"].includes(explicit)) return explicit;
 
     const type = normalizeType(item);
 
-    if (type === "announcement") return "warning";
     if (type === "academic") return "danger";
+    if (type === "announcement") return "warning";
 
     return "neutral";
   }
 
   function getBody(item) {
-    return item?.body || item?.description || item?.message || item?.content || "";
+    return item?.body || item?.description || item?.message || item?.content || item?.text || "";
   }
 
   function getLink(item) {
@@ -2355,24 +2366,23 @@
 
   function shouldShowInHome(item) {
     if (!item || isDismissed(item)) return false;
+    if (normalizeType(item) === "community") return false;
 
-    const type = normalizeType(item);
-
-    // Comunidad queda en foro/campanita, no en cartelera institucional.
-    return ["announcement", "academic", "system"].includes(type);
+    return Boolean(item.title || getBody(item));
   }
 
-  function labelFor(type) {
-    if (type === "academic") return "IMPORTANTE";
-    if (type === "announcement") return "AVISO";
-    return "SISTEMA";
-  }
-
-  function getNoticeItems() {
+  function getNotices() {
     return loadItems()
       .filter(shouldShowInHome)
       .sort((a, b) => new Date(b.createdAt || b.created_at || 0) - new Date(a.createdAt || a.created_at || 0))
-      .slice(0, 8);
+      .slice(0, 10);
+  }
+
+  function labelFor(type, severity) {
+    if (type === "academic" || severity === "danger") return "IMPORTANTE";
+    if (type === "announcement" || severity === "warning") return "AVISO";
+
+    return "SISTEMA";
   }
 
   function buildNoticeCard(item) {
@@ -2393,12 +2403,12 @@
       : "";
 
     return `
-      <article class="home-cmd-card home-notice-card is-${escapeHtml(severity)}" data-home-notification-id="${escapeHtml(item.id)}">
+      <article class="home-cmd-card home-notice-card is-${escapeHtml(severity)}" data-home-notification-id="${escapeHtml(item.id || "")}">
         <div class="home-cmd-prompt">C:\\classroom&gt;</div>
 
         <div class="home-cmd-content">
           <div class="home-cmd-tags">
-            <span>${escapeHtml(labelFor(type))}</span>
+            <span>${escapeHtml(labelFor(type, severity))}</span>
             <span>${escapeHtml(type.toUpperCase())}</span>
           </div>
 
@@ -2465,120 +2475,107 @@
     `;
   }
 
-  function isAvisosPanel(node) {
-    if (!node || node.nodeType !== 1) return false;
+  function removeOldAvisosBlocks() {
+    const selectors = [
+      "#homeAvisosShell",
+      "#homeAvisosDynamicFeed",
+      ".home-avisos-shell",
+      ".home-cmd-window",
+      ".home-terminal-window",
+      ".home-newsletter-terminal",
+      ".home-terminal-feed",
+      ".home-terminal-feed-head",
+      ".home-notifications-feed",
+      "[data-home-avisos-panel]",
+      "[data-home-avisos-final]",
+      "[data-home-notification-id]",
+    ];
 
-    const text = (node.textContent || "").toLowerCase();
-
-    return (
-      text.includes("avisos - novedades") ||
-      text.includes("recuperaciones y asistencias") ||
-      text.includes("novedades del curso") ||
-      text.includes("c:\\andyazhtech\\classroom\\avisos")
-    );
-  }
-
-  function getPanels() {
-    return Array.from(document.querySelectorAll(
-      ".home-avisos-shell, .home-cmd-window, .home-terminal-window, .home-newsletter-terminal, [data-home-avisos-panel], [data-home-avisos-final]"
-    )).filter(isAvisosPanel);
-  }
-
-  function choosePanel() {
-    const panels = getPanels();
-
-    if (!panels.length) return null;
-
-    // El primero visual/DOM es el panel original lindo.
-    return panels[0];
-  }
-
-  function removeDuplicates(keep) {
-    getPanels().forEach((panel) => {
-      if (panel !== keep) {
-        panel.remove();
-      }
-    });
-
-    document.querySelectorAll("[data-home-notification-id]").forEach((node) => {
-      if (!keep.contains(node)) {
+    document.querySelectorAll(selectors.join(",")).forEach((node) => {
+      if (!node.closest(`#${SHELL_ID}`)) {
         node.remove();
       }
     });
   }
 
-  function getOrCreateFeed(panel) {
-    let feed =
-      panel.querySelector("#homeAvisosDynamicFeed") ||
-      panel.querySelector("[data-home-avisos-feed]") ||
-      panel.querySelector(".home-avisos-dynamic-feed") ||
-      panel.querySelector(".home-notifications-feed") ||
-      panel.querySelector(".home-cmd-feed") ||
-      panel.querySelector(".home-terminal-feed");
+  function findMount() {
+    const main = document.querySelector("main");
+    if (main) return main;
 
-    if (!feed) {
-      feed = document.createElement("div");
-      panel.appendChild(feed);
-    }
+    return document.querySelector(".page-content") || document.querySelector(".dashboard-content") || document.body;
+  }
 
-    feed.id = "homeAvisosDynamicFeed";
-    feed.dataset.homeAvisosFeed = "1";
-    feed.classList.add("home-avisos-dynamic-feed");
+  function buildShellHtml() {
+    return `
+      <section id="${SHELL_ID}" class="home-avisos-stable-shell">
+        <div class="home-avisos-stable-topbar">
+          <div class="home-avisos-stable-dots" aria-hidden="true">
+            <span></span><span></span><span></span>
+          </div>
 
-    return feed;
+          <strong>AndyAzhTEC Classroom</strong>
+
+          <div class="home-avisos-stable-path">
+            C:\\AndyAzhTEC\\Classroom\\avisos
+            <span>ONLINE</span>
+          </div>
+        </div>
+
+        <header class="home-avisos-stable-header">
+          <p>AVISOS + NOVEDADES</p>
+          <h2>AVISOS - NOVEDADES</h2>
+          <small>Centro unificado para anuncios del curso, accesos importantes y actividad reciente.</small>
+        </header>
+
+        <div id="homeAvisosStableFeed" class="home-avisos-stable-feed"></div>
+
+        <footer class="home-avisos-stable-footer">
+          <div class="home-avisos-stable-dots" aria-hidden="true">
+            <span></span><span></span><span></span>
+          </div>
+
+          <strong>AndyAzhTEC Classroom</strong>
+        </footer>
+      </section>
+    `;
+  }
+
+  function ensureShell() {
+    let shell = document.getElementById(SHELL_ID);
+
+    if (shell) return shell;
+
+    const mount = findMount();
+    mount.insertAdjacentHTML("beforeend", buildShellHtml());
+
+    return document.getElementById(SHELL_ID);
   }
 
   function render() {
     if (!isHomePage()) return;
 
-    const panel = choosePanel();
-    if (!panel) return;
+    removeOldAvisosBlocks();
 
-    panel.id = "homeAvisosShell";
-    panel.dataset.homeAvisosPanel = "1";
-    panel.classList.add("home-avisos-shell", "home-avisos-clean-final");
+    const shell = ensureShell();
+    const feed = shell.querySelector("#homeAvisosStableFeed");
+    const notices = getNotices();
 
-    removeDuplicates(panel);
-
-    const feed = getOrCreateFeed(panel);
-    const notices = getNoticeItems();
-
-    const html = notices.length
+    const nextHtml = notices.length
       ? notices.map(buildNoticeCard).join("")
       : buildDefaultCards();
 
-    if (html !== lastRenderedHtml) {
-      feed.innerHTML = html;
-      lastRenderedHtml = html;
+    if (nextHtml !== lastStableAvisosHtml) {
+      feed.innerHTML = nextHtml;
+      lastStableAvisosHtml = nextHtml;
     }
   }
 
   function schedule() {
-    setTimeout(render, 20);
-    setTimeout(render, 300);
-    setTimeout(render, 900);
-  }
-
-  function neutralizeOldGlobals() {
-    [
-      "ClassroomHomeAvisosPersistentShell",
-      "ClassroomHomeAvisosFinal",
-      "ClassroomHomeAvisosSinglePanel",
-      "ClassroomHomeAvisosOnePanel",
-      "ClassroomNotificationLinksAndHomeAvisos",
-    ].forEach((name) => {
-      if (window[name]) {
-        Object.keys(window[name]).forEach((key) => {
-          if (typeof window[name][key] === "function") {
-            window[name][key] = render;
-          }
-        });
-      }
-    });
+    setTimeout(render, 80);
+    setTimeout(render, 600);
   }
 
   function init() {
-    neutralizeOldGlobals();
     schedule();
 
     window.addEventListener("classroom:notifications-updated", schedule);
@@ -2588,13 +2585,10 @@
     });
   }
 
-  window.ClassroomHomeAvisosCleanFinal = {
+  window.ClassroomHomeAvisosStableFinal = {
     render,
-    panels: getPanels,
-    cleanup() {
-      const panel = choosePanel();
-      if (panel) removeDuplicates(panel);
-    },
+    notices: getNotices,
+    storage: loadItems,
   };
 
   if (document.readyState === "loading") {
