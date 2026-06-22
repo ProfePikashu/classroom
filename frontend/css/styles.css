@@ -14101,3 +14101,25 @@ html[data-theme="light"] .home-avisos-footer {
 .home-avisos-single-panel [data-home-notification-id] {
   animation: none !important;
 }
+
+/* === Home Avisos One Panel Enforcer Styles 20260622 === */
+
+.home-avisos-locked {
+  margin-top: 24px !important;
+}
+
+.home-avisos-locked .home-avisos-dynamic-feed {
+  display: grid !important;
+  gap: 14px !important;
+  padding: 12px 18px 18px !important;
+}
+
+.home-avisos-locked .home-cmd-card,
+.home-avisos-locked .home-notice-card {
+  width: 100% !important;
+  margin: 0 !important;
+}
+
+.home-avisos-locked [data-home-notification-id] {
+  animation: none !important;
+}

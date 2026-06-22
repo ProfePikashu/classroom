@@ -2923,3 +2923,350 @@
     init();
   }
 })();
+
+/* === Home Avisos One Panel Enforcer 20260622 === */
+(function homeAvisosOnePanelEnforcer() {
+  "use strict";
+
+  const STORAGE_KEY = "andyazh-classroom-notifications-v2";
+  let enforcing = false;
+  let lastHtml = "";
+
+  function safeJson(value, fallback) {
+    try {
+      return JSON.parse(value) || fallback;
+    } catch {
+      return fallback;
+    }
+  }
+
+  function loadItems() {
+    const items = safeJson(localStorage.getItem(STORAGE_KEY), []);
+    return Array.isArray(items) ? items : [];
+  }
+
+  function escapeHtml(value) {
+    return String(value ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  function formatDate(value) {
+    if (!value) return "";
+
+    try {
+      return new Intl.DateTimeFormat("es-AR", {
+        dateStyle: "short",
+        timeStyle: "short",
+      }).format(new Date(value));
+    } catch {
+      return String(value);
+    }
+  }
+
+  function isHomePage() {
+    const path = window.location.pathname;
+    return /index\.html$/i.test(path) || path.endsWith("/frontend/") || path.endsWith("/frontend") || path.endsWith("/");
+  }
+
+  function normalizeType(item) {
+    const raw = String(item?.type || item?.category || "system").toLowerCase();
+
+    if (raw.includes("community") || raw.includes("comunidad")) return "community";
+    if (raw.includes("announcement") || raw.includes("aviso") || raw.includes("news")) return "announcement";
+    if (raw.includes("academic") || raw.includes("exam") || raw.includes("nota") || raw.includes("recuperatorio")) return "academic";
+
+    return raw || "system";
+  }
+
+  function normalizeSeverity(item) {
+    const explicit = String(item?.severity || "").toLowerCase();
+
+    if (["info", "warning", "danger", "neutral"].includes(explicit)) return explicit;
+
+    const type = normalizeType(item);
+    if (type === "announcement") return "warning";
+    if (type === "academic") return "danger";
+    return "neutral";
+  }
+
+  function getBody(item) {
+    return item?.body || item?.description || item?.message || item?.content || "";
+  }
+
+  function getLink(item) {
+    return item?.link || item?.link_url || item?.url || "";
+  }
+
+  function isDismissed(item) {
+    return Boolean(item?.dismissedAt || item?.dismissed_at || item?.deletedAt || item?.deleted_at || item?.hidden);
+  }
+
+  function shouldShowInHome(item) {
+    if (!item || isDismissed(item)) return false;
+    return ["announcement", "academic", "system"].includes(normalizeType(item));
+  }
+
+  function labelFor(type) {
+    if (type === "academic") return "IMPORTANTE";
+    if (type === "announcement") return "AVISO";
+    return "SISTEMA";
+  }
+
+  function buildNoticeCard(item) {
+    const type = normalizeType(item);
+    const severity = normalizeSeverity(item);
+    const body = getBody(item);
+    const link = getLink(item);
+    const actor = item.actor || item.created_by_name || "Classroom";
+    const createdAt = item.createdAt || item.created_at || item.updatedAt || item.updated_at || "";
+
+    const linkHtml = link
+      ? `
+        <a class="home-notice-link" href="${escapeHtml(link)}" target="_blank" rel="noopener noreferrer">
+          <i class="fa-solid fa-arrow-up-right-from-square"></i>
+          Abrir link
+        </a>
+      `
+      : "";
+
+    return `
+      <article class="home-cmd-card home-notice-card is-${escapeHtml(severity)}" data-home-notification-id="${escapeHtml(item.id)}">
+        <div class="home-cmd-prompt">C:\\classroom&gt;</div>
+        <div class="home-cmd-content">
+          <div class="home-cmd-tags">
+            <span>${escapeHtml(labelFor(type))}</span>
+            <span>${escapeHtml(type.toUpperCase())}</span>
+          </div>
+
+          <h3>${escapeHtml(item.title || "Notificación")}</h3>
+          <p>${escapeHtml(body)}</p>
+
+          <div class="home-notice-meta">
+            <strong>Publicado por ${escapeHtml(actor)}</strong>
+            ${createdAt ? `<span>${escapeHtml(formatDate(createdAt))}</span>` : ""}
+          </div>
+
+          ${linkHtml}
+        </div>
+      </article>
+    `;
+  }
+
+  function buildDefaultCards() {
+    return `
+      <article class="home-cmd-card home-notice-card is-info" data-home-default-card="1">
+        <div class="home-cmd-prompt">C:\\classroom&gt;</div>
+        <div class="home-cmd-content">
+          <div class="home-cmd-tags">
+            <span>AVISO</span>
+            <span>SISTEMA</span>
+          </div>
+          <h3>Recuperaciones y asistencias</h3>
+          <p>Próximamente se van a registrar avisos cuando un alumno recupere una clase o quede un cambio pendiente de revisar.</p>
+          <div class="home-notice-meta">
+            <strong>Publicado por Sistema</strong>
+          </div>
+        </div>
+      </article>
+
+      <article class="home-cmd-card home-notice-card is-info" data-home-default-card="1">
+        <div class="home-cmd-prompt">C:\\classroom&gt;</div>
+        <div class="home-cmd-content">
+          <div class="home-cmd-tags">
+            <span>NOVEDAD</span>
+            <span>CURSO</span>
+          </div>
+          <h3>Novedades del curso</h3>
+          <p>Acá van a aparecer anuncios, accesos importantes, cambios de cursada y comunicaciones internas del Classroom.</p>
+          <div class="home-notice-meta">
+            <strong>Canal interno AndyAzhTEC</strong>
+          </div>
+        </div>
+      </article>
+
+      <article class="home-cmd-card home-notice-card is-neutral" data-home-default-card="1">
+        <div class="home-cmd-prompt">C:\\classroom&gt;</div>
+        <div class="home-cmd-content">
+          <div class="home-cmd-tags">
+            <span>LOG</span>
+            <span>ACTIVIDAD</span>
+          </div>
+          <h3>Actividad reciente</h3>
+          <p>Este espacio centraliza avisos, novedades y actividad reciente del Classroom.</p>
+          <div class="home-notice-meta">
+            <strong>Pelusita online · avisos activos</strong>
+          </div>
+        </div>
+      </article>
+    `;
+  }
+
+  function getAvisosPanels() {
+    return Array.from(document.querySelectorAll(
+      ".home-avisos-shell, .home-cmd-window, .home-terminal-window, .home-newsletter-terminal, [data-home-avisos-final], [data-home-avisos-panel]"
+    )).filter((node) => {
+      const text = (node.textContent || "").toLowerCase();
+      return (
+        text.includes("avisos - novedades") ||
+        text.includes("recuperaciones y asistencias") ||
+        text.includes("novedades del curso") ||
+        text.includes("c:\\andyazhtech\\classroom\\avisos")
+      );
+    });
+  }
+
+  function choosePanel() {
+    const panels = getAvisosPanels();
+
+    if (!panels.length) return null;
+
+    // El primero en el DOM es el panel lindo original.
+    return panels[0];
+  }
+
+  function getOrCreateFeed(panel) {
+    let feed =
+      panel.querySelector("#homeAvisosDynamicFeed") ||
+      panel.querySelector("[data-home-avisos-feed]") ||
+      panel.querySelector(".home-avisos-dynamic-feed") ||
+      panel.querySelector(".home-notifications-feed") ||
+      panel.querySelector(".home-cmd-feed") ||
+      panel.querySelector(".home-terminal-feed");
+
+    if (feed) {
+      feed.id = "homeAvisosDynamicFeed";
+      feed.dataset.homeAvisosFeed = "1";
+      feed.classList.add("home-avisos-dynamic-feed");
+      return feed;
+    }
+
+    feed = document.createElement("div");
+    feed.id = "homeAvisosDynamicFeed";
+    feed.dataset.homeAvisosFeed = "1";
+    feed.className = "home-avisos-dynamic-feed";
+
+    const footer = panel.querySelector(".home-avisos-footer");
+    if (footer) {
+      panel.insertBefore(feed, footer);
+    } else {
+      panel.appendChild(feed);
+    }
+
+    return feed;
+  }
+
+  function removeAllOtherPanels(keep) {
+    getAvisosPanels().forEach((panel) => {
+      if (panel === keep) return;
+      panel.remove();
+    });
+
+    document.querySelectorAll("[data-home-notification-id]").forEach((node) => {
+      if (!keep.contains(node)) node.remove();
+    });
+  }
+
+  function disableOldRenderers() {
+    // Evita que otros bridges vuelvan a crear otro panel después.
+    if (window.ClassroomHomeAvisosFinal) {
+      window.ClassroomHomeAvisosFinal.render = () => enforce();
+      window.ClassroomHomeAvisosFinal.cleanup = () => removeAllOtherPanels(choosePanel());
+    }
+
+    if (window.ClassroomHomeAvisosSinglePanel) {
+      window.ClassroomHomeAvisosSinglePanel.render = () => enforce();
+    }
+
+    if (window.ClassroomHomeAvisosPersistentShell) {
+      window.ClassroomHomeAvisosPersistentShell.render = () => enforce();
+    }
+
+    if (window.ClassroomNotificationLinksAndHomeAvisos) {
+      window.ClassroomNotificationLinksAndHomeAvisos.renderHomeAvisos = () => enforce();
+    }
+  }
+
+  function enforce() {
+    if (!isHomePage() || enforcing) return;
+
+    enforcing = true;
+
+    try {
+      disableOldRenderers();
+
+      const keep = choosePanel();
+      if (!keep) return;
+
+      keep.id = "homeAvisosShell";
+      keep.dataset.homeAvisosPanel = "1";
+      keep.dataset.homeAvisosFinal = "1";
+      keep.classList.add("home-avisos-shell", "home-avisos-single-panel", "home-avisos-locked");
+
+      removeAllOtherPanels(keep);
+
+      const feed = getOrCreateFeed(keep);
+
+      const notices = loadItems()
+        .filter(shouldShowInHome)
+        .sort((a, b) => new Date(b.createdAt || b.created_at || 0) - new Date(a.createdAt || a.created_at || 0))
+        .slice(0, 8);
+
+      const html = notices.length
+        ? notices.map(buildNoticeCard).join("")
+        : buildDefaultCards();
+
+      if (html !== lastHtml) {
+        feed.innerHTML = html;
+        lastHtml = html;
+      }
+    } finally {
+      enforcing = false;
+    }
+  }
+
+  function schedule() {
+    setTimeout(enforce, 20);
+    setTimeout(enforce, 250);
+    setTimeout(enforce, 900);
+  }
+
+  const observer = new MutationObserver(() => {
+    if (!enforcing) {
+      setTimeout(enforce, 50);
+    }
+  });
+
+  function init() {
+    disableOldRenderers();
+    schedule();
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+    });
+
+    window.addEventListener("classroom:notifications-updated", schedule);
+    window.addEventListener("storage", (event) => {
+      if (event.key === STORAGE_KEY) schedule();
+    });
+
+    // Refuerzo por si algún setTimeout viejo crea duplicado tarde.
+    setTimeout(schedule, 1800);
+    setTimeout(schedule, 3500);
+  }
+
+  window.ClassroomHomeAvisosOnePanel = {
+    enforce,
+    panels: getAvisosPanels,
+  };
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+})();
