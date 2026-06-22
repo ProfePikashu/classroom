@@ -11,6 +11,8 @@ const GESTION_API_BAJA = "{ASIGNAR_ENDPOINT_BAJA}";
 const ClassroomGestion = {
   init() {
     this.bindButtons();
+    this.ensureLinkedInRecommendationPanel();
+    this.restoreLinkedInRecommendationPanel();
   },
 
   getSession() {
@@ -119,6 +121,7 @@ const ClassroomGestion = {
       }
 
       if (data.url) {
+        this.markLinkedInRecommendationReady(dni, data.url);
         if (certTab && !certTab.closed) {
           certTab.location.href = data.url;
         } else {
@@ -131,6 +134,161 @@ const ClassroomGestion = {
     } finally {
       button.disabled = false;
       button.innerHTML = originalHtml;
+    }
+  },
+
+
+  getLinkedInStorageKey(dni) {
+    return `andyazh-linkedin-recommendation-ready-${dni || "unknown"}-ayrpc2025`;
+  },
+
+  ensureLinkedInRecommendationPanel() {
+    if (document.getElementById("linkedinRecommendationPanel")) return;
+
+    const btnCertificado = document.getElementById("btnGestionCertificado");
+    const host =
+      btnCertificado?.closest(".gestion-card, .glass-card, article, section, div") ||
+      document.querySelector(".main-content") ||
+      document.querySelector("main") ||
+      document.body;
+
+    const panel = document.createElement("section");
+    panel.id = "linkedinRecommendationPanel";
+    panel.className = "linkedin-recommendation-panel";
+    panel.hidden = true;
+
+    panel.innerHTML = `
+      <div class="linkedin-recommendation-head">
+        <div class="linkedin-recommendation-icon">
+          <i class="fa-brands fa-linkedin-in"></i>
+        </div>
+
+        <div>
+          <h3>Recomendación en LinkedIn</h3>
+          <p>
+            Ya podés pedirle al profe una recomendación profesional.
+            Antes, agregá el curso a tu perfil y conectá con Arturo en LinkedIn.
+          </p>
+        </div>
+      </div>
+
+      <ol class="linkedin-recommendation-steps">
+        <li>
+          <strong>Agregá el curso a tu perfil</strong>
+          <span>Sumá “Armado y Reparación de Computadoras — AyRPC 2025” en tu formación, cursos o licencias/certificaciones.</span>
+        </li>
+
+        <li>
+          <strong>Agregá habilidades aprendidas</strong>
+          <span>Hardware, diagnóstico de PC, armado de computadoras, sistemas operativos, BIOS/UEFI, mantenimiento preventivo y seguridad informática básica.</span>
+        </li>
+
+        <li>
+          <strong>Conectá con el profe</strong>
+          <span>Entrá al perfil de Arturo y enviá solicitud de conexión si todavía no están conectados.</span>
+        </li>
+
+        <li>
+          <strong>Pedí la recomendación</strong>
+          <span>Copiá el mensaje sugerido y mandalo por LinkedIn cuando ya tengas el curso cargado.</span>
+        </li>
+      </ol>
+
+      <div class="linkedin-recommendation-actions">
+        <a class="btn btn-primary" href="https://www.linkedin.com/in/arturoandrescoria/" target="_blank" rel="noopener noreferrer">
+          <i class="fa-brands fa-linkedin"></i>
+          Abrir LinkedIn del profe
+        </a>
+
+        <button class="btn btn-ghost" type="button" id="btnCopyLinkedinSkills">
+          <i class="fa-solid fa-copy"></i>
+          Copiar habilidades
+        </button>
+
+        <button class="btn btn-ghost" type="button" id="btnCopyLinkedinMessage">
+          <i class="fa-solid fa-message"></i>
+          Copiar pedido
+        </button>
+      </div>
+
+      <p class="linkedin-recommendation-note">
+        Importante: la recomendación se pide después de aprobar el examen o recuperatorio y generar el certificado.
+      </p>
+    `;
+
+    host.insertAdjacentElement("afterend", panel);
+
+    document.getElementById("btnCopyLinkedinSkills")?.addEventListener("click", () => {
+      this.copyToClipboard(
+        "Hardware, diagnóstico de PC, armado de computadoras, sistemas operativos, BIOS/UEFI, mantenimiento preventivo, instalación de software, seguridad informática básica, solución de problemas técnicos.",
+        "Habilidades copiadas."
+      );
+    });
+
+    document.getElementById("btnCopyLinkedinMessage")?.addEventListener("click", () => {
+      const session = this.getSession();
+      const nombre =
+        session?.nombre ||
+        session?.alumno?.["Nombre Completo"] ||
+        session?.student?.nombre ||
+        "";
+
+      const mensaje =
+`Hola Arturo, ¿cómo estás?
+
+Soy ${nombre || "alumno/a"} del curso Armado y Reparación de Computadoras — AyRPC 2025.
+
+Ya aprobé el examen o recuperatorio, generé mi certificado y cargué el curso en mi perfil de LinkedIn con las habilidades aprendidas.
+
+¿Podrías dejarme una recomendación profesional cuando tengas un momento?
+
+Muchas gracias.`;
+
+      this.copyToClipboard(mensaje, "Mensaje copiado.");
+    });
+  },
+
+  restoreLinkedInRecommendationPanel() {
+    const dni = this.getDni();
+    if (!dni) return;
+
+    const saved = localStorage.getItem(this.getLinkedInStorageKey(dni));
+    if (!saved) return;
+
+    this.showLinkedInRecommendationPanel();
+  },
+
+  markLinkedInRecommendationReady(dni, certificateUrl) {
+    localStorage.setItem(
+      this.getLinkedInStorageKey(dni),
+      JSON.stringify({
+        ready: true,
+        certificateUrl,
+        unlockedAt: new Date().toISOString(),
+      })
+    );
+
+    this.showLinkedInRecommendationPanel();
+  },
+
+  showLinkedInRecommendationPanel() {
+    const panel = document.getElementById("linkedinRecommendationPanel");
+    if (!panel) return;
+
+    panel.hidden = false;
+    panel.classList.add("show");
+
+    setTimeout(() => {
+      panel.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }, 250);
+  },
+
+  async copyToClipboard(text, okMessage) {
+    try {
+      await navigator.clipboard.writeText(text);
+      alert(okMessage || "Copiado.");
+    } catch (error) {
+      prompt("Copiá este texto:", text);
     }
   },
 

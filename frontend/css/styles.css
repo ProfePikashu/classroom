@@ -14312,3 +14312,116 @@ html[data-theme="light"] .home-avisos-stable-footer {
     padding-inline: 12px;
   }
 }
+
+/* === LINKEDIN RECOMMENDATION PANEL === */
+
+.linkedin-recommendation-panel {
+  margin-top: 1rem;
+  padding: 1rem;
+  border: 1px solid rgba(0, 245, 255, .22);
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 10% 0%, rgba(0, 119, 181, .22), transparent 36%),
+    radial-gradient(circle at 100% 100%, rgba(168, 85, 247, .16), transparent 42%),
+    rgba(10, 5, 26, .74);
+  box-shadow: 0 20px 48px rgba(0,0,0,.28);
+}
+
+.linkedin-recommendation-panel[hidden] {
+  display: none !important;
+}
+
+.linkedin-recommendation-panel.show {
+  animation: linkedinPanelIn .25s ease both;
+}
+
+.linkedin-recommendation-head {
+  display: flex;
+  gap: .85rem;
+  align-items: flex-start;
+  margin-bottom: .85rem;
+}
+
+.linkedin-recommendation-icon {
+  width: 44px;
+  height: 44px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border-radius: 16px;
+  background: rgba(0, 119, 181, .18);
+  border: 1px solid rgba(0, 119, 181, .36);
+  color: #60a5fa;
+  font-size: 1.25rem;
+}
+
+.linkedin-recommendation-head h3 {
+  margin: 0 0 .25rem;
+  font-family: var(--font-title);
+  color: var(--text-main);
+}
+
+.linkedin-recommendation-head p,
+.linkedin-recommendation-note {
+  margin: 0;
+  color: var(--text-muted);
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.linkedin-recommendation-steps {
+  display: grid;
+  gap: .6rem;
+  margin: .85rem 0;
+  padding-left: 1.15rem;
+}
+
+.linkedin-recommendation-steps li {
+  padding: .65rem .75rem;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 14px;
+  background: rgba(255,255,255,.035);
+}
+
+.linkedin-recommendation-steps strong {
+  display: block;
+  color: var(--cyan);
+  margin-bottom: .25rem;
+}
+
+.linkedin-recommendation-steps span {
+  display: block;
+  color: var(--text-muted);
+  font-weight: 700;
+  line-height: 1.42;
+}
+
+.linkedin-recommendation-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .6rem;
+  margin-top: .85rem;
+}
+
+.linkedin-recommendation-actions .btn {
+  flex: 1 1 180px;
+}
+
+.linkedin-recommendation-note {
+  margin-top: .8rem;
+  font-size: .82rem;
+}
+
+@keyframes linkedinPanelIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* === END LINKEDIN RECOMMENDATION PANEL === */
