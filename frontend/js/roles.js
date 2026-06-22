@@ -216,3 +216,111 @@ const ClassroomRoles = {
 document.addEventListener("DOMContentLoaded", () => {
   ClassroomRoles.init();
 });
+
+/* === Moderator Dedupe Roles Fix 20260622 === */
+(function moderatorDedupeRolesFix() {
+  "use strict";
+
+  function normTwitch(value) {
+    return String(value || "").trim().toLowerCase().replace(/^@+/, "");
+  }
+
+  function normDni(value) {
+    return String(value || "").replace(/\D/g, "");
+  }
+
+  function dedupe(list) {
+    const seen = new Set();
+
+    return (Array.isArray(list) ? list : [])
+      .map((item) => ({
+        ...item,
+        twitch: normTwitch(item?.twitch),
+        dni: normDni(item?.dni),
+        role: item?.role || "moderator",
+        roleLabel: item?.roleLabel || "Moderador",
+      }))
+      .filter((item) => {
+        const key = `${item.twitch}::${item.dni}`;
+
+        if (!item.twitch || !item.dni || seen.has(key)) return false;
+
+        seen.add(key);
+        return true;
+      });
+  }
+
+  function patchRoles() {
+    const roles = window.ClassroomRoles;
+
+    if (!roles || roles.__moderatorDedupePatched) return;
+
+    roles.__moderatorDedupePatched = true;
+
+    ["getAssignedRoles", "getModeratorAssignments", "getAssignedRoleEntries"].forEach((methodName) => {
+      if (typeof roles[methodName] !== "function") return;
+
+      const original = roles[methodName].bind(roles);
+
+      roles[methodName] = function patchedRoleList(...args) {
+        return dedupe(original(...args));
+      };
+    });
+
+    if (typeof roles.getAssignedRoleForSession === "function") {
+      const originalGetForSession = roles.getAssignedRoleForSession.bind(roles);
+
+      roles.getAssignedRoleForSession = function patchedGetAssignedRoleForSession(session, ...args) {
+        const result = originalGetForSession(session, ...args);
+
+        if (result) {
+          return {
+            ...result,
+            twitch: normTwitch(result.twitch),
+            dni: normDni(result.dni),
+            role: result.role || "moderator",
+            roleLabel: result.roleLabel || "Moderador",
+          };
+        }
+
+        return result;
+      };
+    }
+  }
+
+  function normalizeCurrentSession() {
+    try {
+      const key = "andyazh-classroom-session";
+      const session = JSON.parse(localStorage.getItem(key) || "null");
+
+      if (!session) return;
+
+      const role = String(session.role || "").toLowerCase();
+
+      if (role === "classroom_moderator") {
+        session.role = "moderator";
+        session.roleLabel = session.roleLabel || "Moderador";
+        localStorage.setItem(key, JSON.stringify(session));
+      }
+    } catch {}
+  }
+
+  function init() {
+    normalizeCurrentSession();
+
+    setTimeout(patchRoles, 50);
+    setTimeout(patchRoles, 300);
+    setTimeout(patchRoles, 1000);
+  }
+
+  window.ClassroomModeratorRolesDedupeFix = {
+    patch: patchRoles,
+    dedupe,
+  };
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+})();
