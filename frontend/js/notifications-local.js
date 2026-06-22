@@ -1359,3 +1359,378 @@
     scheduleInitialSync();
   }
 })();
+
+/* === Bell Badge Auto Refresh 20260621 === */
+(function bellBadgeAutoRefresh() {
+  "use strict";
+
+  const STORAGE_KEY = "andyazh-classroom-notifications-v2";
+  const POLL_MS = 20000;
+
+  let pollTimer = null;
+  let syncInProgress = false;
+
+  function safeJson(value, fallback) {
+    try {
+      return JSON.parse(value) || fallback;
+    } catch {
+      return fallback;
+    }
+  }
+
+  function loadItems() {
+    const items = safeJson(localStorage.getItem(STORAGE_KEY), []);
+    return Array.isArray(items) ? items : [];
+  }
+
+  function isDismissed(item) {
+    return Boolean(
+      item?.dismissedAt ||
+      item?.dismissed_at ||
+      item?.deletedAt ||
+      item?.deleted_at ||
+      item?.hidden
+    );
+  }
+
+  function isUnread(item) {
+    return !Boolean(item?.read || item?.read_at || item?.readAt);
+  }
+
+  function unreadCount() {
+    return loadItems().filter((item) => item && !isDismissed(item) && isUnread(item)).length;
+  }
+
+  function findBadgeTargets() {
+    return [
+      document.getElementById("notificationsDot"),
+      document.getElementById("notificationDot"),
+      document.getElementById("notificationsBadge"),
+      document.querySelector(".notifications-dot"),
+      document.querySelector(".notification-dot"),
+      document.querySelector(".notifications-badge"),
+      document.querySelector("[data-notifications-dot]"),
+      document.querySelector("[data-notifications-badge]"),
+    ].filter(Boolean);
+  }
+
+  function updateBellBadge() {
+    const count = unreadCount();
+    const targets = findBadgeTargets();
+
+    targets.forEach((dot) => {
+      dot.textContent = count > 0 ? String(count) : "";
+      dot.hidden = count <= 0;
+      dot.classList.toggle("is-visible", count > 0);
+      dot.classList.toggle("has-unread", count > 0);
+      dot.setAttribute("aria-label", count > 0 ? `${count} notificaciones sin leer` : "Sin notificaciones nuevas");
+    });
+
+    const bellButtons = [
+      document.getElementById("notificationsToggle"),
+      document.querySelector(".notifications-toggle"),
+      document.querySelector("[data-notifications-toggle]"),
+    ].filter(Boolean);
+
+    bellButtons.forEach((button) => {
+      button.classList.toggle("has-unread", count > 0);
+      button.setAttribute("data-unread-count", String(count));
+    });
+
+    return count;
+  }
+
+  async function syncBackendQuietly() {
+    if (syncInProgress) return;
+
+    const api = window.ClassroomBackendNotifications;
+
+    if (!api || typeof api.sync !== "function") {
+      updateBellBadge();
+      return;
+    }
+
+    syncInProgress = true;
+
+    try {
+      await api.sync();
+      updateBellBadge();
+
+      if (window.ClassroomUnifiedBellRenderer?.schedule) {
+        window.ClassroomUnifiedBellRenderer.schedule();
+      }
+    } catch (error) {
+      console.warn("[Classroom] No se pudo refrescar badge desde backend:", error);
+      updateBellBadge();
+    } finally {
+      syncInProgress = false;
+    }
+  }
+
+  function startPolling() {
+    if (pollTimer) return;
+
+    pollTimer = window.setInterval(() => {
+      if (document.visibilityState === "visible") {
+        syncBackendQuietly();
+      }
+    }, POLL_MS);
+  }
+
+  function wireEvents() {
+    window.addEventListener("classroom:notifications-updated", () => {
+      setTimeout(updateBellBadge, 10);
+      setTimeout(updateBellBadge, 120);
+    });
+
+    window.addEventListener("storage", (event) => {
+      if (event.key === STORAGE_KEY) {
+        updateBellBadge();
+      }
+    });
+
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") {
+        syncBackendQuietly();
+      }
+    });
+
+    window.addEventListener("focus", () => {
+      syncBackendQuietly();
+    });
+
+    document.addEventListener("click", (event) => {
+      if (
+        event.target.closest("#notificationsToggle") ||
+        event.target.closest(".notifications-toggle") ||
+        event.target.closest("[data-notifications-toggle]") ||
+        event.target.closest("[data-notification-delete]") ||
+        event.target.closest("[data-notification-toggle-read]")
+      ) {
+        setTimeout(updateBellBadge, 80);
+        setTimeout(updateBellBadge, 300);
+      }
+    }, true);
+  }
+
+  function init() {
+    wireEvents();
+    updateBellBadge();
+
+    setTimeout(syncBackendQuietly, 800);
+    setTimeout(updateBellBadge, 1400);
+
+    startPolling();
+  }
+
+  window.ClassroomBellBadgeAutoRefresh = {
+    update: updateBellBadge,
+    sync: syncBackendQuietly,
+    unreadCount,
+  };
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+})();
+
+/* === Notifications Realtime WebSocket Bridge 20260621 === */
+(function notificationsRealtimeWebSocketBridge() {
+  "use strict";
+
+  let socket = null;
+  let reconnectTimer = null;
+  let heartbeatTimer = null;
+  let reconnectDelay = 1500;
+  let manuallyClosed = false;
+
+  function getBackendApi() {
+    return window.ClassroomBackendNotifications || null;
+  }
+
+  function apiBaseToWsUrl(apiBase) {
+    return String(apiBase || "")
+      .replace(/^https:/i, "wss:")
+      .replace(/^http:/i, "ws:");
+  }
+
+  async function getToken() {
+    const api = getBackendApi();
+
+    if (!api || typeof api.ensureBackendToken !== "function") {
+      throw new Error("ClassroomBackendNotifications no está disponible todavía.");
+    }
+
+    return api.ensureBackendToken();
+  }
+
+  function getWsUrl(token) {
+    const api = getBackendApi();
+    const apiBase = api?.getApiBase ? api.getApiBase() : "http://127.0.0.1:8000";
+
+    return `${apiBaseToWsUrl(apiBase)}/api/classroom/notifications/ws?token=${encodeURIComponent(token)}`;
+  }
+
+  function clearTimers() {
+    if (heartbeatTimer) {
+      clearInterval(heartbeatTimer);
+      heartbeatTimer = null;
+    }
+  }
+
+  function scheduleReconnect() {
+    if (manuallyClosed) return;
+    if (reconnectTimer) return;
+
+    reconnectTimer = setTimeout(() => {
+      reconnectTimer = null;
+      connect();
+    }, reconnectDelay);
+
+    reconnectDelay = Math.min(reconnectDelay * 1.6, 15000);
+  }
+
+  async function syncNow(reason) {
+    const api = getBackendApi();
+
+    if (api?.sync) {
+      await api.sync().catch((error) => {
+        console.warn("[Classroom WS] No se pudo sincronizar tras evento realtime:", reason, error);
+      });
+    }
+
+    if (window.ClassroomBellBadgeAutoRefresh?.update) {
+      window.ClassroomBellBadgeAutoRefresh.update();
+    }
+
+    if (window.ClassroomUnifiedBellRenderer?.schedule) {
+      window.ClassroomUnifiedBellRenderer.schedule();
+    }
+
+    if (window.ClassroomNotificationCenterBackend?.load) {
+      const isCenterPage = /centro-notificaciones\.html/i.test(window.location.pathname);
+      if (isCenterPage) {
+        window.ClassroomNotificationCenterBackend.load().catch(() => {});
+      }
+    }
+  }
+
+  async function connect() {
+    if (socket && (socket.readyState === WebSocket.OPEN || socket.readyState === WebSocket.CONNECTING)) {
+      return;
+    }
+
+    try {
+      const token = await getToken();
+      const wsUrl = getWsUrl(token);
+
+      manuallyClosed = false;
+      socket = new WebSocket(wsUrl);
+
+      socket.addEventListener("open", () => {
+        reconnectDelay = 1500;
+        clearTimers();
+
+        heartbeatTimer = setInterval(() => {
+          if (socket && socket.readyState === WebSocket.OPEN) {
+            socket.send("ping");
+          }
+        }, 25000);
+
+        document.documentElement.classList.add("notifications-ws-ready");
+        syncNow("ws-open");
+      });
+
+      socket.addEventListener("message", (event) => {
+        let data = {};
+
+        try {
+          data = JSON.parse(event.data);
+        } catch {
+          data = { type: String(event.data || "") };
+        }
+
+        if (data.type === "notifications_ws_ready" || data.type === "pong") {
+          return;
+        }
+
+        if (data.type === "notifications_changed") {
+          syncNow(data.action || "notifications_changed");
+        }
+      });
+
+      socket.addEventListener("close", () => {
+        clearTimers();
+        document.documentElement.classList.remove("notifications-ws-ready");
+        scheduleReconnect();
+      });
+
+      socket.addEventListener("error", () => {
+        clearTimers();
+        document.documentElement.classList.remove("notifications-ws-ready");
+
+        try {
+          socket.close();
+        } catch {}
+      });
+    } catch (error) {
+      console.warn("[Classroom WS] No se pudo conectar realtime:", error);
+      scheduleReconnect();
+    }
+  }
+
+  function disconnect() {
+    manuallyClosed = true;
+    clearTimers();
+
+    if (reconnectTimer) {
+      clearTimeout(reconnectTimer);
+      reconnectTimer = null;
+    }
+
+    if (socket) {
+      try {
+        socket.close();
+      } catch {}
+    }
+
+    socket = null;
+  }
+
+  function status() {
+    return {
+      readyState: socket ? socket.readyState : null,
+      connected: Boolean(socket && socket.readyState === WebSocket.OPEN),
+      reconnectDelay,
+    };
+  }
+
+  function init() {
+    setTimeout(connect, 1200);
+
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") {
+        connect();
+      }
+    });
+
+    window.addEventListener("focus", () => {
+      connect();
+    });
+  }
+
+  window.ClassroomNotificationsRealtime = {
+    connect,
+    disconnect,
+    status,
+    syncNow,
+  };
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+})();
