@@ -14079,3 +14079,25 @@ html[data-theme="light"] .home-avisos-footer {
 .home-avisos-final .home-notice-card + .home-notice-card {
   margin-top: 0 !important;
 }
+
+/* === Home Avisos Single Panel Merge Styles 20260622 === */
+
+.home-avisos-single-panel {
+  margin-top: 24px !important;
+}
+
+.home-avisos-single-panel .home-avisos-dynamic-feed {
+  display: grid !important;
+  gap: 14px !important;
+  padding: 12px 18px 18px !important;
+}
+
+.home-avisos-single-panel .home-cmd-card,
+.home-avisos-single-panel .home-notice-card {
+  margin: 0 !important;
+  width: 100%;
+}
+
+.home-avisos-single-panel [data-home-notification-id] {
+  animation: none !important;
+}
