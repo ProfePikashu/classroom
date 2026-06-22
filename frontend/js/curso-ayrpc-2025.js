@@ -283,22 +283,33 @@ const CursoAyRPC2025Panel = {
 
   hasApprovedExam(alumno, supabaseData, sheetData) {
     const values = [
-      alumno?.resultado,
+      // Examen regular - columna Y: Resultado
       alumno?.Resultado,
-      alumno?.NOTA,
-      alumno?.nota,
+      alumno?.RESULTADO,
+      alumno?.resultado,
       sheetData?.Resultado,
       sheetData?.RESULTADO,
-      sheetData?.NOTA,
-      sheetData?.Nota,
+      sheetData?.resultado,
+      supabaseData?.Resultado,
+      supabaseData?.RESULTADO,
       supabaseData?.resultado,
-      supabaseData?.aprobado,
-      supabaseData?.exam_result,
-    ].map(v => this.normalizeStatus(v));
 
-    return values.some(v =>
-      ["APROBADO", "APROBADA", "TRUE", "1", "SI", "SÍ"].includes(v)
-    );
+      // Recuperatorio - columna AA: Recuperatorio
+      alumno?.Recuperatorio,
+      alumno?.RECUPERATORIO,
+      alumno?.recuperatorio,
+      sheetData?.Recuperatorio,
+      sheetData?.RECUPERATORIO,
+      sheetData?.recuperatorio,
+      supabaseData?.Recuperatorio,
+      supabaseData?.RECUPERATORIO,
+      supabaseData?.recuperatorio,
+    ];
+
+    return values.some(value => {
+      const v = this.normalizeStatus(value);
+      return ["APROBADO", "APROBADA", "APROBO", "APROBÓ", "SI", "SÍ", "TRUE", "1", "OK"].includes(v);
+    });
   },
 
   paintRecovery(alumno, supabaseData, sheetData) {
