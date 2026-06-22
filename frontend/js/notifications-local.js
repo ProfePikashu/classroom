@@ -629,3 +629,410 @@
 
   document.addEventListener("DOMContentLoaded", init);
 })();
+
+/* === Notification Center Bell Render Bridge 20260621 === */
+(function notificationCenterBellRenderBridge() {
+  "use strict";
+
+  const STORAGE_KEY = "andyazh-classroom-notifications-v2";
+
+  function safeJson(value, fallback) {
+    try {
+      return JSON.parse(value) || fallback;
+    } catch {
+      return fallback;
+    }
+  }
+
+  function loadItems() {
+    return safeJson(localStorage.getItem(STORAGE_KEY), []);
+  }
+
+  function escapeHtml(value) {
+    return String(value ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  function formatDate(value) {
+    if (!value) return "";
+
+    try {
+      return new Intl.DateTimeFormat("es-AR", {
+        dateStyle: "short",
+        timeStyle: "short",
+      }).format(new Date(value));
+    } catch {
+      return value;
+    }
+  }
+
+  function severityOf(item) {
+    if (item.severity) return item.severity;
+
+    if (item.type === "community") return "info";
+    if (item.type === "announcement") return "warning";
+    if (item.type === "academic") return "danger";
+
+    return "neutral";
+  }
+
+  function iconOf(item) {
+    const severity = severityOf(item);
+
+    if (severity === "danger") return "fa-triangle-exclamation";
+    if (severity === "warning") return "fa-bullhorn";
+    if (severity === "info") return "fa-comments";
+
+    return "fa-bell";
+  }
+
+  function visibleItems() {
+    return loadItems()
+      .filter((item) => !item.dismissedAt && !item.dismissed_at)
+      .sort((a, b) => new Date(b.createdAt || b.created_at || 0) - new Date(a.createdAt || a.created_at || 0));
+  }
+
+  function findList() {
+    return document.getElementById("notificationsList")
+      || document.querySelector(".notifications-list")
+      || document.querySelector("[data-notifications-list]");
+  }
+
+  function panelLooksEmpty(list) {
+    const text = (list?.textContent || "").replace(/\s+/g, " ").trim().toLowerCase();
+
+    return !list || text.includes("sin notificaciones") || text.length < 20;
+  }
+
+  function renderBridgeIfNeeded() {
+    const list = findList();
+    const items = visibleItems();
+
+    if (!list || !items.length) return;
+    if (!panelLooksEmpty(list)) return;
+
+    list.innerHTML = items.map((item) => {
+      const id = item.id;
+      const link = item.link || item.link_url || "";
+      const severity = severityOf(item);
+      const unreadClass = item.read ? "" : "is-unread";
+      const severityClass = `is-${severity}`;
+      const readLabel = item.read ? "Marcar no leída" : "Marcar leída";
+      const readIcon = item.read ? "fa-envelope" : "fa-envelope-open";
+
+      return `
+        <article class="notification-item ${unreadClass} ${severityClass}" data-notification-id="${escapeHtml(id)}" data-notification-link="${escapeHtml(link)}">
+          <button class="notification-delete-btn" type="button" data-notification-delete="${escapeHtml(id)}" aria-label="Eliminar notificación" title="Eliminar notificación">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+
+          <div class="notification-icon">
+            <i class="fa-solid ${iconOf(item)}"></i>
+          </div>
+
+          <div class="notification-content">
+            <strong>${escapeHtml(item.title || "Notificación")}</strong>
+            <p>${escapeHtml(item.body || item.message || "")}</p>
+            <small>
+              ${escapeHtml(item.actor || "Classroom")} · ${escapeHtml(formatDate(item.createdAt || item.created_at))}
+            </small>
+
+            <div class="notification-actions">
+              <button class="notification-action-btn" type="button" data-notification-toggle-read="${escapeHtml(id)}">
+                <i class="fa-solid ${readIcon}"></i>
+                ${readLabel}
+              </button>
+            </div>
+          </div>
+        </article>
+      `;
+    }).join("");
+  }
+
+  function scheduleBridgeRender() {
+    setTimeout(renderBridgeIfNeeded, 30);
+    setTimeout(renderBridgeIfNeeded, 120);
+    setTimeout(renderBridgeIfNeeded, 300);
+  }
+
+  document.addEventListener("click", (event) => {
+    if (
+      event.target.closest("#notificationsToggle")
+      || event.target.closest(".notifications-toggle")
+      || event.target.closest(".notifications-widget")
+      || event.target.closest(".theme-toggle")
+    ) {
+      scheduleBridgeRender();
+    }
+  }, true);
+
+  window.addEventListener("classroom:notifications-updated", scheduleBridgeRender);
+
+  window.addEventListener("storage", (event) => {
+    if (event.key === STORAGE_KEY) scheduleBridgeRender();
+  });
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", scheduleBridgeRender);
+  } else {
+    scheduleBridgeRender();
+  }
+})();
+
+/* === Unified Bell Renderer 20260621 === */
+(function unifiedBellRenderer() {
+  "use strict";
+
+  const STORAGE_KEY = "andyazh-classroom-notifications-v2";
+
+  function safeJson(value, fallback) {
+    try {
+      return JSON.parse(value) || fallback;
+    } catch {
+      return fallback;
+    }
+  }
+
+  function escapeHtml(value) {
+    return String(value ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  function formatDate(value) {
+    if (!value) return "";
+
+    try {
+      return new Intl.DateTimeFormat("es-AR", {
+        dateStyle: "short",
+        timeStyle: "short",
+      }).format(new Date(value));
+    } catch {
+      return String(value);
+    }
+  }
+
+  function normalizeType(item) {
+    const raw = String(item.type || item.category || "system").toLowerCase();
+
+    if (raw.includes("community") || raw.includes("comunidad")) return "community";
+    if (raw.includes("reply") || raw.includes("post") || raw.includes("thread")) return "community";
+
+    if (raw.includes("academic") || raw.includes("exam") || raw.includes("nota") || raw.includes("recuperatorio")) return "academic";
+    if (raw.includes("announcement") || raw.includes("aviso") || raw.includes("news")) return "announcement";
+    if (raw.includes("data_change") || raw.includes("admin_data_change")) return "academic";
+
+    return raw || "system";
+  }
+
+  function severityOf(item) {
+    const explicit = String(item.severity || "").toLowerCase();
+
+    if (explicit === "danger" || explicit === "warning" || explicit === "info" || explicit === "neutral") {
+      return explicit;
+    }
+
+    const type = normalizeType(item);
+
+    if (type === "community") return "info";
+    if (type === "announcement") return "warning";
+    if (type === "academic") return "danger";
+
+    return "neutral";
+  }
+
+  function iconOf(item) {
+    const type = normalizeType(item);
+    const severity = severityOf(item);
+
+    if (type === "community") return "fa-comments";
+    if (severity === "danger") return "fa-triangle-exclamation";
+    if (severity === "warning") return "fa-bullhorn";
+    if (severity === "info") return "fa-comments";
+
+    return "fa-bell";
+  }
+
+  function getCreatedAt(item) {
+    return item.createdAt || item.created_at || item.timestamp || item.date || item.updatedAt || item.updated_at || "";
+  }
+
+  function getLink(item) {
+    return item.link || item.link_url || item.url || "";
+  }
+
+  function getBody(item) {
+    return item.body || item.message || item.content || item.text || "";
+  }
+
+  function isDismissed(item) {
+    return Boolean(
+      item.dismissedAt ||
+      item.dismissed_at ||
+      item.deletedAt ||
+      item.deleted_at ||
+      item.hidden
+    );
+  }
+
+  function normalizeItem(item, index) {
+    const id = item.id || item.notification_id || `notification-${index}-${getCreatedAt(item) || Date.now()}`;
+
+    return {
+      ...item,
+      id: String(id),
+      type: normalizeType(item),
+      severity: severityOf(item),
+      title: item.title || item.subject || "Notificación",
+      body: getBody(item),
+      link: getLink(item),
+      createdAt: getCreatedAt(item),
+      actor: item.actor || item.created_by || item.author || "Classroom",
+      read: Boolean(item.read || item.read_at || item.readAt),
+    };
+  }
+
+  function loadItems() {
+    const base = safeJson(localStorage.getItem(STORAGE_KEY), []);
+
+    if (!Array.isArray(base)) return [];
+
+    const seen = new Set();
+
+    return base
+      .map(normalizeItem)
+      .filter((item) => {
+        if (!item.id || isDismissed(item)) return false;
+        if (seen.has(item.id)) return false;
+
+        seen.add(item.id);
+        return true;
+      })
+      .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+  }
+
+  function saveItems(items) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+    window.dispatchEvent(new CustomEvent("classroom:notifications-updated", {
+      detail: { items },
+    }));
+  }
+
+  function findList() {
+    return document.getElementById("notificationsList")
+      || document.querySelector(".notifications-list")
+      || document.querySelector("[data-notifications-list]");
+  }
+
+  function findDot() {
+    return document.getElementById("notificationsDot")
+      || document.querySelector(".notifications-dot")
+      || document.querySelector("[data-notifications-dot]");
+  }
+
+  function updateDot(items) {
+    const dot = findDot();
+    if (!dot) return;
+
+    const unread = items.filter((item) => !item.read).length;
+
+    dot.textContent = unread ? String(unread) : "";
+    dot.hidden = unread <= 0;
+    dot.classList.toggle("is-visible", unread > 0);
+  }
+
+  function renderUnifiedBell() {
+    const list = findList();
+    if (!list) return;
+
+    const items = loadItems();
+
+    updateDot(items);
+
+    if (!items.length) {
+      list.innerHTML = `
+        <div class="notifications-empty">
+          <i class="fa-regular fa-bell"></i>
+          <strong>Sin notificaciones</strong>
+          <p>Cuando haya respuestas, hilos o avisos, van a aparecer acá.</p>
+        </div>
+      `;
+      return;
+    }
+
+    list.innerHTML = items.map((item) => {
+      const unreadClass = item.read ? "" : "is-unread";
+      const severityClass = `is-${item.severity}`;
+      const readLabel = item.read ? "Marcar no leída" : "Marcar leída";
+      const readIcon = item.read ? "fa-envelope" : "fa-envelope-open";
+
+      return `
+        <article class="notification-item ${unreadClass} ${severityClass}" data-notification-id="${escapeHtml(item.id)}" data-notification-link="${escapeHtml(item.link)}">
+          <button class="notification-delete-btn" type="button" data-notification-delete="${escapeHtml(item.id)}" aria-label="Eliminar notificación" title="Eliminar notificación">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+
+          <div class="notification-icon">
+            <i class="fa-solid ${iconOf(item)}"></i>
+          </div>
+
+          <div class="notification-content">
+            <strong>${escapeHtml(item.title)}</strong>
+            <p>${escapeHtml(item.body)}</p>
+            <small>
+              ${escapeHtml(item.actor || "Classroom")} · ${escapeHtml(formatDate(item.createdAt))}
+            </small>
+
+            <div class="notification-actions">
+              <button class="notification-action-btn" type="button" data-notification-toggle-read="${escapeHtml(item.id)}">
+                <i class="fa-solid ${readIcon}"></i>
+                ${readLabel}
+              </button>
+            </div>
+          </div>
+        </article>
+      `;
+    }).join("");
+  }
+
+  function scheduleRender() {
+    setTimeout(renderUnifiedBell, 20);
+    setTimeout(renderUnifiedBell, 120);
+    setTimeout(renderUnifiedBell, 300);
+  }
+
+  document.addEventListener("click", (event) => {
+    if (
+      event.target.closest("#notificationsToggle") ||
+      event.target.closest(".notifications-toggle") ||
+      event.target.closest(".notifications-widget") ||
+      event.target.closest(".notifications-panel")
+    ) {
+      scheduleRender();
+    }
+  }, true);
+
+  window.addEventListener("classroom:notifications-updated", scheduleRender);
+
+  window.addEventListener("storage", (event) => {
+    if (event.key === STORAGE_KEY) scheduleRender();
+  });
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", scheduleRender);
+  } else {
+    scheduleRender();
+  }
+
+  window.ClassroomUnifiedBellRenderer = {
+    render: renderUnifiedBell,
+    schedule: scheduleRender,
+  };
+})();

@@ -1,23 +1,20 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <title>AyRPC 2026 — AndyAzhTEC Classroom</title>
+  <title>Centro de notificaciones — AndyAzhTEC Classroom</title>
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
-
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600;700;800&display=swap" rel="stylesheet" />
-
-  <link rel="stylesheet" href="css/styles.css?v=20260612-pelusita-guide-compact" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600;700;800&family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css?v=20260621-notifications-center" />
   <link rel="icon" href="favicon.ico" type="image/x-icon" />
-  <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
-  <link rel="stylesheet" href="css/pelusita.css?v=20260611b" />
 </head>
-<body class="page-curso-ayrpc-2026">
+
+<body>
   <button class="mobile-menu-toggle" id="mobileMenuToggle" type="button" aria-label="Abrir menú">
     <span></span>
     <span></span>
@@ -25,8 +22,8 @@
   </button>
 
   <div class="mobile-sidebar-overlay" id="mobileSidebarOverlay"></div>
+
   <div class="app-shell">
-    
     <aside class="sidebar sidebar-v2" id="classroomSidebar">
       <div class="sidebar-v2-brand">
         <a href="index.html" class="sidebar-v2-brand-link" aria-label="Ir al inicio">
@@ -137,23 +134,20 @@
     </aside>
 
     <main class="main-content">
-
-      <!-- TOPBAR -->
       <header class="topbar">
         <div>
           <p class="eyebrow">
-            <i class="fa-solid fa-microchip"></i>
-            Armado y Reparación de Computadoras
+            <i class="fa-solid fa-bell"></i>
+            Administración
           </p>
 
-          <h1>AyRPC 2026</h1>
+          <h1>Centro de notificaciones</h1>
         </div>
 
         <div class="topbar-actions">
           <button class="theme-toggle theme-toggle-icon" id="themeToggle" type="button" aria-label="Cambiar tema">
             <i class="fa-solid fa-moon"></i>
           </button>
-
 
           <div class="user-menu" id="userMenu">
             <button class="user-pill user-menu-toggle" id="userMenuToggle" type="button" aria-label="Abrir menú de usuario">
@@ -184,89 +178,161 @@
         </div>
       </header>
 
-      <section class="ayrpc2026-promise-shell">
-        <article class="ayrpc2026-promise-card">
-          <div class="ayrpc2026-promise-copy">
-            <span class="badge">
-              <i class="fa-solid fa-clock"></i>
-              Próximamente
-            </span>
+      <section class="hero-panel notifications-center-hero">
+        <div class="hero-copy">
+          <span class="badge">
+            <i class="fa-solid fa-satellite-dish"></i>
+            Staff
+          </span>
 
-            <h2>
-              AyRPC 2026
-              <span>La próxima evolución del curso</span>
-            </h2>
-
-            <p>
-              Esta edición se está preparando para nacer directamente dentro del Classroom,
-              con una experiencia más clara, ordenada y conectada a ExamPro.
-            </p>
-
-            <div class="ayrpc2026-promise-actions">
-              <a href="cursos.html" class="btn btn-outline">
-                <i class="fa-solid fa-arrow-left"></i>
-                Volver a cursos
-              </a>
-
-              <button class="btn btn-primary" type="button" id="ayrpc2026AskPelusita">
-                <i class="fa-solid fa-paw"></i>
-                Preguntarle a Pelusita
-              </button>
-            </div>
-          </div>
-
-          <div class="ayrpc2026-promise-visual" aria-hidden="true">
-            <div class="ayrpc2026-orbit">
-              <span></span>
-              <span></span>
-              <span></span>
-              <i class="fa-solid fa-microchip"></i>
-            </div>
-
-            <strong>EN PREPARACIÍ“N</strong>
-            <small>El temario se va a activar cuando esté cerrado</small>
-          </div>
-        </article>
-
-        <article class="ayrpc2026-soon-panel">
-          <div>
-            <p class="eyebrow">Estado</p>
-            <h3>Contenido en construcción</h3>
-          </div>
+          <h2>
+            Centro de
+            <span>notificaciones</span>
+          </h2>
 
           <p>
-            Por ahora no vamos a mostrar módulos, temario ni planificación detallada.
-            Cuando la estructura final esté lista, esta pantalla se va a transformar en el panel académico completo de AyRPC 2026.
+            Administrá avisos, novedades, notificaciones académicas y mensajes de comunidad desde un solo lugar.
           </p>
+        </div>
+      </section>
 
-          <div class="ayrpc2026-soon-line">
-            <span></span>
+      <section class="notifications-center-grid">
+        <article class="panel notifications-center-composer">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Crear / editar</p>
+              <h3 id="notificationFormTitle">Nueva notificación</h3>
+            </div>
+
+            <button class="btn btn-outline" id="notificationResetForm" type="button">
+              <i class="fa-solid fa-rotate-left"></i>
+              Limpiar
+            </button>
           </div>
+
+          <form id="notificationAdminForm" class="notification-admin-form">
+            <input type="hidden" id="notificationEditId" />
+
+            <div class="form-grid">
+              <label>
+                <span>Título</span>
+                <input id="notificationTitle" type="text" maxlength="90" placeholder="Ejemplo: Se cargaron las notas" required />
+              </label>
+
+              <label>
+                <span>Tipo</span>
+                <select id="notificationType" required>
+                  <option value="community">Comunidad</option>
+                  <option value="announcement" selected>Aviso común</option>
+                  <option value="academic">Académica / crítica</option>
+                  <option value="system">Sistema</option>
+                </select>
+              </label>
+
+              <label>
+                <span>Severidad / color</span>
+                <select id="notificationSeverity" required>
+                  <option value="info">Azul — comunidad/info</option>
+                  <option value="warning" selected>Amarillo — aviso</option>
+                  <option value="danger">Rojo — exámenes/notas/recuperatorios</option>
+                  <option value="neutral">Violeta — sistema</option>
+                </select>
+              </label>
+
+              <label>
+                <span>Audiencia</span>
+                <select id="notificationAudience" required>
+                  <option value="all" selected>Todos los usuarios</option>
+                  <option value="students">Alumnos</option>
+                  <option value="staff">Docentes y moderadores</option>
+                  <option value="course-ayrpc-2025">AyRPC 2025</option>
+                  <option value="course-ayrpc-2026">AyRPC 2026</option>
+                </select>
+              </label>
+
+              <label class="full">
+                <span>Mensaje</span>
+                <textarea id="notificationBody" rows="5" maxlength="800" placeholder="Escribí el aviso de forma clara y directa." required></textarea>
+              </label>
+
+              <label class="full">
+                <span>Link opcional</span>
+                <input id="notificationLink" type="text" placeholder="Ejemplo: curso-ayrpc-2025.html" />
+              </label>
+            </div>
+
+            <div class="notification-admin-mail-note">
+              <i class="fa-solid fa-envelope-circle-check"></i>
+              <div>
+                <strong>Email desactivado por defecto.</strong>
+                <p>Por ahora estas notificaciones se administran para la campanita. Cuando conectemos email, el alumno podrá elegir si quiere recibir correos y cuáles categorías acepta.</p>
+              </div>
+            </div>
+
+            <div class="notification-admin-actions">
+              <button class="btn btn-primary" type="submit">
+                <i class="fa-solid fa-paper-plane"></i>
+                Guardar notificación
+              </button>
+
+              <button class="btn btn-outline" id="notificationPreviewDemo" type="button">
+                <i class="fa-solid fa-eye"></i>
+                Vista demo
+              </button>
+            </div>
+          </form>
+        </article>
+
+        <article class="panel notifications-center-list-panel">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Administración</p>
+              <h3>Notificaciones existentes</h3>
+            </div>
+
+            <span class="notification-admin-counter" id="notificationAdminCounter">0</span>
+          </div>
+
+          <div class="notification-admin-toolbar">
+            <label>
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input id="notificationSearch" type="search" placeholder="Buscar por título, texto o tipo..." />
+            </label>
+
+            <select id="notificationFilterType">
+              <option value="all">Todos los tipos</option>
+              <option value="community">Comunidad</option>
+              <option value="announcement">Avisos</option>
+              <option value="academic">Académicas</option>
+              <option value="system">Sistema</option>
+            </select>
+          </div>
+
+          <div class="notification-admin-bulk">
+            <button type="button" id="notificationMarkAllRead">
+              <i class="fa-solid fa-check-double"></i>
+              Marcar todas leídas
+            </button>
+
+            <button type="button" id="notificationClearAllAdmin" class="danger">
+              <i class="fa-solid fa-broom"></i>
+              Limpiar todas
+            </button>
+          </div>
+
+          <div id="notificationAdminList" class="notification-admin-list"></div>
         </article>
       </section>
     </main>
   </div>
 
-  <script src="js/auth.js?v=20260612-notifications-global-v2"></script>
-  <script src="js/roles.js?v=20260612-notifications-global-v2"></script>
-  <script src="js/courses-data.js"></script>
-  <script src="js/main.js?v=20260612-newsletter-api-v1"></script>
-  <script src="js/notifications-local.js?v=20260620-community-notifications-v2"></script>
-  <script src="js/curso-ayrpc-2026.js?v=20260612-promise"></script>
-  <script src="js/pelusita.js?v=20260611b"></script>  <script src="js/pelusita-dialog.js?v=20260612-guide-compact"></script>
+  <script src="js/auth.js?v=20260621-notifications-center"></script>
+  <script src="js/roles.js?v=20260621-notifications-center"></script>
+  <script src="js/main.js?v=20260621-notifications-center"></script>
+  <script src="js/notifications-local.js?v=20260621-notifications-center"></script>
+  <script src="js/centro-notificaciones.js?v=20260621-notifications-center"></script>
+  <script src="js/pelusita.js?v=20260611b"></script>
+  <script src="js/pelusita-dialog.js?v=20260612-guide-compact"></script>
   <script src="js/sidebar-v2.js?v=20260612-pelusita-dock-v2"></script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-

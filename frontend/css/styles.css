@@ -13170,3 +13170,590 @@ html[data-theme="light"] .gestion-course-selector select {
 html[data-theme="light"] .gestion-course-selector small {
   color: rgba(32, 23, 53, 0.62);
 }
+
+/* === Centro de Notificaciones Admin 20260621 === */
+
+.notifications-center-grid {
+  display: grid;
+  grid-template-columns: minmax(340px, 0.85fr) minmax(0, 1.15fr);
+  gap: 1rem;
+  align-items: start;
+  margin-top: 1rem;
+}
+
+.notifications-center-composer,
+.notifications-center-list-panel {
+  min-width: 0;
+}
+
+.notification-admin-form {
+  display: grid;
+  gap: 1rem;
+}
+
+.notification-admin-form .form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.85rem;
+}
+
+.notification-admin-form label {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.notification-admin-form label.full {
+  grid-column: 1 / -1;
+}
+
+.notification-admin-form label span {
+  color: rgba(235, 245, 255, 0.82);
+  font-weight: 850;
+  font-size: 0.84rem;
+}
+
+.notification-admin-form input,
+.notification-admin-form select,
+.notification-admin-form textarea,
+.notification-admin-toolbar input,
+.notification-admin-toolbar select {
+  width: 100%;
+  border: 1px solid rgba(120, 255, 245, 0.16);
+  border-radius: 14px;
+  background: rgba(5, 8, 20, 0.72);
+  color: rgba(245, 248, 255, 0.94);
+  padding: 0.72rem 0.78rem;
+  font: inherit;
+  outline: none;
+}
+
+.notification-admin-form textarea {
+  resize: vertical;
+  min-height: 130px;
+}
+
+.notification-admin-form input:focus,
+.notification-admin-form select:focus,
+.notification-admin-form textarea:focus,
+.notification-admin-toolbar input:focus,
+.notification-admin-toolbar select:focus {
+  border-color: rgba(120, 255, 245, 0.42);
+  box-shadow: 0 0 0 3px rgba(120, 255, 245, 0.08);
+}
+
+.notification-admin-mail-note {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.75rem;
+  padding: 0.85rem;
+  border: 1px solid rgba(255, 221, 87, 0.24);
+  border-radius: 18px;
+  background: rgba(255, 221, 87, 0.07);
+}
+
+.notification-admin-mail-note i {
+  color: #ffdd57;
+  font-size: 1.2rem;
+  margin-top: 0.15rem;
+}
+
+.notification-admin-mail-note strong {
+  color: #ffdd57;
+}
+
+.notification-admin-mail-note p {
+  margin: 0.2rem 0 0;
+  color: rgba(235, 245, 255, 0.70);
+  line-height: 1.5;
+}
+
+.notification-admin-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+}
+
+.notification-admin-counter {
+  min-width: 38px;
+  height: 38px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 14px;
+  border: 1px solid rgba(120, 255, 245, 0.18);
+  background: rgba(120, 255, 245, 0.08);
+  color: #78fff5;
+  font-weight: 900;
+}
+
+.notification-admin-toolbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 190px;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.notification-admin-toolbar label {
+  position: relative;
+  display: block;
+}
+
+.notification-admin-toolbar label i {
+  position: absolute;
+  left: 0.78rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(120, 255, 245, 0.8);
+}
+
+.notification-admin-toolbar label input {
+  padding-left: 2.35rem;
+}
+
+.notification-admin-bulk {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-bottom: 0.9rem;
+}
+
+.notification-admin-bulk button,
+.notification-admin-item-actions button {
+  min-height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.42rem;
+  border: 1px solid rgba(120, 255, 245, 0.16);
+  border-radius: 999px;
+  background: rgba(120, 255, 245, 0.07);
+  color: #78fff5;
+  padding: 0.35rem 0.75rem;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.notification-admin-bulk button.danger,
+.notification-admin-item-actions button.danger {
+  border-color: rgba(255, 71, 104, 0.24);
+  background: rgba(255, 71, 104, 0.08);
+  color: #ff9bad;
+}
+
+.notification-admin-list {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.notification-admin-empty {
+  display: grid;
+  place-items: center;
+  text-align: center;
+  gap: 0.4rem;
+  padding: 2rem 1rem;
+  border: 1px dashed rgba(120, 255, 245, 0.18);
+  border-radius: 18px;
+  color: rgba(235, 245, 255, 0.66);
+}
+
+.notification-admin-empty i {
+  color: #78fff5;
+  font-size: 1.5rem;
+}
+
+.notification-admin-item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.85rem;
+  border: 1px solid rgba(120, 255, 245, 0.14);
+  border-radius: 18px;
+  padding: 0.9rem;
+  background: rgba(5, 8, 20, 0.58);
+}
+
+.notification-admin-item.is-info {
+  border-color: rgba(59, 130, 246, 0.32);
+  background: radial-gradient(circle at top left, rgba(59, 130, 246, 0.11), transparent 38%), rgba(5, 8, 20, 0.62);
+}
+
+.notification-admin-item.is-warning {
+  border-color: rgba(255, 221, 87, 0.34);
+  background: radial-gradient(circle at top left, rgba(255, 221, 87, 0.12), transparent 38%), rgba(5, 8, 20, 0.62);
+}
+
+.notification-admin-item.is-danger {
+  border-color: rgba(255, 71, 104, 0.34);
+  background: radial-gradient(circle at top left, rgba(255, 71, 104, 0.12), transparent 38%), rgba(5, 8, 20, 0.62);
+}
+
+.notification-admin-item.is-neutral {
+  border-color: rgba(153, 87, 255, 0.30);
+  background: radial-gradient(circle at top left, rgba(153, 87, 255, 0.12), transparent 38%), rgba(5, 8, 20, 0.62);
+}
+
+.notification-admin-item-icon {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 15px;
+  background: rgba(120, 255, 245, 0.08);
+  color: #78fff5;
+}
+
+.notification-admin-item.is-warning .notification-admin-item-icon {
+  background: rgba(255, 221, 87, 0.12);
+  color: #ffdd57;
+}
+
+.notification-admin-item.is-danger .notification-admin-item-icon {
+  background: rgba(255, 71, 104, 0.13);
+  color: #ff6b8a;
+}
+
+.notification-admin-item.is-info .notification-admin-item-icon {
+  background: rgba(59, 130, 246, 0.13);
+  color: #60a5fa;
+}
+
+.notification-admin-item-body {
+  min-width: 0;
+}
+
+.notification-admin-item-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.85rem;
+  align-items: flex-start;
+}
+
+.notification-admin-item-top h4 {
+  margin: 0 0 0.35rem;
+}
+
+.notification-admin-item-top small {
+  color: rgba(235, 245, 255, 0.52);
+  white-space: nowrap;
+}
+
+.notification-admin-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.notification-admin-tags span {
+  padding: 0.18rem 0.5rem;
+  border-radius: 999px;
+  background: rgba(120, 255, 245, 0.08);
+  color: rgba(235, 245, 255, 0.78);
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.notification-admin-item p {
+  margin: 0.65rem 0 0;
+  color: rgba(235, 245, 255, 0.72);
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+
+.notification-admin-link {
+  display: inline-flex;
+  margin-top: 0.55rem;
+  color: #78fff5;
+  font-weight: 800;
+}
+
+.notification-admin-item-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.8rem;
+}
+
+/* Light mode */
+html[data-theme="light"] .notification-admin-form input,
+html[data-theme="light"] .notification-admin-form select,
+html[data-theme="light"] .notification-admin-form textarea,
+html[data-theme="light"] .notification-admin-toolbar input,
+html[data-theme="light"] .notification-admin-toolbar select {
+  background: rgba(255, 255, 255, 0.92);
+  color: #201735;
+  border-color: rgba(79, 70, 229, 0.16);
+}
+
+html[data-theme="light"] .notification-admin-form label span,
+html[data-theme="light"] .notification-admin-item p,
+html[data-theme="light"] .notification-admin-mail-note p {
+  color: rgba(32, 23, 53, 0.72);
+}
+
+html[data-theme="light"] .notification-admin-item {
+  background: rgba(255, 255, 255, 0.78);
+}
+
+html[data-theme="light"] .notification-admin-tags span {
+  color: rgba(32, 23, 53, 0.72);
+}
+
+html[data-theme="light"] .notification-admin-item-top small {
+  color: rgba(32, 23, 53, 0.52);
+}
+
+/* Responsive */
+@media (max-width: 1050px) {
+  .notifications-center-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 680px) {
+  .notification-admin-form .form-grid,
+  .notification-admin-toolbar {
+    grid-template-columns: 1fr;
+  }
+
+  .notification-admin-item,
+  .notification-admin-mail-note {
+    grid-template-columns: 1fr;
+  }
+
+  .notification-admin-item-top {
+    flex-direction: column;
+  }
+
+  .notification-admin-item-top small {
+    white-space: normal;
+  }
+}
+
+/* === Bell Notification Severity Colors 20260621 === */
+
+/*
+  Colores por tipo/severidad en campanita:
+  - Azul: Comunidad / info
+  - Amarillo: Avisos comunes
+  - Rojo: Exámenes, recuperatorios, notas, datos críticos
+  - Violeta: Sistema / neutral
+*/
+
+.notification-item.is-info,
+.notification-item.is-community {
+  border-color: rgba(59, 130, 246, 0.36) !important;
+  background:
+    radial-gradient(circle at top left, rgba(59, 130, 246, 0.18), transparent 42%),
+    rgba(8, 14, 32, 0.88) !important;
+}
+
+.notification-item.is-info .notification-icon,
+.notification-item.is-community .notification-icon {
+  background: rgba(59, 130, 246, 0.20) !important;
+  color: #60a5fa !important;
+  box-shadow: 0 0 18px rgba(59, 130, 246, 0.16);
+}
+
+.notification-item.is-info .notification-action-btn,
+.notification-item.is-community .notification-action-btn {
+  border-color: rgba(59, 130, 246, 0.24) !important;
+  background: rgba(59, 130, 246, 0.10) !important;
+  color: #93c5fd !important;
+}
+
+.notification-item.is-warning,
+.notification-item.is-announcement {
+  border-color: rgba(255, 221, 87, 0.42) !important;
+  background:
+    radial-gradient(circle at top left, rgba(255, 221, 87, 0.18), transparent 42%),
+    rgba(20, 17, 8, 0.88) !important;
+}
+
+.notification-item.is-warning .notification-icon,
+.notification-item.is-announcement .notification-icon {
+  background: rgba(255, 221, 87, 0.20) !important;
+  color: #ffdd57 !important;
+  box-shadow: 0 0 18px rgba(255, 221, 87, 0.16);
+}
+
+.notification-item.is-warning .notification-action-btn,
+.notification-item.is-announcement .notification-action-btn {
+  border-color: rgba(255, 221, 87, 0.26) !important;
+  background: rgba(255, 221, 87, 0.10) !important;
+  color: #ffe58a !important;
+}
+
+.notification-item.is-danger,
+.notification-item.is-academic {
+  border-color: rgba(255, 71, 104, 0.42) !important;
+  background:
+    radial-gradient(circle at top left, rgba(255, 71, 104, 0.18), transparent 42%),
+    rgba(24, 8, 18, 0.88) !important;
+}
+
+.notification-item.is-danger .notification-icon,
+.notification-item.is-academic .notification-icon {
+  background: rgba(255, 71, 104, 0.20) !important;
+  color: #ff6b8a !important;
+  box-shadow: 0 0 18px rgba(255, 71, 104, 0.16);
+}
+
+.notification-item.is-danger .notification-action-btn,
+.notification-item.is-academic .notification-action-btn {
+  border-color: rgba(255, 71, 104, 0.26) !important;
+  background: rgba(255, 71, 104, 0.10) !important;
+  color: #ff9bad !important;
+}
+
+.notification-item.is-neutral,
+.notification-item.is-system {
+  border-color: rgba(153, 87, 255, 0.36) !important;
+  background:
+    radial-gradient(circle at top left, rgba(153, 87, 255, 0.18), transparent 42%),
+    rgba(14, 10, 32, 0.88) !important;
+}
+
+.notification-item.is-neutral .notification-icon,
+.notification-item.is-system .notification-icon {
+  background: rgba(153, 87, 255, 0.20) !important;
+  color: #b894ff !important;
+  box-shadow: 0 0 18px rgba(153, 87, 255, 0.16);
+}
+
+.notification-item.is-neutral .notification-action-btn,
+.notification-item.is-system .notification-action-btn {
+  border-color: rgba(153, 87, 255, 0.24) !important;
+  background: rgba(153, 87, 255, 0.10) !important;
+  color: #c8b5ff !important;
+}
+
+/* Borde izquierdo tipo alerta visual */
+.notification-item.is-info,
+.notification-item.is-community,
+.notification-item.is-warning,
+.notification-item.is-announcement,
+.notification-item.is-danger,
+.notification-item.is-academic,
+.notification-item.is-neutral,
+.notification-item.is-system {
+  border-left-width: 4px !important;
+}
+
+/* Unread más potente */
+.notification-item.is-unread.is-info,
+.notification-item.is-unread.is-community {
+  box-shadow:
+    0 0 0 1px rgba(59, 130, 246, 0.08),
+    0 14px 30px rgba(59, 130, 246, 0.08);
+}
+
+.notification-item.is-unread.is-warning,
+.notification-item.is-unread.is-announcement {
+  box-shadow:
+    0 0 0 1px rgba(255, 221, 87, 0.08),
+    0 14px 30px rgba(255, 221, 87, 0.08);
+}
+
+.notification-item.is-unread.is-danger,
+.notification-item.is-unread.is-academic {
+  box-shadow:
+    0 0 0 1px rgba(255, 71, 104, 0.08),
+    0 14px 30px rgba(255, 71, 104, 0.08);
+}
+
+.notification-item.is-unread.is-neutral,
+.notification-item.is-unread.is-system {
+  box-shadow:
+    0 0 0 1px rgba(153, 87, 255, 0.08),
+    0 14px 30px rgba(153, 87, 255, 0.08);
+}
+
+/* Botón X mantiene rojo, pero sin comerse el color del tipo */
+.notification-item .notification-delete-btn {
+  border-color: rgba(255, 94, 123, 0.28) !important;
+  background: rgba(255, 94, 123, 0.10) !important;
+  color: #ff9bad !important;
+}
+
+/* Modo claro */
+html[data-theme="light"] .notification-item.is-info,
+html[data-theme="light"] .notification-item.is-community {
+  background:
+    radial-gradient(circle at top left, rgba(59, 130, 246, 0.10), transparent 42%),
+    rgba(255, 255, 255, 0.94) !important;
+  border-color: rgba(59, 130, 246, 0.28) !important;
+}
+
+html[data-theme="light"] .notification-item.is-info .notification-icon,
+html[data-theme="light"] .notification-item.is-community .notification-icon {
+  background: rgba(59, 130, 246, 0.12) !important;
+  color: #2563eb !important;
+}
+
+html[data-theme="light"] .notification-item.is-warning,
+html[data-theme="light"] .notification-item.is-announcement {
+  background:
+    radial-gradient(circle at top left, rgba(245, 158, 11, 0.12), transparent 42%),
+    rgba(255, 255, 255, 0.94) !important;
+  border-color: rgba(245, 158, 11, 0.34) !important;
+}
+
+html[data-theme="light"] .notification-item.is-warning .notification-icon,
+html[data-theme="light"] .notification-item.is-announcement .notification-icon {
+  background: rgba(245, 158, 11, 0.13) !important;
+  color: #b45309 !important;
+}
+
+html[data-theme="light"] .notification-item.is-danger,
+html[data-theme="light"] .notification-item.is-academic {
+  background:
+    radial-gradient(circle at top left, rgba(225, 29, 72, 0.10), transparent 42%),
+    rgba(255, 255, 255, 0.94) !important;
+  border-color: rgba(225, 29, 72, 0.30) !important;
+}
+
+html[data-theme="light"] .notification-item.is-danger .notification-icon,
+html[data-theme="light"] .notification-item.is-academic .notification-icon {
+  background: rgba(225, 29, 72, 0.12) !important;
+  color: #be123c !important;
+}
+
+html[data-theme="light"] .notification-item.is-neutral,
+html[data-theme="light"] .notification-item.is-system {
+  background:
+    radial-gradient(circle at top left, rgba(124, 58, 237, 0.10), transparent 42%),
+    rgba(255, 255, 255, 0.94) !important;
+  border-color: rgba(124, 58, 237, 0.26) !important;
+}
+
+html[data-theme="light"] .notification-item.is-neutral .notification-icon,
+html[data-theme="light"] .notification-item.is-system .notification-icon {
+  background: rgba(124, 58, 237, 0.12) !important;
+  color: #6d28d9 !important;
+}
+
+html[data-theme="light"] .notification-item.is-info .notification-action-btn,
+html[data-theme="light"] .notification-item.is-community .notification-action-btn {
+  background: rgba(59, 130, 246, 0.08) !important;
+  border-color: rgba(59, 130, 246, 0.20) !important;
+  color: #1d4ed8 !important;
+}
+
+html[data-theme="light"] .notification-item.is-warning .notification-action-btn,
+html[data-theme="light"] .notification-item.is-announcement .notification-action-btn {
+  background: rgba(245, 158, 11, 0.09) !important;
+  border-color: rgba(245, 158, 11, 0.22) !important;
+  color: #92400e !important;
+}
+
+html[data-theme="light"] .notification-item.is-danger .notification-action-btn,
+html[data-theme="light"] .notification-item.is-academic .notification-action-btn {
+  background: rgba(225, 29, 72, 0.08) !important;
+  border-color: rgba(225, 29, 72, 0.20) !important;
+  color: #9f1239 !important;
+}
+
+html[data-theme="light"] .notification-item.is-neutral .notification-action-btn,
+html[data-theme="light"] .notification-item.is-system .notification-action-btn {
+  background: rgba(124, 58, 237, 0.08) !important;
+  border-color: rgba(124, 58, 237, 0.20) !important;
+  color: #5b21b6 !important;
+}
