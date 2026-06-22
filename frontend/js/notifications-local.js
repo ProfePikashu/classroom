@@ -2428,3 +2428,155 @@
     init();
   }
 })();
+
+/* === Moderator Staff Token Refresh Fix 20260622 === */
+(function moderatorStaffTokenRefreshFix() {
+  "use strict";
+
+  const SESSION_KEY = "andyazh-classroom-session";
+
+  function safeJson(value, fallback) {
+    try {
+      return JSON.parse(value) || fallback;
+    } catch {
+      return fallback;
+    }
+  }
+
+  function loadSession() {
+    return safeJson(localStorage.getItem(SESSION_KEY), {});
+  }
+
+  function saveSession(session) {
+    localStorage.setItem(SESSION_KEY, JSON.stringify(session || {}));
+  }
+
+  function getApiBase() {
+    if (window.ClassroomBackendNotifications?.getApiBase) {
+      return window.ClassroomBackendNotifications.getApiBase();
+    }
+
+    const host = window.location.hostname;
+
+    if (host === "localhost" || host === "127.0.0.1" || host === "") {
+      return "http://127.0.0.1:8000";
+    }
+
+    return "https://exampro-backend-1n6d.onrender.com";
+  }
+
+  function isModeratorSession(session) {
+    const role = String(session?.role || "").toLowerCase();
+    const backendRole = String(session?.backendRole || session?.exampro?.role || "").toLowerCase();
+    const provider = String(session?.provider || "").toLowerCase();
+
+    return (
+      role === "moderator" ||
+      role === "classroom_moderator" ||
+      backendRole === "classroom_moderator" ||
+      provider.includes("moderator")
+    );
+  }
+
+  function isTeacherSession(session) {
+    const role = String(session?.role || "").toLowerCase();
+    const backendRole = String(session?.backendRole || session?.exampro?.role || "").toLowerCase();
+
+    return role === "teacher" || role === "docente" || backendRole === "docente";
+  }
+
+  async function requestModeratorToken(session) {
+    const dni = String(session?.dni || session?.alumno?.dni || "").trim();
+    const twitch = String(session?.twitch || session?.alumno?.twitch || session?.alumno?.twitch_username || "").trim();
+
+    if (!dni || !twitch) {
+      throw new Error("La sesión de moderador no tiene DNI/Twitch.");
+    }
+
+    const response = await fetch(`${getApiBase()}/api/classroom/moderator-login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ dni, twitch }),
+    });
+
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok || !data.access_token) {
+      throw new Error(data.detail || "No se pudo obtener token staff de moderador.");
+    }
+
+    const updated = {
+      ...session,
+      role: "moderator",
+      roleLabel: "Moderador",
+      backendRole: "classroom_moderator",
+      access_token: data.access_token,
+      token_type: data.token_type || "bearer",
+      provider: "exampro-moderator-login",
+      exampro: {
+        ...(session.exampro && typeof session.exampro === "object" ? session.exampro : {}),
+        access_token: data.access_token,
+        token_type: data.token_type || "bearer",
+        role: "classroom_moderator",
+      },
+    };
+
+    saveSession(updated);
+
+    return data.access_token;
+  }
+
+  function patchBackendEnsureToken() {
+    const api = window.ClassroomBackendNotifications;
+
+    if (!api || typeof api.ensureBackendToken !== "function" || api.ensureBackendToken.__moderatorStaffPatched) {
+      return false;
+    }
+
+    const originalEnsureBackendToken = api.ensureBackendToken.bind(api);
+
+    const patched = async function patchedModeratorAwareEnsureBackendToken(...args) {
+      const session = loadSession();
+
+      // Docente usa el flujo normal.
+      if (isTeacherSession(session)) {
+        return originalEnsureBackendToken(...args);
+      }
+
+      // Moderador: no confiamos en un token viejo de alumno.
+      // Pedimos siempre token staff a /moderator-login.
+      if (isModeratorSession(session)) {
+        return requestModeratorToken(session);
+      }
+
+      return originalEnsureBackendToken(...args);
+    };
+
+    patched.__moderatorStaffPatched = true;
+    api.ensureBackendToken = patched;
+
+    return true;
+  }
+
+  function init() {
+    patchBackendEnsureToken();
+
+    setTimeout(patchBackendEnsureToken, 300);
+    setTimeout(patchBackendEnsureToken, 1000);
+    setTimeout(patchBackendEnsureToken, 2500);
+  }
+
+  window.ClassroomModeratorStaffTokenFix = {
+    patch: patchBackendEnsureToken,
+    refresh: () => requestModeratorToken(loadSession()),
+    session: loadSession,
+  };
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+})();
