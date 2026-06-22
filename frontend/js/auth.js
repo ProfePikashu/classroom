@@ -386,3 +386,156 @@ const ClassroomAuth = {
     this.bindLogout();
   },
 };
+
+/* === Moderator Login Priority Bridge 20260622 === */
+(function moderatorLoginPriorityBridge() {
+  "use strict";
+
+  if (window.__ClassroomModeratorLoginPriorityBridge) return;
+  window.__ClassroomModeratorLoginPriorityBridge = true;
+
+  const originalFetch = window.fetch.bind(window);
+
+  function isStudentLoginUrl(input) {
+    const url = typeof input === "string" ? input : input?.url || "";
+    return /\/api\/classroom\/student-login\b/.test(url);
+  }
+
+  function moderatorLoginUrlFromStudentLogin(input) {
+    const url = typeof input === "string" ? input : input?.url || "";
+    return url.replace("/api/classroom/student-login", "/api/classroom/moderator-login");
+  }
+
+  async function readBodyPayload(init) {
+    try {
+      if (!init || !init.body) return null;
+
+      if (typeof init.body === "string") {
+        return JSON.parse(init.body);
+      }
+
+      return null;
+    } catch {
+      return null;
+    }
+  }
+
+  function normalizeModeratorResponse(data, payload) {
+    const student = data.student || data.alumno || {};
+
+    return {
+      ...data,
+      ok: true,
+
+      // Backend role real
+      role: data.role || "classroom_moderator",
+      roleLabel: data.roleLabel || data.role_label || "Moderador",
+
+      // Campos que auth.js suele usar para armar sesión
+      dni: data.dni || student.dni || payload?.dni || "",
+      twitch: data.twitch || student.twitch || student.twitch_username || payload?.twitch || "",
+      email: data.email || student.email || "",
+      displayName:
+        data.displayName ||
+        data.display_name ||
+        data.nombre_completo ||
+        student.nombre_completo ||
+        [student.nombre, student.apellido].filter(Boolean).join(" ") ||
+        "Moderador",
+
+      course: data.course || data.cursada || student.cursada || "AyRPC 2025",
+
+      access_token: data.access_token || data.token || "",
+      token_type: data.token_type || "bearer",
+
+      student: {
+        ...student,
+        dni: data.dni || student.dni || payload?.dni || "",
+        twitch: data.twitch || student.twitch || student.twitch_username || payload?.twitch || "",
+        twitch_username: data.twitch || student.twitch_username || payload?.twitch || "",
+        email: data.email || student.email || "",
+        cursada: data.course || data.cursada || student.cursada || "AyRPC 2025",
+      },
+
+      classroomModerator: true,
+      provider: "exampro-moderator-login",
+    };
+  }
+
+  window.fetch = async function patchedFetch(input, init = {}) {
+    if (!isStudentLoginUrl(input)) {
+      return originalFetch(input, init);
+    }
+
+    const payload = await readBodyPayload(init);
+
+    if (!payload?.dni || !payload?.twitch) {
+      return originalFetch(input, init);
+    }
+
+    try {
+      const modUrl = moderatorLoginUrlFromStudentLogin(input);
+
+      const modResponse = await originalFetch(modUrl, {
+        ...init,
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(init.headers || {}),
+        },
+        body: JSON.stringify({
+          dni: payload.dni,
+          twitch: payload.twitch,
+        }),
+      });
+
+      const modData = await modResponse.clone().json().catch(() => null);
+
+      if (modResponse.ok && modData?.ok) {
+        const normalized = normalizeModeratorResponse(modData, payload);
+
+        console.info("[Classroom] Login reconocido como moderador:", normalized.twitch || payload.twitch);
+
+        return new Response(JSON.stringify(normalized), {
+          status: 200,
+          statusText: "OK",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+      }
+    } catch (error) {
+      console.warn("[Classroom] moderator-login falló, sigo con student-login:", error);
+    }
+
+    return originalFetch(input, init);
+  };
+
+  function normalizeSavedModeratorSession() {
+    try {
+      const key = "andyazh-classroom-session";
+      const session = JSON.parse(localStorage.getItem(key) || "null");
+
+      if (!session) return;
+
+      const backendRole = String(session.backendRole || session.role || "").toLowerCase();
+      const provider = String(session.provider || "").toLowerCase();
+
+      if (
+        backendRole === "classroom_moderator" ||
+        provider.includes("moderator")
+      ) {
+        session.role = "moderator";
+        session.roleLabel = "Moderador";
+        session.backendRole = "classroom_moderator";
+        session.provider = session.provider || "exampro-moderator-login";
+
+        localStorage.setItem(key, JSON.stringify(session));
+      }
+    } catch {}
+  }
+
+  window.addEventListener("storage", normalizeSavedModeratorSession);
+  setInterval(normalizeSavedModeratorSession, 800);
+  setTimeout(normalizeSavedModeratorSession, 300);
+})();
