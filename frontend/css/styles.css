@@ -17043,3 +17043,124 @@ html[data-theme="dark"] .cn-polished-action,
 :root[data-theme="dark"] .cn-polished-action {
   border-width: 2px !important;
 }
+
+/* === CENTRO ACTIONS FLOAT AND EMAIL READABILITY 20260622 === */
+
+/* La fila de botones NO debe parecer una card */
+.cn-floating-actions-row,
+.cn-polished-card .cn-floating-actions-row {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  gap: 10px !important;
+  width: auto !important;
+  margin-top: 14px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Si una fila de acciones quedó con borde por CSS viejo, lo matamos */
+.cn-floating-actions-row.cn-polished-card,
+.cn-floating-actions-row[class*="cn-card-"] {
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Botones flotantes: visibles pero sin caja madre */
+.cn-floating-actions-row button,
+.cn-floating-actions-row a,
+.cn-polished-card .cn-floating-actions-row button,
+.cn-polished-card .cn-floating-actions-row a {
+  margin: 0 !important;
+}
+
+/* En modo claro, botones más legibles sin encerrarlos */
+html[data-theme="light"] .cn-floating-actions-row button,
+html[data-theme="light"] .cn-floating-actions-row a,
+:root[data-theme="light"] .cn-floating-actions-row button,
+:root[data-theme="light"] .cn-floating-actions-row a {
+  background: rgba(224, 242, 254, 0.96) !important;
+  border: 2px solid rgba(14, 165, 233, 0.42) !important;
+  color: #075985 !important;
+  font-weight: 950 !important;
+  border-radius: 999px !important;
+  text-shadow:
+    1px 1px 0 rgba(255,255,255,.90),
+    -1px -1px 0 rgba(15,23,42,.08) !important;
+  box-shadow: 0 10px 22px rgba(85,72,120,.08) !important;
+}
+
+html[data-theme="light"] .cn-floating-actions-row button:has(.fa-trash),
+html[data-theme="light"] .cn-floating-actions-row a:has(.fa-trash),
+html[data-theme="light"] .cn-floating-actions-row .cn-polished-danger-action,
+:root[data-theme="light"] .cn-floating-actions-row button:has(.fa-trash),
+:root[data-theme="light"] .cn-floating-actions-row a:has(.fa-trash),
+:root[data-theme="light"] .cn-floating-actions-row .cn-polished-danger-action {
+  background: rgba(252,231,243,.92) !important;
+  border-color: rgba(244,114,182,.48) !important;
+  color: #831843 !important;
+}
+
+/* En modo oscuro, botones flotantes cyber sin contenedor */
+html[data-theme="dark"] .cn-floating-actions-row button,
+html[data-theme="dark"] .cn-floating-actions-row a,
+:root[data-theme="dark"] .cn-floating-actions-row button,
+:root[data-theme="dark"] .cn-floating-actions-row a {
+  background: rgba(0, 245, 255, 0.08) !important;
+  border: 2px solid rgba(0, 245, 255, 0.24) !important;
+  color: var(--cyan) !important;
+  border-radius: 999px !important;
+  box-shadow: none !important;
+}
+
+/* Aviso de email: legible aunque GitHub Pages tenga CSS viejo/cacheado */
+.cn-email-notice-readable,
+html[data-theme="light"] .cn-email-notice-readable,
+:root[data-theme="light"] .cn-email-notice-readable {
+  background:
+    radial-gradient(circle at top left, rgba(254,243,199,.68), transparent 38%),
+    linear-gradient(135deg, rgba(255,251,235,.96), rgba(255,247,237,.92)) !important;
+  border: 1px solid rgba(217,119,6,.28) !important;
+  color: #3f2b00 !important;
+  border-radius: 20px !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="light"] .cn-email-notice-readable *,
+:root[data-theme="light"] .cn-email-notice-readable * {
+  color: #3f2b00 !important;
+  opacity: 1 !important;
+  text-shadow:
+    1px 1px 0 rgba(255,255,255,.92),
+    -1px -1px 0 rgba(15,23,42,.06) !important;
+}
+
+html[data-theme="light"] .cn-email-notice-readable strong,
+:root[data-theme="light"] .cn-email-notice-readable strong {
+  color: #92400e !important;
+  font-weight: 950 !important;
+}
+
+/* Fallback amplio por si el runtime tarda */
+html[data-theme="light"] .email-warning,
+html[data-theme="light"] .email-disabled,
+html[data-theme="light"] .notification-email-warning,
+:root[data-theme="light"] .email-warning,
+:root[data-theme="light"] .email-disabled,
+:root[data-theme="light"] .notification-email-warning {
+  color: #3f2b00 !important;
+}
+
+html[data-theme="light"] .email-warning *,
+html[data-theme="light"] .email-disabled *,
+html[data-theme="light"] .notification-email-warning *,
+:root[data-theme="light"] .email-warning *,
+:root[data-theme="light"] .email-disabled *,
+:root[data-theme="light"] .notification-email-warning * {
+  color: #3f2b00 !important;
+}

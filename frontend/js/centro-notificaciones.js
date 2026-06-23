@@ -1486,3 +1486,185 @@
     init();
   }
 })();
+
+/* === CENTRO NOTIFICATION ACTIONS FLOAT FIX 20260622 === */
+(function centroNotificationActionsFloatFix() {
+  "use strict";
+
+  function isActionOnlyBlock(el) {
+    const text = (el.textContent || "")
+      .replace(/\s+/g, " ")
+      .trim()
+      .toLowerCase();
+
+    if (!text) return false;
+
+    const hasOnlyActions =
+      text.includes("editar") &&
+      text.includes("reenviar") &&
+      text.includes("borrar") &&
+      !text.includes("audiencia") &&
+      !text.includes("destinatarios") &&
+      !text.includes("no leídas") &&
+      !text.includes("no leidas") &&
+      !text.includes("a pedido") &&
+      !text.includes("probando") &&
+      !text.includes("cuanto") &&
+      !text.includes("no abras") &&
+      !text.includes("modo oscuro");
+
+    return hasOnlyActions;
+  }
+
+  function findRealNotificationCard(fromNode) {
+    let node = fromNode;
+
+    for (let i = 0; i < 10 && node && node !== document.body; i += 1) {
+      const text = (node.textContent || "").replace(/\s+/g, " ").trim().toLowerCase();
+
+      const hasActions =
+        text.includes("editar") &&
+        text.includes("reenviar") &&
+        text.includes("borrar");
+
+      const hasNotificationContent =
+        text.includes("audiencia") ||
+        text.includes("destinatarios") ||
+        text.includes("no leídas") ||
+        text.includes("no leidas") ||
+        text.includes("a pedido") ||
+        text.includes("probando") ||
+        text.includes("cuanto") ||
+        text.includes("no abras") ||
+        text.includes("modo oscuro") ||
+        text.length > 140;
+
+      if (hasActions && hasNotificationContent && !isActionOnlyBlock(node)) {
+        return node;
+      }
+
+      node = node.parentElement;
+    }
+
+    return null;
+  }
+
+  function severityFromText(text) {
+    const t = String(text || "").toLowerCase();
+
+    if (t.includes("rojo") || t.includes("académica") || t.includes("academica")) return "danger";
+    if (t.includes("amarillo")) return "warning";
+    if (t.includes("azul") || t.includes("comunidad")) return "info";
+    if (t.includes("violeta") || t.includes("sistema") || t.includes("neutro")) return "neutral";
+
+    return "neutral";
+  }
+
+  function patchActionRows() {
+    document.querySelectorAll(".cn-polished-card").forEach((el) => {
+      if (isActionOnlyBlock(el)) {
+        el.classList.remove(
+          "cn-polished-card",
+          "cn-card-danger",
+          "cn-card-warning",
+          "cn-card-info",
+          "cn-card-neutral"
+        );
+
+        el.classList.add("cn-floating-actions-row");
+      }
+    });
+
+    document.querySelectorAll("button, a").forEach((button) => {
+      const label = (button.textContent || "").toLowerCase();
+
+      if (!/editar|reenviar|borrar|marcar leída|marcar leida/.test(label)) return;
+
+      const row = button.parentElement;
+
+      if (row && isActionOnlyBlock(row)) {
+        row.classList.remove(
+          "cn-polished-card",
+          "cn-card-danger",
+          "cn-card-warning",
+          "cn-card-info",
+          "cn-card-neutral"
+        );
+
+        row.classList.add("cn-floating-actions-row");
+      }
+
+      const card = findRealNotificationCard(button);
+
+      if (card) {
+        const severity = severityFromText(card.textContent || "");
+
+        card.classList.add("cn-polished-card");
+        card.classList.remove("cn-card-danger", "cn-card-warning", "cn-card-info", "cn-card-neutral");
+        card.classList.add(`cn-card-${severity}`);
+      }
+    });
+  }
+
+  function patchEmailNotice() {
+    const blocks = Array.from(document.querySelectorAll("div, section, article, aside"));
+
+    blocks.forEach((el) => {
+      const text = (el.textContent || "").replace(/\s+/g, " ").trim().toLowerCase();
+
+      if (
+        text.includes("email desactivado por defecto") &&
+        text.includes("campanita")
+      ) {
+        el.classList.add("cn-email-notice-readable");
+      }
+    });
+  }
+
+  function run() {
+    patchActionRows();
+    patchEmailNotice();
+  }
+
+  let scheduled = false;
+
+  function schedule() {
+    if (scheduled) return;
+
+    scheduled = true;
+    requestAnimationFrame(() => {
+      scheduled = false;
+      run();
+    });
+  }
+
+  const observer = new MutationObserver(schedule);
+
+  function init() {
+    run();
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+    });
+
+    window.addEventListener("classroom:notifications-updated", schedule);
+
+    setTimeout(run, 300);
+    setTimeout(run, 1200);
+    setTimeout(run, 2500);
+  }
+
+  window.ClassroomCentroActionsFloatFix = {
+    run,
+    patchActionRows,
+    patchEmailNotice,
+  };
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+})();
