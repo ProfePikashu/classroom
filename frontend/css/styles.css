@@ -16652,3 +16652,62 @@ body[data-cn-center-stable="true"] .cn-existing-notification-card,
 body[data-cn-center-stable="true"] .cn-full-notification-card {
   visibility: visible !important;
 }
+
+/* === CENTRO CARD ACTIONS BOTTOM LAYOUT 20260623 === */
+/*
+  Solo corrige layout de acciones dentro de las cards del Centro:
+  - Botones abajo.
+  - Botones flotantes.
+  - No toca colores.
+  - No toca render ni datos.
+*/
+
+.cn-full-notification-card {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: flex-start !important;
+  gap: 10px 16px !important;
+}
+
+.cn-full-notification-card .cn-card-main-content {
+  flex: 1 1 420px !important;
+  min-width: 0 !important;
+}
+
+.cn-full-notification-card .cn-card-actions-bottom {
+  order: 50 !important;
+  flex: 0 0 calc(100% - 72px) !important;
+  width: calc(100% - 72px) !important;
+  margin-left: 72px !important;
+  margin-top: 14px !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 10px !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+.cn-full-notification-card .cn-card-actions-bottom button,
+.cn-full-notification-card .cn-card-actions-bottom a {
+  position: static !important;
+  margin: 0 !important;
+}
+
+/* Evita que el contenedor de acciones se comporte como columna lateral */
+.cn-full-notification-card .cn-card-actions-bottom,
+.cn-full-notification-card .cn-card-actions-bottom * {
+  transform: none !important;
+}
+
+/* Mobile / ancho chico: sin margen fantasma */
+@media (max-width: 720px) {
+  .cn-full-notification-card .cn-card-actions-bottom {
+    flex-basis: 100% !important;
+    width: 100% !important;
+    margin-left: 0 !important;
+  }
+}

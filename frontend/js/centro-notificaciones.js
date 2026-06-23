@@ -1579,3 +1579,170 @@
     init();
   }
 })();
+
+/* === CENTRO CARD ACTIONS BOTTOM MARKER 20260623 === */
+(function centroCardActionsBottomMarker() {
+  "use strict";
+
+  function txt(el) {
+    return String(el?.textContent || "")
+      .replace(/\s+/g, " ")
+      .trim()
+      .toLowerCase();
+  }
+
+  function isActionButton(el) {
+    const text = txt(el);
+    return (
+      text.includes("editar") ||
+      text.includes("reenviar") ||
+      text.includes("borrar") ||
+      text.includes("marcar leída") ||
+      text.includes("marcar leida")
+    );
+  }
+
+  function isActionRow(el) {
+    if (!el) return false;
+
+    const text = txt(el);
+
+    const hasAction =
+      text.includes("editar") ||
+      text.includes("reenviar") ||
+      text.includes("borrar") ||
+      text.includes("marcar leída") ||
+      text.includes("marcar leida");
+
+    if (!hasAction) return false;
+
+    // No queremos que agarre toda la card.
+    if (text.includes("audiencia")) return false;
+    if (text.includes("destinatarios")) return false;
+    if (text.includes("modo oscuro")) return false;
+    if (text.includes("nueva edicion")) return false;
+    if (text.includes("nueva edición")) return false;
+    if (text.includes("no abras")) return false;
+    if (text.includes("prueba de notificaciones")) return false;
+
+    const rect = el.getBoundingClientRect();
+
+    if (rect.height > 130) return false;
+
+    return true;
+  }
+
+  function findActionRow(button, card) {
+    let node = button.parentElement;
+
+    for (let i = 0; i < 6 && node && node !== card && node !== document.body; i += 1) {
+      if (isActionRow(node)) {
+        return node;
+      }
+
+      node = node.parentElement;
+    }
+
+    return button.parentElement;
+  }
+
+  function markContent(card, actionRow) {
+    const children = Array.from(card.children || []);
+
+    children.forEach((child) => {
+      child.classList.remove("cn-card-main-content");
+    });
+
+    const candidates = children.filter((child) => {
+      if (child === actionRow) return false;
+
+      const text = txt(child);
+
+      if (!text) return false;
+      if (isActionRow(child)) return false;
+
+      return (
+        text.includes("audiencia") ||
+        text.includes("destinatarios") ||
+        text.includes("no leída") ||
+        text.includes("no leida") ||
+        text.includes("excel") ||
+        text.includes("jiji") ||
+        text.includes("pedido") ||
+        text.includes("cuanto") ||
+        text.includes("probando")
+      );
+    });
+
+    if (candidates.length) {
+      candidates[candidates.length - 1].classList.add("cn-card-main-content");
+    }
+  }
+
+  function run() {
+    const cards = Array.from(document.querySelectorAll(".cn-full-notification-card"));
+
+    cards.forEach((card) => {
+      card.querySelectorAll(".cn-card-actions-bottom").forEach((old) => {
+        old.classList.remove("cn-card-actions-bottom");
+      });
+
+      const buttons = Array.from(card.querySelectorAll("button, a"))
+        .filter(isActionButton);
+
+      if (!buttons.length) return;
+
+      const row = findActionRow(buttons[0], card);
+
+      if (row) {
+        row.classList.add("cn-card-actions-bottom");
+        markContent(card, row);
+      }
+    });
+
+    document.body.dataset.cnActionsBottom = String(
+      document.querySelectorAll(".cn-card-actions-bottom").length
+    );
+  }
+
+  let scheduled = false;
+
+  function schedule() {
+    if (scheduled) return;
+
+    scheduled = true;
+
+    requestAnimationFrame(() => {
+      scheduled = false;
+      run();
+    });
+  }
+
+  function init() {
+    run();
+
+    const observer = new MutationObserver(schedule);
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+    });
+
+    window.addEventListener("classroom:notifications-updated", schedule);
+
+    setTimeout(run, 300);
+    setTimeout(run, 1000);
+    setTimeout(run, 2200);
+  }
+
+  window.ClassroomCentroCardActionsBottom = {
+    run
+  };
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+})();
