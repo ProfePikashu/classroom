@@ -15728,3 +15728,114 @@ html[data-theme="light"] body.page-notifications .eyebrow,
 :root[data-theme="light"] body.page-notifications .eyebrow {
   color: #4f46e5 !important;
 }
+
+/* === AVISOS BOLETIN CARDS POLISH 20260622 === */
+
+/* Eyebrow en español */
+.home-avisos-stable-header p {
+  letter-spacing: 0.22em !important;
+}
+
+/* Dark mode: que siga cyber/neon, pero no cuadrado tipo bloque crudo */
+html[data-theme="dark"] .home-avisos-stable-feed,
+:root[data-theme="dark"] .home-avisos-stable-feed {
+  gap: 16px !important;
+}
+
+html[data-theme="dark"] .home-avisos-stable-feed .home-cmd-card,
+html[data-theme="dark"] .home-avisos-stable-feed .home-notice-card,
+:root[data-theme="dark"] .home-avisos-stable-feed .home-cmd-card,
+:root[data-theme="dark"] .home-avisos-stable-feed .home-notice-card {
+  overflow: hidden !important;
+  border-radius: 20px !important;
+  padding: 18px 20px !important;
+  border: 1px solid rgba(0, 245, 255, 0.18) !important;
+  background:
+    radial-gradient(circle at top left, rgba(0, 245, 255, 0.08), transparent 34%),
+    linear-gradient(135deg, rgba(6, 12, 28, 0.84), rgba(18, 8, 34, 0.72)) !important;
+  box-shadow:
+    0 14px 34px rgba(0, 0, 0, 0.22),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.025) !important;
+}
+
+/* Dark severity: mismo mood, pero con bordes suaves */
+html[data-theme="dark"] .home-notice-card.is-danger,
+:root[data-theme="dark"] .home-notice-card.is-danger {
+  border-color: rgba(236, 72, 153, 0.34) !important;
+  background:
+    radial-gradient(circle at top left, rgba(236, 72, 153, 0.15), transparent 34%),
+    linear-gradient(135deg, rgba(28, 8, 24, 0.86), rgba(15, 8, 30, 0.76)) !important;
+}
+
+html[data-theme="dark"] .home-notice-card.is-warning,
+:root[data-theme="dark"] .home-notice-card.is-warning {
+  border-color: rgba(245, 158, 11, 0.34) !important;
+  background:
+    radial-gradient(circle at top left, rgba(245, 158, 11, 0.13), transparent 34%),
+    linear-gradient(135deg, rgba(28, 20, 8, 0.82), rgba(15, 8, 30, 0.76)) !important;
+}
+
+html[data-theme="dark"] .home-notice-card.is-info,
+:root[data-theme="dark"] .home-notice-card.is-info {
+  border-color: rgba(0, 245, 255, 0.30) !important;
+  background:
+    radial-gradient(circle at top left, rgba(0, 245, 255, 0.12), transparent 34%),
+    linear-gradient(135deg, rgba(4, 20, 30, 0.84), rgba(15, 8, 30, 0.74)) !important;
+}
+
+html[data-theme="dark"] .home-notice-card.is-neutral,
+:root[data-theme="dark"] .home-notice-card.is-neutral {
+  border-color: rgba(168, 85, 247, 0.30) !important;
+  background:
+    radial-gradient(circle at top left, rgba(168, 85, 247, 0.12), transparent 34%),
+    linear-gradient(135deg, rgba(14, 10, 32, 0.84), rgba(8, 12, 28, 0.74)) !important;
+}
+
+/* Prompt C:\classroom también suave en dark */
+html[data-theme="dark"] .home-cmd-prompt,
+:root[data-theme="dark"] .home-cmd-prompt {
+  display: inline-flex !important;
+  width: auto !important;
+  margin: 0 0 10px !important;
+  padding: 4px 9px !important;
+  border-radius: 999px !important;
+  background: rgba(0, 245, 255, 0.08) !important;
+  border: 1px solid rgba(0, 245, 255, 0.20) !important;
+  color: var(--cyan) !important;
+  font-weight: 900 !important;
+}
+
+/* Contenido sin rectángulo plano */
+html[data-theme="dark"] .home-cmd-content,
+:root[data-theme="dark"] .home-cmd-content {
+  background: transparent !important;
+}
+
+/* Botón link en dark más consistente */
+html[data-theme="dark"] .home-notice-link,
+:root[data-theme="dark"] .home-notice-link {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  margin-top: 12px !important;
+  padding: 8px 12px !important;
+  border-radius: 999px !important;
+  background: rgba(0, 245, 255, 0.08) !important;
+  border: 1px solid rgba(0, 245, 255, 0.24) !important;
+  color: var(--cyan) !important;
+  font-weight: 900 !important;
+  text-decoration: none !important;
+}
+
+/* Light mode: mantener el estilo bonito pero asegurar bordes suaves */
+html[data-theme="light"] .home-avisos-stable-feed .home-cmd-card,
+html[data-theme="light"] .home-avisos-stable-feed .home-notice-card,
+:root[data-theme="light"] .home-avisos-stable-feed .home-cmd-card,
+:root[data-theme="light"] .home-avisos-stable-feed .home-notice-card {
+  border-radius: 20px !important;
+}
+
+/* Título editorial en ambos modos */
+.home-avisos-stable-header h2 {
+  text-transform: none !important;
+}

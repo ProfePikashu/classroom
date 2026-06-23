@@ -18,7 +18,7 @@
     announcements: true,
     emailCommunity: false,
     emailAnnouncements: false,
-    newsletter: false,
+    boletín: false,
     attendance: true,
   };
 
@@ -486,7 +486,7 @@ const icon = TYPE_ICONS[item.type] || TYPE_ICONS.system;
           <div class="notification-prefs-list">
             ${prefRow("emailCommunity", "Resumen o actividad de Comunidad", "Recibir por correo respuestas, menciones o actividad importante de Comunidad.", prefs.emailCommunity, "pendiente")}
             ${prefRow("emailAnnouncements", "Avisos oficiales", "Recibir por correo comunicados importantes del curso.", prefs.emailAnnouncements, "pendiente")}
-            ${prefRow("newsletter", "Newsletter del curso", "Recibir resúmenes generales, novedades y recordatorios.", prefs.newsletter, "pendiente")}
+            ${prefRow("boletín", "Boletín del curso", "Recibir resúmenes generales, novedades y recordatorios.", prefs.boletín, "pendiente")}
           </div>
         </section>
 
@@ -2482,7 +2482,7 @@ if (String(item.id) !== String(id)) return item;
       ".home-avisos-shell",
       ".home-cmd-window",
       ".home-terminal-window",
-      ".home-newsletter-terminal",
+      ".home-boletín-terminal",
       ".home-terminal-feed",
       ".home-terminal-feed-head",
       ".home-notifications-feed",
@@ -2522,7 +2522,7 @@ if (String(item.id) !== String(id)) return item;
         </div>
 
         <header class="home-avisos-stable-header">
-          <p>NEWSLETTER</p>
+          <p>BOLETÍN</p>
           <h2>Avisos y novedades</h2>
           <small>Centro unificado para anuncios del curso, accesos importantes y actividad reciente.</small>
         </header>
