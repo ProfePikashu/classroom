@@ -1,3 +1,53 @@
+/* === CENTRO IGNORE BELL ME REFRESH 20260623 === */
+(function centroIgnoreBellMeRefresh() {
+  "use strict";
+
+  /*
+    Problema:
+    - La campanita consulta /notifications/me cada X segundos.
+    - Eso dispara eventos globales de notificaciones.
+    - En el Centro, esos eventos hacen que el listado admin se re-renderice
+      momentáneamente en formato base/viejo y luego el V3 lo vuelve a pintar.
+    - Resultado: salto/parpadeo cada pocos segundos.
+
+    Solución:
+    - En esta página, filtramos los eventos globales que no sean del Centro admin.
+    - El Centro mantiene su render estable.
+  */
+
+  const isCentroPage = /centro-notificaciones\.html/i.test(location.pathname);
+
+  if (!isCentroPage) return;
+
+  const ORIGINAL_DISPATCH = EventTarget.prototype.dispatchEvent;
+
+  EventTarget.prototype.dispatchEvent = function patchedCentroDispatchEvent(event) {
+    try {
+      const eventName = String(event?.type || "");
+
+      if (
+        this === window &&
+        eventName === "classroom:notifications-updated" &&
+        !window.__CENTRO_ADMIN_RENDERING__
+      ) {
+        /*
+          Bloqueamos solo el evento global de refresh de campanita.
+          No bloqueamos clicks, submit, carga admin ni eventos normales.
+        */
+        return true;
+      }
+    } catch (_) {
+      // Si algo raro pasa, dejamos pasar el evento.
+    }
+
+    return ORIGINAL_DISPATCH.call(this, event);
+  };
+
+  window.ClassroomCentroIgnoreBellMeRefresh = {
+    enabled: true
+  };
+})();
+
 /*
   AndyAzhTEC Classroom — Centro de notificaciones
   MVP local. Luego se conecta a Supabase/backend.

@@ -16645,3 +16645,10 @@ html.cn-center-preparing #notificationsContainer > * {
     box-shadow 220ms ease,
     opacity 160ms ease !important;
 }
+
+/* === CENTRO STABLE NO GLOBAL FLICKER 20260623 === */
+/* El Centro no debe esconder/reformatear cards por refrescos globales de campanita. */
+body[data-cn-center-stable="true"] .cn-existing-notification-card,
+body[data-cn-center-stable="true"] .cn-full-notification-card {
+  visibility: visible !important;
+}
