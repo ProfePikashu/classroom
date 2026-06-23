@@ -16085,3 +16085,434 @@ html[data-theme="light"] .theme-switch-stars,
     width: 34px;
   }
 }
+
+/* === ANIMATED THEME SWITCH DELUXE 20260622 === */
+/*
+  Switch de tema sin imágenes:
+  - Dark: noche violeta, estrellas, medialuna con borde neon.
+  - Light: cielo pastel, nubes, sol suave.
+*/
+
+.theme-toggle.theme-switch {
+  width: 104px !important;
+  min-width: 104px !important;
+  height: 46px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  overflow: visible !important;
+  border-radius: 999px !important;
+}
+
+.theme-toggle.theme-switch:hover {
+  transform: translateY(-1px);
+}
+
+.theme-toggle.theme-switch:active {
+  transform: scale(0.985);
+}
+
+.theme-toggle.theme-switch .theme-switch-track {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: 999px;
+  border: 1px solid rgba(168, 85, 247, 0.32);
+  transition:
+    border-color 420ms cubic-bezier(.22, 1, .36, 1),
+    box-shadow 420ms cubic-bezier(.22, 1, .36, 1),
+    background 420ms cubic-bezier(.22, 1, .36, 1);
+}
+
+.theme-switch-sky,
+.theme-switch-stars,
+.theme-switch-clouds {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.theme-switch-sky {
+  border-radius: inherit;
+  transition:
+    opacity 520ms cubic-bezier(.22, 1, .36, 1),
+    transform 520ms cubic-bezier(.22, 1, .36, 1);
+}
+
+.theme-switch-sky-night {
+  opacity: 1;
+  background:
+    radial-gradient(circle at 20% 44%, rgba(12, 15, 48, 0.95) 0 22%, transparent 23%),
+    radial-gradient(circle at 78% 20%, rgba(255,255,255,0.12) 0 20%, transparent 21%),
+    linear-gradient(135deg, #1f165f 0%, #4b2c96 52%, #7c4dd7 100%);
+}
+
+.theme-switch-sky-day {
+  opacity: 0;
+  transform: translateY(8px);
+  background:
+    radial-gradient(circle at 78% 50%, rgba(255, 224, 102, 0.34) 0 22%, transparent 23%),
+    linear-gradient(180deg, #b8ecff 0%, #dff9ff 55%, #f7eeff 100%);
+}
+
+/* Estrellas modo noche */
+.theme-switch-stars {
+  opacity: 1;
+  transition:
+    opacity 360ms ease,
+    transform 520ms cubic-bezier(.22, 1, .36, 1);
+}
+
+.theme-switch-stars span {
+  position: absolute;
+  display: block;
+  width: 3px;
+  height: 3px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.92);
+  box-shadow: 0 0 8px rgba(255,255,255,0.72);
+}
+
+.theme-switch-stars span:nth-child(1) {
+  left: 48px;
+  top: 10px;
+}
+
+.theme-switch-stars span:nth-child(2) {
+  left: 62px;
+  top: 22px;
+  width: 2px;
+  height: 2px;
+}
+
+.theme-switch-stars span:nth-child(3) {
+  left: 76px;
+  top: 14px;
+}
+
+.theme-switch-stars span:nth-child(4) {
+  left: 88px;
+  top: 28px;
+  width: 2px;
+  height: 2px;
+}
+
+.theme-switch-stars span:nth-child(5) {
+  left: 38px;
+  top: 29px;
+  width: 2px;
+  height: 2px;
+}
+
+/* Nubes inventadas con sombras */
+.theme-switch-clouds {
+  opacity: 0;
+  transition:
+    opacity 480ms cubic-bezier(.22, 1, .36, 1),
+    transform 520ms cubic-bezier(.22, 1, .36, 1);
+}
+
+.theme-switch-clouds::before,
+.theme-switch-clouds::after {
+  content: "";
+  position: absolute;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.72);
+  filter: blur(0.1px);
+}
+
+.theme-switch-clouds-day {
+  opacity: 0;
+  transform: translateX(-10px);
+}
+
+.theme-switch-clouds-day::before {
+  left: 8px;
+  bottom: 4px;
+  width: 58px;
+  height: 16px;
+  box-shadow:
+    16px -7px 0 5px rgba(255,255,255,0.68),
+    34px -3px 0 3px rgba(255,255,255,0.62),
+    56px -6px 0 6px rgba(255,255,255,0.58);
+}
+
+.theme-switch-clouds-day::after {
+  left: 35px;
+  top: 8px;
+  width: 44px;
+  height: 14px;
+  background: rgba(255,255,255,0.34);
+  box-shadow:
+    14px -4px 0 4px rgba(255,255,255,0.30),
+    28px 0 0 3px rgba(255,255,255,0.24);
+}
+
+/* Nubes oscuras sutiles para la noche */
+.theme-switch-clouds-night {
+  opacity: 1;
+}
+
+.theme-switch-clouds-night::before {
+  left: 42px;
+  bottom: 6px;
+  width: 54px;
+  height: 15px;
+  background: rgba(255,255,255,0.09);
+  box-shadow:
+    13px -8px 0 6px rgba(255,255,255,0.07),
+    30px -3px 0 4px rgba(255,255,255,0.08);
+}
+
+.theme-switch-clouds-night::after {
+  left: 55px;
+  top: 8px;
+  width: 38px;
+  height: 13px;
+  background: rgba(255,255,255,0.07);
+  box-shadow:
+    12px -4px 0 4px rgba(255,255,255,0.055);
+}
+
+/* Thumb */
+.theme-toggle.theme-switch .theme-switch-thumb {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  z-index: 5;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  display: block;
+  transition:
+    transform 560ms cubic-bezier(.22, 1, .36, 1),
+    background 420ms cubic-bezier(.22, 1, .36, 1),
+    box-shadow 420ms cubic-bezier(.22, 1, .36, 1);
+}
+
+.theme-switch-moon-shape,
+.theme-switch-sun-shape {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  transition:
+    opacity 360ms ease,
+    transform 460ms cubic-bezier(.22, 1, .36, 1),
+    box-shadow 420ms cubic-bezier(.22, 1, .36, 1);
+}
+
+/* Luna: medialuna hecha con ::before y ::after */
+.theme-switch-moon-shape::before,
+.theme-switch-moon-shape::after {
+  content: "";
+  position: absolute;
+  border-radius: 999px;
+}
+
+.theme-switch-moon-shape::before {
+  width: 28px;
+  height: 28px;
+  left: 4px;
+  top: 4px;
+  background:
+    radial-gradient(circle at 38% 34%, #ffffff, #dbe4f0 72%);
+  box-shadow:
+    inset -5px -5px 10px rgba(0,0,0,0.10),
+    0 0 12px rgba(255,255,255,0.60);
+}
+
+.theme-switch-moon-shape::after {
+  width: 27px;
+  height: 27px;
+  left: 12px;
+  top: 3px;
+  background: #30206d;
+  box-shadow:
+    -2px 0 0 rgba(0,245,255,0.34),
+    -4px 0 12px rgba(0,245,255,0.28);
+}
+
+/* Sol */
+.theme-switch-sun-shape::before,
+.theme-switch-sun-shape::after {
+  content: "";
+  position: absolute;
+  border-radius: 999px;
+}
+
+.theme-switch-sun-shape::before {
+  width: 28px;
+  height: 28px;
+  left: 4px;
+  top: 4px;
+  background:
+    radial-gradient(circle at 34% 30%, #fff9b8, #facc15 70%, #f59e0b);
+  box-shadow:
+    inset -4px -4px 8px rgba(180,83,9,0.12),
+    0 8px 16px rgba(251,191,36,0.26);
+}
+
+.theme-switch-sun-shape::after {
+  inset: 1px;
+  border-radius: inherit;
+  border: 2px solid rgba(255,255,255,0.42);
+  opacity: 0.65;
+}
+
+/* DARK */
+html[data-theme="dark"] .theme-toggle.theme-switch .theme-switch-track,
+:root[data-theme="dark"] .theme-toggle.theme-switch .theme-switch-track {
+  border-color: rgba(168,85,247,0.48) !important;
+  box-shadow:
+    0 0 20px rgba(168,85,247,0.22),
+    0 0 34px rgba(0,245,255,0.08),
+    inset 0 0 0 1px rgba(255,255,255,0.035) !important;
+}
+
+html[data-theme="dark"] .theme-toggle.theme-switch .theme-switch-thumb,
+:root[data-theme="dark"] .theme-toggle.theme-switch .theme-switch-thumb {
+  transform: translateX(0);
+  background: transparent !important;
+  box-shadow:
+    0 0 18px rgba(255,255,255,0.26),
+    0 0 30px rgba(0,245,255,0.16) !important;
+}
+
+html[data-theme="dark"] .theme-switch-sky-night,
+:root[data-theme="dark"] .theme-switch-sky-night {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+html[data-theme="dark"] .theme-switch-sky-day,
+:root[data-theme="dark"] .theme-switch-sky-day {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+html[data-theme="dark"] .theme-switch-stars,
+:root[data-theme="dark"] .theme-switch-stars {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+html[data-theme="dark"] .theme-switch-clouds-night,
+:root[data-theme="dark"] .theme-switch-clouds-night {
+  opacity: 1;
+}
+
+html[data-theme="dark"] .theme-switch-clouds-day,
+:root[data-theme="dark"] .theme-switch-clouds-day {
+  opacity: 0;
+}
+
+html[data-theme="dark"] .theme-switch-moon-shape,
+:root[data-theme="dark"] .theme-switch-moon-shape {
+  opacity: 1;
+  transform: scale(1) rotate(0deg);
+}
+
+html[data-theme="dark"] .theme-switch-sun-shape,
+:root[data-theme="dark"] .theme-switch-sun-shape {
+  opacity: 0;
+  transform: scale(0.70) rotate(-40deg);
+}
+
+/* LIGHT */
+html[data-theme="light"] .theme-toggle.theme-switch .theme-switch-track,
+:root[data-theme="light"] .theme-toggle.theme-switch .theme-switch-track {
+  border-color: rgba(14,165,233,0.28) !important;
+  box-shadow:
+    0 10px 24px rgba(85,72,120,0.12),
+    inset 0 0 0 1px rgba(255,255,255,0.58) !important;
+}
+
+html[data-theme="light"] .theme-toggle.theme-switch .theme-switch-thumb,
+:root[data-theme="light"] .theme-toggle.theme-switch .theme-switch-thumb {
+  transform: translateX(58px);
+  background: transparent !important;
+  box-shadow:
+    0 10px 22px rgba(251,191,36,0.22),
+    0 0 0 4px rgba(255,255,255,0.46) !important;
+}
+
+html[data-theme="light"] .theme-switch-sky-night,
+:root[data-theme="light"] .theme-switch-sky-night {
+  opacity: 0;
+  transform: translateY(-8px);
+}
+
+html[data-theme="light"] .theme-switch-sky-day,
+:root[data-theme="light"] .theme-switch-sky-day {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+html[data-theme="light"] .theme-switch-stars,
+:root[data-theme="light"] .theme-switch-stars {
+  opacity: 0;
+  transform: translateX(-10px);
+}
+
+html[data-theme="light"] .theme-switch-clouds-night,
+:root[data-theme="light"] .theme-switch-clouds-night {
+  opacity: 0;
+}
+
+html[data-theme="light"] .theme-switch-clouds-day,
+:root[data-theme="light"] .theme-switch-clouds-day {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+html[data-theme="light"] .theme-switch-moon-shape,
+:root[data-theme="light"] .theme-switch-moon-shape {
+  opacity: 0;
+  transform: scale(0.70) rotate(40deg);
+}
+
+html[data-theme="light"] .theme-switch-sun-shape,
+:root[data-theme="light"] .theme-switch-sun-shape {
+  opacity: 1;
+  transform: scale(1) rotate(0deg);
+}
+
+/* Ocultar estructura vieja si quedó alguna */
+.theme-toggle.theme-switch > .theme-switch-icon {
+  display: none !important;
+}
+
+/* Mobile */
+@media (max-width: 720px) {
+  .theme-toggle.theme-switch {
+    width: 92px !important;
+    min-width: 92px !important;
+    height: 42px !important;
+  }
+
+  .theme-toggle.theme-switch .theme-switch-thumb {
+    width: 32px;
+    height: 32px;
+  }
+
+  html[data-theme="light"] .theme-toggle.theme-switch .theme-switch-thumb,
+  :root[data-theme="light"] .theme-toggle.theme-switch .theme-switch-thumb {
+    transform: translateX(50px);
+  }
+
+  .theme-switch-moon-shape::before,
+  .theme-switch-sun-shape::before {
+    width: 25px;
+    height: 25px;
+    left: 3.5px;
+    top: 3.5px;
+  }
+
+  .theme-switch-moon-shape::after {
+    width: 24px;
+    height: 24px;
+    left: 10px;
+    top: 3px;
+  }
+}

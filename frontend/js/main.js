@@ -1048,23 +1048,26 @@ document.addEventListener("DOMContentLoaded", () => {
     button.setAttribute("title", "Cambiar tema");
 
     button.innerHTML = `
-      <span class="theme-switch-track" aria-hidden="true"></span>
+      <span class="theme-switch-track" aria-hidden="true">
+        <span class="theme-switch-sky theme-switch-sky-night"></span>
+        <span class="theme-switch-sky theme-switch-sky-day"></span>
 
-      <span class="theme-switch-stars" aria-hidden="true">
-        <span></span>
-        <span></span>
-        <span></span>
+        <span class="theme-switch-stars" aria-hidden="true">
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+        </span>
+
+        <span class="theme-switch-clouds theme-switch-clouds-night" aria-hidden="true"></span>
+        <span class="theme-switch-clouds theme-switch-clouds-day" aria-hidden="true"></span>
+
+        <span class="theme-switch-thumb" aria-hidden="true">
+          <span class="theme-switch-moon-shape"></span>
+          <span class="theme-switch-sun-shape"></span>
+        </span>
       </span>
-
-      <span class="theme-switch-icon theme-switch-moon" aria-hidden="true">
-        <i class="fa-solid fa-moon"></i>
-      </span>
-
-      <span class="theme-switch-icon theme-switch-sun" aria-hidden="true">
-        <i class="fa-solid fa-sun"></i>
-      </span>
-
-      <span class="theme-switch-thumb" aria-hidden="true"></span>
     `;
 
     syncButton(button);
