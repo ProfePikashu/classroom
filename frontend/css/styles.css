@@ -15180,3 +15180,551 @@ html[data-theme="light"] .home-avisos-stable-header h2,
 :root[data-theme="light"] .home-avisos-stable-header h2 {
   color: #0f8ea3 !important;
 }
+
+/* === LIGHT MODE AYRPC2026 EXAMPRO FIX 20260622 === */
+/*
+  Corrige componentes que seguían heredando estética oscura en modo claro:
+  - AyRPC 2026 visual / en preparación
+  - ExamPro card central
+*/
+
+/* ─────────────────────────────────────────────
+   AYRPC 2026 - modo claro
+───────────────────────────────────────────── */
+
+html[data-theme="light"] .course-hero,
+html[data-theme="light"] .course-hero-card,
+html[data-theme="light"] .ayrpc-hero,
+html[data-theme="light"] .ayrpc-2026-hero,
+html[data-theme="light"] .course-page-hero,
+:root[data-theme="light"] .course-hero,
+:root[data-theme="light"] .course-hero-card,
+:root[data-theme="light"] .ayrpc-hero,
+:root[data-theme="light"] .ayrpc-2026-hero,
+:root[data-theme="light"] .course-page-hero {
+  background:
+    radial-gradient(circle at left, rgba(207,250,254,0.72), transparent 34%),
+    radial-gradient(circle at right, rgba(250,232,255,0.68), transparent 38%),
+    linear-gradient(135deg, rgba(255,255,255,0.94), rgba(245,243,255,0.86)) !important;
+  border-color: rgba(167,139,250,0.22) !important;
+  box-shadow: 0 18px 42px rgba(85,72,120,0.12) !important;
+  color: #172033 !important;
+}
+
+/* Visual derecha de AyRPC 2026 */
+html[data-theme="light"] .course-hero-visual,
+html[data-theme="light"] .course-visual-card,
+html[data-theme="light"] .soon-visual,
+html[data-theme="light"] .visual-card,
+html[data-theme="light"] .ayrpc-visual,
+html[data-theme="light"] .ayrpc-2026-visual,
+html[data-theme="light"] .course-placeholder,
+html[data-theme="light"] .course-status-visual,
+:root[data-theme="light"] .course-hero-visual,
+:root[data-theme="light"] .course-visual-card,
+:root[data-theme="light"] .soon-visual,
+:root[data-theme="light"] .visual-card,
+:root[data-theme="light"] .ayrpc-visual,
+:root[data-theme="light"] .ayrpc-2026-visual,
+:root[data-theme="light"] .course-placeholder,
+:root[data-theme="light"] .course-status-visual {
+  background:
+    radial-gradient(circle at center 30%, rgba(186,230,253,0.82), transparent 38%),
+    linear-gradient(135deg, rgba(255,255,255,0.86), rgba(245,243,255,0.78)) !important;
+  border: 1px solid rgba(14,165,233,0.22) !important;
+  box-shadow: 0 16px 36px rgba(85,72,120,0.12) !important;
+  color: #0f8ea3 !important;
+}
+
+/* Cualquier bloque visual interno oscuro dentro de la visual de curso */
+html[data-theme="light"] .course-hero-visual *,
+html[data-theme="light"] .course-visual-card *,
+html[data-theme="light"] .soon-visual *,
+html[data-theme="light"] .visual-card *,
+:root[data-theme="light"] .course-hero-visual *,
+:root[data-theme="light"] .course-visual-card *,
+:root[data-theme="light"] .soon-visual *,
+:root[data-theme="light"] .visual-card * {
+  text-shadow: none !important;
+}
+
+/* Texto en preparación */
+html[data-theme="light"] .course-hero-visual h3,
+html[data-theme="light"] .course-hero-visual strong,
+html[data-theme="light"] .course-visual-card h3,
+html[data-theme="light"] .course-visual-card strong,
+html[data-theme="light"] .soon-visual h3,
+html[data-theme="light"] .soon-visual strong,
+html[data-theme="light"] .visual-card h3,
+html[data-theme="light"] .visual-card strong,
+:root[data-theme="light"] .course-hero-visual h3,
+:root[data-theme="light"] .course-hero-visual strong,
+:root[data-theme="light"] .course-visual-card h3,
+:root[data-theme="light"] .course-visual-card strong,
+:root[data-theme="light"] .soon-visual h3,
+:root[data-theme="light"] .soon-visual strong,
+:root[data-theme="light"] .visual-card h3,
+:root[data-theme="light"] .visual-card strong {
+  color: #3b2f63 !important;
+  font-weight: 900 !important;
+}
+
+html[data-theme="light"] .course-hero-visual p,
+html[data-theme="light"] .course-visual-card p,
+html[data-theme="light"] .soon-visual p,
+html[data-theme="light"] .visual-card p,
+:root[data-theme="light"] .course-hero-visual p,
+:root[data-theme="light"] .course-visual-card p,
+:root[data-theme="light"] .soon-visual p,
+:root[data-theme="light"] .visual-card p {
+  color: #64748b !important;
+}
+
+/* Ícono chip en visual */
+html[data-theme="light"] .course-hero-visual i,
+html[data-theme="light"] .course-visual-card i,
+html[data-theme="light"] .soon-visual i,
+html[data-theme="light"] .visual-card i,
+:root[data-theme="light"] .course-hero-visual i,
+:root[data-theme="light"] .course-visual-card i,
+:root[data-theme="light"] .soon-visual i,
+:root[data-theme="light"] .visual-card i {
+  color: #0f8ea3 !important;
+  filter: drop-shadow(0 8px 16px rgba(14,165,233,0.18)) !important;
+}
+
+/* Estado contenido en construcción */
+html[data-theme="light"] .course-status-card,
+html[data-theme="light"] .status-card,
+html[data-theme="light"] .construction-card,
+html[data-theme="light"] .course-progress-card,
+:root[data-theme="light"] .course-status-card,
+:root[data-theme="light"] .status-card,
+:root[data-theme="light"] .construction-card,
+:root[data-theme="light"] .course-progress-card {
+  background:
+    linear-gradient(135deg, rgba(255,255,255,0.92), rgba(253,242,248,0.72)) !important;
+  border-color: rgba(244,114,182,0.18) !important;
+  color: #172033 !important;
+}
+
+/* ─────────────────────────────────────────────
+   EXAMPRO - modo claro
+───────────────────────────────────────────── */
+
+html[data-theme="light"] .exampro-card,
+html[data-theme="light"] .exampro-panel,
+html[data-theme="light"] .exampro-launch-card,
+html[data-theme="light"] .exampro-embed-card,
+html[data-theme="light"] .exampro-access-card,
+html[data-theme="light"] .exampro-page-card,
+html[data-theme="light"] .exampro-wrapper .card,
+:root[data-theme="light"] .exampro-card,
+:root[data-theme="light"] .exampro-panel,
+:root[data-theme="light"] .exampro-launch-card,
+:root[data-theme="light"] .exampro-embed-card,
+:root[data-theme="light"] .exampro-access-card,
+:root[data-theme="light"] .exampro-page-card,
+:root[data-theme="light"] .exampro-wrapper .card {
+  background:
+    radial-gradient(circle at top left, rgba(207,250,254,0.76), transparent 34%),
+    radial-gradient(circle at top right, rgba(250,232,255,0.76), transparent 34%),
+    linear-gradient(135deg, rgba(255,255,255,0.94), rgba(245,243,255,0.86)) !important;
+  border: 1px solid rgba(167,139,250,0.24) !important;
+  color: #172033 !important;
+  box-shadow: 0 20px 48px rgba(85,72,120,0.14) !important;
+}
+
+/* Por si la card ExamPro no tiene clase específica: detectamos el patrón visual general */
+html[data-theme="light"] .exampro-page .card,
+html[data-theme="light"] .exampro-page section,
+html[data-theme="light"] .exampro-page article,
+:root[data-theme="light"] .exampro-page .card,
+:root[data-theme="light"] .exampro-page section,
+:root[data-theme="light"] .exampro-page article {
+  background:
+    radial-gradient(circle at top left, rgba(207,250,254,0.70), transparent 34%),
+    linear-gradient(135deg, rgba(255,255,255,0.92), rgba(250,245,255,0.82)) !important;
+  border-color: rgba(167,139,250,0.24) !important;
+  color: #172033 !important;
+}
+
+/* Textos ExamPro */
+html[data-theme="light"] .exampro-card h1,
+html[data-theme="light"] .exampro-card h2,
+html[data-theme="light"] .exampro-card h3,
+html[data-theme="light"] .exampro-panel h1,
+html[data-theme="light"] .exampro-panel h2,
+html[data-theme="light"] .exampro-panel h3,
+html[data-theme="light"] .exampro-launch-card h1,
+html[data-theme="light"] .exampro-launch-card h2,
+html[data-theme="light"] .exampro-launch-card h3,
+html[data-theme="light"] .exampro-access-card h1,
+html[data-theme="light"] .exampro-access-card h2,
+html[data-theme="light"] .exampro-access-card h3,
+:root[data-theme="light"] .exampro-card h1,
+:root[data-theme="light"] .exampro-card h2,
+:root[data-theme="light"] .exampro-card h3,
+:root[data-theme="light"] .exampro-panel h1,
+:root[data-theme="light"] .exampro-panel h2,
+:root[data-theme="light"] .exampro-panel h3,
+:root[data-theme="light"] .exampro-launch-card h1,
+:root[data-theme="light"] .exampro-launch-card h2,
+:root[data-theme="light"] .exampro-launch-card h3,
+:root[data-theme="light"] .exampro-access-card h1,
+:root[data-theme="light"] .exampro-access-card h2,
+:root[data-theme="light"] .exampro-access-card h3 {
+  color: #172033 !important;
+  text-shadow: none !important;
+}
+
+/* El título ExamPro grande estaba quedando invisible */
+html[data-theme="light"] .exampro-card .title,
+html[data-theme="light"] .exampro-card .exampro-title,
+html[data-theme="light"] .exampro-panel .title,
+html[data-theme="light"] .exampro-panel .exampro-title,
+html[data-theme="light"] [class*="exampro"] h1,
+:root[data-theme="light"] .exampro-card .title,
+:root[data-theme="light"] .exampro-card .exampro-title,
+:root[data-theme="light"] .exampro-panel .title,
+:root[data-theme="light"] .exampro-panel .exampro-title,
+:root[data-theme="light"] [class*="exampro"] h1 {
+  color: #0f8ea3 !important;
+  text-shadow:
+    1px 1px 0 rgba(255,255,255,0.96),
+    -1px -1px 0 rgba(186,230,253,0.54) !important;
+}
+
+/* Descripciones y bullets ExamPro */
+html[data-theme="light"] .exampro-card p,
+html[data-theme="light"] .exampro-card li,
+html[data-theme="light"] .exampro-panel p,
+html[data-theme="light"] .exampro-panel li,
+html[data-theme="light"] .exampro-launch-card p,
+html[data-theme="light"] .exampro-launch-card li,
+html[data-theme="light"] .exampro-access-card p,
+html[data-theme="light"] .exampro-access-card li,
+:root[data-theme="light"] .exampro-card p,
+:root[data-theme="light"] .exampro-card li,
+:root[data-theme="light"] .exampro-panel p,
+:root[data-theme="light"] .exampro-panel li,
+:root[data-theme="light"] .exampro-launch-card p,
+:root[data-theme="light"] .exampro-launch-card li,
+:root[data-theme="light"] .exampro-access-card p,
+:root[data-theme="light"] .exampro-access-card li {
+  color: #475569 !important;
+}
+
+/* Iconos/mini panel de ExamPro */
+html[data-theme="light"] .exampro-card .icon-card,
+html[data-theme="light"] .exampro-panel .icon-card,
+html[data-theme="light"] .exampro-visual,
+html[data-theme="light"] .exampro-icon-card,
+html[data-theme="light"] .exampro-system-card,
+:root[data-theme="light"] .exampro-card .icon-card,
+:root[data-theme="light"] .exampro-panel .icon-card,
+:root[data-theme="light"] .exampro-visual,
+:root[data-theme="light"] .exampro-icon-card,
+:root[data-theme="light"] .exampro-system-card {
+  background:
+    radial-gradient(circle at top, rgba(186,230,253,0.72), transparent 44%),
+    linear-gradient(135deg, rgba(255,255,255,0.86), rgba(245,243,255,0.80)) !important;
+  border: 1px solid rgba(14,165,233,0.24) !important;
+  color: #0f8ea3 !important;
+  box-shadow: 0 16px 34px rgba(85,72,120,0.12) !important;
+}
+
+html[data-theme="light"] .exampro-card i,
+html[data-theme="light"] .exampro-panel i,
+html[data-theme="light"] .exampro-launch-card i,
+html[data-theme="light"] .exampro-access-card i,
+:root[data-theme="light"] .exampro-card i,
+:root[data-theme="light"] .exampro-panel i,
+:root[data-theme="light"] .exampro-launch-card i,
+:root[data-theme="light"] .exampro-access-card i {
+  color: #0f8ea3 !important;
+  filter: none !important;
+}
+
+/* Botón ExamPro en claro */
+html[data-theme="light"] .exampro-card .btn,
+html[data-theme="light"] .exampro-panel .btn,
+html[data-theme="light"] .exampro-launch-card .btn,
+html[data-theme="light"] .exampro-access-card .btn,
+:root[data-theme="light"] .exampro-card .btn,
+:root[data-theme="light"] .exampro-panel .btn,
+:root[data-theme="light"] .exampro-launch-card .btn,
+:root[data-theme="light"] .exampro-access-card .btn {
+  background: linear-gradient(135deg, #c4b5fd, #f0abfc) !important;
+  color: #2e1065 !important;
+  border-color: rgba(147,51,234,0.20) !important;
+  box-shadow: 0 10px 24px rgba(85,72,120,0.12) !important;
+}
+
+/* Frase "se abre en una pestaña nueva" */
+html[data-theme="light"] .exampro-card small,
+html[data-theme="light"] .exampro-panel small,
+html[data-theme="light"] .exampro-launch-card small,
+html[data-theme="light"] .exampro-access-card small,
+:root[data-theme="light"] .exampro-card small,
+:root[data-theme="light"] .exampro-panel small,
+:root[data-theme="light"] .exampro-launch-card small,
+:root[data-theme="light"] .exampro-access-card small {
+  color: #64748b !important;
+}
+
+/* Parche amplio para cualquier bloque oscuro dentro de páginas light que contenga ExamPro */
+html[data-theme="light"] [class*="exampro"] {
+  text-shadow: none !important;
+}
+
+html[data-theme="light"] [class*="exampro"] [style*="background"],
+:root[data-theme="light"] [class*="exampro"] [style*="background"] {
+  color: #172033 !important;
+}
+
+
+/* === CENTRO NOTIFICACIONES LIGHT READABILITY FIX 20260622 === */
+
+:root[data-theme="light"] .cn-empty-readable,
+html[data-theme="light"] .cn-empty-readable{
+  border:1px dashed rgba(125,181,228,.28) !important;
+  background:linear-gradient(135deg, rgba(255,255,255,.60), rgba(247,244,255,.88)) !important;
+  border-radius:24px !important;
+  color:#475569 !important;
+  box-shadow:none !important;
+}
+
+:root[data-theme="light"] .cn-empty-readable *,
+html[data-theme="light"] .cn-empty-readable *{
+  opacity:1 !important;
+}
+
+:root[data-theme="light"] .cn-empty-readable i,
+html[data-theme="light"] .cn-empty-readable i{
+  color:#67d8e8 !important;
+}
+
+:root[data-theme="light"] .cn-empty-readable strong,
+:root[data-theme="light"] .cn-empty-readable .empty-title,
+html[data-theme="light"] .cn-empty-readable strong,
+html[data-theme="light"] .cn-empty-readable .empty-title{
+  color:#334155 !important;
+  font-weight:800 !important;
+}
+
+:root[data-theme="light"] .cn-empty-readable p,
+:root[data-theme="light"] .cn-empty-readable span,
+:root[data-theme="light"] .cn-empty-readable small,
+html[data-theme="light"] .cn-empty-readable p,
+html[data-theme="light"] .cn-empty-readable span,
+html[data-theme="light"] .cn-empty-readable small{
+  color:#64748b !important;
+}
+
+:root[data-theme="light"] .notifications-empty,
+:root[data-theme="light"] .notifications-empty *,
+:root[data-theme="light"] .empty-state,
+:root[data-theme="light"] .empty-state *,
+html[data-theme="light"] .notifications-empty,
+html[data-theme="light"] .notifications-empty *,
+html[data-theme="light"] .empty-state,
+html[data-theme="light"] .empty-state *{
+  opacity:1 !important;
+}
+
+:root[data-theme="light"] .notifications-empty strong,
+:root[data-theme="light"] .empty-state strong,
+html[data-theme="light"] .notifications-empty strong,
+html[data-theme="light"] .empty-state strong{
+  color:#334155 !important;
+}
+
+:root[data-theme="light"] .notifications-empty p,
+:root[data-theme="light"] .notifications-empty span,
+:root[data-theme="light"] .notifications-empty small,
+:root[data-theme="light"] .empty-state p,
+:root[data-theme="light"] .empty-state span,
+:root[data-theme="light"] .empty-state small,
+html[data-theme="light"] .notifications-empty p,
+html[data-theme="light"] .notifications-empty span,
+html[data-theme="light"] .notifications-empty small,
+html[data-theme="light"] .empty-state p,
+html[data-theme="light"] .empty-state span,
+html[data-theme="light"] .empty-state small{
+  color:#64748b !important;
+}
+
+:root[data-theme="light"] .page-centro-notificaciones .page-hero p,
+:root[data-theme="light"] .page-centro-notificaciones .page-hero .hero-copy p,
+html[data-theme="light"] .page-centro-notificaciones .page-hero p,
+html[data-theme="light"] .page-centro-notificaciones .page-hero .hero-copy p{
+  color:#64748b !important;
+}
+
+:root[data-theme="light"] .page-centro-notificaciones input::placeholder,
+:root[data-theme="light"] .page-centro-notificaciones textarea::placeholder,
+html[data-theme="light"] .page-centro-notificaciones input::placeholder,
+html[data-theme="light"] .page-centro-notificaciones textarea::placeholder{
+  color:#94a3b8 !important;
+  opacity:1 !important;
+}
+
+/* === CENTRO NOTIFICACIONES LIGHT FINAL READABILITY 20260622 === */
+
+/* Hero del centro: que no se lave en claro */
+html[data-theme="light"] body.page-centro-notificaciones .page-hero,
+:root[data-theme="light"] body.page-centro-notificaciones .page-hero,
+html[data-theme="light"] body.page-notifications .page-hero,
+:root[data-theme="light"] body.page-notifications .page-hero {
+  background:
+    radial-gradient(circle at left, rgba(207,250,254,.72), transparent 34%),
+    radial-gradient(circle at right, rgba(250,232,255,.70), transparent 38%),
+    linear-gradient(135deg, rgba(255,255,255,.96), rgba(245,243,255,.86)) !important;
+  color: #172033 !important;
+  border-color: rgba(167,139,250,.24) !important;
+}
+
+html[data-theme="light"] body.page-centro-notificaciones .page-hero h1,
+html[data-theme="light"] body.page-centro-notificaciones .page-hero h2,
+html[data-theme="light"] body.page-notifications .page-hero h1,
+html[data-theme="light"] body.page-notifications .page-hero h2,
+:root[data-theme="light"] body.page-centro-notificaciones .page-hero h1,
+:root[data-theme="light"] body.page-centro-notificaciones .page-hero h2,
+:root[data-theme="light"] body.page-notifications .page-hero h1,
+:root[data-theme="light"] body.page-notifications .page-hero h2 {
+  color: #172033 !important;
+  text-shadow: none !important;
+}
+
+html[data-theme="light"] body.page-centro-notificaciones .page-hero p,
+html[data-theme="light"] body.page-notifications .page-hero p,
+:root[data-theme="light"] body.page-centro-notificaciones .page-hero p,
+:root[data-theme="light"] body.page-notifications .page-hero p {
+  color: #475569 !important;
+}
+
+/* Cards principales */
+html[data-theme="light"] body.page-centro-notificaciones .notification-admin-card,
+html[data-theme="light"] body.page-centro-notificaciones .notifications-admin-card,
+html[data-theme="light"] body.page-centro-notificaciones .notification-center-card,
+html[data-theme="light"] body.page-centro-notificaciones .center-panel,
+html[data-theme="light"] body.page-centro-notificaciones .admin-panel,
+html[data-theme="light"] body.page-notifications .notification-admin-card,
+html[data-theme="light"] body.page-notifications .notifications-admin-card,
+html[data-theme="light"] body.page-notifications .notification-center-card,
+html[data-theme="light"] body.page-notifications .center-panel,
+html[data-theme="light"] body.page-notifications .admin-panel,
+:root[data-theme="light"] body.page-centro-notificaciones .notification-admin-card,
+:root[data-theme="light"] body.page-centro-notificaciones .notifications-admin-card,
+:root[data-theme="light"] body.page-centro-notificaciones .notification-center-card,
+:root[data-theme="light"] body.page-centro-notificaciones .center-panel,
+:root[data-theme="light"] body.page-centro-notificaciones .admin-panel,
+:root[data-theme="light"] body.page-notifications .notification-admin-card,
+:root[data-theme="light"] body.page-notifications .notifications-admin-card,
+:root[data-theme="light"] body.page-notifications .notification-center-card,
+:root[data-theme="light"] body.page-notifications .center-panel,
+:root[data-theme="light"] body.page-notifications .admin-panel {
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.94), rgba(250,245,255,.86)) !important;
+  border-color: rgba(167,139,250,.22) !important;
+  color: #172033 !important;
+  box-shadow: 0 16px 36px rgba(85,72,120,.10) !important;
+}
+
+/* Empty state bien visible */
+html[data-theme="light"] .cn-empty-readable,
+html[data-theme="light"] .notifications-empty,
+html[data-theme="light"] .empty-state,
+:root[data-theme="light"] .cn-empty-readable,
+:root[data-theme="light"] .notifications-empty,
+:root[data-theme="light"] .empty-state {
+  background:
+    radial-gradient(circle at top, rgba(224,242,254,.70), transparent 44%),
+    linear-gradient(135deg, rgba(255,255,255,.92), rgba(250,245,255,.82)) !important;
+  border: 1px dashed rgba(14,165,233,.30) !important;
+  color: #334155 !important;
+  opacity: 1 !important;
+}
+
+html[data-theme="light"] .cn-empty-readable *,
+html[data-theme="light"] .notifications-empty *,
+html[data-theme="light"] .empty-state *,
+:root[data-theme="light"] .cn-empty-readable *,
+:root[data-theme="light"] .notifications-empty *,
+:root[data-theme="light"] .empty-state * {
+  color: #334155 !important;
+  opacity: 1 !important;
+}
+
+html[data-theme="light"] .cn-empty-readable p,
+html[data-theme="light"] .notifications-empty p,
+html[data-theme="light"] .empty-state p,
+html[data-theme="light"] .cn-empty-readable span,
+html[data-theme="light"] .notifications-empty span,
+html[data-theme="light"] .empty-state span,
+:root[data-theme="light"] .cn-empty-readable p,
+:root[data-theme="light"] .notifications-empty p,
+:root[data-theme="light"] .empty-state p,
+:root[data-theme="light"] .cn-empty-readable span,
+:root[data-theme="light"] .notifications-empty span,
+:root[data-theme="light"] .empty-state span {
+  color: #64748b !important;
+}
+
+/* Botones de acción del centro */
+html[data-theme="light"] body.page-centro-notificaciones .btn,
+html[data-theme="light"] body.page-centro-notificaciones button,
+html[data-theme="light"] body.page-notifications .btn,
+html[data-theme="light"] body.page-notifications button,
+:root[data-theme="light"] body.page-centro-notificaciones .btn,
+:root[data-theme="light"] body.page-centro-notificaciones button,
+:root[data-theme="light"] body.page-notifications .btn,
+:root[data-theme="light"] body.page-notifications button {
+  text-shadow: none !important;
+}
+
+html[data-theme="light"] body.page-centro-notificaciones .btn-danger,
+html[data-theme="light"] body.page-centro-notificaciones .danger-btn,
+html[data-theme="light"] body.page-centro-notificaciones .clear-btn,
+html[data-theme="light"] body.page-notifications .btn-danger,
+html[data-theme="light"] body.page-notifications .danger-btn,
+html[data-theme="light"] body.page-notifications .clear-btn,
+:root[data-theme="light"] body.page-centro-notificaciones .btn-danger,
+:root[data-theme="light"] body.page-centro-notificaciones .danger-btn,
+:root[data-theme="light"] body.page-centro-notificaciones .clear-btn,
+:root[data-theme="light"] body.page-notifications .btn-danger,
+:root[data-theme="light"] body.page-notifications .danger-btn,
+:root[data-theme="light"] body.page-notifications .clear-btn {
+  background: rgba(252,231,243,.86) !important;
+  border-color: rgba(244,114,182,.38) !important;
+  color: #831843 !important;
+}
+
+/* Labels y headings */
+html[data-theme="light"] body.page-centro-notificaciones label,
+html[data-theme="light"] body.page-centro-notificaciones .eyebrow,
+html[data-theme="light"] body.page-centro-notificaciones h2,
+html[data-theme="light"] body.page-centro-notificaciones h3,
+html[data-theme="light"] body.page-notifications label,
+html[data-theme="light"] body.page-notifications .eyebrow,
+html[data-theme="light"] body.page-notifications h2,
+html[data-theme="light"] body.page-notifications h3,
+:root[data-theme="light"] body.page-centro-notificaciones label,
+:root[data-theme="light"] body.page-centro-notificaciones .eyebrow,
+:root[data-theme="light"] body.page-centro-notificaciones h2,
+:root[data-theme="light"] body.page-centro-notificaciones h3,
+:root[data-theme="light"] body.page-notifications label,
+:root[data-theme="light"] body.page-notifications .eyebrow,
+:root[data-theme="light"] body.page-notifications h2,
+:root[data-theme="light"] body.page-notifications h3 {
+  color: #334155 !important;
+}
+
+/* Eyebrow en azul/lila legible */
+html[data-theme="light"] body.page-centro-notificaciones .eyebrow,
+html[data-theme="light"] body.page-notifications .eyebrow,
+:root[data-theme="light"] body.page-centro-notificaciones .eyebrow,
+:root[data-theme="light"] body.page-notifications .eyebrow {
+  color: #4f46e5 !important;
+}

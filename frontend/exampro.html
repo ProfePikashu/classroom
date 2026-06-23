@@ -283,6 +283,106 @@
         text-align:center;
       }
     }
+  
+    /* === EXAMPRO LIGHT PASTEL INLINE FIX 20260622 === */
+
+    html[data-theme="light"] body.page-exampro .exampro-shell,
+    :root[data-theme="light"] body.page-exampro .exampro-shell{
+      min-height:calc(100vh - 230px);
+    }
+
+    html[data-theme="light"] body.page-exampro .exampro-access-clean,
+    :root[data-theme="light"] body.page-exampro .exampro-access-clean{
+      border:1px solid rgba(167,139,250,.26) !important;
+      background:
+        radial-gradient(circle at 15% 20%, rgba(207,250,254,.86), transparent 34%),
+        radial-gradient(circle at 92% 8%, rgba(250,232,255,.82), transparent 38%),
+        radial-gradient(circle at 85% 85%, rgba(252,231,243,.62), transparent 34%),
+        linear-gradient(135deg, rgba(255,255,255,.96), rgba(245,243,255,.88)) !important;
+      box-shadow:
+        0 22px 54px rgba(85,72,120,.16),
+        0 0 0 1px rgba(255,255,255,.60) inset !important;
+      color:#172033 !important;
+    }
+
+    html[data-theme="light"] body.page-exampro .exampro-access-clean::before,
+    :root[data-theme="light"] body.page-exampro .exampro-access-clean::before{
+      border-color:rgba(167,139,250,.18) !important;
+      background:rgba(255,255,255,.14);
+    }
+
+    html[data-theme="light"] body.page-exampro .exampro-access-clean::after,
+    :root[data-theme="light"] body.page-exampro .exampro-access-clean::after{
+      background:rgba(186,230,253,.42) !important;
+      filter:blur(14px) !important;
+    }
+
+    html[data-theme="light"] body.page-exampro .exampro-access-clean .section-kicker,
+    :root[data-theme="light"] body.page-exampro .exampro-access-clean .section-kicker{
+      border-color:rgba(14,165,233,.26) !important;
+      background:rgba(224,242,254,.82) !important;
+      color:#075985 !important;
+      box-shadow:none !important;
+    }
+
+    html[data-theme="light"] body.page-exampro .exampro-access-clean h3,
+    :root[data-theme="light"] body.page-exampro .exampro-access-clean h3{
+      color:#0f8ea3 !important;
+      text-shadow:
+        1px 1px 0 rgba(255,255,255,.96),
+        -1px -1px 0 rgba(186,230,253,.54) !important;
+    }
+
+    html[data-theme="light"] body.page-exampro .exampro-access-clean p,
+    html[data-theme="light"] body.page-exampro .exampro-access-points li,
+    html[data-theme="light"] body.page-exampro .exampro-open-note,
+    :root[data-theme="light"] body.page-exampro .exampro-access-clean p,
+    :root[data-theme="light"] body.page-exampro .exampro-access-points li,
+    :root[data-theme="light"] body.page-exampro .exampro-open-note{
+      color:#475569 !important;
+    }
+
+    html[data-theme="light"] body.page-exampro .exampro-access-points i,
+    :root[data-theme="light"] body.page-exampro .exampro-access-points i{
+      color:#0f8ea3 !important;
+      background:rgba(224,242,254,.86) !important;
+      border-color:rgba(14,165,233,.24) !important;
+      box-shadow:none !important;
+    }
+
+    html[data-theme="light"] body.page-exampro .exampro-orb,
+    :root[data-theme="light"] body.page-exampro .exampro-orb{
+      border-color:rgba(167,139,250,.28) !important;
+      background:
+        radial-gradient(circle at 28% 20%, rgba(186,230,253,.82), transparent 38%),
+        radial-gradient(circle at 70% 78%, rgba(252,231,243,.76), transparent 40%),
+        rgba(255,255,255,.74) !important;
+      box-shadow:
+        inset 0 0 34px rgba(255,255,255,.62),
+        0 18px 38px rgba(85,72,120,.14) !important;
+    }
+
+    html[data-theme="light"] body.page-exampro .exampro-orb i,
+    :root[data-theme="light"] body.page-exampro .exampro-orb i{
+      color:#0f8ea3 !important;
+      filter:drop-shadow(0 8px 14px rgba(14,165,233,.18)) !important;
+    }
+
+    html[data-theme="light"] body.page-exampro .exampro-orb span,
+    :root[data-theme="light"] body.page-exampro .exampro-orb span{
+      border-color:rgba(14,165,233,.28) !important;
+      background:rgba(224,242,254,.92) !important;
+      color:#075985 !important;
+    }
+
+    html[data-theme="light"] body.page-exampro .btn-exampro-open,
+    :root[data-theme="light"] body.page-exampro .btn-exampro-open{
+      background:linear-gradient(135deg,#c4b5fd,#f0abfc) !important;
+      color:#2e1065 !important;
+      border-color:rgba(147,51,234,.20) !important;
+      box-shadow:0 10px 24px rgba(85,72,120,.12) !important;
+    }
+
   </style>
 
 </head>
@@ -463,7 +563,7 @@
             <h3>ExamPro</h3>
 
             <p>
-              Abrí ExamPro en una pestaÍ±a nueva para consultar tus exámenes, recuperatorios
+              Abrí ExamPro en una pestaña nueva para consultar tus exámenes, recuperatorios
               y devoluciones corregidas. Este Classroom queda abierto para que puedas volver
               a tus clases y materiales cuando lo necesites.
             </p>
@@ -491,7 +591,7 @@
 
               <span class="exampro-open-note">
                 <i class="fa-solid fa-window-restore"></i>
-                Se abre en una pestaÍ±a nueva.
+                Se abre en una pestaña nueva.
               </span>
             </div>
           </div>

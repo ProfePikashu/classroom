@@ -949,3 +949,191 @@
     setTimeout(init, 250);
   }
 })();
+
+
+/* === CENTRO NOTIFICACIONES RUNTIME TEXT FIX 20260622 === */
+(function(){
+  const fixes = [
+    ["Administración", "Administración"],
+    ["administración", "administración"],
+    ["Notificación", "Notificación"],
+    ["notificación", "notificación"],
+    ["académicas", "académicas"],
+    ["Gestión", "Gestión"],
+    ["Título", "Título"],
+    ["título", "título"],
+    ["Aviso común", "Aviso común"],
+    ["Escribí", "Escribí"],
+    ["podrá", "podrá"],
+    ["cuáles", "cuáles"],
+    ["categorías", "categorías"],
+    ["todavía", "todavía"],
+    ["Creá", "Creá"],
+    ["Amarillo — aviso", "Amarillo — aviso"],
+    ["Guardar notificación", "Guardar notificación"],
+    ["Nueva notificación", "Nueva notificación"],
+    ["No hay notificaciones todavía.", "No hay notificaciones todavía."],
+    ["Creá la primera desde el formulario de la izquierda.", "Creá la primera desde el formulario de la izquierda."]
+  ];
+
+  function fixString(value){
+    let out = value;
+    for (const [bad, good] of fixes){
+      out = out.split(bad).join(good);
+    }
+    return out;
+  }
+
+  function patchTexts(){
+    const selectors = "h1,h2,h3,h4,p,span,small,strong,label,button,option";
+    document.querySelectorAll(selectors).forEach((el) => {
+      if (!el.children.length && el.textContent) {
+        const fixed = fixString(el.textContent);
+        if (fixed !== el.textContent) {
+          el.textContent = fixed;
+        }
+      }
+    });
+
+    document.querySelectorAll("input,textarea").forEach((el) => {
+      if (el.placeholder) {
+        const fixed = fixString(el.placeholder);
+        if (fixed !== el.placeholder) {
+          el.placeholder = fixed;
+        }
+      }
+    });
+
+    document.querySelectorAll("option").forEach((el) => {
+      if (el.textContent) {
+        const fixed = fixString(el.textContent);
+        if (fixed !== el.textContent) {
+          el.textContent = fixed;
+        }
+      }
+    });
+  }
+
+  function patchEmptyState(){
+    const blocks = Array.from(document.querySelectorAll("div,section,article"));
+    const empty = blocks.find(el => {
+      const t = (el.textContent || "").replace(/\s+/g, " ").trim();
+      return t.includes("No hay notificaciones todavía") || t.includes("Creá la primera desde el formulario de la izquierda");
+    });
+
+    if (empty) {
+      empty.classList.add("cn-empty-readable");
+    }
+  }
+
+  function runFix(){
+    patchTexts();
+    patchEmptyState();
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", runFix);
+  } else {
+    runFix();
+  }
+
+  setTimeout(runFix, 300);
+  setTimeout(runFix, 1000);
+})();
+
+/* === CENTRO NOTIFICACIONES MOJIBAKE FINAL RUNTIME 20260622 === */
+(function centroNotificacionesMojibakeFinalRuntime() {
+  "use strict";
+
+  const fixes = [
+    ["Ã¡", "á"], ["Ã©", "é"], ["Ã­", "í"], ["Ã³", "ó"], ["Ãº", "ú"],
+    ["Ã±", "ñ"], ["Ã‘", "Ñ"], ["Ã¼", "ü"],
+    ["â€“", "—"], ["â€”", "—"], ["â€˜", "‘"], ["â€™", "’"],
+    ["â€œ", "“"], ["â€", "”"], ["â€¦", "…"],
+    ["Â¿", "¿"], ["Â¡", "¡"], ["Â°", "°"], ["Â·", "·"], ["Â ", " "]
+  ];
+
+  function fixString(value) {
+    let output = String(value || "");
+
+    for (const [bad, good] of fixes) {
+      output = output.split(bad).join(good);
+    }
+
+    return output;
+  }
+
+  function patchTextNode(node) {
+    const fixed = fixString(node.nodeValue);
+
+    if (fixed !== node.nodeValue) {
+      node.nodeValue = fixed;
+    }
+  }
+
+  function patchAttributes(el) {
+    ["placeholder", "title", "aria-label", "value"].forEach((attr) => {
+      if (!el.hasAttribute || !el.hasAttribute(attr)) return;
+
+      const value = el.getAttribute(attr);
+      const fixed = fixString(value);
+
+      if (fixed !== value) {
+        el.setAttribute(attr, fixed);
+      }
+    });
+  }
+
+  function patchAllText(root = document.body) {
+    if (!root) return;
+
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+
+    let node;
+    while ((node = walker.nextNode())) {
+      patchTextNode(node);
+    }
+
+    root.querySelectorAll?.("input, textarea, select, option, button, [title], [aria-label]").forEach(patchAttributes);
+  }
+
+  function patchEmptyState() {
+    const candidates = Array.from(document.querySelectorAll("div, section, article"));
+
+    candidates.forEach((el) => {
+      const text = fixString(el.textContent || "").replace(/\s+/g, " ").trim();
+
+      if (
+        text.includes("No hay notificaciones todavía") ||
+        text.includes("Creá la primera") ||
+        text.includes("No hay notificaciones todav")
+      ) {
+        el.classList.add("cn-empty-readable");
+      }
+    });
+  }
+
+  function run() {
+    patchAllText();
+    patchEmptyState();
+  }
+
+  const observer = new MutationObserver(() => {
+    window.requestAnimationFrame(run);
+  });
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", () => {
+      run();
+      observer.observe(document.body, { childList: true, subtree: true, characterData: true });
+    });
+  } else {
+    run();
+    observer.observe(document.body, { childList: true, subtree: true, characterData: true });
+  }
+
+  setTimeout(run, 250);
+  setTimeout(run, 900);
+
+  window.ClassroomCentroMojibakeFix = { run, fixString };
+})();
