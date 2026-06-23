@@ -2409,7 +2409,7 @@ if (String(item.id) !== String(id)) return item;
         <div class="home-cmd-content">
           <div class="home-cmd-tags">
             <span>${escapeHtml(labelFor(type, severity))}</span>
-            <span>${escapeHtml(type.toUpperCase())}</span>
+            <span>${escapeHtml(({ academic: "ACADÉMICA", announcement: "AVISO", system: "SISTEMA", community: "COMUNIDAD" }[type] || type).toUpperCase())}</span>
           </div>
 
           <h3>${escapeHtml(item.title || "Notificación")}</h3>

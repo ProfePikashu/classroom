@@ -1287,3 +1287,202 @@
     init();
   }
 })();
+
+/* === CENTRO NOTIFICATION CARD POLISH RUNTIME 20260622 === */
+(function centroNotificationCardPolishRuntime() {
+  "use strict";
+
+  const WORD_FIXES = [
+    ["ACADEMIC", "Académica"],
+    ["ANNOUNCEMENT", "Aviso"],
+    ["COMMUNITY", "Comunidad"],
+    ["SYSTEM", "Sistema"],
+    ["DANGER", "Rojo"],
+    ["WARNING", "Amarillo"],
+    ["INFO", "Azul"],
+    ["NEUTRAL", "Neutro"],
+    [" all ", " Todos "],
+    [" unread ", " No leída "],
+    [" read ", " Leída "],
+  ];
+
+  function fixText(value) {
+    let out = String(value || "");
+
+    out = out.replace(/\bACADEMIC\b/g, "Académica");
+    out = out.replace(/\bANNOUNCEMENT\b/g, "Aviso");
+    out = out.replace(/\bCOMMUNITY\b/g, "Comunidad");
+    out = out.replace(/\bSYSTEM\b/g, "Sistema");
+    out = out.replace(/\bDANGER\b/g, "Rojo");
+    out = out.replace(/\bWARNING\b/g, "Amarillo");
+    out = out.replace(/\bINFO\b/g, "Azul");
+    out = out.replace(/\bNEUTRAL\b/g, "Neutro");
+    out = out.replace(/\ball\b/g, "Todos");
+    out = out.replace(/\bunread\b/g, "No leída");
+    out = out.replace(/\bread\b/g, "Leída");
+
+    for (const [bad, good] of WORD_FIXES) {
+      out = out.split(bad).join(good);
+    }
+
+    return out;
+  }
+
+  function patchTextNodes(root = document.body) {
+    if (!root) return;
+
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    let node;
+
+    while ((node = walker.nextNode())) {
+      const fixed = fixText(node.nodeValue);
+
+      if (fixed !== node.nodeValue) {
+        node.nodeValue = fixed;
+      }
+    }
+  }
+
+  function hasNotificationActions(el) {
+    const text = (el.textContent || "").toLowerCase();
+
+    return (
+      text.includes("editar") &&
+      text.includes("reenviar") &&
+      text.includes("borrar")
+    );
+  }
+
+  function isTooBig(el) {
+    const text = (el.textContent || "");
+    return text.length > 1200;
+  }
+
+  function findCardFromButton(button) {
+    let node = button;
+
+    for (let i = 0; i < 8 && node && node !== document.body; i += 1) {
+      if (hasNotificationActions(node) && !isTooBig(node)) {
+        return node;
+      }
+
+      node = node.parentElement;
+    }
+
+    return null;
+  }
+
+  function severityFromText(text) {
+    const t = String(text || "").toLowerCase();
+
+    if (t.includes("rojo") || t.includes("danger") || t.includes("académica") || t.includes("academica")) {
+      return "danger";
+    }
+
+    if (t.includes("amarillo") || t.includes("warning")) {
+      return "warning";
+    }
+
+    if (t.includes("azul") || t.includes("info") || t.includes("comunidad")) {
+      return "info";
+    }
+
+    if (t.includes("violeta") || t.includes("sistema") || t.includes("system") || t.includes("neutral")) {
+      return "neutral";
+    }
+
+    return "neutral";
+  }
+
+  function patchCards() {
+    const buttons = Array.from(document.querySelectorAll("button, a"))
+      .filter((el) => /editar|reenviar|borrar|marcar leída|marcar leida/i.test(el.textContent || ""));
+
+    const cards = new Set();
+
+    buttons.forEach((button) => {
+      const card = findCardFromButton(button);
+
+      if (card) {
+        cards.add(card);
+      }
+    });
+
+    cards.forEach((card) => {
+      const text = card.textContent || "";
+      const severity = severityFromText(text);
+
+      card.classList.add("cn-polished-card");
+      card.classList.remove("cn-card-danger", "cn-card-warning", "cn-card-info", "cn-card-neutral");
+      card.classList.add(`cn-card-${severity}`);
+
+      card.querySelectorAll("button, a").forEach((action) => {
+        const label = (action.textContent || "").toLowerCase();
+
+        action.classList.add("cn-polished-action");
+
+        if (label.includes("borrar") || label.includes("limpiar")) {
+          action.classList.add("cn-polished-danger-action");
+        }
+      });
+
+      card.querySelectorAll(".badge, .chip, .pill, span, small").forEach((el) => {
+        const raw = (el.textContent || "").trim();
+
+        if (/^(académica|academica|aviso|sistema|comunidad|rojo|azul|violeta|amarillo|todos|no leída|no leida|leída|leida|staff)$/i.test(raw)) {
+          el.classList.add("cn-polished-chip");
+        }
+      });
+    });
+
+    document.body.dataset.cnPolishedCards = String(cards.size);
+  }
+
+  function run() {
+    patchTextNodes();
+    patchCards();
+  }
+
+  let scheduled = false;
+
+  function schedule() {
+    if (scheduled) return;
+
+    scheduled = true;
+
+    requestAnimationFrame(() => {
+      scheduled = false;
+      run();
+    });
+  }
+
+  const observer = new MutationObserver(schedule);
+
+  function init() {
+    run();
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+    });
+
+    window.addEventListener("classroom:notifications-updated", schedule);
+
+    setTimeout(run, 300);
+    setTimeout(run, 1200);
+    setTimeout(run, 2500);
+  }
+
+  window.ClassroomCentroNotificationPolish = {
+    run,
+    patchCards,
+    patchTextNodes,
+  };
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+})();
