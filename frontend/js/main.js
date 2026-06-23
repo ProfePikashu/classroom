@@ -1030,3 +1030,97 @@ document.addEventListener("DOMContentLoaded", () => {
   if (!window.ClassroomUseLocalNotifications) initNotificationPrefsCard();
   refreshClassroomNewsFromApi();
 });
+
+/* === ANIMATED THEME SWITCH 20260622 === */
+(function animatedThemeSwitch() {
+  "use strict";
+
+  function getTheme() {
+    return document.documentElement.getAttribute("data-theme") || "dark";
+  }
+
+  function enhanceToggle(button) {
+    if (!button || button.dataset.themeSwitchReady === "1") return;
+
+    button.dataset.themeSwitchReady = "1";
+    button.classList.add("theme-switch");
+    button.setAttribute("aria-label", "Cambiar entre modo claro y oscuro");
+    button.setAttribute("title", "Cambiar tema");
+
+    button.innerHTML = `
+      <span class="theme-switch-track" aria-hidden="true"></span>
+
+      <span class="theme-switch-stars" aria-hidden="true">
+        <span></span>
+        <span></span>
+        <span></span>
+      </span>
+
+      <span class="theme-switch-icon theme-switch-moon" aria-hidden="true">
+        <i class="fa-solid fa-moon"></i>
+      </span>
+
+      <span class="theme-switch-icon theme-switch-sun" aria-hidden="true">
+        <i class="fa-solid fa-sun"></i>
+      </span>
+
+      <span class="theme-switch-thumb" aria-hidden="true"></span>
+    `;
+
+    syncButton(button);
+  }
+
+  function syncButton(button) {
+    if (!button) return;
+
+    const theme = getTheme();
+
+    button.dataset.theme = theme;
+    button.setAttribute("aria-pressed", theme === "light" ? "true" : "false");
+  }
+
+  function syncAll() {
+    document.querySelectorAll("#themeToggle, .theme-toggle").forEach((button) => {
+      enhanceToggle(button);
+      syncButton(button);
+    });
+  }
+
+  function init() {
+    syncAll();
+
+    const observer = new MutationObserver(() => {
+      syncAll();
+    });
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["data-theme"],
+    });
+
+    window.addEventListener("storage", (event) => {
+      if (String(event.key || "").toLowerCase().includes("theme")) {
+        syncAll();
+      }
+    });
+
+    document.addEventListener("click", (event) => {
+      const button = event.target.closest?.("#themeToggle, .theme-toggle");
+      if (!button) return;
+
+      // Dejamos que el handler original cambie el tema y sincronizamos después.
+      setTimeout(syncAll, 40);
+      setTimeout(syncAll, 260);
+    });
+  }
+
+  window.ClassroomAnimatedThemeSwitch = {
+    sync: syncAll,
+  };
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+})();
