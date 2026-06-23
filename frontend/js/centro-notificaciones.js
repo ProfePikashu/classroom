@@ -760,6 +760,86 @@
     form.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
+  function adminSeverityClass(item) {
+    const raw = String(item?.severity || "").trim().toLowerCase();
+
+    if (raw === "danger" || raw === "red" || raw === "rojo") return "danger";
+    if (raw === "warning" || raw === "yellow" || raw === "amarillo") return "warning";
+    if (raw === "info" || raw === "blue" || raw === "azul") return "info";
+
+    return "neutral";
+  }
+
+  function adminSeverityColorClass(severity) {
+    if (severity === "danger") return "red";
+    if (severity === "warning") return "yellow";
+    if (severity === "info") return "blue";
+    return "violet";
+  }
+
+  function adminSeverityLabel(severity) {
+    if (severity === "danger") return "Rojo";
+    if (severity === "warning") return "Amarillo";
+    if (severity === "info") return "Azul";
+    return "Violeta";
+  }
+
+  function adminIconClass(severity) {
+    if (severity === "danger") return "fa-triangle-exclamation";
+    if (severity === "warning") return "fa-bullhorn";
+    if (severity === "info") return "fa-comments";
+    return "fa-bell";
+  }
+
+  function adminTypeLabel(type) {
+    const raw = String(type || "").trim().toLowerCase();
+
+    if (raw === "academic") return "Académica";
+    if (raw === "community") return "Comunidad";
+    if (raw === "system") return "Sistema";
+    if (raw === "announcement") return "Aviso";
+
+    return typeLabel ? typeLabel(type || "announcement") : (type || "Aviso");
+  }
+
+  function adminAudienceLabel(value) {
+    const raw = String(value || "all").trim().toLowerCase();
+
+    if (raw === "all") return "Todos";
+    if (raw === "students") return "Alumnos";
+    if (raw === "staff") return "Docentes y moderadores";
+    if (raw === "course-ayrpc-2025") return "AyRPC 2025";
+    if (raw === "course-ayrpc-2026") return "AyRPC 2026";
+
+    return value || "Todos";
+  }
+
+  function adminRoleLabel(value) {
+    const raw = String(value || "").trim().toLowerCase();
+
+    if (raw === "docente" || raw === "teacher") return "Docente";
+    if (raw === "classroom_moderator" || raw === "moderator") return "Moderador";
+    if (raw === "alumno" || raw === "student") return "Alumno";
+
+    return value || "";
+  }
+
+  function adminFormatDate(value) {
+    if (!value) return "";
+
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) return "";
+
+    return date.toLocaleString("es-AR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  }
+
   function renderBackendAdminList(items) {
     const list =
       document.querySelector("#notificationAdminList") ||
@@ -781,43 +861,86 @@
     }
 
     list.innerHTML = items.map((item) => {
-      const severity = item.severity || "neutral";
-      const type = item.type || "system";
+      const severity = adminSeverityClass(item);
+      const colorClass = adminSeverityColorClass(severity);
+      const icon = adminIconClass(severity);
+      const type = item.type || "announcement";
       const body = item.body || item.description || "";
+      const link = item.link_url || item.link || "";
+      const audience = item.audience_type || item.audience || "all";
       const recipients = item.recipients_count ?? item.recipientsCreated ?? item.recipients_created ?? 0;
       const unread = item.unread_count ?? item.unread ?? 0;
+      const createdAt = item.created_at || item.createdAt || "";
+      const updatedAt = item.updated_at || item.updatedAt || "";
+      const createdByName = item.created_by_name || item.actor || "Staff";
+      const createdByRole = adminRoleLabel(item.created_by_role || item.role || "");
+      const createdByTwitch = item.created_by_twitch ? `@${item.created_by_twitch}` : "";
+      const createdByDni = item.created_by_dni ? `DNI ${item.created_by_dni}` : "";
+
+      const creatorParts = [
+        createdByName,
+        createdByRole,
+        createdByTwitch,
+        createdByDni,
+      ].filter(Boolean);
+
+      const metaParts = [
+        `Audiencia: ${adminAudienceLabel(audience)}`,
+        `Destinatarios: ${recipients}`,
+        `No leídas: ${unread}`,
+        creatorParts.length ? `Creada por: ${creatorParts.join(" · ")}` : "",
+        createdAt ? `Creada: ${adminFormatDate(createdAt)}` : "",
+        updatedAt && updatedAt !== createdAt ? `Actualizada: ${adminFormatDate(updatedAt)}` : "",
+      ].filter(Boolean);
+
+      const unreadBadge = unread > 0 ? "No leída" : "Leída";
 
       return `
-        <article class="notification-admin-item is-${escapeHtml(severity)}" data-admin-notification-id="${escapeHtml(item.id)}">
-          <div class="notification-admin-item-main">
-            <div class="notification-admin-item-head">
-              <strong>${escapeHtml(item.title)}</strong>
-              <span>${escapeHtml(type)} · ${escapeHtml(severity)}</span>
+        <article class="notification-admin-item is-${escapeHtml(severity)} cn-existing-notification-card cn-full-notification-card cn-severity-${escapeHtml(colorClass)}" data-admin-notification-id="${escapeHtml(item.id)}">
+          <div class="notification-admin-item-icon">
+            <i class="fa-solid ${escapeHtml(icon)}"></i>
+          </div>
+
+          <div class="notification-admin-item-body">
+            <div class="notification-admin-item-top">
+              <div>
+                <h4>${escapeHtml(item.title || "Notificación")}</h4>
+
+                <div class="notification-admin-tags">
+                  <span>${escapeHtml(adminTypeLabel(type))}</span>
+                  <span>${escapeHtml(adminSeverityLabel(severity))}</span>
+                  <span>${escapeHtml(adminAudienceLabel(audience))}</span>
+                  <span>${escapeHtml(unreadBadge)}</span>
+                </div>
+              </div>
+
+              <small>${escapeHtml(adminFormatDate(createdAt))}</small>
             </div>
 
             <p>${escapeHtml(body)}</p>
 
-            <small>
-              Audiencia: ${escapeHtml(item.audience_type || item.audience || "all")}
-              ${item.course ? " · Curso: " + escapeHtml(item.course) : ""}
-              · Destinatarios: ${escapeHtml(recipients)}
-              · No leídas: ${escapeHtml(unread)}
-            </small>
-          </div>
+            ${link ? `<a class="notification-admin-link" href="${escapeHtml(link)}" target="_blank" rel="noopener noreferrer">${escapeHtml(link)}</a>` : ""}
 
-          <div class="notification-admin-item-actions">
-            <button type="button" data-backend-notification-edit="${escapeHtml(item.id)}">
-              <i class="fa-solid fa-pen"></i>
-              Editar
-            </button>
-            <button type="button" data-backend-notification-resend="${escapeHtml(item.id)}">
-              <i class="fa-solid fa-paper-plane"></i>
-              Reenviar
-            </button>
-            <button type="button" data-backend-notification-delete="${escapeHtml(item.id)}">
-              <i class="fa-solid fa-trash"></i>
-              Borrar
-            </button>
+            <small class="notification-admin-meta">
+              ${escapeHtml(metaParts.join(" · "))}
+            </small>
+
+            <div class="notification-admin-item-actions">
+              <button type="button" data-backend-notification-edit="${escapeHtml(item.id)}">
+                <i class="fa-solid fa-pen"></i>
+                Editar
+              </button>
+
+              <button type="button" data-backend-notification-resend="${escapeHtml(item.id)}">
+                <i class="fa-solid fa-paper-plane"></i>
+                Reenviar
+              </button>
+
+              <button type="button" class="danger" data-backend-notification-delete="${escapeHtml(item.id)}">
+                <i class="fa-solid fa-trash"></i>
+                Borrar
+              </button>
+            </div>
           </div>
         </article>
       `;
@@ -1188,204 +1311,6 @@
   window.ClassroomCentroMojibakeFix = { run, fixString };
 })();
 
-/* === CENTRO EXISTING NOTIFICATION FULL CARD MARKER V3 20260622 === */
-(function centroExistingNotificationFullCardMarkerV3() {
-  "use strict";
-
-  const COLOR_CLASSES = [
-    "cn-severity-red",
-    "cn-severity-blue",
-    "cn-severity-violet",
-    "cn-severity-yellow"
-  ];
-
-  function textOf(el) {
-    return String(el?.textContent || "")
-      .replace(/\s+/g, " ")
-      .trim()
-      .toLowerCase();
-  }
-
-  function detectSeverity(text) {
-    const t = String(text || "").toLowerCase();
-
-    if (t.includes("amarillo") || t.includes("warning")) return "yellow";
-    if (t.includes("violeta") || t.includes("lila") || t.includes("purple") || t.includes("sistema") || t.includes("neutro")) return "violet";
-    if (t.includes("azul") || t.includes("info") || t.includes("comunidad")) return "blue";
-    if (t.includes("rojo") || t.includes("danger") || t.includes("académica") || t.includes("academica") || t.includes("aviso")) return "red";
-
-    return "violet";
-  }
-
-  function isPanelOrPage(el) {
-    const text = textOf(el);
-
-    return (
-      el === document.body ||
-      text.includes("notificaciones existentes buscar por título") ||
-      text.includes("nueva notificación título tipo") ||
-      text.includes("crear / editar nueva notificación")
-    );
-  }
-
-  function hasNotificationIdentity(el) {
-    const text = textOf(el);
-
-    return (
-      text.includes("editar") &&
-      text.includes("reenviar") &&
-      text.includes("borrar") &&
-      (
-        text.includes("modo oscuro") ||
-        text.includes("nueva edicion") ||
-        text.includes("nueva edición") ||
-        text.includes("no abras") ||
-        text.includes("prueba de notificaciones") ||
-        text.includes("audiencia") ||
-        text.includes("destinatarios") ||
-        text.includes("no leída") ||
-        text.includes("no leida")
-      )
-    );
-  }
-
-  function isActionOnlyBlock(el) {
-    const text = textOf(el);
-
-    if (!text) return false;
-
-    return (
-      text.includes("editar") &&
-      text.includes("reenviar") &&
-      text.includes("borrar") &&
-      !text.includes("modo oscuro") &&
-      !text.includes("nueva edicion") &&
-      !text.includes("nueva edición") &&
-      !text.includes("no abras") &&
-      !text.includes("prueba de notificaciones") &&
-      !text.includes("audiencia") &&
-      !text.includes("destinatarios")
-    );
-  }
-
-  function findOuterCard(fromEl) {
-    let best = null;
-    let node = fromEl;
-    const startRect = fromEl.getBoundingClientRect();
-
-    for (let i = 0; i < 10 && node && node !== document.body; i += 1) {
-      const rect = node.getBoundingClientRect();
-
-      if (
-        hasNotificationIdentity(node) &&
-        !isPanelOrPage(node) &&
-        !isActionOnlyBlock(node) &&
-        rect.height >= 70 &&
-        rect.height <= 430 &&
-        rect.width >= startRect.width &&
-        rect.width <= 1400
-      ) {
-        /*
-          Queremos el ancestro más externo razonable:
-          - más ancho que el interno
-          - incluye icono/columna izquierda
-          - no llega al panel completo
-        */
-        best = node;
-      }
-
-      node = node.parentElement;
-    }
-
-    return best || fromEl;
-  }
-
-  function clearOldMarks() {
-    document.querySelectorAll(".cn-existing-notification-card").forEach((el) => {
-      el.classList.remove(
-        "cn-existing-notification-card",
-        "cn-full-notification-card",
-        ...COLOR_CLASSES
-      );
-    });
-  }
-
-  function markFullCards() {
-    const actions = Array.from(document.querySelectorAll("button, a"))
-      .filter((el) => {
-        const text = textOf(el);
-        return text.includes("editar") || text.includes("reenviar") || text.includes("borrar");
-      });
-
-    const cards = new Set();
-
-    actions.forEach((action) => {
-      const card = findOuterCard(action);
-
-      if (card && !isPanelOrPage(card)) {
-        cards.add(card);
-      }
-    });
-
-    clearOldMarks();
-
-    cards.forEach((card) => {
-      const severity = detectSeverity(card.textContent);
-
-      card.classList.add(
-        "cn-existing-notification-card",
-        "cn-full-notification-card",
-        `cn-severity-${severity}`
-      );
-    });
-
-    document.body.dataset.cnColorCards = String(cards.size);
-    // console.debug("[Centro cards pastel V3 full]", { cards: cards.size });
-  }
-
-  let scheduled = false;
-
-  function schedule() {
-    if (scheduled) return;
-
-    scheduled = true;
-
-    requestAnimationFrame(() => {
-      scheduled = false;
-      markFullCards();
-    });
-  }
-
-  function init() {
-    markFullCards();
-
-    const observer = new MutationObserver(schedule);
-
-    observer.observe(document.body, {
-      childList: true,
-      subtree: true,
-      characterData: true
-    });
-
-    window.addEventListener("classroom:notifications-updated", schedule);
-
-    setTimeout(markFullCards, 200);
-    setTimeout(markFullCards, 600);
-    setTimeout(markFullCards, 1400);
-    setTimeout(markFullCards, 2800);
-  }
-
-  window.ClassroomCentroCardColorsV3 = {
-    run: markFullCards
-  };
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", init);
-  } else {
-    init();
-  }
-})();
-
 /* === HIDE CENTER EMAIL CARD 20260622 === */
 (function hideCenterEmailCard() {
   "use strict";
@@ -1484,412 +1409,3 @@
   }
 })();
 
-/* === CENTRO REVEAL STABLE CARDS 20260623 === */
-(function centroRevealStableCards() {
-  "use strict";
-
-  function getExpectedCount() {
-    const candidates = Array.from(document.querySelectorAll("span, div, button, strong"))
-      .map((el) => String(el.textContent || "").trim())
-      .filter((txt) => /^\d+$/.test(txt))
-      .map(Number)
-      .filter((n) => n >= 0 && n <= 999);
-
-    // En esta pantalla suele estar el contador de existentes. Si no, no pasa nada.
-    return candidates.length ? Math.max(...candidates) : 0;
-  }
-
-  function countFinalCards() {
-    return document.querySelectorAll(".cn-existing-notification-card.cn-full-notification-card").length;
-  }
-
-  function hasEmptyState() {
-    const text = String(document.body.textContent || "").toLowerCase();
-    return text.includes("no hay notificaciones todavía") || text.includes("no hay notificaciones todav");
-  }
-
-  function runColorMarker() {
-    if (window.ClassroomCentroCardColorsV3 && typeof window.ClassroomCentroCardColorsV3.run === "function") {
-      window.ClassroomCentroCardColorsV3.run();
-    }
-  }
-
-  function reveal() {
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        document.documentElement.classList.remove("cn-center-preparing");
-        document.body.dataset.cnCenterStable = "true";
-      });
-    });
-  }
-
-  function tryReveal() {
-    runColorMarker();
-
-    const finalCards = countFinalCards();
-    const expected = getExpectedCount();
-
-    if (finalCards > 0) {
-      reveal();
-      return true;
-    }
-
-    if (expected === 0 || hasEmptyState()) {
-      reveal();
-      return true;
-    }
-
-    return false;
-  }
-
-  function init() {
-    let attempts = 0;
-    const maxAttempts = 24;
-
-    const timer = setInterval(() => {
-      attempts += 1;
-
-      if (tryReveal() || attempts >= maxAttempts) {
-        clearInterval(timer);
-        reveal();
-      }
-    }, 120);
-
-    window.addEventListener("classroom:notifications-updated", () => {
-      document.documentElement.classList.add("cn-center-preparing");
-
-      setTimeout(() => {
-        tryReveal();
-      }, 80);
-
-      setTimeout(() => {
-        tryReveal();
-      }, 240);
-    });
-  }
-
-  window.ClassroomCentroRevealStableCards = {
-    tryReveal,
-    reveal
-  };
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", init);
-  } else {
-    init();
-  }
-})();
-
-/* === CENTRO ADMIN FINAL CLEAN CARD 20260623 === */
-(function centroAdminFinalCleanCard() {
-  "use strict";
-
-  function clean(value) {
-    return String(value || "")
-      .replace(/\s+/g, " ")
-      .trim();
-  }
-
-  function normalizeType(value) {
-    const t = clean(value).toLowerCase();
-
-    if (t.includes("acad")) return "Académica";
-    if (t.includes("comunidad")) return "Comunidad";
-    if (t.includes("sistema")) return "Sistema";
-    if (t.includes("aviso")) return "Aviso";
-
-    return clean(value);
-  }
-
-  function normalizeSeverity(value) {
-    const t = clean(value).toLowerCase();
-
-    if (t.includes("rojo")) return "Rojo";
-    if (t.includes("azul")) return "Azul";
-    if (t.includes("violeta")) return "Violeta";
-    if (t.includes("amarillo")) return "Amarillo";
-    if (t.includes("neutro")) return "Neutro";
-
-    return clean(value);
-  }
-
-  function detectFromClass(card) {
-    const cls = String(card.className || "").toLowerCase();
-
-    if (cls.includes("warning") || cls.includes("yellow")) {
-      return { severity: "Amarillo", icon: "fa-bullhorn" };
-    }
-
-    if (cls.includes("info") || cls.includes("blue")) {
-      return { severity: "Azul", icon: "fa-comments" };
-    }
-
-    if (cls.includes("danger") || cls.includes("red")) {
-      return { severity: "Rojo", icon: "fa-triangle-exclamation" };
-    }
-
-    return { severity: "Violeta", icon: "fa-bell" };
-  }
-
-  function splitLinesFromOriginal(card) {
-    const clone = card.cloneNode(true);
-
-    clone.querySelectorAll(".cn-final-card-icon, .cn-final-card-body").forEach((el) => el.remove());
-
-    clone.querySelectorAll("button, a").forEach((el) => {
-      const text = clean(el.textContent);
-
-      if (/editar|reenviar|borrar|marcar/i.test(text)) {
-        el.remove();
-      }
-    });
-
-    return String(clone.innerText || "")
-      .split("\n")
-      .map(clean)
-      .filter(Boolean)
-      .filter((line) => !/^(editar|reenviar|borrar|marcar leída|marcar leida)$/i.test(line));
-  }
-
-  function parseTitleTypeSeverity(lines, detected) {
-    const first = clean(lines[0] || "");
-
-    const joinedFirst = clean(lines.slice(0, 3).join(" "));
-
-    const re = /^(.*?)(Académica|Academica|Comunidad|Sistema|Aviso)\s*[·.-]\s*(Rojo|Azul|Violeta|Amarillo|Neutro)\s*$/i;
-    const match = joinedFirst.match(re) || first.match(re);
-
-    if (match) {
-      return {
-        title: clean(match[1]) || first || "Notificación",
-        type: normalizeType(match[2]),
-        severity: normalizeSeverity(match[3])
-      };
-    }
-
-    const typeLine = lines.find((line) => /^(Académica|Academica|Comunidad|Sistema|Aviso)$/i.test(line));
-    const severityLine = lines.find((line) => /^(Rojo|Azul|Violeta|Amarillo|Neutro)$/i.test(line));
-
-    return {
-      title: first || "Notificación",
-      type: normalizeType(typeLine || ""),
-      severity: normalizeSeverity(severityLine || detected.severity || "")
-    };
-  }
-
-  function findDate(lines, card) {
-    const fromLines = lines.find((line) => /\d{1,2}\/\d{1,2}\/\d{2,4}/.test(line));
-
-    if (fromLines) return fromLines;
-
-    const candidates = Array.from(card.querySelectorAll("time, small, span, div"))
-      .map((el) => clean(el.textContent))
-      .filter(Boolean);
-
-    return candidates.find((line) => /\d{1,2}\/\d{1,2}\/\d{2,4}/.test(line)) || "";
-  }
-
-  function findMeta(lines) {
-    return lines.find((line) => /^Audiencia:/i.test(line)) || "";
-  }
-
-  function findMessage(lines, parsed, meta, date) {
-    const ignored = new Set([
-      parsed.title,
-      parsed.type,
-      parsed.severity,
-      meta,
-      date
-    ].map(clean).filter(Boolean));
-
-    return lines.find((line) => {
-      if (!line) return false;
-      if (ignored.has(line)) return false;
-      if (/^(Académica|Academica|Comunidad|Sistema|Aviso)$/i.test(line)) return false;
-      if (/^(Rojo|Azul|Violeta|Amarillo|Neutro)$/i.test(line)) return false;
-      if (/^Audiencia:/i.test(line)) return false;
-      if (/\d{1,2}\/\d{1,2}\/\d{2,4}/.test(line)) return false;
-      if (/^(Todos|staff|No leída|No leida)$/i.test(line)) return false;
-
-      return true;
-    }) || "";
-  }
-
-  function findActions(card) {
-    const direct = card.querySelector(".notification-admin-actions, .notification-admin-item-actions, .notification-actions");
-
-    if (direct && /editar|reenviar|borrar|marcar/i.test(direct.textContent || "")) {
-      return direct;
-    }
-
-    const button = Array.from(card.querySelectorAll("button, a"))
-      .find((el) => /editar|reenviar|borrar|marcar/i.test(el.textContent || ""));
-
-    if (!button) return null;
-
-    let node = button.parentElement;
-
-    for (let i = 0; i < 6 && node && node !== card; i += 1) {
-      const text = clean(node.textContent);
-
-      if (/editar/i.test(text) && /reenviar/i.test(text)) {
-        return node;
-      }
-
-      node = node.parentElement;
-    }
-
-    return button.parentElement || null;
-  }
-
-  function makeBadge(text) {
-    const span = document.createElement("span");
-
-    span.className = "cn-final-card-badge";
-    span.textContent = text;
-
-    return span;
-  }
-
-  function transform(card) {
-    if (!card || card.dataset.cnFinalTransforming === "1") return;
-
-    const rawSignature = clean(card.innerText);
-
-    if (card.dataset.cnFinalSignature === rawSignature && card.classList.contains("cn-final-admin-card")) {
-      return;
-    }
-
-    card.dataset.cnFinalTransforming = "1";
-
-    try {
-      const actions = findActions(card);
-      const lines = splitLinesFromOriginal(card);
-      const detected = detectFromClass(card);
-      const parsed = parseTitleTypeSeverity(lines, detected);
-      const meta = findMeta(lines);
-      const date = findDate(lines, card);
-      const message = findMessage(lines, parsed, meta, date);
-
-      let audience = "";
-      let unread = "";
-
-      const audienceMatch = meta.match(/Audiencia:\s*([^·]+)/i);
-      const unreadMatch = meta.match(/No leídas:\s*([0-9]+)/i) || meta.match(/No leidas:\s*([0-9]+)/i);
-
-      if (audienceMatch) audience = clean(audienceMatch[1]);
-      if (unreadMatch) unread = "No leída";
-
-      const icon = document.createElement("div");
-      icon.className = "cn-final-card-icon";
-      icon.innerHTML = `<i class="fa-solid ${detected.icon}" aria-hidden="true"></i>`;
-
-      const body = document.createElement("div");
-      body.className = "cn-final-card-body";
-
-      const top = document.createElement("div");
-      top.className = "cn-final-card-top";
-
-      const title = document.createElement("h3");
-      title.className = "cn-final-card-title";
-      title.textContent = parsed.title;
-
-      top.appendChild(title);
-
-      if (date) {
-        const dateEl = document.createElement("span");
-        dateEl.className = "cn-final-card-date";
-        dateEl.textContent = date;
-        top.appendChild(dateEl);
-      }
-
-      const badges = document.createElement("div");
-      badges.className = "cn-final-card-badges";
-
-      if (parsed.type) badges.appendChild(makeBadge(parsed.type));
-      if (parsed.severity) badges.appendChild(makeBadge(parsed.severity));
-      if (audience) badges.appendChild(makeBadge(audience));
-      if (unread) badges.appendChild(makeBadge(unread));
-
-      body.appendChild(top);
-      body.appendChild(badges);
-
-      if (message) {
-        const msg = document.createElement("p");
-        msg.className = "cn-final-card-message";
-        msg.textContent = message;
-        body.appendChild(msg);
-      }
-
-      if (meta) {
-        const metaEl = document.createElement("div");
-        metaEl.className = "cn-final-card-meta";
-        metaEl.textContent = meta;
-        body.appendChild(metaEl);
-      }
-
-      if (actions) {
-        actions.classList.add("cn-final-card-actions");
-        body.appendChild(actions);
-      }
-
-      card.innerHTML = "";
-      card.appendChild(icon);
-      card.appendChild(body);
-      card.classList.add("cn-final-admin-card");
-
-      card.dataset.cnFinalSignature = clean(card.innerText);
-    } finally {
-      card.dataset.cnFinalTransforming = "0";
-    }
-  }
-
-  function run() {
-    const cards = Array.from(document.querySelectorAll(".notification-admin-item"));
-
-    cards.forEach(transform);
-
-    document.body.dataset.cnFinalCards = String(cards.length);
-  }
-
-  let scheduled = false;
-
-  function schedule() {
-    if (scheduled) return;
-
-    scheduled = true;
-
-    requestAnimationFrame(() => {
-      scheduled = false;
-      run();
-    });
-  }
-
-  function init() {
-    run();
-
-    const observer = new MutationObserver(schedule);
-
-    observer.observe(document.body, {
-      childList: true,
-      subtree: true
-    });
-
-    window.addEventListener("classroom:notifications-updated", schedule);
-
-    setTimeout(run, 150);
-    setTimeout(run, 500);
-    setTimeout(run, 1200);
-    setTimeout(run, 2500);
-  }
-
-  window.ClassroomCentroFinalCards = {
-    run
-  };
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", init);
-  } else {
-    init();
-  }
-})();

@@ -16611,214 +16611,51 @@ html[data-theme="light"] .cn-existing-notification-card a:has(.fa-trash) i,
   display: none !important;
 }
 
-/* === CENTRO HIDE INTERMEDIATE RENDER 20260623 === */
+/* === CENTRO ADMIN SINGLE OFFICIAL CARD 20260623 === */
 /*
-  Evita que se vea el render intermedio/viejo del Centro.
-  Solo oculta las cards/listado de notificaciones existentes mientras JS estabiliza.
-  No toca formulario, header, sidebar, buscador ni botones superiores.
+  Centro de notificaciones:
+  - Un único render oficial: .notification-admin-item.
+  - No se transforma desde la campanita.
+  - No se usa #notificationsList.
 */
 
-html.cn-center-preparing .cn-existing-notification-card,
-html.cn-center-preparing .cn-full-notification-card,
-html.cn-center-preparing .admin-notification-card,
-html.cn-center-preparing .notification-card,
-html.cn-center-preparing [data-notification-id] {
-  visibility: hidden !important;
-}
-
-/* Si aparece el formato viejo sin clase todavía, lo ocultamos solo dentro del panel derecho. */
-html.cn-center-preparing .notifications-list > *,
-html.cn-center-preparing .notification-list > *,
-html.cn-center-preparing .admin-notifications-list > *,
-html.cn-center-preparing #notificationsList > *,
-html.cn-center-preparing #adminNotificationsList > *,
-html.cn-center-preparing #notificationsContainer > * {
-  visibility: hidden !important;
-}
-
-/* Cuando ya estabilizó, transición suave */
-.cn-existing-notification-card,
-.cn-full-notification-card {
-  transition:
-    background 220ms ease,
-    border-color 220ms ease,
-    box-shadow 220ms ease,
-    opacity 160ms ease !important;
-}
-
-/* === CENTRO STABLE NO GLOBAL FLICKER 20260623 === */
-/* El Centro no debe esconder/reformatear cards por refrescos globales de campanita. */
-body[data-cn-center-stable="true"] .cn-existing-notification-card,
-body[data-cn-center-stable="true"] .cn-full-notification-card {
-  visibility: visible !important;
-}
-
-/* === CENTRO ADMIN FINAL CLEAN CARD 20260623 === */
-/*
-  Render visual final para las cards del Centro.
-  Se aplica sobre .notification-admin-item reconstruida por JS.
-  No crea cards internas. No toca el resto del Classroom.
-*/
-
-.notification-admin-item.cn-final-admin-card {
-  display: grid !important;
-  grid-template-columns: 52px minmax(0, 1fr) !important;
-  gap: 14px 18px !important;
-  align-items: flex-start !important;
-  padding: 22px 26px !important;
-  min-height: 0 !important;
-}
-
-.cn-final-card-icon {
-  grid-column: 1 !important;
-  width: 46px !important;
-  height: 46px !important;
-  border-radius: 16px !important;
-  display: grid !important;
-  place-items: center !important;
-  font-size: 1.05rem !important;
-}
-
-.cn-final-card-body {
-  grid-column: 2 !important;
-  min-width: 0 !important;
-  width: 100% !important;
-}
-
-.cn-final-card-top {
-  display: flex !important;
-  align-items: flex-start !important;
-  justify-content: space-between !important;
-  gap: 14px !important;
-  width: 100% !important;
-}
-
-.cn-final-card-title {
-  margin: 0 !important;
-  font-size: 1.08rem !important;
-  line-height: 1.25 !important;
-  font-weight: 950 !important;
-  color: inherit !important;
-}
-
-.cn-final-card-date {
-  flex: 0 0 auto !important;
-  white-space: nowrap !important;
-  opacity: .8 !important;
-  font-size: .9rem !important;
-}
-
-.cn-final-card-badges {
-  display: flex !important;
-  flex-wrap: wrap !important;
-  gap: 7px !important;
-  margin-top: 8px !important;
-}
-
-.cn-final-card-badge {
-  display: inline-flex !important;
-  align-items: center !important;
-  padding: 4px 10px !important;
-  min-height: 22px !important;
-  border-radius: 999px !important;
-  font-size: .76rem !important;
-  line-height: 1 !important;
-  font-weight: 900 !important;
-  background: rgba(42, 65, 92, .72) !important;
-  color: #dff8ff !important;
-}
-
-.cn-final-card-message {
-  margin: 16px 0 0 !important;
-  font-size: .98rem !important;
+.notification-admin-meta {
+  display: block !important;
+  margin-top: 0.75rem !important;
+  color: rgba(235, 245, 255, 0.64) !important;
   line-height: 1.45 !important;
-  color: inherit !important;
+  font-weight: 750 !important;
 }
 
-.cn-final-card-meta {
-  margin-top: 10px !important;
-  font-size: .82rem !important;
-  font-weight: 850 !important;
-  opacity: .92 !important;
+.notification-admin-item.cn-existing-notification-card.cn-full-notification-card {
+  border-width: 2px !important;
+  border-radius: 22px !important;
 }
 
-.cn-final-card-actions {
+.notification-admin-item-actions {
   display: flex !important;
   flex-wrap: wrap !important;
-  align-items: center !important;
   justify-content: flex-start !important;
-  gap: 10px !important;
-  margin-top: 18px !important;
-  padding: 0 !important;
-  width: 100% !important;
-  background: transparent !important;
-  border: 0 !important;
-  box-shadow: none !important;
-  position: static !important;
-  transform: none !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  margin-top: 0.9rem !important;
 }
 
-.cn-final-card-actions button,
-.cn-final-card-actions a {
+.notification-admin-item-actions button {
   position: static !important;
   width: auto !important;
-  height: auto !important;
   min-width: auto !important;
-  margin: 0 !important;
   transform: none !important;
-  flex: 0 0 auto !important;
 }
 
-/* Iconos por severidad */
-.notification-admin-item.is-danger .cn-final-card-icon,
-.notification-admin-item.cn-severity-red .cn-final-card-icon {
-  background: rgba(255, 92, 146, .20) !important;
-  color: #ff7ea8 !important;
+html[data-theme="light"] .notification-admin-meta,
+:root[data-theme="light"] .notification-admin-meta {
+  color: rgba(32, 23, 53, 0.68) !important;
 }
 
-.notification-admin-item.is-info .cn-final-card-icon,
-.notification-admin-item.cn-severity-blue .cn-final-card-icon {
-  background: rgba(82, 164, 255, .20) !important;
-  color: #5aa8ff !important;
-}
-
-.notification-admin-item.is-warning .cn-final-card-icon,
-.notification-admin-item.cn-severity-yellow .cn-final-card-icon {
-  background: rgba(255, 205, 71, .20) !important;
-  color: #ffd166 !important;
-}
-
-.notification-admin-item.is-neutral .cn-final-card-icon,
-.notification-admin-item.cn-severity-violet .cn-final-card-icon {
-  background: rgba(170, 105, 255, .20) !important;
-  color: #b784ff !important;
-}
-
-/* Modo claro */
-html[data-theme="light"] .cn-final-card-badge,
-:root[data-theme="light"] .cn-final-card-badge {
-  background: rgba(255, 255, 255, .74) !important;
+html[data-theme="light"] .notification-admin-tags span,
+:root[data-theme="light"] .notification-admin-tags span {
+  background: rgba(255, 255, 255, 0.74) !important;
   color: #174366 !important;
-  box-shadow: 0 0 0 1px rgba(15, 23, 42, .05) !important;
-}
-
-html[data-theme="light"] .cn-final-card-date,
-:root[data-theme="light"] .cn-final-card-date {
-  color: #5b6380 !important;
-}
-
-@media (max-width: 720px) {
-  .notification-admin-item.cn-final-admin-card {
-    grid-template-columns: 1fr !important;
-  }
-
-  .cn-final-card-icon,
-  .cn-final-card-body {
-    grid-column: 1 !important;
-  }
-
-  .cn-final-card-top {
-    flex-direction: column !important;
-    gap: 6px !important;
-  }
+  border: 1px solid rgba(15, 23, 42, 0.05) !important;
 }
