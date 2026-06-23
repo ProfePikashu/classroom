@@ -879,7 +879,17 @@
         createdByName,
         createdByRole,
         createdByTwitch,
-      ].filter(Boolean);
+      ]
+        .filter(Boolean)
+        .filter((part, index, array) => {
+          const normalized = String(part || "").trim().toLowerCase();
+
+          if (!normalized) return false;
+
+          return array.findIndex((current) =>
+            String(current || "").trim().toLowerCase() === normalized
+          ) === index;
+        });
 
       const metaParts = [
         `Destinatarios: ${recipients}`,
