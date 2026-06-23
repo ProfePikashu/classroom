@@ -1137,3 +1137,153 @@
 
   window.ClassroomCentroMojibakeFix = { run, fixString };
 })();
+
+/* === NOTIFICATION LABELS SPANISH RUNTIME 20260622 === */
+(function notificationLabelsSpanishRuntime() {
+  "use strict";
+
+  const MAP = new Map([
+    ["academic", "Académica"],
+    ["academica", "Académica"],
+    ["announcement", "Aviso"],
+    ["notice", "Aviso"],
+    ["alert", "Aviso"],
+    ["system", "Sistema"],
+    ["community", "Comunidad"],
+    ["course", "Curso"],
+    ["activity", "Actividad"],
+    ["log", "Registro"],
+    ["news", "Novedad"],
+    ["newsletter", "Boletín"],
+    ["danger", "Rojo"],
+    ["red", "Rojo"],
+    ["warning", "Amarillo"],
+    ["yellow", "Amarillo"],
+    ["info", "Azul"],
+    ["blue", "Azul"],
+    ["neutral", "Neutro"],
+    ["purple", "Violeta"],
+    ["violet", "Violeta"],
+    ["success", "Verde"],
+    ["green", "Verde"],
+    ["all", "Todos"],
+    ["unread", "No leída"],
+    ["read", "Leída"]
+  ]);
+
+  function normalizeToken(token) {
+    return String(token || "")
+      .trim()
+      .toLowerCase()
+      .replace(/[()[\]{}:;,.]/g, "");
+  }
+
+  function translateText(text) {
+    let output = String(text || "");
+
+    // Frases combinadas comunes.
+    output = output.replace(/\bIMPORTANTE\s+ACADEMIC\b/gi, "IMPORTANTE ACADÉMICA");
+    output = output.replace(/\bIMPORTANTE\s+ANNOUNCEMENT\b/gi, "IMPORTANTE AVISO");
+    output = output.replace(/\bSISTEMA\s+SYSTEM\b/gi, "SISTEMA");
+    output = output.replace(/\bCOMMUNITY\b/gi, "Comunidad");
+    output = output.replace(/\bACADEMIC\b/gi, "Académica");
+    output = output.replace(/\bANNOUNCEMENT\b/gi, "Aviso");
+    output = output.replace(/\bSYSTEM\b/gi, "Sistema");
+    output = output.replace(/\bDANGER\b/gi, "Rojo");
+    output = output.replace(/\bWARNING\b/gi, "Amarillo");
+    output = output.replace(/\bINFO\b/gi, "Azul");
+    output = output.replace(/\bNEUTRAL\b/gi, "Neutro");
+    output = output.replace(/\ball\b/g, "Todos");
+
+    const trimmed = output.trim();
+    const mapped = MAP.get(normalizeToken(trimmed));
+
+    return mapped || output;
+  }
+
+  function patchTextNode(node) {
+    const fixed = translateText(node.nodeValue);
+
+    if (fixed !== node.nodeValue) {
+      node.nodeValue = fixed;
+    }
+  }
+
+  function patchElement(el) {
+    if (!el) return;
+
+    // Solo texto directo para no romper nodos con iconos.
+    if (!el.children.length && el.textContent) {
+      const fixed = translateText(el.textContent);
+
+      if (fixed !== el.textContent) {
+        el.textContent = fixed;
+      }
+    }
+
+    ["title", "aria-label", "data-type", "data-severity"].forEach((attr) => {
+      if (!el.hasAttribute || !el.hasAttribute(attr)) return;
+
+      const value = el.getAttribute(attr);
+      const fixed = translateText(value);
+
+      if (fixed !== value) {
+        el.setAttribute(attr, fixed);
+      }
+    });
+  }
+
+  function patch(root = document.body) {
+    if (!root) return;
+
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+
+    let node;
+    while ((node = walker.nextNode())) {
+      patchTextNode(node);
+    }
+
+    root.querySelectorAll?.(
+      ".home-cmd-tags span, .notification-chip, .notification-pill, .notification-badge, .badge, .chip, .pill, small, span, strong"
+    ).forEach(patchElement);
+  }
+
+  let scheduled = false;
+
+  function schedulePatch() {
+    if (scheduled) return;
+
+    scheduled = true;
+    requestAnimationFrame(() => {
+      scheduled = false;
+      patch();
+    });
+  }
+
+  const observer = new MutationObserver(schedulePatch);
+
+  function init() {
+    patch();
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      characterData: true
+    });
+
+    window.addEventListener("classroom:notifications-updated", schedulePatch);
+    setTimeout(patch, 300);
+    setTimeout(patch, 1200);
+  }
+
+  window.ClassroomNotificationSpanishLabels = {
+    patch,
+    translateText
+  };
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+})();

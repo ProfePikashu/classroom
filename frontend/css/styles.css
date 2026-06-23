@@ -16516,3 +16516,337 @@ html[data-theme="light"] .theme-switch-sun-shape,
     top: 3px;
   }
 }
+
+/* === NOTIFICATIONS CONTRAST AND LABEL POLISH 20260622 === */
+/*
+  Mejora pedida:
+  - Cards más gruesas/visibles.
+  - Celestes y amarillos más legibles en modo claro.
+  - Centro de notificaciones más parecido al boletín.
+  - Dark mode conserva estética cyber pero con bordes suaves.
+*/
+
+/* Cards del centro de notificaciones */
+.notification-card,
+.notification-item,
+.admin-notification-card,
+.notification-center-card,
+.notifications-admin-card [data-notification-id],
+.notifications-list [data-notification-id],
+.notification-list [data-notification-id],
+.notification-entry {
+  border-width: 2px !important;
+  border-style: solid !important;
+  border-radius: 24px !important;
+  padding: 22px 24px !important;
+}
+
+/* Cards del boletín/inicio */
+.home-avisos-stable-feed .home-cmd-card,
+.home-avisos-stable-feed .home-notice-card,
+.home-notice-card,
+.home-cmd-card[data-home-notification-id] {
+  border-width: 2px !important;
+  border-radius: 24px !important;
+  padding: 20px 22px !important;
+}
+
+/* Botones de acciones en notificaciones */
+.notification-actions button,
+.notification-actions .btn,
+.admin-notification-actions button,
+.admin-notification-actions .btn,
+.notification-card button,
+.notification-item button,
+.admin-notification-card button,
+.notification-center-card button {
+  min-height: 42px !important;
+  padding: 10px 16px !important;
+  border-radius: 999px !important;
+  border-width: 2px !important;
+  font-weight: 900 !important;
+}
+
+/* Chips / pills / badges */
+.notification-chip,
+.notification-pill,
+.notification-badge,
+.notification-card .badge,
+.notification-item .badge,
+.admin-notification-card .badge,
+.notification-center-card .badge,
+.home-cmd-tags span,
+.home-notice-card .badge,
+.home-notice-card .chip,
+.home-notice-card .pill {
+  border-radius: 999px !important;
+  padding: 5px 10px !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.01em !important;
+}
+
+/* ─────────────────────────────────────────────
+   LIGHT MODE: legibilidad reforzada
+───────────────────────────────────────────── */
+
+html[data-theme="light"] .notification-card,
+html[data-theme="light"] .notification-item,
+html[data-theme="light"] .admin-notification-card,
+html[data-theme="light"] .notification-center-card,
+html[data-theme="light"] .notifications-admin-card [data-notification-id],
+html[data-theme="light"] .notifications-list [data-notification-id],
+html[data-theme="light"] .notification-list [data-notification-id],
+html[data-theme="light"] .notification-entry,
+:root[data-theme="light"] .notification-card,
+:root[data-theme="light"] .notification-item,
+:root[data-theme="light"] .admin-notification-card,
+:root[data-theme="light"] .notification-center-card,
+:root[data-theme="light"] .notifications-admin-card [data-notification-id],
+:root[data-theme="light"] .notifications-list [data-notification-id],
+:root[data-theme="light"] .notification-list [data-notification-id],
+:root[data-theme="light"] .notification-entry {
+  background:
+    radial-gradient(circle at top left, rgba(255,255,255,.92), transparent 40%),
+    linear-gradient(135deg, rgba(255,255,255,.96), rgba(250,245,255,.88)) !important;
+  border-color: rgba(167,139,250,.34) !important;
+  color: #172033 !important;
+  box-shadow:
+    0 14px 32px rgba(85,72,120,.10),
+    inset 0 1px 0 rgba(255,255,255,.72) !important;
+}
+
+html[data-theme="light"] .notification-card h3,
+html[data-theme="light"] .notification-item h3,
+html[data-theme="light"] .admin-notification-card h3,
+html[data-theme="light"] .notification-center-card h3,
+html[data-theme="light"] .notification-card strong,
+html[data-theme="light"] .notification-item strong,
+html[data-theme="light"] .admin-notification-card strong,
+html[data-theme="light"] .notification-center-card strong,
+:root[data-theme="light"] .notification-card h3,
+:root[data-theme="light"] .notification-item h3,
+:root[data-theme="light"] .admin-notification-card h3,
+:root[data-theme="light"] .notification-center-card h3,
+:root[data-theme="light"] .notification-card strong,
+:root[data-theme="light"] .notification-item strong,
+:root[data-theme="light"] .admin-notification-card strong,
+:root[data-theme="light"] .notification-center-card strong {
+  color: #111827 !important;
+  font-weight: 950 !important;
+}
+
+html[data-theme="light"] .notification-card p,
+html[data-theme="light"] .notification-item p,
+html[data-theme="light"] .admin-notification-card p,
+html[data-theme="light"] .notification-center-card p,
+:root[data-theme="light"] .notification-card p,
+:root[data-theme="light"] .notification-item p,
+:root[data-theme="light"] .admin-notification-card p,
+:root[data-theme="light"] .notification-center-card p {
+  color: #334155 !important;
+}
+
+/* Danger/rojo -> rosa pastel con buen contraste */
+html[data-theme="light"] .notification-card.is-danger,
+html[data-theme="light"] .notification-card.danger,
+html[data-theme="light"] .notification-item.is-danger,
+html[data-theme="light"] .notification-item.danger,
+html[data-theme="light"] .admin-notification-card.is-danger,
+html[data-theme="light"] .admin-notification-card.danger,
+html[data-theme="light"] .notification-center-card.is-danger,
+html[data-theme="light"] .notification-center-card.danger,
+:root[data-theme="light"] .notification-card.is-danger,
+:root[data-theme="light"] .notification-card.danger,
+:root[data-theme="light"] .notification-item.is-danger,
+:root[data-theme="light"] .notification-item.danger,
+:root[data-theme="light"] .admin-notification-card.is-danger,
+:root[data-theme="light"] .admin-notification-card.danger,
+:root[data-theme="light"] .notification-center-card.is-danger,
+:root[data-theme="light"] .notification-center-card.danger {
+  background:
+    radial-gradient(circle at top left, rgba(252,231,243,.92), transparent 42%),
+    linear-gradient(135deg, rgba(255,245,249,.98), rgba(255,241,242,.90)) !important;
+  border-color: rgba(244,114,182,.52) !important;
+  color: #831843 !important;
+}
+
+/* Info/azul -> cian pastel más legible */
+html[data-theme="light"] .notification-card.is-info,
+html[data-theme="light"] .notification-card.info,
+html[data-theme="light"] .notification-item.is-info,
+html[data-theme="light"] .notification-item.info,
+html[data-theme="light"] .admin-notification-card.is-info,
+html[data-theme="light"] .admin-notification-card.info,
+html[data-theme="light"] .notification-center-card.is-info,
+html[data-theme="light"] .notification-center-card.info,
+:root[data-theme="light"] .notification-card.is-info,
+:root[data-theme="light"] .notification-card.info,
+:root[data-theme="light"] .notification-item.is-info,
+:root[data-theme="light"] .notification-item.info,
+:root[data-theme="light"] .admin-notification-card.is-info,
+:root[data-theme="light"] .admin-notification-card.info,
+:root[data-theme="light"] .notification-center-card.is-info,
+:root[data-theme="light"] .notification-center-card.info {
+  background:
+    radial-gradient(circle at top left, rgba(207,250,254,.88), transparent 42%),
+    linear-gradient(135deg, rgba(240,253,255,.96), rgba(224,242,254,.90)) !important;
+  border-color: rgba(14,165,233,.48) !important;
+  color: #064e5f !important;
+}
+
+/* Warning/amarillo -> manteca con texto oscuro */
+html[data-theme="light"] .notification-card.is-warning,
+html[data-theme="light"] .notification-card.warning,
+html[data-theme="light"] .notification-item.is-warning,
+html[data-theme="light"] .notification-item.warning,
+html[data-theme="light"] .admin-notification-card.is-warning,
+html[data-theme="light"] .admin-notification-card.warning,
+html[data-theme="light"] .notification-center-card.is-warning,
+html[data-theme="light"] .notification-center-card.warning,
+:root[data-theme="light"] .notification-card.is-warning,
+:root[data-theme="light"] .notification-card.warning,
+:root[data-theme="light"] .notification-item.is-warning,
+:root[data-theme="light"] .notification-item.warning,
+:root[data-theme="light"] .admin-notification-card.is-warning,
+:root[data-theme="light"] .admin-notification-card.warning,
+:root[data-theme="light"] .notification-center-card.is-warning,
+:root[data-theme="light"] .notification-center-card.warning {
+  background:
+    radial-gradient(circle at top left, rgba(254,243,199,.96), transparent 42%),
+    linear-gradient(135deg, rgba(255,251,235,.98), rgba(255,247,237,.92)) !important;
+  border-color: rgba(217,119,6,.46) !important;
+  color: #3f2b00 !important;
+}
+
+/* Neutral/system -> lila pastel */
+html[data-theme="light"] .notification-card.is-neutral,
+html[data-theme="light"] .notification-card.neutral,
+html[data-theme="light"] .notification-item.is-neutral,
+html[data-theme="light"] .notification-item.neutral,
+html[data-theme="light"] .admin-notification-card.is-neutral,
+html[data-theme="light"] .admin-notification-card.neutral,
+html[data-theme="light"] .notification-center-card.is-neutral,
+html[data-theme="light"] .notification-center-card.neutral,
+:root[data-theme="light"] .notification-card.is-neutral,
+:root[data-theme="light"] .notification-card.neutral,
+:root[data-theme="light"] .notification-item.is-neutral,
+:root[data-theme="light"] .notification-item.neutral,
+:root[data-theme="light"] .admin-notification-card.is-neutral,
+:root[data-theme="light"] .admin-notification-card.neutral,
+:root[data-theme="light"] .notification-center-card.is-neutral,
+:root[data-theme="light"] .notification-center-card.neutral {
+  background:
+    radial-gradient(circle at top left, rgba(245,243,255,.96), transparent 42%),
+    linear-gradient(135deg, rgba(250,245,255,.98), rgba(255,255,255,.92)) !important;
+  border-color: rgba(167,139,250,.46) !important;
+  color: #3b2f63 !important;
+}
+
+/* Chips en claro: con fondito, no texto flotando */
+html[data-theme="light"] .notification-chip,
+html[data-theme="light"] .notification-pill,
+html[data-theme="light"] .notification-badge,
+html[data-theme="light"] .notification-card .badge,
+html[data-theme="light"] .notification-item .badge,
+html[data-theme="light"] .admin-notification-card .badge,
+html[data-theme="light"] .notification-center-card .badge,
+html[data-theme="light"] .home-cmd-tags span,
+:root[data-theme="light"] .notification-chip,
+:root[data-theme="light"] .notification-pill,
+:root[data-theme="light"] .notification-badge,
+:root[data-theme="light"] .notification-card .badge,
+:root[data-theme="light"] .notification-item .badge,
+:root[data-theme="light"] .admin-notification-card .badge,
+:root[data-theme="light"] .notification-center-card .badge,
+:root[data-theme="light"] .home-cmd-tags span {
+  background: rgba(255,255,255,.72) !important;
+  border: 1px solid rgba(100,116,139,.20) !important;
+  color: #1e293b !important;
+  text-shadow:
+    1px 1px 0 rgba(255,255,255,.92),
+    -1px -1px 0 rgba(15,23,42,.05) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.70) !important;
+}
+
+/* Botones celestes: más contraste */
+html[data-theme="light"] .notification-card button,
+html[data-theme="light"] .notification-item button,
+html[data-theme="light"] .admin-notification-card button,
+html[data-theme="light"] .notification-center-card button,
+:root[data-theme="light"] .notification-card button,
+:root[data-theme="light"] .notification-item button,
+:root[data-theme="light"] .admin-notification-card button,
+:root[data-theme="light"] .notification-center-card button {
+  color: #075985 !important;
+  background: rgba(224,242,254,.92) !important;
+  border-color: rgba(14,165,233,.32) !important;
+  text-shadow:
+    1px 1px 0 rgba(255,255,255,.86),
+    -1px -1px 0 rgba(15,23,42,.04) !important;
+}
+
+/* Botón borrar: rosa pastel visible */
+html[data-theme="light"] .notification-card button[data-action*="delete"],
+html[data-theme="light"] .notification-card button[data-action*="remove"],
+html[data-theme="light"] .notification-card .delete,
+html[data-theme="light"] .notification-card .danger,
+html[data-theme="light"] .admin-notification-card button[data-action*="delete"],
+html[data-theme="light"] .admin-notification-card .delete,
+html[data-theme="light"] .admin-notification-card .danger,
+:root[data-theme="light"] .notification-card button[data-action*="delete"],
+:root[data-theme="light"] .notification-card button[data-action*="remove"],
+:root[data-theme="light"] .notification-card .delete,
+:root[data-theme="light"] .notification-card .danger,
+:root[data-theme="light"] .admin-notification-card button[data-action*="delete"],
+:root[data-theme="light"] .admin-notification-card .delete,
+:root[data-theme="light"] .admin-notification-card .danger {
+  color: #831843 !important;
+  background: rgba(252,231,243,.90) !important;
+  border-color: rgba(244,114,182,.44) !important;
+}
+
+/* Links celestes: fondo sutil para que no se laven */
+html[data-theme="light"] .notification-card a,
+html[data-theme="light"] .notification-item a,
+html[data-theme="light"] .admin-notification-card a,
+html[data-theme="light"] .notification-center-card a,
+:root[data-theme="light"] .notification-card a,
+:root[data-theme="light"] .notification-item a,
+:root[data-theme="light"] .admin-notification-card a,
+:root[data-theme="light"] .notification-center-card a {
+  color: #0f8ea3 !important;
+  font-weight: 900 !important;
+  text-decoration-thickness: 2px !important;
+}
+
+/* ─────────────────────────────────────────────
+   DARK MODE: más grosor manteniendo cyber
+───────────────────────────────────────────── */
+
+html[data-theme="dark"] .notification-card,
+html[data-theme="dark"] .notification-item,
+html[data-theme="dark"] .admin-notification-card,
+html[data-theme="dark"] .notification-center-card,
+html[data-theme="dark"] .notifications-admin-card [data-notification-id],
+html[data-theme="dark"] .notifications-list [data-notification-id],
+html[data-theme="dark"] .notification-list [data-notification-id],
+html[data-theme="dark"] .notification-entry,
+:root[data-theme="dark"] .notification-card,
+:root[data-theme="dark"] .notification-item,
+:root[data-theme="dark"] .admin-notification-card,
+:root[data-theme="dark"] .notification-center-card,
+:root[data-theme="dark"] .notifications-admin-card [data-notification-id],
+:root[data-theme="dark"] .notifications-list [data-notification-id],
+:root[data-theme="dark"] .notification-list [data-notification-id],
+:root[data-theme="dark"] .notification-entry {
+  border-width: 2px !important;
+  border-radius: 24px !important;
+}
+
+/* Boletín/inicio: eliminar inglés visual si llega como texto en chip simple */
+.home-cmd-tags span,
+.notification-chip,
+.notification-pill,
+.notification-badge {
+  text-transform: none !important;
+}
