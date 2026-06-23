@@ -300,7 +300,12 @@
 
   function renderEmpty() {
     els.list.innerHTML = `
-`;
+      <div class="notification-admin-empty">
+        <i class="fa-solid fa-bell-slash"></i>
+        <strong>No hay notificaciones todavía.</strong>
+        <p>Creá la primera desde el formulario de la izquierda.</p>
+      </div>
+    `;
   }
 
   function render() {
@@ -321,7 +326,52 @@
 
       return `
         <article class="notification-admin-item is-${escapeHtml(severity)} ${isRead ? "is-read" : "is-unread"}" data-notification-id="${escapeHtml(item.id)}">
-</article>
+          <div class="notification-admin-item-icon">
+            <i class="fa-solid ${severity === "danger" ? "fa-triangle-exclamation" : severity === "warning" ? "fa-bullhorn" : severity === "info" ? "fa-comments" : "fa-bell"}"></i>
+          </div>
+
+          <div class="notification-admin-item-body">
+            <div class="notification-admin-item-top">
+              <div>
+                <h4>${escapeHtml(item.title)}</h4>
+                <div class="notification-admin-tags">
+                  <span>${escapeHtml(typeLabel(item.type))}</span>
+                  <span>${escapeHtml(colorLabel(item))}</span>
+                  <span>${escapeHtml(item.audience || "all")}</span>
+                  <span>${isRead ? "Leída" : "No leída"}</span>
+                </div>
+              </div>
+
+              <small>${escapeHtml(formatDate(item.createdAt))}</small>
+            </div>
+
+            <p>${escapeHtml(item.body)}</p>
+
+            ${item.link ? `<a class="notification-admin-link" href="${escapeHtml(item.link)}">${escapeHtml(item.link)}</a>` : ""}
+
+            <div class="notification-admin-item-actions">
+              <button type="button" data-admin-edit="${escapeHtml(item.id)}">
+                <i class="fa-solid fa-pen"></i>
+                Editar
+              </button>
+
+              <button type="button" data-admin-resend="${escapeHtml(item.id)}">
+                <i class="fa-solid fa-paper-plane"></i>
+                Reenviar
+              </button>
+
+              <button type="button" data-admin-read="${escapeHtml(item.id)}">
+                <i class="fa-solid ${isRead ? "fa-envelope" : "fa-envelope-open"}"></i>
+                ${isRead ? "Marcar no leída" : "Marcar leída"}
+              </button>
+
+              <button type="button" class="danger" data-admin-delete="${escapeHtml(item.id)}">
+                <i class="fa-solid fa-trash"></i>
+                Borrar
+              </button>
+            </div>
+          </div>
+        </article>
       `;
     }).join("");
   }
@@ -671,7 +721,12 @@
 
     if (!items.length) {
       list.innerHTML = `
-`;
+        <div class="notification-admin-empty">
+          <i class="fa-regular fa-bell"></i>
+          <strong>No hay notificaciones todavía</strong>
+          <p>Cuando crees avisos desde este centro, van a aparecer acá.</p>
+        </div>
+      `;
       return;
     }
 
@@ -684,7 +739,37 @@
 
       return `
         <article class="notification-admin-item is-${escapeHtml(severity)}" data-admin-notification-id="${escapeHtml(item.id)}">
-</article>
+          <div class="notification-admin-item-main">
+            <div class="notification-admin-item-head">
+              <strong>${escapeHtml(item.title)}</strong>
+              <span>${escapeHtml(type)} · ${escapeHtml(severity)}</span>
+            </div>
+
+            <p>${escapeHtml(body)}</p>
+
+            <small>
+              Audiencia: ${escapeHtml(item.audience_type || item.audience || "all")}
+              ${item.course ? " · Curso: " + escapeHtml(item.course) : ""}
+              · Destinatarios: ${escapeHtml(recipients)}
+              · No leídas: ${escapeHtml(unread)}
+            </small>
+          </div>
+
+          <div class="notification-admin-item-actions">
+            <button type="button" data-backend-notification-edit="${escapeHtml(item.id)}">
+              <i class="fa-solid fa-pen"></i>
+              Editar
+            </button>
+            <button type="button" data-backend-notification-resend="${escapeHtml(item.id)}">
+              <i class="fa-solid fa-paper-plane"></i>
+              Reenviar
+            </button>
+            <button type="button" data-backend-notification-delete="${escapeHtml(item.id)}">
+              <i class="fa-solid fa-trash"></i>
+              Borrar
+            </button>
+          </div>
+        </article>
       `;
     }).join("");
   }
@@ -1051,90 +1136,4 @@
   setTimeout(run, 900);
 
   window.ClassroomCentroMojibakeFix = { run, fixString };
-})();
-
-/* === HIDE EMAIL NOTICE SAFE NON DESTRUCTIVE 20260622 === */
-(function hideEmailNoticeSafeNonDestructive() {
-  "use strict";
-
-  function norm(value) {
-    return String(value || "").replace(/\s+/g, " ").trim().toLowerCase();
-  }
-
-  function isEmailNotice(text) {
-    return (
-      text.includes("email desactivado por defecto") ||
-      text.includes("email sigue desactivado por defecto")
-    );
-  }
-
-  function isForbiddenContainer(el) {
-    const text = norm(el.textContent);
-
-    return (
-      el === document.body ||
-      el.classList.contains("main-content") ||
-      el.classList.contains("content") ||
-      text.includes("nueva notificación") ||
-      text.includes("crear / editar") ||
-      text.includes("guardar notificación") ||
-      text.includes("vista demo") ||
-      text.includes("notificaciones existentes")
-    );
-  }
-
-  function hideEmailNotices() {
-    const candidates = Array.from(document.querySelectorAll("div, section, article, aside, p"))
-      .filter((el) => {
-        const text = norm(el.textContent);
-        if (!isEmailNotice(text)) return false;
-        if (isForbiddenContainer(el)) return false;
-
-        const rect = el.getBoundingClientRect();
-
-        // Elegimos bloques chicos, no paneles enteros.
-        if (rect.width > 900) return false;
-        if (rect.height > 220) return false;
-
-        return true;
-      })
-      .sort((a, b) => {
-        const ar = a.getBoundingClientRect();
-        const br = b.getBoundingClientRect();
-        return (ar.width * ar.height) - (br.width * br.height);
-      });
-
-    candidates.forEach((el) => {
-      el.classList.add("js-email-notice-hidden");
-      el.setAttribute("aria-hidden", "true");
-    });
-  }
-
-  function init() {
-    hideEmailNotices();
-
-    const observer = new MutationObserver(() => {
-      requestAnimationFrame(hideEmailNotices);
-    });
-
-    observer.observe(document.body, {
-      childList: true,
-      subtree: true,
-      characterData: true
-    });
-
-    setTimeout(hideEmailNotices, 300);
-    setTimeout(hideEmailNotices, 1200);
-    setTimeout(hideEmailNotices, 2500);
-  }
-
-  window.ClassroomHideEmailNoticeSafe = {
-    run: hideEmailNotices
-  };
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", init);
-  } else {
-    init();
-  }
 })();
