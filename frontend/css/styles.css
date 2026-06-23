@@ -16661,4 +16661,19 @@ html[data-theme="light"] .notification-admin-tags span,
 }\n\n/* === CENTRO ADMIN META BELOW ACTIONS 20260623 === */
 .notification-admin-item-actions + .notification-admin-meta {
   margin-top: 0.8rem !important;
+}\n\n\n/* === CENTRO ADMIN DELETE BUSY 20260623 === */
+.notification-admin-item.is-deleting {
+  opacity: 0.58 !important;
+  pointer-events: none !important;
+  filter: grayscale(0.2) !important;
+}
+
+.notification-admin-item.is-deleting::after {
+  content: "Borrando..." !important;
+  position: absolute !important;
+  right: 18px !important;
+  bottom: 16px !important;
+  font-size: 0.78rem !important;
+  font-weight: 900 !important;
+  color: rgba(235, 245, 255, 0.72) !important;
 }\n

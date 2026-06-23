@@ -999,17 +999,101 @@
     return data;
   }
 
-  async function deleteNotificationFromBackend(id) {
-    if (!confirm("¿Borrar esta notificación para todos?")) return;
+  function escapeCssValue(value) {
+    const raw = String(value || "");
 
-    await apiFetch(`/api/classroom/notifications/${encodeURIComponent(id)}`, {
-      method: "DELETE",
+    if (window.CSS && typeof window.CSS.escape === "function") {
+      return window.CSS.escape(raw);
+    }
+
+    return raw.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+  }
+
+  function removeNotificationFromBellStorage(id) {
+    if (!id) return;
+
+    const current = safeJson(localStorage.getItem(STORAGE_KEY), []);
+
+    if (!Array.isArray(current)) return;
+
+    const next = current.filter((item) => String(item?.id) !== String(id));
+
+    if (next.length === current.length) return;
+
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+
+    window.dispatchEvent(new CustomEvent("classroom:notifications-updated", {
+      detail: {
+        deletedId: id,
+        items: next,
+        source: "centro-admin-delete",
+      },
+    }));
+  }
+
+  function removeNotificationFromAdminMemory(id) {
+    if (!id) return;
+
+    const current = Array.isArray(window.ClassroomNotificationAdminItems)
+      ? window.ClassroomNotificationAdminItems
+      : [];
+
+    const next = current.filter((item) => String(item?.id) !== String(id));
+
+    window.ClassroomNotificationAdminItems = next;
+
+    renderBackendAdminList(next);
+  }
+
+  function setAdminDeleteBusy(id, busy) {
+    const selector = `[data-admin-notification-id="${escapeCssValue(id)}"]`;
+    const card = document.querySelector(selector);
+
+    if (!card) return;
+
+    card.classList.toggle("is-deleting", Boolean(busy));
+
+    card.querySelectorAll("button").forEach((button) => {
+      button.disabled = Boolean(busy);
     });
+  }
 
-    await loadAdminNotifications();
+  async function deleteNotificationFromBackend(id) {
+    if (!id) return;
 
-    if (getBackendApi()?.sync) {
-      await getBackendApi().sync().catch(() => {});
+    const ok = confirm("¿Borrar esta notificación para todos? Esto también la borra del backend/Supabase.");
+
+    if (!ok) return;
+
+    const previousItems = Array.isArray(window.ClassroomNotificationAdminItems)
+      ? [...window.ClassroomNotificationAdminItems]
+      : [];
+
+    setAdminDeleteBusy(id, true);
+
+    try {
+      await apiFetch(`/api/classroom/notifications/${encodeURIComponent(id)}`, {
+        method: "DELETE",
+      });
+
+      removeNotificationFromAdminMemory(id);
+      removeNotificationFromBellStorage(id);
+
+      await loadAdminNotifications();
+
+      if (getBackendApi()?.sync) {
+        await getBackendApi().sync().catch(() => {});
+      }
+    } catch (error) {
+      window.ClassroomNotificationAdminItems = previousItems;
+      renderBackendAdminList(previousItems);
+
+      console.error("[Centro Notificaciones] Error borrando desde backend:", error);
+      alert(error.message || "No se pudo borrar la notificación desde Supabase.");
+
+      throw error;
+    } finally {
+      setAdminDeleteBusy(id, false);
     }
   }
 
@@ -1064,11 +1148,13 @@
       if (deleteButton) {
         event.preventDefault();
         event.stopPropagation();
+        event.stopImmediatePropagation();
 
-        deleteNotificationFromBackend(deleteButton.getAttribute("data-backend-notification-delete"))
+        const id = deleteButton.getAttribute("data-backend-notification-delete");
+
+        deleteNotificationFromBackend(id)
           .catch((error) => {
             console.error("[Centro Notificaciones] Error borrando:", error);
-            alert(error.message || "No se pudo borrar.");
           });
 
         return;
