@@ -1137,3 +1137,500 @@
 
   window.ClassroomCentroMojibakeFix = { run, fixString };
 })();
+
+/* === CENTRO EXISTING NOTIFICATION CARD COLOR MARKER 20260622 === */
+(function centroExistingNotificationCardColorMarker() {
+  "use strict";
+
+  function cleanText(value) {
+    return String(value || "")
+      .replace(/\s+/g, " ")
+      .trim()
+      .toLowerCase();
+  }
+
+  function detectSeverity(text) {
+    const t = cleanText(text);
+
+    if (t.includes("amarillo") || t.includes("warning")) {
+      return "yellow";
+    }
+
+    if (t.includes("violeta") || t.includes("lila") || t.includes("purple") || t.includes("sistema") || t.includes("neutro")) {
+      return "violet";
+    }
+
+    if (t.includes("azul") || t.includes("info") || t.includes("comunidad")) {
+      return "blue";
+    }
+
+    if (t.includes("rojo") || t.includes("danger") || t.includes("académica") || t.includes("academica") || t.includes("aviso")) {
+      return "red";
+    }
+
+    return "";
+  }
+
+  function isLikelyNotificationCard(el) {
+    if (!el || el === document.body) return false;
+
+    const text = cleanText(el.textContent);
+
+    if (!text.includes("editar")) return false;
+    if (!text.includes("reenviar")) return false;
+    if (!text.includes("borrar")) return false;
+
+    // Evita agarrar el panel completo o la página.
+    if (text.includes("notificaciones existentes") && text.includes("buscar por título")) return false;
+    if (text.includes("nueva notificación") && text.includes("guardar notificación")) return false;
+
+    // Evita agarrar solo la fila de botones.
+    if (
+      !text.includes("audiencia") &&
+      !text.includes("destinatarios") &&
+      !text.includes("no leída") &&
+      !text.includes("no leida") &&
+      text.length < 120
+    ) {
+      return false;
+    }
+
+    const rect = el.getBoundingClientRect();
+
+    if (rect.height < 55) return false;
+    if (rect.height > 420) return false;
+
+    return true;
+  }
+
+  function findCardFromAction(action) {
+    let node = action;
+
+    for (let i = 0; i < 8 && node && node !== document.body; i += 1) {
+      if (isLikelyNotificationCard(node)) {
+        return node;
+      }
+
+      node = node.parentElement;
+    }
+
+    return null;
+  }
+
+  function markCards() {
+    const actions = Array.from(document.querySelectorAll("button, a"))
+      .filter((el) => {
+        const text = cleanText(el.textContent);
+        return text.includes("editar") || text.includes("reenviar") || text.includes("borrar");
+      });
+
+    const cards = new Set();
+
+    actions.forEach((action) => {
+      const card = findCardFromAction(action);
+
+      if (card) cards.add(card);
+    });
+
+    cards.forEach((card) => {
+      const severity = detectSeverity(card.textContent);
+
+      card.classList.add("cn-existing-notification-card");
+      card.classList.remove(
+        "cn-severity-red",
+        "cn-severity-blue",
+        "cn-severity-violet",
+        "cn-severity-yellow"
+      );
+
+      if (severity) {
+        card.classList.add(`cn-severity-${severity}`);
+      }
+    });
+
+    document.body.dataset.cnColorCards = String(cards.size);
+  }
+
+  let scheduled = false;
+
+  function schedule() {
+    if (scheduled) return;
+
+    scheduled = true;
+
+    requestAnimationFrame(() => {
+      scheduled = false;
+      markCards();
+    });
+  }
+
+  function init() {
+    markCards();
+
+    const observer = new MutationObserver(schedule);
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      characterData: true
+    });
+
+    window.addEventListener("classroom:notifications-updated", schedule);
+
+    setTimeout(markCards, 300);
+    setTimeout(markCards, 1200);
+    setTimeout(markCards, 2500);
+  }
+
+  window.ClassroomCentroCardColors = {
+    run: markCards
+  };
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+})();
+
+/* === CENTRO EXISTING NOTIFICATION CARD COLOR MARKER V2 20260622 === */
+(function centroExistingNotificationCardColorMarkerV2() {
+  "use strict";
+
+  function textOf(el) {
+    return String(el?.textContent || "")
+      .replace(/\s+/g, " ")
+      .trim()
+      .toLowerCase();
+  }
+
+  function detectSeverity(text) {
+    const t = String(text || "").toLowerCase();
+
+    if (t.includes("amarillo") || t.includes("warning")) return "yellow";
+    if (t.includes("violeta") || t.includes("lila") || t.includes("purple") || t.includes("sistema") || t.includes("neutro")) return "violet";
+    if (t.includes("azul") || t.includes("info") || t.includes("comunidad")) return "blue";
+    if (t.includes("rojo") || t.includes("danger") || t.includes("académica") || t.includes("academica") || t.includes("aviso")) return "red";
+
+    return "violet";
+  }
+
+  function looksLikeRealCard(el) {
+    if (!el || el === document.body) return false;
+
+    const text = textOf(el);
+    const rect = el.getBoundingClientRect();
+
+    const hasActions =
+      text.includes("editar") &&
+      text.includes("reenviar") &&
+      text.includes("borrar");
+
+    const hasContent =
+      text.includes("audiencia") ||
+      text.includes("destinatarios") ||
+      text.includes("no leída") ||
+      text.includes("no leida") ||
+      text.includes("modo oscuro") ||
+      text.includes("nueva edicion") ||
+      text.includes("nueva edición") ||
+      text.includes("no abras") ||
+      text.includes("prueba de notificaciones");
+
+    if (!hasActions || !hasContent) return false;
+
+    // Evita agarrar panel entero.
+    if (text.includes("notificaciones existentes") && text.includes("buscar por título")) return false;
+    if (text.includes("nueva notificación") && text.includes("guardar notificación")) return false;
+
+    // Evita agarrar solo fila de botones.
+    if (rect.height < 70) return false;
+
+    // Evita agarrar contenedores gigantes.
+    if (rect.height > 360) return false;
+
+    return true;
+  }
+
+  function findCardFromAction(action) {
+    let node = action;
+
+    for (let i = 0; i < 10 && node && node !== document.body; i += 1) {
+      if (looksLikeRealCard(node)) return node;
+      node = node.parentElement;
+    }
+
+    return null;
+  }
+
+  function markCards() {
+    const actions = Array.from(document.querySelectorAll("button, a"))
+      .filter((el) => {
+        const text = textOf(el);
+        return text.includes("editar") || text.includes("reenviar") || text.includes("borrar");
+      });
+
+    const cards = new Set();
+
+    actions.forEach((action) => {
+      const card = findCardFromAction(action);
+      if (card) cards.add(card);
+    });
+
+    cards.forEach((card) => {
+      const severity = detectSeverity(card.textContent);
+
+      card.classList.add("cn-existing-notification-card");
+      card.classList.remove(
+        "cn-severity-red",
+        "cn-severity-blue",
+        "cn-severity-violet",
+        "cn-severity-yellow"
+      );
+      card.classList.add(`cn-severity-${severity}`);
+    });
+
+    document.body.dataset.cnColorCards = String(cards.size);
+    console.log("[Centro cards pastel V2]", { cards: cards.size });
+  }
+
+  let scheduled = false;
+
+  function schedule() {
+    if (scheduled) return;
+
+    scheduled = true;
+    requestAnimationFrame(() => {
+      scheduled = false;
+      markCards();
+    });
+  }
+
+  function init() {
+    markCards();
+
+    const observer = new MutationObserver(schedule);
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+    });
+
+    window.addEventListener("classroom:notifications-updated", schedule);
+
+    setTimeout(markCards, 300);
+    setTimeout(markCards, 1200);
+    setTimeout(markCards, 2500);
+  }
+
+  window.ClassroomCentroCardColorsV2 = {
+    run: markCards,
+  };
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+})();
+
+/* === CENTRO EXISTING NOTIFICATION FULL CARD MARKER V3 20260622 === */
+(function centroExistingNotificationFullCardMarkerV3() {
+  "use strict";
+
+  const COLOR_CLASSES = [
+    "cn-severity-red",
+    "cn-severity-blue",
+    "cn-severity-violet",
+    "cn-severity-yellow"
+  ];
+
+  function textOf(el) {
+    return String(el?.textContent || "")
+      .replace(/\s+/g, " ")
+      .trim()
+      .toLowerCase();
+  }
+
+  function detectSeverity(text) {
+    const t = String(text || "").toLowerCase();
+
+    if (t.includes("amarillo") || t.includes("warning")) return "yellow";
+    if (t.includes("violeta") || t.includes("lila") || t.includes("purple") || t.includes("sistema") || t.includes("neutro")) return "violet";
+    if (t.includes("azul") || t.includes("info") || t.includes("comunidad")) return "blue";
+    if (t.includes("rojo") || t.includes("danger") || t.includes("académica") || t.includes("academica") || t.includes("aviso")) return "red";
+
+    return "violet";
+  }
+
+  function isPanelOrPage(el) {
+    const text = textOf(el);
+
+    return (
+      el === document.body ||
+      text.includes("notificaciones existentes buscar por título") ||
+      text.includes("nueva notificación título tipo") ||
+      text.includes("crear / editar nueva notificación")
+    );
+  }
+
+  function hasNotificationIdentity(el) {
+    const text = textOf(el);
+
+    return (
+      text.includes("editar") &&
+      text.includes("reenviar") &&
+      text.includes("borrar") &&
+      (
+        text.includes("modo oscuro") ||
+        text.includes("nueva edicion") ||
+        text.includes("nueva edición") ||
+        text.includes("no abras") ||
+        text.includes("prueba de notificaciones") ||
+        text.includes("audiencia") ||
+        text.includes("destinatarios") ||
+        text.includes("no leída") ||
+        text.includes("no leida")
+      )
+    );
+  }
+
+  function isActionOnlyBlock(el) {
+    const text = textOf(el);
+
+    if (!text) return false;
+
+    return (
+      text.includes("editar") &&
+      text.includes("reenviar") &&
+      text.includes("borrar") &&
+      !text.includes("modo oscuro") &&
+      !text.includes("nueva edicion") &&
+      !text.includes("nueva edición") &&
+      !text.includes("no abras") &&
+      !text.includes("prueba de notificaciones") &&
+      !text.includes("audiencia") &&
+      !text.includes("destinatarios")
+    );
+  }
+
+  function findOuterCard(fromEl) {
+    let best = null;
+    let node = fromEl;
+    const startRect = fromEl.getBoundingClientRect();
+
+    for (let i = 0; i < 10 && node && node !== document.body; i += 1) {
+      const rect = node.getBoundingClientRect();
+
+      if (
+        hasNotificationIdentity(node) &&
+        !isPanelOrPage(node) &&
+        !isActionOnlyBlock(node) &&
+        rect.height >= 70 &&
+        rect.height <= 430 &&
+        rect.width >= startRect.width &&
+        rect.width <= 1400
+      ) {
+        /*
+          Queremos el ancestro más externo razonable:
+          - más ancho que el interno
+          - incluye icono/columna izquierda
+          - no llega al panel completo
+        */
+        best = node;
+      }
+
+      node = node.parentElement;
+    }
+
+    return best || fromEl;
+  }
+
+  function clearOldMarks() {
+    document.querySelectorAll(".cn-existing-notification-card").forEach((el) => {
+      el.classList.remove(
+        "cn-existing-notification-card",
+        "cn-full-notification-card",
+        ...COLOR_CLASSES
+      );
+    });
+  }
+
+  function markFullCards() {
+    const actions = Array.from(document.querySelectorAll("button, a"))
+      .filter((el) => {
+        const text = textOf(el);
+        return text.includes("editar") || text.includes("reenviar") || text.includes("borrar");
+      });
+
+    const cards = new Set();
+
+    actions.forEach((action) => {
+      const card = findOuterCard(action);
+
+      if (card && !isPanelOrPage(card)) {
+        cards.add(card);
+      }
+    });
+
+    clearOldMarks();
+
+    cards.forEach((card) => {
+      const severity = detectSeverity(card.textContent);
+
+      card.classList.add(
+        "cn-existing-notification-card",
+        "cn-full-notification-card",
+        `cn-severity-${severity}`
+      );
+    });
+
+    document.body.dataset.cnColorCards = String(cards.size);
+    console.log("[Centro cards pastel V3 full]", { cards: cards.size });
+  }
+
+  let scheduled = false;
+
+  function schedule() {
+    if (scheduled) return;
+
+    scheduled = true;
+
+    requestAnimationFrame(() => {
+      scheduled = false;
+      markFullCards();
+    });
+  }
+
+  function init() {
+    markFullCards();
+
+    const observer = new MutationObserver(schedule);
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+      attributes: true,
+      attributeFilter: ["class"]
+    });
+
+    window.addEventListener("classroom:notifications-updated", schedule);
+
+    setTimeout(markFullCards, 200);
+    setTimeout(markFullCards, 600);
+    setTimeout(markFullCards, 1400);
+    setTimeout(markFullCards, 2800);
+  }
+
+  window.ClassroomCentroCardColorsV3 = {
+    run: markFullCards
+  };
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+})();
