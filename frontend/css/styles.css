@@ -16610,3 +16610,38 @@ html[data-theme="light"] .cn-existing-notification-card a:has(.fa-trash) i,
 .center-email-card-hidden {
   display: none !important;
 }
+
+/* === CENTRO HIDE INTERMEDIATE RENDER 20260623 === */
+/*
+  Evita que se vea el render intermedio/viejo del Centro.
+  Solo oculta las cards/listado de notificaciones existentes mientras JS estabiliza.
+  No toca formulario, header, sidebar, buscador ni botones superiores.
+*/
+
+html.cn-center-preparing .cn-existing-notification-card,
+html.cn-center-preparing .cn-full-notification-card,
+html.cn-center-preparing .admin-notification-card,
+html.cn-center-preparing .notification-card,
+html.cn-center-preparing [data-notification-id] {
+  visibility: hidden !important;
+}
+
+/* Si aparece el formato viejo sin clase todavía, lo ocultamos solo dentro del panel derecho. */
+html.cn-center-preparing .notifications-list > *,
+html.cn-center-preparing .notification-list > *,
+html.cn-center-preparing .admin-notifications-list > *,
+html.cn-center-preparing #notificationsList > *,
+html.cn-center-preparing #adminNotificationsList > *,
+html.cn-center-preparing #notificationsContainer > * {
+  visibility: hidden !important;
+}
+
+/* Cuando ya estabilizó, transición suave */
+.cn-existing-notification-card,
+.cn-full-notification-card {
+  transition:
+    background 220ms ease,
+    border-color 220ms ease,
+    box-shadow 220ms ease,
+    opacity 160ms ease !important;
+}

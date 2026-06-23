@@ -1433,3 +1433,99 @@
     init();
   }
 })();
+
+/* === CENTRO REVEAL STABLE CARDS 20260623 === */
+(function centroRevealStableCards() {
+  "use strict";
+
+  function getExpectedCount() {
+    const candidates = Array.from(document.querySelectorAll("span, div, button, strong"))
+      .map((el) => String(el.textContent || "").trim())
+      .filter((txt) => /^\d+$/.test(txt))
+      .map(Number)
+      .filter((n) => n >= 0 && n <= 999);
+
+    // En esta pantalla suele estar el contador de existentes. Si no, no pasa nada.
+    return candidates.length ? Math.max(...candidates) : 0;
+  }
+
+  function countFinalCards() {
+    return document.querySelectorAll(".cn-existing-notification-card.cn-full-notification-card").length;
+  }
+
+  function hasEmptyState() {
+    const text = String(document.body.textContent || "").toLowerCase();
+    return text.includes("no hay notificaciones todavía") || text.includes("no hay notificaciones todav");
+  }
+
+  function runColorMarker() {
+    if (window.ClassroomCentroCardColorsV3 && typeof window.ClassroomCentroCardColorsV3.run === "function") {
+      window.ClassroomCentroCardColorsV3.run();
+    }
+  }
+
+  function reveal() {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        document.documentElement.classList.remove("cn-center-preparing");
+        document.body.dataset.cnCenterStable = "true";
+      });
+    });
+  }
+
+  function tryReveal() {
+    runColorMarker();
+
+    const finalCards = countFinalCards();
+    const expected = getExpectedCount();
+
+    if (finalCards > 0) {
+      reveal();
+      return true;
+    }
+
+    if (expected === 0 || hasEmptyState()) {
+      reveal();
+      return true;
+    }
+
+    return false;
+  }
+
+  function init() {
+    let attempts = 0;
+    const maxAttempts = 24;
+
+    const timer = setInterval(() => {
+      attempts += 1;
+
+      if (tryReveal() || attempts >= maxAttempts) {
+        clearInterval(timer);
+        reveal();
+      }
+    }, 120);
+
+    window.addEventListener("classroom:notifications-updated", () => {
+      document.documentElement.classList.add("cn-center-preparing");
+
+      setTimeout(() => {
+        tryReveal();
+      }, 80);
+
+      setTimeout(() => {
+        tryReveal();
+      }, 240);
+    });
+  }
+
+  window.ClassroomCentroRevealStableCards = {
+    tryReveal,
+    reveal
+  };
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+})();
