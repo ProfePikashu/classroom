@@ -1634,3 +1634,101 @@
     init();
   }
 })();
+
+/* === HIDE CENTER EMAIL CARD 20260622 === */
+(function hideCenterEmailCard() {
+  "use strict";
+
+  function norm(value) {
+    return String(value || "")
+      .replace(/\s+/g, " ")
+      .trim()
+      .toLowerCase();
+  }
+
+  function isTargetText(text) {
+    return (
+      text.includes("email desactivado por defecto") &&
+      text.includes("campanita")
+    );
+  }
+
+  function looksLikeOnlyEmailCard(el) {
+    const text = norm(el.textContent);
+    if (!isTargetText(text)) return false;
+
+    // Seguridad: no agarrar el formulario entero.
+    if (text.includes("nueva notificación")) return false;
+    if (text.includes("guardar notificación")) return false;
+    if (text.includes("vista demo")) return false;
+    if (text.includes("notificaciones existentes")) return false;
+
+    const rect = el.getBoundingClientRect();
+
+    // La card es chica/mediana, no media página.
+    if (rect.height < 30 || rect.height > 180) return false;
+    if (rect.width < 180 || rect.width > 900) return false;
+
+    return true;
+  }
+
+  function findEmailCard() {
+    const nodes = Array.from(document.querySelectorAll("div, section, article, aside"));
+
+    const candidates = nodes
+      .filter(looksLikeOnlyEmailCard)
+      .sort((a, b) => {
+        const ar = a.getBoundingClientRect();
+        const br = b.getBoundingClientRect();
+        return (ar.width * ar.height) - (br.width * br.height);
+      });
+
+    return candidates[0] || null;
+  }
+
+  function run() {
+    const card = findEmailCard();
+
+    if (card) {
+      card.classList.add("center-email-card-hidden");
+      card.setAttribute("aria-hidden", "true");
+    }
+  }
+
+  let scheduled = false;
+
+  function schedule() {
+    if (scheduled) return;
+
+    scheduled = true;
+    requestAnimationFrame(() => {
+      scheduled = false;
+      run();
+    });
+  }
+
+  function init() {
+    run();
+
+    const observer = new MutationObserver(schedule);
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true
+    });
+
+    setTimeout(run, 300);
+    setTimeout(run, 900);
+    setTimeout(run, 1800);
+  }
+
+  window.ClassroomHideCenterEmailCard = {
+    run
+  };
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+})();

@@ -16838,3 +16838,9 @@ html[data-theme="light"] .cn-existing-notification-card a:has(.fa-trash) i,
 :root[data-theme="light"] .cn-existing-notification-card a:has(.fa-trash) i {
   color: #be3455 !important;
 }
+
+/* === HIDE CENTER EMAIL CARD 20260622 === */
+/* Oculta solo la card informativa de email del centro de notificaciones. */
+.center-email-card-hidden {
+  display: none !important;
+}
