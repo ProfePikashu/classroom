@@ -259,6 +259,108 @@
   <script src="js/clases-ayrpc-2025.js"></script>
   <script src="js/pelusita.js?v=20260612-sidebar-dock"></script>  <script src="js/pelusita-dialog.js?v=20260612-guide-compact"></script>
   <script src="js/sidebar-v2.js?v=20260612-pelusita-dock-v2"></script>
+
+<!-- === AYRPC 2025 RECOVERY DESKTOP SCROLL 20260623 === -->
+<script>
+(function ayrpc2025RecoveryDesktopScroll() {
+  "use strict";
+
+  const DESKTOP_QUERY = "(min-width: 769px)";
+
+  function isDesktop() {
+    return window.matchMedia(DESKTOP_QUERY).matches;
+  }
+
+  function norm(value) {
+    return String(value || "")
+      .replace(/\s+/g, " ")
+      .trim()
+      .toLowerCase();
+  }
+
+  function isRecoveryTrigger(element) {
+    if (!element) return false;
+
+    const clickable = element.closest("button, a, [role='button'], [data-recovery], [data-recuperar], [data-recovery-class], [data-class-recovery]");
+
+    if (!clickable) return false;
+
+    const text = norm(clickable.textContent);
+    const attrs = [
+      clickable.getAttribute("id"),
+      clickable.getAttribute("class"),
+      clickable.getAttribute("data-action"),
+      clickable.getAttribute("data-recovery"),
+      clickable.getAttribute("data-recuperar"),
+      clickable.getAttribute("data-recovery-class"),
+      clickable.getAttribute("data-class-recovery")
+    ].map(norm).join(" ");
+
+    return (
+      text.includes("recuperar") ||
+      attrs.includes("recuperar") ||
+      attrs.includes("recovery")
+    );
+  }
+
+  function findPlayerTarget() {
+    return (
+      document.querySelector("#youtubePlayer") ||
+      document.querySelector("#videoPlayer") ||
+      document.querySelector("#classVideoPlayer") ||
+      document.querySelector("#player") ||
+      document.querySelector(".video-player-box") ||
+      document.querySelector(".class-player") ||
+      document.querySelector(".lesson-player") ||
+      document.querySelector(".player-wrapper") ||
+      document.querySelector("iframe[src*='youtube.com']") ||
+      document.querySelector("iframe[src*='youtu.be']")
+    );
+  }
+
+  function scrollToPlayer() {
+    if (!isDesktop()) return;
+
+    const target = findPlayerTarget();
+
+    if (!target) return;
+
+    const headerOffset = 118;
+    const rect = target.getBoundingClientRect();
+    const top = Math.max(0, window.scrollY + rect.top - headerOffset);
+
+    window.scrollTo({
+      top,
+      behavior: "smooth"
+    });
+
+    target.classList.add("recovery-scroll-focus");
+
+    window.setTimeout(() => {
+      target.classList.remove("recovery-scroll-focus");
+    }, 1400);
+  }
+
+  function scheduleScrollToPlayer() {
+    // Distintos delays porque algunas acciones primero cambian la clase/video y recién después actualizan el reproductor.
+    window.setTimeout(scrollToPlayer, 80);
+    window.setTimeout(scrollToPlayer, 280);
+    window.setTimeout(scrollToPlayer, 650);
+  }
+
+  document.addEventListener("click", function onRecoveryClick(event) {
+    if (!isRecoveryTrigger(event.target)) return;
+
+    scheduleScrollToPlayer();
+  }, true);
+
+  window.ClassroomAyRPC2025RecoveryScroll = {
+    run: scrollToPlayer,
+    schedule: scheduleScrollToPlayer
+  };
+})();
+</script>
+
 </body>
 </html>
 
