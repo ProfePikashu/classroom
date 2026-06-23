@@ -16653,61 +16653,187 @@ body[data-cn-center-stable="true"] .cn-full-notification-card {
   visibility: visible !important;
 }
 
-/* === CENTRO CARD ACTIONS BOTTOM LAYOUT 20260623 === */
+/* === CENTRO ADMIN DESIRED CARD STYLE 20260623 === */
 /*
-  Solo corrige layout de acciones dentro de las cards del Centro:
-  - Botones abajo.
-  - Botones flotantes.
-  - No toca colores.
-  - No toca render ni datos.
+  Convierte visualmente el render admin compacto en la card buena:
+  - Ícono a la izquierda.
+  - Título arriba.
+  - Etiquetas tipo/severidad/audiencia/estado.
+  - Botones abajo, flotantes.
+  - Sin card interna extra.
 */
 
-.cn-full-notification-card {
-  display: flex !important;
-  flex-wrap: wrap !important;
-  align-items: flex-start !important;
-  gap: 10px 16px !important;
+.notification-admin-item.notification-admin-desired-card {
+  display: grid !important;
+  grid-template-columns: 54px minmax(0, 1fr) !important;
+  gap: 14px 18px !important;
+  align-items: start !important;
+  padding: 20px 22px !important;
+  min-height: 0 !important;
 }
 
-.cn-full-notification-card .cn-card-main-content {
-  flex: 1 1 420px !important;
+.notification-admin-item.notification-admin-desired-card > :not(.notification-desired-icon):not(.notification-desired-body) {
+  display: none !important;
+}
+
+.notification-desired-icon {
+  width: 46px !important;
+  height: 46px !important;
+  border-radius: 16px !important;
+  display: grid !important;
+  place-items: center !important;
+  font-size: 1.05rem !important;
+  grid-column: 1 !important;
+  grid-row: 1 !important;
+}
+
+.notification-desired-body {
+  grid-column: 2 !important;
+  grid-row: 1 !important;
   min-width: 0 !important;
+  width: 100% !important;
 }
 
-.cn-full-notification-card .cn-card-actions-bottom {
-  order: 50 !important;
-  flex: 0 0 calc(100% - 72px) !important;
-  width: calc(100% - 72px) !important;
-  margin-left: 72px !important;
-  margin-top: 14px !important;
+.notification-desired-top {
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: space-between !important;
+  gap: 14px !important;
+  width: 100% !important;
+}
+
+.notification-desired-title {
+  margin: 0 !important;
+  font-size: 1.08rem !important;
+  line-height: 1.25 !important;
+  font-weight: 950 !important;
+}
+
+.notification-desired-date {
+  flex: 0 0 auto !important;
+  opacity: .82 !important;
+  font-size: .9rem !important;
+  white-space: nowrap !important;
+}
+
+.notification-desired-badges {
   display: flex !important;
   flex-wrap: wrap !important;
+  gap: 7px !important;
+  margin-top: 8px !important;
+}
+
+.notification-desired-badge {
+  display: inline-flex !important;
   align-items: center !important;
+  min-height: 22px !important;
+  padding: 4px 10px !important;
+  border-radius: 999px !important;
+  font-size: .76rem !important;
+  font-weight: 900 !important;
+  line-height: 1 !important;
+}
+
+.notification-desired-message {
+  margin: 16px 0 0 !important;
+  font-size: .98rem !important;
+  line-height: 1.45 !important;
+}
+
+.notification-desired-meta {
+  margin-top: 10px !important;
+  font-size: .82rem !important;
+  font-weight: 800 !important;
+  opacity: .9 !important;
+}
+
+.notification-admin-item.notification-admin-desired-card .notification-admin-actions,
+.notification-admin-item.notification-admin-desired-card .notification-admin-item-actions,
+.notification-admin-item.notification-admin-desired-card .notification-actions {
+  display: flex !important;
+  flex-wrap: wrap !important;
   justify-content: flex-start !important;
+  align-items: center !important;
   gap: 10px !important;
+  width: 100% !important;
+  margin: 18px 0 0 !important;
+  padding: 0 !important;
   background: transparent !important;
   border: 0 !important;
   box-shadow: none !important;
-  padding: 0 !important;
-}
-
-.cn-full-notification-card .cn-card-actions-bottom button,
-.cn-full-notification-card .cn-card-actions-bottom a {
   position: static !important;
-  margin: 0 !important;
-}
-
-/* Evita que el contenedor de acciones se comporte como columna lateral */
-.cn-full-notification-card .cn-card-actions-bottom,
-.cn-full-notification-card .cn-card-actions-bottom * {
   transform: none !important;
 }
 
-/* Mobile / ancho chico: sin margen fantasma */
+.notification-admin-item.notification-admin-desired-card .notification-admin-actions button,
+.notification-admin-item.notification-admin-desired-card .notification-admin-item-actions button,
+.notification-admin-item.notification-admin-desired-card .notification-actions button,
+.notification-admin-item.notification-admin-desired-card .notification-admin-actions a,
+.notification-admin-item.notification-admin-desired-card .notification-admin-item-actions a,
+.notification-admin-item.notification-admin-desired-card .notification-actions a {
+  width: auto !important;
+  height: auto !important;
+  min-width: auto !important;
+  position: static !important;
+  transform: none !important;
+  margin: 0 !important;
+}
+
+/* Colores de ícono/badges por severidad, sin tocar la card completa */
+.notification-admin-item.is-danger .notification-desired-icon,
+.notification-admin-item.cn-severity-red .notification-desired-icon {
+  background: rgba(255, 92, 146, .20) !important;
+  color: #ff7ea8 !important;
+}
+
+.notification-admin-item.is-info .notification-desired-icon,
+.notification-admin-item.cn-severity-blue .notification-desired-icon {
+  background: rgba(82, 164, 255, .20) !important;
+  color: #5aa8ff !important;
+}
+
+.notification-admin-item.is-warning .notification-desired-icon,
+.notification-admin-item.cn-severity-yellow .notification-desired-icon {
+  background: rgba(255, 205, 71, .20) !important;
+  color: #ffd166 !important;
+}
+
+.notification-admin-item.is-neutral .notification-desired-icon,
+.notification-admin-item.cn-severity-violet .notification-desired-icon {
+  background: rgba(170, 105, 255, .20) !important;
+  color: #b784ff !important;
+}
+
+.notification-desired-badge {
+  background: rgba(42, 65, 92, .72) !important;
+  color: #dff8ff !important;
+}
+
+/* Modo claro */
+html[data-theme="light"] .notification-desired-badge,
+:root[data-theme="light"] .notification-desired-badge {
+  background: rgba(255,255,255,.72) !important;
+  color: #174366 !important;
+  box-shadow: 0 0 0 1px rgba(15, 23, 42, .05) !important;
+}
+
+html[data-theme="light"] .notification-desired-date,
+:root[data-theme="light"] .notification-desired-date {
+  color: #5b6380 !important;
+}
+
 @media (max-width: 720px) {
-  .cn-full-notification-card .cn-card-actions-bottom {
-    flex-basis: 100% !important;
-    width: 100% !important;
-    margin-left: 0 !important;
+  .notification-admin-item.notification-admin-desired-card {
+    grid-template-columns: 1fr !important;
+  }
+
+  .notification-desired-icon,
+  .notification-desired-body {
+    grid-column: 1 !important;
+  }
+
+  .notification-desired-top {
+    flex-direction: column !important;
+    gap: 6px !important;
   }
 }

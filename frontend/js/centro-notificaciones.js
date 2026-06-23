@@ -1580,63 +1580,124 @@
   }
 })();
 
-/* === CENTRO CARD ACTIONS BOTTOM MARKER 20260623 === */
-(function centroCardActionsBottomMarker() {
+/* === CENTRO ADMIN DESIRED CARD TRANSFORM 20260623 === */
+(function centroAdminDesiredCardTransform() {
   "use strict";
 
-  function txt(el) {
-    return String(el?.textContent || "")
-      .replace(/\s+/g, " ")
-      .trim()
-      .toLowerCase();
+  const TYPE_LABELS = ["Académica", "Academica", "Comunidad", "Sistema", "Aviso"];
+  const SEVERITY_LABELS = ["Rojo", "Azul", "Violeta", "Amarillo", "Neutro"];
+
+  function cleanText(value) {
+    return String(value || "").replace(/\s+/g, " ").trim();
   }
 
-  function isActionButton(el) {
-    const text = txt(el);
-    return (
-      text.includes("editar") ||
-      text.includes("reenviar") ||
-      text.includes("borrar") ||
-      text.includes("marcar leída") ||
-      text.includes("marcar leida")
+  function linesFrom(card) {
+    const clone = card.cloneNode(true);
+
+    clone.querySelectorAll(".notification-desired-icon, .notification-desired-body").forEach((el) => el.remove());
+
+    return String(clone.innerText || card.innerText || "")
+      .split("\n")
+      .map(cleanText)
+      .filter(Boolean)
+      .filter((line) => !["Editar", "Reenviar", "Borrar", "Marcar leída", "Marcar leida"].includes(line));
+  }
+
+  function parseFirstLine(line) {
+    const text = cleanText(line);
+
+    const re = new RegExp("^(.*?)(Académica|Academica|Comunidad|Sistema|Aviso)\\s*[·.-]\\s*(Rojo|Azul|Violeta|Amarillo|Neutro)\\s*$", "i");
+    const match = text.match(re);
+
+    if (match) {
+      return {
+        title: cleanText(match[1]) || text,
+        type: normalizeType(match[2]),
+        severity: normalizeSeverity(match[3])
+      };
+    }
+
+    return {
+      title: text,
+      type: "",
+      severity: ""
+    };
+  }
+
+  function normalizeType(value) {
+    const t = cleanText(value).toLowerCase();
+
+    if (t.includes("acad")) return "Académica";
+    if (t.includes("comunidad")) return "Comunidad";
+    if (t.includes("sistema")) return "Sistema";
+    if (t.includes("aviso")) return "Aviso";
+
+    return cleanText(value);
+  }
+
+  function normalizeSeverity(value) {
+    const t = cleanText(value).toLowerCase();
+
+    if (t.includes("rojo")) return "Rojo";
+    if (t.includes("azul")) return "Azul";
+    if (t.includes("violeta")) return "Violeta";
+    if (t.includes("amarillo")) return "Amarillo";
+    if (t.includes("neutro")) return "Neutro";
+
+    return cleanText(value);
+  }
+
+  function detectFromClasses(card) {
+    const cls = String(card.className || "").toLowerCase();
+
+    if (cls.includes("is-warning") || cls.includes("cn-severity-yellow")) {
+      return { severity: "Amarillo", icon: "fa-bullhorn" };
+    }
+
+    if (cls.includes("is-info") || cls.includes("cn-severity-blue")) {
+      return { severity: "Azul", icon: "fa-comments" };
+    }
+
+    if (cls.includes("is-danger") || cls.includes("cn-severity-red")) {
+      return { severity: "Rojo", icon: "fa-triangle-exclamation" };
+    }
+
+    return { severity: "Violeta", icon: "fa-bell" };
+  }
+
+  function findDate(card) {
+    const candidates = Array.from(card.querySelectorAll("time, small, span, div"))
+      .map((el) => cleanText(el.textContent))
+      .filter(Boolean);
+
+    return candidates.find((txt) => /\d{1,2}\/\d{1,2}\/\d{2,4}/.test(txt)) || "";
+  }
+
+  function findActions(card) {
+    const selectors = [
+      ".notification-admin-actions",
+      ".notification-admin-item-actions",
+      ".notification-actions"
+    ];
+
+    for (const selector of selectors) {
+      const found = card.querySelector(selector);
+
+      if (found && /editar|reenviar|borrar|marcar/i.test(found.textContent || "")) {
+        return found;
+      }
+    }
+
+    const button = Array.from(card.querySelectorAll("button, a")).find((el) =>
+      /editar|reenviar|borrar|marcar/i.test(el.textContent || "")
     );
-  }
 
-  function isActionRow(el) {
-    if (!el) return false;
+    if (!button) return null;
 
-    const text = txt(el);
-
-    const hasAction =
-      text.includes("editar") ||
-      text.includes("reenviar") ||
-      text.includes("borrar") ||
-      text.includes("marcar leída") ||
-      text.includes("marcar leida");
-
-    if (!hasAction) return false;
-
-    // No queremos que agarre toda la card.
-    if (text.includes("audiencia")) return false;
-    if (text.includes("destinatarios")) return false;
-    if (text.includes("modo oscuro")) return false;
-    if (text.includes("nueva edicion")) return false;
-    if (text.includes("nueva edición")) return false;
-    if (text.includes("no abras")) return false;
-    if (text.includes("prueba de notificaciones")) return false;
-
-    const rect = el.getBoundingClientRect();
-
-    if (rect.height > 130) return false;
-
-    return true;
-  }
-
-  function findActionRow(button, card) {
     let node = button.parentElement;
 
-    for (let i = 0; i < 6 && node && node !== card && node !== document.body; i += 1) {
-      if (isActionRow(node)) {
+    for (let i = 0; i < 5 && node && node !== card; i += 1) {
+      if (/editar|reenviar|borrar|marcar/i.test(node.textContent || "")) {
         return node;
       }
 
@@ -1646,63 +1707,111 @@
     return button.parentElement;
   }
 
-  function markContent(card, actionRow) {
-    const children = Array.from(card.children || []);
+  function makeBadge(text) {
+    const span = document.createElement("span");
 
-    children.forEach((child) => {
-      child.classList.remove("cn-card-main-content");
-    });
+    span.className = "notification-desired-badge";
+    span.textContent = text;
 
-    const candidates = children.filter((child) => {
-      if (child === actionRow) return false;
+    return span;
+  }
 
-      const text = txt(child);
+  function transformCard(card) {
+    if (!card || card.dataset.desiredTransforming === "1") return;
 
-      if (!text) return false;
-      if (isActionRow(child)) return false;
+    card.dataset.desiredTransforming = "1";
 
-      return (
-        text.includes("audiencia") ||
-        text.includes("destinatarios") ||
-        text.includes("no leída") ||
-        text.includes("no leida") ||
-        text.includes("excel") ||
-        text.includes("jiji") ||
-        text.includes("pedido") ||
-        text.includes("cuanto") ||
-        text.includes("probando")
-      );
-    });
+    try {
+      const lines = linesFrom(card);
+      const first = parseFirstLine(lines[0] || "");
+      const detected = detectFromClasses(card);
 
-    if (candidates.length) {
-      candidates[candidates.length - 1].classList.add("cn-card-main-content");
+      const title = first.title || lines[0] || "Notificación";
+      const type = first.type || "";
+      const severity = first.severity || detected.severity || "";
+
+      const message = lines.find((line) =>
+        line !== lines[0] &&
+        !/^Audiencia:/i.test(line) &&
+        !/\d{1,2}\/\d{1,2}\/\d{2,4}/.test(line)
+      ) || "";
+
+      const meta = lines.find((line) => /^Audiencia:/i.test(line)) || "";
+      const date = findDate(card);
+
+      const actions = findActions(card);
+
+      card.querySelectorAll(".notification-desired-icon, .notification-desired-body").forEach((el) => el.remove());
+
+      const icon = document.createElement("div");
+      icon.className = "notification-desired-icon";
+      icon.innerHTML = `<i class="fa-solid ${detected.icon}" aria-hidden="true"></i>`;
+
+      const body = document.createElement("div");
+      body.className = "notification-desired-body";
+
+      const top = document.createElement("div");
+      top.className = "notification-desired-top";
+
+      const titleEl = document.createElement("h3");
+      titleEl.className = "notification-desired-title";
+      titleEl.textContent = title;
+
+      const dateEl = document.createElement("span");
+      dateEl.className = "notification-desired-date";
+      dateEl.textContent = date;
+
+      top.appendChild(titleEl);
+
+      if (date) top.appendChild(dateEl);
+
+      const badges = document.createElement("div");
+      badges.className = "notification-desired-badges";
+
+      if (type) badges.appendChild(makeBadge(type));
+      if (severity) badges.appendChild(makeBadge(severity));
+
+      // Mantener badges útiles como en la card buena.
+      const audienceMatch = meta.match(/Audiencia:\s*([^·]+)/i);
+      const unreadMatch = meta.match(/No leídas:\s*([0-9]+)/i) || meta.match(/No leidas:\s*([0-9]+)/i);
+
+      if (audienceMatch) badges.appendChild(makeBadge(cleanText(audienceMatch[1])));
+      if (unreadMatch) badges.appendChild(makeBadge("No leída"));
+
+      const msg = document.createElement("p");
+      msg.className = "notification-desired-message";
+      msg.textContent = message;
+
+      const metaEl = document.createElement("div");
+      metaEl.className = "notification-desired-meta";
+      metaEl.textContent = meta;
+
+      body.appendChild(top);
+      body.appendChild(badges);
+      if (message) body.appendChild(msg);
+
+      // Por ahora ocultamos meta pesada en visual, pero queda en dataset.
+      body.dataset.meta = meta;
+
+      if (actions) {
+        body.appendChild(actions);
+      }
+
+      card.classList.add("notification-admin-desired-card");
+
+      card.insertBefore(body, card.firstChild);
+      card.insertBefore(icon, body);
+    } finally {
+      card.dataset.desiredTransforming = "0";
     }
   }
 
   function run() {
-    const cards = Array.from(document.querySelectorAll(".cn-full-notification-card"));
+    const cards = Array.from(document.querySelectorAll(".notification-admin-item"));
 
-    cards.forEach((card) => {
-      card.querySelectorAll(".cn-card-actions-bottom").forEach((old) => {
-        old.classList.remove("cn-card-actions-bottom");
-      });
+    cards.forEach(transformCard);
 
-      const buttons = Array.from(card.querySelectorAll("button, a"))
-        .filter(isActionButton);
-
-      if (!buttons.length) return;
-
-      const row = findActionRow(buttons[0], card);
-
-      if (row) {
-        row.classList.add("cn-card-actions-bottom");
-        markContent(card, row);
-      }
-    });
-
-    document.body.dataset.cnActionsBottom = String(
-      document.querySelectorAll(".cn-card-actions-bottom").length
-    );
+    document.body.dataset.cnDesiredCards = String(cards.length);
   }
 
   let scheduled = false;
@@ -1725,18 +1834,17 @@
 
     observer.observe(document.body, {
       childList: true,
-      subtree: true,
-      characterData: true,
+      subtree: true
     });
 
     window.addEventListener("classroom:notifications-updated", schedule);
 
-    setTimeout(run, 300);
-    setTimeout(run, 1000);
-    setTimeout(run, 2200);
+    setTimeout(run, 250);
+    setTimeout(run, 900);
+    setTimeout(run, 1800);
   }
 
-  window.ClassroomCentroCardActionsBottom = {
+  window.ClassroomCentroDesiredCards = {
     run
   };
 
