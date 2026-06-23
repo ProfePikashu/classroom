@@ -16535,3 +16535,28 @@ body.page-notifications .notification-item,
 body.page-notifications [data-notification-id] {
   border-width: 2px !important;
 }
+
+/* === CENTRO MINIMAL SAFE BORDER 20260622 === */
+/*
+  Mínimo y seguro:
+  - No cambia fondos.
+  - No crea cards internas.
+  - No toca el layout.
+  - Solo sube apenas el grosor del borde de cards reales.
+*/
+
+body.page-centro-notificaciones .notification-card,
+body.page-centro-notificaciones .notification-item,
+body.page-centro-notificaciones .admin-notification-card,
+body.page-centro-notificaciones [data-notification-id],
+body.page-notifications .notification-card,
+body.page-notifications .notification-item,
+body.page-notifications .admin-notification-card,
+body.page-notifications [data-notification-id] {
+  border-width: 2px !important;
+}
+
+body.page-centro-notificaciones .js-email-notice-hidden,
+body.page-notifications .js-email-notice-hidden {
+  display: none !important;
+}

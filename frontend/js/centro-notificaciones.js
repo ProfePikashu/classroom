@@ -1053,3 +1053,88 @@
   window.ClassroomCentroMojibakeFix = { run, fixString };
 })();
 
+/* === HIDE EMAIL NOTICE SAFE NON DESTRUCTIVE 20260622 === */
+(function hideEmailNoticeSafeNonDestructive() {
+  "use strict";
+
+  function norm(value) {
+    return String(value || "").replace(/\s+/g, " ").trim().toLowerCase();
+  }
+
+  function isEmailNotice(text) {
+    return (
+      text.includes("email desactivado por defecto") ||
+      text.includes("email sigue desactivado por defecto")
+    );
+  }
+
+  function isForbiddenContainer(el) {
+    const text = norm(el.textContent);
+
+    return (
+      el === document.body ||
+      el.classList.contains("main-content") ||
+      el.classList.contains("content") ||
+      text.includes("nueva notificación") ||
+      text.includes("crear / editar") ||
+      text.includes("guardar notificación") ||
+      text.includes("vista demo") ||
+      text.includes("notificaciones existentes")
+    );
+  }
+
+  function hideEmailNotices() {
+    const candidates = Array.from(document.querySelectorAll("div, section, article, aside, p"))
+      .filter((el) => {
+        const text = norm(el.textContent);
+        if (!isEmailNotice(text)) return false;
+        if (isForbiddenContainer(el)) return false;
+
+        const rect = el.getBoundingClientRect();
+
+        // Elegimos bloques chicos, no paneles enteros.
+        if (rect.width > 900) return false;
+        if (rect.height > 220) return false;
+
+        return true;
+      })
+      .sort((a, b) => {
+        const ar = a.getBoundingClientRect();
+        const br = b.getBoundingClientRect();
+        return (ar.width * ar.height) - (br.width * br.height);
+      });
+
+    candidates.forEach((el) => {
+      el.classList.add("js-email-notice-hidden");
+      el.setAttribute("aria-hidden", "true");
+    });
+  }
+
+  function init() {
+    hideEmailNotices();
+
+    const observer = new MutationObserver(() => {
+      requestAnimationFrame(hideEmailNotices);
+    });
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      characterData: true
+    });
+
+    setTimeout(hideEmailNotices, 300);
+    setTimeout(hideEmailNotices, 1200);
+    setTimeout(hideEmailNotices, 2500);
+  }
+
+  window.ClassroomHideEmailNoticeSafe = {
+    run: hideEmailNotices
+  };
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+})();
