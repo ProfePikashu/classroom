@@ -16658,4 +16658,7 @@ html[data-theme="light"] .notification-admin-tags span,
   background: rgba(255, 255, 255, 0.74) !important;
   color: #174366 !important;
   border: 1px solid rgba(15, 23, 42, 0.05) !important;
-}
+}\n\n/* === CENTRO ADMIN META BELOW ACTIONS 20260623 === */
+.notification-admin-item-actions + .notification-admin-meta {
+  margin-top: 0.8rem !important;
+}\n

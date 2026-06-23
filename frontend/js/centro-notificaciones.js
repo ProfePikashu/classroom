@@ -875,17 +875,13 @@
       const createdByName = item.created_by_name || item.actor || "Staff";
       const createdByRole = adminRoleLabel(item.created_by_role || item.role || "");
       const createdByTwitch = item.created_by_twitch ? `@${item.created_by_twitch}` : "";
-      const createdByDni = item.created_by_dni ? `DNI ${item.created_by_dni}` : "";
-
       const creatorParts = [
         createdByName,
         createdByRole,
         createdByTwitch,
-        createdByDni,
       ].filter(Boolean);
 
       const metaParts = [
-        `Audiencia: ${adminAudienceLabel(audience)}`,
         `Destinatarios: ${recipients}`,
         `No leídas: ${unread}`,
         creatorParts.length ? `Creada por: ${creatorParts.join(" · ")}` : "",
@@ -921,10 +917,6 @@
 
             ${link ? `<a class="notification-admin-link" href="${escapeHtml(link)}" target="_blank" rel="noopener noreferrer">${escapeHtml(link)}</a>` : ""}
 
-            <small class="notification-admin-meta">
-              ${escapeHtml(metaParts.join(" · "))}
-            </small>
-
             <div class="notification-admin-item-actions">
               <button type="button" data-backend-notification-edit="${escapeHtml(item.id)}">
                 <i class="fa-solid fa-pen"></i>
@@ -941,6 +933,10 @@
                 Borrar
               </button>
             </div>
+
+            <small class="notification-admin-meta">
+              ${escapeHtml(metaParts.join(" · "))}
+            </small>
           </div>
         </article>
       `;
