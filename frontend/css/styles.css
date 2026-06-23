@@ -16779,3 +16779,62 @@ html[data-theme="dark"] .cn-existing-notification-card.cn-severity-yellow,
 .cn-full-notification-card {
   position: relative;
 }
+
+/* === CENTRO NOTIFICATION DEEP BLUE TEXT 20260622 === */
+/*
+  Ajuste chico:
+  - Solo en cards de notificaciones existentes.
+  - Cambia textos/botones celeste flúor por azul profundo en modo claro.
+  - No toca fondos ni layout.
+*/
+
+html[data-theme="light"] .cn-existing-notification-card a,
+html[data-theme="light"] .cn-existing-notification-card button,
+html[data-theme="light"] .cn-existing-notification-card .btn,
+html[data-theme="light"] .cn-existing-notification-card [role="button"],
+:root[data-theme="light"] .cn-existing-notification-card a,
+:root[data-theme="light"] .cn-existing-notification-card button,
+:root[data-theme="light"] .cn-existing-notification-card .btn,
+:root[data-theme="light"] .cn-existing-notification-card [role="button"] {
+  color: #075985 !important;
+  text-shadow:
+    1px 1px 0 rgba(255,255,255,0.80),
+    -1px -1px 0 rgba(15,23,42,0.08) !important;
+}
+
+/* Íconos dentro de los botones */
+html[data-theme="light"] .cn-existing-notification-card button i,
+html[data-theme="light"] .cn-existing-notification-card .btn i,
+html[data-theme="light"] .cn-existing-notification-card a i,
+:root[data-theme="light"] .cn-existing-notification-card button i,
+:root[data-theme="light"] .cn-existing-notification-card .btn i,
+:root[data-theme="light"] .cn-existing-notification-card a i {
+  color: #075985 !important;
+}
+
+/* Link largo dentro de la notificación */
+html[data-theme="light"] .cn-existing-notification-card a[href],
+:root[data-theme="light"] .cn-existing-notification-card a[href] {
+  color: #0369a1 !important;
+  font-weight: 900 !important;
+  text-decoration-color: rgba(3,105,161,0.45) !important;
+}
+
+/* Botón borrar conserva rosa */
+html[data-theme="light"] .cn-existing-notification-card button:has(.fa-trash),
+html[data-theme="light"] .cn-existing-notification-card a:has(.fa-trash),
+html[data-theme="light"] .cn-existing-notification-card .danger,
+html[data-theme="light"] .cn-existing-notification-card .delete,
+:root[data-theme="light"] .cn-existing-notification-card button:has(.fa-trash),
+:root[data-theme="light"] .cn-existing-notification-card a:has(.fa-trash),
+:root[data-theme="light"] .cn-existing-notification-card .danger,
+:root[data-theme="light"] .cn-existing-notification-card .delete {
+  color: #be3455 !important;
+}
+
+html[data-theme="light"] .cn-existing-notification-card button:has(.fa-trash) i,
+html[data-theme="light"] .cn-existing-notification-card a:has(.fa-trash) i,
+:root[data-theme="light"] .cn-existing-notification-card button:has(.fa-trash) i,
+:root[data-theme="light"] .cn-existing-notification-card a:has(.fa-trash) i {
+  color: #be3455 !important;
+}
