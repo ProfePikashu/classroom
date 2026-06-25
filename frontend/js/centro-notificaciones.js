@@ -1501,3 +1501,338 @@
   }
 })();
 
+/* === CENTRO BACKEND DOMINANCE 20260624 === */
+(function centroBackendDominance20260624() {
+  "use strict";
+
+  const isCentroPage = /centro-notificaciones\.html$/i.test(window.location.pathname || "");
+
+  if (!isCentroPage) return;
+
+  function escapeHtml(value) {
+    return String(value ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  function listEl() {
+    return (
+      document.querySelector("#notificationAdminList") ||
+      document.querySelector("#notificationsAdminList") ||
+      document.querySelector("[data-notification-admin-list]") ||
+      document.querySelector(".notification-admin-list")
+    );
+  }
+
+  function counterEl() {
+    return (
+      document.querySelector("#notificationAdminCounter") ||
+      document.querySelector("[data-notification-admin-counter]") ||
+      document.querySelector(".notification-admin-counter")
+    );
+  }
+
+  function searchEl() {
+    return (
+      document.querySelector("#notificationAdminSearch") ||
+      document.querySelector("[data-notification-admin-search]") ||
+      document.querySelector(".notification-admin-search")
+    );
+  }
+
+  function typeFilterEl() {
+    return (
+      document.querySelector("#notificationAdminTypeFilter") ||
+      document.querySelector("[data-notification-admin-type-filter]") ||
+      document.querySelector(".notification-admin-type-filter")
+    );
+  }
+
+  function ensureCommunityFilterOption() {
+    const select = typeFilterEl();
+
+    if (!select || select.querySelector('option[value="community"]')) return;
+
+    const option = document.createElement("option");
+    option.value = "community";
+    option.textContent = "Comunidad";
+    select.appendChild(option);
+  }
+
+  function formatDate(value) {
+    if (!value) return "";
+
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) return "";
+
+    return date.toLocaleString("es-AR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  }
+
+  function severityClass(item) {
+    const severity = String(item?.severity || "").toLowerCase();
+
+    if (["danger", "error", "rojo", "red"].includes(severity)) return "danger";
+    if (["warning", "warn", "amarillo", "yellow"].includes(severity)) return "warning";
+    if (["success", "ok", "verde", "green"].includes(severity)) return "success";
+    if (String(item?.type || "").toLowerCase() === "community") return "info";
+
+    return "info";
+  }
+
+  function severityLabel(value) {
+    const severity = String(value || "info").toLowerCase();
+
+    if (severity === "danger") return "Rojo";
+    if (severity === "warning") return "Amarillo";
+    if (severity === "success") return "Verde";
+
+    return "Azul";
+  }
+
+  function typeLabel(value) {
+    const type = String(value || "announcement").toLowerCase();
+
+    if (type === "community") return "Comunidad";
+    if (type === "academic") return "Académica";
+    if (type === "system") return "Sistema";
+
+    return "Aviso";
+  }
+
+  function audienceLabel(value, item) {
+    const audience = String(value || "all").toLowerCase();
+
+    if (audience === "course") return item?.course || "Curso";
+    if (audience === "students") return "Alumnos";
+    if (audience === "staff") return "Staff";
+    if (audience === "specific_user") return "Usuario";
+
+    return "Todos";
+  }
+
+  function iconClass(item) {
+    const type = String(item?.type || "").toLowerCase();
+    const severity = severityClass(item);
+
+    if (type === "community") return "fa-comments";
+    if (severity === "danger") return "fa-triangle-exclamation";
+    if (severity === "warning") return "fa-circle-exclamation";
+    if (severity === "success") return "fa-circle-check";
+
+    return "fa-bell";
+  }
+
+  function getBackendItems() {
+    const items = Array.isArray(window.ClassroomNotificationAdminItems)
+      ? window.ClassroomNotificationAdminItems
+      : [];
+
+    return items.filter(Boolean);
+  }
+
+  function getFilteredBackendItems() {
+    const items = getBackendItems();
+    const search = String(searchEl()?.value || "").trim().toLowerCase();
+    const type = String(typeFilterEl()?.value || "all").trim().toLowerCase();
+
+    return items.filter((item) => {
+      const itemType = String(item?.type || "announcement").toLowerCase();
+
+      const matchesType =
+        !type ||
+        type === "all" ||
+        type === "todos" ||
+        itemType === type;
+
+      const haystack = [
+        item?.title,
+        item?.body,
+        item?.description,
+        item?.type,
+        item?.severity,
+        item?.course,
+        item?.actor,
+        item?.created_by_name,
+        item?.created_by_twitch,
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+
+      const matchesSearch = !search || haystack.includes(search);
+
+      return matchesType && matchesSearch;
+    });
+  }
+
+  function renderBackendDominantList() {
+    const list = listEl();
+
+    if (!list) return false;
+
+    ensureCommunityFilterOption();
+
+    const allItems = getBackendItems();
+
+    if (!allItems.length) return false;
+
+    const items = getFilteredBackendItems();
+
+    const counter = counterEl();
+
+    if (counter) {
+      counter.textContent = String(items.length);
+    }
+
+    if (!items.length) {
+      list.innerHTML = `
+        <div class="notification-admin-empty">
+          <i class="fa-regular fa-bell"></i>
+          <strong>No hay notificaciones con ese filtro</strong>
+          <p>Probá cambiar la búsqueda o el tipo seleccionado.</p>
+        </div>
+      `;
+      return true;
+    }
+
+    list.innerHTML = items.map((item) => {
+      const severity = severityClass(item);
+      const type = item.type || "announcement";
+      const body = item.body || item.description || "";
+      const link = item.link_url || item.link || "";
+      const audience = item.audience_type || item.audience || "all";
+      const recipients = item.recipients_count ?? item.recipientsCreated ?? item.recipients_created ?? 0;
+      const unread = item.unread_count ?? item.unread ?? 0;
+      const createdAt = item.created_at || item.createdAt || "";
+      const updatedAt = item.updated_at || item.updatedAt || "";
+      const createdByName = item.created_by_name || item.actor || "Staff";
+      const createdByRole = item.created_by_role || item.role || "";
+      const createdByTwitch = item.created_by_twitch ? `@${item.created_by_twitch}` : "";
+
+      const creatorParts = [createdByName, createdByRole, createdByTwitch]
+        .filter(Boolean)
+        .filter((part, index, array) => {
+          const normalized = String(part || "").trim().toLowerCase();
+
+          if (!normalized) return false;
+
+          return array.findIndex((current) =>
+            String(current || "").trim().toLowerCase() === normalized
+          ) === index;
+        });
+
+      const metaParts = [
+        `Destinatarios: ${recipients}`,
+        `No leídas: ${unread}`,
+        creatorParts.length ? `Creada por: ${creatorParts.join(" · ")}` : "",
+        createdAt ? `Creada: ${formatDate(createdAt)}` : "",
+        updatedAt && updatedAt !== createdAt ? `Actualizada: ${formatDate(updatedAt)}` : "",
+      ].filter(Boolean);
+
+      const unreadBadge = Number(unread || 0) > 0 ? "No leída" : "Leída";
+
+      return `
+        <article class="notification-admin-item is-${escapeHtml(severity)} cn-existing-notification-card cn-full-notification-card cn-severity-${escapeHtml(severity)}" data-admin-notification-id="${escapeHtml(item.id)}">
+          <div class="notification-admin-item-icon">
+            <i class="fa-solid ${escapeHtml(iconClass(item))}"></i>
+          </div>
+
+          <div class="notification-admin-item-body">
+            <div class="notification-admin-item-top">
+              <div>
+                <h4>${escapeHtml(item.title || "Notificación")}</h4>
+
+                <div class="notification-admin-tags">
+                  <span>${escapeHtml(typeLabel(type))}</span>
+                  <span>${escapeHtml(severityLabel(severity))}</span>
+                  <span>${escapeHtml(audienceLabel(audience, item))}</span>
+                  <span>${escapeHtml(unreadBadge)}</span>
+                </div>
+              </div>
+
+              <small>${escapeHtml(formatDate(createdAt))}</small>
+            </div>
+
+            <p>${escapeHtml(body)}</p>
+
+            ${link ? `<a class="notification-admin-link" href="${escapeHtml(link)}" target="_blank" rel="noopener noreferrer">${escapeHtml(link)}</a>` : ""}
+
+            <div class="notification-admin-item-actions">
+              <button type="button" data-backend-notification-edit="${escapeHtml(item.id)}">
+                <i class="fa-solid fa-pen"></i>
+                Editar
+              </button>
+
+              <button type="button" data-backend-notification-resend="${escapeHtml(item.id)}">
+                <i class="fa-solid fa-paper-plane"></i>
+                Reenviar
+              </button>
+
+              <button type="button" class="danger" data-backend-notification-delete="${escapeHtml(item.id)}">
+                <i class="fa-solid fa-trash"></i>
+                Borrar
+              </button>
+            </div>
+
+            <small class="notification-admin-meta">
+              ${escapeHtml(metaParts.join(" · "))}
+            </small>
+          </div>
+        </article>
+      `;
+    }).join("");
+
+    return true;
+  }
+
+  function scheduleDominantRender() {
+    setTimeout(renderBackendDominantList, 40);
+    setTimeout(renderBackendDominantList, 160);
+    setTimeout(renderBackendDominantList, 420);
+    setTimeout(renderBackendDominantList, 900);
+  }
+
+  async function forceBackendLoadThenRender() {
+    try {
+      if (window.ClassroomNotificationCenterBackend?.load) {
+        await window.ClassroomNotificationCenterBackend.load();
+      }
+    } catch (error) {
+      console.warn("[Centro Backend Dominance] No pude recargar backend:", error);
+    }
+
+    scheduleDominantRender();
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    ensureCommunityFilterOption();
+
+    searchEl()?.addEventListener("input", scheduleDominantRender);
+    searchEl()?.addEventListener("change", scheduleDominantRender);
+    typeFilterEl()?.addEventListener("input", scheduleDominantRender);
+    typeFilterEl()?.addEventListener("change", scheduleDominantRender);
+
+    forceBackendLoadThenRender();
+  });
+
+  window.addEventListener("classroom:notifications-updated", scheduleDominantRender);
+  window.addEventListener("focus", scheduleDominantRender);
+
+  window.ClassroomCentroBackendDominance = {
+    render: renderBackendDominantList,
+    schedule: scheduleDominantRender,
+    reload: forceBackendLoadThenRender,
+  };
+
+  scheduleDominantRender();
+})();
