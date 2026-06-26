@@ -1836,3 +1836,189 @@
 
   scheduleDominantRender();
 })();
+
+
+/* ============================================================
+   CENTRO_DELETE_BACKEND_DOMINANTE_20260625
+   Fuerza el borrado real por backend para botones de Centro.
+   Evita que la lógica legacy/localStorage deje la notificación viva.
+============================================================ */
+(function patchCentroDeleteBackendDominante() {
+  function getSessionToken() {
+    try {
+      const raw = localStorage.getItem("andyazh-classroom-session");
+      if (!raw) return "";
+      const session = JSON.parse(raw);
+      return session?.token || session?.access_token || session?.jwt || "";
+    } catch (_) {
+      return "";
+    }
+  }
+
+  function getApiBase() {
+    const base =
+      window.ClassroomBackend?.baseUrl ||
+      window.ClassroomBackend?.apiBase ||
+      window.CLASSROOM_API_BASE ||
+      window.EXAMPRO_API_BASE ||
+      "http://127.0.0.1:8000";
+
+    return String(base).replace(/\/+$/, "");
+  }
+
+  function getNotificationIdFromButton(btn) {
+    if (!btn) return "";
+
+    return (
+      btn.dataset.adminNotificationDelete ||
+      btn.dataset.notificationDelete ||
+      btn.dataset.deleteNotification ||
+      btn.dataset.deleteId ||
+      btn.dataset.id ||
+      btn.getAttribute("data-admin-notification-delete") ||
+      btn.getAttribute("data-notification-delete") ||
+      btn.getAttribute("data-delete-notification") ||
+      btn.getAttribute("data-delete-id") ||
+      ""
+    ).trim();
+  }
+
+  function looksLikeDeleteButton(target) {
+    const btn = target?.closest?.("button, a");
+    if (!btn) return null;
+
+    const text = (btn.textContent || "").trim().toLowerCase();
+
+    const hasDeleteDataset =
+      btn.hasAttribute("data-admin-notification-delete") ||
+      btn.hasAttribute("data-notification-delete") ||
+      btn.hasAttribute("data-delete-notification") ||
+      btn.hasAttribute("data-delete-id");
+
+    const isInsideNotificationCenter =
+      Boolean(
+        btn.closest("#notificationAdminList") ||
+        btn.closest("#notificationsAdminList") ||
+        btn.closest("#notificationList") ||
+        btn.closest(".notification-center") ||
+        btn.closest(".notifications-admin") ||
+        btn.closest(".notification-card")
+      );
+
+    if ((hasDeleteDataset || text === "borrar" || text.includes("borrar")) && isInsideNotificationCenter) {
+      return btn;
+    }
+
+    return null;
+  }
+
+  async function deleteNotificationBackendDominante(id, btn) {
+    if (!id) {
+      console.warn("[Centro] No encontré ID de notificación para borrar.");
+      return;
+    }
+
+    const ok = window.confirm("¿Borrar esta notificación para todos?");
+    if (!ok) return;
+
+    const oldText = btn?.textContent;
+
+    try {
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = "Borrando...";
+      }
+
+      const token = getSessionToken();
+      const headers = {};
+
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+
+      const response = await fetch(`${getApiBase()}/api/classroom/notifications/${encodeURIComponent(id)}`, {
+        method: "DELETE",
+        headers,
+      });
+
+      let data = null;
+      try {
+        data = await response.json();
+      } catch (_) {}
+
+      if (!response.ok) {
+        throw new Error(data?.detail || data?.message || `HTTP ${response.status}`);
+      }
+
+      document
+        .querySelectorAll(`[data-admin-notification-delete="${CSS.escape(id)}"], [data-notification-delete="${CSS.escape(id)}"], [data-delete-notification="${CSS.escape(id)}"], [data-delete-id="${CSS.escape(id)}"]`)
+        .forEach((el) => {
+          const card = el.closest("article, .notification-card, .notification-item, li, tr");
+          if (card) card.remove();
+        });
+
+      if (Array.isArray(window.ClassroomNotificationsAdminItems)) {
+        window.ClassroomNotificationsAdminItems = window.ClassroomNotificationsAdminItems.filter((item) => String(item.id) !== String(id));
+      }
+
+      if (Array.isArray(window.ClassroomNotificationsItems)) {
+        window.ClassroomNotificationsItems = window.ClassroomNotificationsItems.filter((item) => String(item.id) !== String(id));
+      }
+
+      window.dispatchEvent(new CustomEvent("classroom-notification-deleted", {
+        detail: {
+          deletedId: id,
+          id,
+          source: "centro-delete-backend-dominante",
+          backend: data || null,
+        },
+      }));
+
+      window.dispatchEvent(new CustomEvent("classroom-notifications-changed", {
+        detail: {
+          action: "delete",
+          deletedId: id,
+          id,
+          source: "centro-delete-backend-dominante",
+        },
+      }));
+
+      if (window.ClassroomNotificationsAdmin?.load) {
+        await window.ClassroomNotificationsAdmin.load();
+      } else if (window.ClassroomNotificationCenter?.load) {
+        await window.ClassroomNotificationCenter.load();
+      }
+
+      console.log("[Centro] Notificación borrada desde backend:", id, data);
+    } catch (error) {
+      console.error("[Centro] No pude borrar notificación desde backend:", error);
+      alert(error.message || "No pude borrar la notificación.");
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = oldText || "Borrar";
+      }
+    }
+  }
+
+  document.addEventListener(
+    "click",
+    function onCentroDeleteClick(event) {
+      const btn = looksLikeDeleteButton(event.target);
+      if (!btn) return;
+
+      const id = getNotificationIdFromButton(btn);
+      if (!id) return;
+
+      event.preventDefault();
+      event.stopPropagation();
+      event.stopImmediatePropagation();
+
+      deleteNotificationBackendDominante(id, btn);
+    },
+    true
+  );
+
+  console.log("[Centro] Patch delete backend dominante activo.");
+})();
+
