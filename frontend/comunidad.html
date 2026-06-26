@@ -169,6 +169,183 @@
 </style>
 
   <!-- COMMUNITY_FILE_ACCEPT_FIX_20260625 -->
+
+<style id="community-publish-overlay-style">
+  /* COMMUNITY_PUBLISH_OVERLAY_HTML_20260625 */
+  .community-publish-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 999999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background:
+      radial-gradient(circle at 30% 20%, rgba(0, 234, 255, 0.16), transparent 32%),
+      radial-gradient(circle at 70% 80%, rgba(176, 77, 255, 0.16), transparent 36%),
+      rgba(4, 8, 22, 0.68);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  .community-publish-hidden {
+    display: none !important;
+  }
+
+  .community-publish-card {
+    position: relative;
+    width: min(540px, 94vw);
+    overflow: hidden;
+    padding: 30px 26px 24px;
+    border-radius: 26px;
+    border: 1px solid rgba(103, 235, 255, 0.28);
+    background:
+      linear-gradient(180deg, rgba(12, 22, 50, 0.98), rgba(6, 11, 30, 0.98));
+    box-shadow:
+      0 28px 80px rgba(0, 0, 0, 0.56),
+      0 0 42px rgba(105, 74, 255, 0.18),
+      inset 0 0 0 1px rgba(255,255,255,0.04);
+    color: #eef8ff;
+    text-align: center;
+  }
+
+  .community-publish-glow {
+    position: absolute;
+    inset: -80px;
+    opacity: 0.55;
+    background:
+      conic-gradient(from 120deg, transparent, rgba(0,234,255,.24), transparent, rgba(176,77,255,.25), transparent);
+    animation: communityPublishGlow 4.5s linear infinite;
+    pointer-events: none;
+  }
+
+  .community-publish-card > *:not(.community-publish-glow) {
+    position: relative;
+    z-index: 1;
+  }
+
+  .community-publish-icon {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 16px;
+    display: grid;
+    place-items: center;
+    border-radius: 22px;
+    color: #081225;
+    font-size: 26px;
+    background: linear-gradient(135deg, #67ebff, #9b6bff);
+    box-shadow:
+      0 0 24px rgba(103,235,255,.38),
+      0 0 44px rgba(155,107,255,.20);
+    animation: communityPublishFloat 1.55s ease-in-out infinite;
+  }
+
+  .community-publish-card h3 {
+    margin: 0 0 8px;
+    font-size: clamp(1.35rem, 3vw, 1.75rem);
+    font-weight: 900;
+    letter-spacing: .02em;
+    text-transform: uppercase;
+  }
+
+  .community-publish-card p {
+    min-height: 24px;
+    margin: 0 0 20px;
+    color: rgba(231, 244, 255, 0.88);
+    font-size: 1rem;
+  }
+
+  .community-publish-progress {
+    width: 100%;
+    height: 16px;
+    padding: 2px;
+    border-radius: 999px;
+    overflow: hidden;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.10);
+  }
+
+  .community-publish-progress-bar {
+    height: 100%;
+    width: 0%;
+    border-radius: inherit;
+    transition: width 220ms ease;
+    background:
+      linear-gradient(90deg, #00eaff 0%, #6d7cff 52%, #b04dff 100%);
+    box-shadow:
+      0 0 18px rgba(0,234,255,.38),
+      0 0 26px rgba(176,77,255,.24);
+  }
+
+  .community-publish-footer {
+    margin-top: 12px;
+    display: flex;
+    justify-content: space-between;
+    gap: 14px;
+    align-items: flex-start;
+    color: rgba(229, 243, 255, 0.82);
+    font-size: .94rem;
+    text-align: left;
+  }
+
+  #communityPublishPercent {
+    min-width: 44px;
+    color: #67ebff;
+    font-weight: 900;
+    text-align: left;
+  }
+
+  #communityPublishDetail {
+    flex: 1;
+    text-align: right;
+  }
+
+  .community-publish-warning {
+    display: block;
+    margin-top: 16px;
+    color: rgba(229, 243, 255, 0.58);
+    line-height: 1.35;
+  }
+
+  .community-publish-busy {
+    opacity: .72 !important;
+    cursor: wait !important;
+    pointer-events: none !important;
+  }
+
+  @keyframes communityPublishGlow {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @keyframes communityPublishFloat {
+    0%, 100% {
+      transform: translateY(0) rotate(-2deg);
+    }
+    50% {
+      transform: translateY(-5px) rotate(2deg);
+    }
+  }
+
+  @media (max-width: 560px) {
+    .community-publish-card {
+      padding: 26px 20px 22px;
+    }
+
+    .community-publish-footer {
+      flex-direction: column;
+      gap: 6px;
+      text-align: center;
+      align-items: center;
+    }
+
+    #communityPublishDetail {
+      text-align: center;
+    }
+  }
+</style>
+
 </head>
 
 <body class="page-community">
@@ -550,6 +727,34 @@
   <script src="js/comunidad.js?v=20260625-community-attachments-v1"></script>
   <script src="js/pelusita.js?v=20260611b"></script>  <script src="js/pelusita-dialog.js?v=20260612-guide-compact"></script>
   <script src="js/sidebar-v2.js?v=20260612-pelusita-dock-v2"></script>
+
+<!-- COMMUNITY_PUBLISH_OVERLAY_HTML_20260625 -->
+<div id="communityPublishOverlay" class="community-publish-overlay community-publish-hidden" aria-hidden="true">
+  <div class="community-publish-card" role="status" aria-live="polite">
+    <div class="community-publish-glow"></div>
+
+    <div class="community-publish-icon">
+      <i class="fa-solid fa-paper-plane"></i>
+    </div>
+
+    <h3 id="communityPublishTitle">Creando hilo con adjuntos</h3>
+    <p id="communityPublishMessage">Preparando publicación...</p>
+
+    <div class="community-publish-progress" aria-label="Progreso de publicación">
+      <div id="communityPublishProgressBar" class="community-publish-progress-bar" style="width: 0%;"></div>
+    </div>
+
+    <div class="community-publish-footer">
+      <span id="communityPublishPercent">0%</span>
+      <span id="communityPublishDetail">Por favor esperá, no cierres esta ventana.</span>
+    </div>
+
+    <small class="community-publish-warning">
+      No vuelvas a tocar “Publicar hilo”. Estamos subiendo todo sin hacer macumba.
+    </small>
+  </div>
+</div>
+
 </body>
 </html>
 

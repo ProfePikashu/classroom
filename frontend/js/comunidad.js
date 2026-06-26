@@ -1370,3 +1370,412 @@
   // COMMUNITY_DRIVE_THUMBNAILS_FIX_20260625
   // COMMUNITY_ATTACHMENTS_FRONT_APPS_SCRIPT_V1_20260625
 })();
+
+
+/* ============================================================
+   COMMUNITY_PUBLISH_OVERLAY_JS_20260625
+   Overlay de publicación + anti doble click + progreso visual.
+   No reemplaza la lógica existente: la envuelve desde afuera.
+============================================================ */
+(function communityPublishOverlayPatch() {
+  const PATCH_ID = "COMMUNITY_PUBLISH_OVERLAY_JS_20260625";
+
+  if (window.__communityPublishOverlayPatchApplied) {
+    return;
+  }
+
+  window.__communityPublishOverlayPatchApplied = true;
+
+  let isPublishing = false;
+  let relevantRequests = 0;
+  let hideTimer = null;
+  let softProgressTimer = null;
+  let lastKnownPercent = 0;
+  let currentSubmitButton = null;
+  let originalButtonHtml = "";
+  let originalBodyOverflow = "";
+
+  function clampPercent(value) {
+    return Math.max(0, Math.min(100, Number(value) || 0));
+  }
+
+  function ui() {
+    return {
+      overlay: document.getElementById("communityPublishOverlay"),
+      title: document.getElementById("communityPublishTitle"),
+      message: document.getElementById("communityPublishMessage"),
+      bar: document.getElementById("communityPublishProgressBar"),
+      percent: document.getElementById("communityPublishPercent"),
+      detail: document.getElementById("communityPublishDetail"),
+    };
+  }
+
+  function setProgress(percent, message, detail, title) {
+    const els = ui();
+    const value = clampPercent(percent);
+    lastKnownPercent = Math.max(lastKnownPercent, value);
+
+    if (els.title && title) els.title.textContent = title;
+    if (els.message && message) els.message.textContent = message;
+    if (els.detail && detail) els.detail.textContent = detail;
+    if (els.percent) els.percent.textContent = `${Math.round(lastKnownPercent)}%`;
+    if (els.bar) els.bar.style.width = `${lastKnownPercent}%`;
+  }
+
+  function findPublishButtonFromTarget(target) {
+    const direct = target?.closest?.("button, input[type='submit']");
+
+    function isRealPublishButton(el) {
+      if (!el) return false;
+
+      const text = `${el.textContent || ""} ${el.value || ""}`.trim().toLowerCase();
+      const id = String(el.id || "").toLowerCase();
+      const cls = String(el.className || "").toLowerCase();
+      const datasetKeys = Object.keys(el.dataset || {}).join(" ").toLowerCase();
+
+      const insideCommunity =
+        el.closest?.(".page-community") ||
+        document.body?.classList?.contains("page-community");
+
+      if (!insideCommunity) return false;
+
+      // IMPORTANTE:
+      // No agarrar "Abrir hilo", "Responder", "Borrar", "Marcar resuelto", etc.
+      if (
+        text.includes("abrir hilo") ||
+        text.includes("responder") ||
+        text.includes("borrar") ||
+        text.includes("marcar resuelto") ||
+        text.includes("ver hilo")
+      ) {
+        return false;
+      }
+
+      // Solo el botón real de creación/publicación.
+      return (
+        text.includes("publicar hilo") ||
+        id.includes("communitysubmit") ||
+        id.includes("community-submit") ||
+        cls.includes("community-submit") ||
+        datasetKeys.includes("communitysubmit") ||
+        datasetKeys.includes("communitySubmit") ||
+        el.getAttribute("type") === "submit"
+      );
+    }
+
+    if (isRealPublishButton(direct)) {
+      return direct;
+    }
+
+    const form =
+      target?.closest?.("form") ||
+      document.querySelector("#communityForm") ||
+      document.querySelector("[data-community-form]");
+
+    const scopedButton =
+      form?.querySelector?.("button[type='submit'], input[type='submit']") ||
+      null;
+
+    if (isRealPublishButton(scopedButton)) {
+      return scopedButton;
+    }
+
+    const allButtons = Array.from(document.querySelectorAll("button, input[type='submit']"));
+    return allButtons.find(isRealPublishButton) || null;
+  }
+
+  // COMMUNITY_PUBLISH_OVERLAY_BUTTON_SCOPE_FIX_20260625
+
+  function setButtonBusy(btn) {
+    if (!btn) return;
+
+    currentSubmitButton = btn;
+
+    if (!originalButtonHtml) {
+      originalButtonHtml = btn.innerHTML || btn.textContent || "Publicar hilo";
+    }
+
+    btn.disabled = true;
+    btn.setAttribute("aria-disabled", "true");
+    btn.classList.add("community-publish-busy");
+    btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Publicando...`;
+  }
+
+  function clearButtonBusy() {
+    const btn = currentSubmitButton;
+
+    if (!btn) return;
+
+    btn.disabled = false;
+    btn.removeAttribute("aria-disabled");
+    btn.classList.remove("community-publish-busy");
+
+    if (originalButtonHtml) {
+      btn.innerHTML = originalButtonHtml;
+    }
+
+    currentSubmitButton = null;
+    originalButtonHtml = "";
+  }
+
+  function showOverlay(btn) {
+    const els = ui();
+
+    if (!els.overlay) {
+      return;
+    }
+
+    clearTimeout(hideTimer);
+    clearInterval(softProgressTimer);
+
+    isPublishing = true;
+    lastKnownPercent = 0;
+
+    originalBodyOverflow = document.body.style.overflow || "";
+    document.body.style.overflow = "hidden";
+
+    els.overlay.classList.remove("community-publish-hidden");
+    els.overlay.setAttribute("aria-hidden", "false");
+
+    setButtonBusy(btn);
+
+    setProgress(
+      3,
+      "Preparando publicación...",
+      "Por favor esperá. No vuelvas a tocar el botón.",
+      "Creando hilo con adjuntos"
+    );
+
+    softProgressTimer = setInterval(() => {
+      if (!isPublishing) return;
+
+      let next = lastKnownPercent;
+
+      if (next < 12) next += 1.5;
+      else if (next < 35) next += 0.8;
+      else if (next < 72) next += 0.45;
+      else if (next < 88) next += 0.18;
+
+      if (next !== lastKnownPercent) {
+        setProgress(next);
+      }
+    }, 380);
+  }
+
+  function hideOverlaySoon() {
+    clearTimeout(hideTimer);
+
+    hideTimer = setTimeout(() => {
+      if (relevantRequests > 0) return;
+
+      setProgress(
+        100,
+        "Hilo publicado correctamente.",
+        "Actualizando la comunidad...",
+        "Listo"
+      );
+
+      setTimeout(() => {
+        const els = ui();
+
+        clearInterval(softProgressTimer);
+        softProgressTimer = null;
+
+        if (els.overlay) {
+          els.overlay.classList.add("community-publish-hidden");
+          els.overlay.setAttribute("aria-hidden", "true");
+        }
+
+        clearButtonBusy();
+
+        document.body.style.overflow = originalBodyOverflow;
+        originalBodyOverflow = "";
+
+        isPublishing = false;
+        lastKnownPercent = 0;
+      }, 520);
+    }, 950);
+  }
+
+  function failOverlay(message) {
+    clearTimeout(hideTimer);
+    clearInterval(softProgressTimer);
+    softProgressTimer = null;
+
+    setProgress(
+      100,
+      message || "No pude completar la publicación.",
+      "Revisá el mensaje de error o probá nuevamente.",
+      "Algo salió mal"
+    );
+
+    setTimeout(() => {
+      const els = ui();
+
+      if (els.overlay) {
+        els.overlay.classList.add("community-publish-hidden");
+        els.overlay.setAttribute("aria-hidden", "true");
+      }
+
+      clearButtonBusy();
+
+      document.body.style.overflow = originalBodyOverflow;
+      originalBodyOverflow = "";
+
+      isPublishing = false;
+      lastKnownPercent = 0;
+      relevantRequests = 0;
+    }, 900);
+  }
+
+  function isCommunityThreadPost(url, options) {
+    const text = String(url || "");
+    const method = String(options?.method || "GET").toUpperCase();
+
+    return (
+      method === "POST" &&
+      text.includes("/api/classroom/community/threads") &&
+      !text.includes("/attachments") &&
+      !text.includes("/replies")
+    );
+  }
+
+  function isCommunityAttachmentPost(url, options) {
+    const text = String(url || "");
+    const method = String(options?.method || "GET").toUpperCase();
+
+    return (
+      method === "POST" &&
+      text.includes("/api/classroom/community/threads/") &&
+      text.includes("/attachments")
+    );
+  }
+
+  function describeFilesFromBody(body) {
+    try {
+      if (!(body instanceof FormData)) {
+        return { count: 0, totalBytes: 0, names: [] };
+      }
+
+      const files = [];
+
+      body.forEach((value) => {
+        if (value instanceof File) {
+          files.push(value);
+        }
+      });
+
+      return {
+        count: files.length,
+        totalBytes: files.reduce((sum, file) => sum + (file.size || 0), 0),
+        names: files.map((file) => file.name).filter(Boolean),
+      };
+    } catch (_) {
+      return { count: 0, totalBytes: 0, names: [] };
+    }
+  }
+
+  function startFromUserAction(event) {
+    const btn = findPublishButtonFromTarget(event.target);
+
+    if (!btn) return;
+
+    if (isPublishing) {
+      event.preventDefault();
+      event.stopPropagation();
+      event.stopImmediatePropagation();
+      return;
+    }
+
+    showOverlay(btn);
+  }
+
+  // COMMUNITY_PUBLISH_OVERLAY_SAFE_SCOPE_20260625: no activar overlay por clicks globales.
+  // document.addEventListener("click", startFromUserAction, true);
+  // COMMUNITY_PUBLISH_OVERLAY_SAFE_SCOPE_20260625: no activar overlay por submit global.
+const originalFetch = window.fetch.bind(window);
+
+  window.fetch = async function patchedCommunityPublishFetch(input, options = {}) {
+    const url = typeof input === "string" ? input : input?.url || "";
+    const isThread = isCommunityThreadPost(url, options);
+    const isAttachment = isCommunityAttachmentPost(url, options);
+
+    if (!isThread && !isAttachment) {
+      return originalFetch(input, options);
+    }
+
+    relevantRequests += 1;
+    clearTimeout(hideTimer);
+
+    if (isThread) {
+      if (!isPublishing) {
+        const realPublishButton =
+          Array.from(document.querySelectorAll("button, input[type='submit']")).find((el) => {
+            const text = `${el.textContent || ""} ${el.value || ""}`.trim().toLowerCase();
+            return text.includes("publicar hilo");
+          }) || null;
+
+        showOverlay(realPublishButton);
+      }
+
+      setProgress(
+        Math.max(lastKnownPercent, 12),
+        "Creando hilo base...",
+        "Estamos guardando el título y el contenido.",
+        "Creando hilo"
+      );
+    }
+
+    if (isAttachment) {
+      const info = describeFilesFromBody(options?.body);
+      const detail =
+        info.count > 1
+          ? `${info.count} archivos en cola`
+          : info.names[0] || "Subiendo archivo";
+
+      setProgress(
+        Math.max(lastKnownPercent, 34),
+        "Subiendo adjuntos...",
+        detail,
+        "Creando hilo con adjuntos"
+      );
+    }
+
+    try {
+      const response = await originalFetch(input, options);
+
+      if (isThread) {
+        setProgress(
+          Math.max(lastKnownPercent, 28),
+          "Hilo creado. Preparando adjuntos...",
+          "Ya tenemos el hilo, falta procesar archivos.",
+          "Hilo creado"
+        );
+      }
+
+      if (isAttachment) {
+        setProgress(
+          Math.max(lastKnownPercent, 92),
+          "Adjuntos subidos.",
+          "Procesando vista previa y actualizando la lista.",
+          "Finalizando"
+        );
+      }
+
+      if (!response.ok) {
+        failOverlay(`La publicación respondió con error HTTP ${response.status}.`);
+      }
+
+      return response;
+    } catch (error) {
+      failOverlay(error?.message || "Falló la publicación.");
+      throw error;
+    } finally {
+      relevantRequests = Math.max(0, relevantRequests - 1);
+      hideOverlaySoon();
+    }
+  };
+console.log(`[Comunidad] ${PATCH_ID} activo.`);
+})();
+
+// COMMUNITY_PUBLISH_OVERLAY_SAFE_SCOPE_20260625
