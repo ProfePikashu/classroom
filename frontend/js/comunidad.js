@@ -369,6 +369,103 @@
     `;
   }
 
+  function isImageAttachment(attachment) {
+    return String(attachment?.mime_type || attachment?.type || "").toLowerCase().startsWith("image/");
+  }
+
+  function isVideoAttachment(attachment) {
+    return String(attachment?.mime_type || attachment?.type || "").toLowerCase().startsWith("video/");
+  }
+
+  function isAudioAttachment(attachment) {
+    return String(attachment?.mime_type || attachment?.type || "").toLowerCase().startsWith("audio/");
+  }
+
+  function formatBytes(bytes) {
+    const size = Number(bytes || 0);
+    if (!Number.isFinite(size) || size <= 0) return "";
+
+    const units = ["B", "KB", "MB", "GB"];
+    let value = size;
+    let index = 0;
+
+    while (value >= 1024 && index < units.length - 1) {
+      value = value / 1024;
+      index += 1;
+    }
+
+    return `${value.toFixed(value >= 10 || index === 0 ? 0 : 1)} ${units[index]}`;
+  }
+
+  function attachmentIcon(attachment) {
+    const mime = String(attachment?.mime_type || attachment?.type || "").toLowerCase();
+    const name = String(attachment?.filename || attachment?.name || "").toLowerCase();
+
+    if (mime.startsWith("image/")) return "fa-regular fa-image";
+    if (mime.startsWith("video/")) return "fa-regular fa-file-video";
+    if (mime.startsWith("audio/")) return "fa-regular fa-file-audio";
+    if (mime.includes("pdf") || name.endsWith(".pdf")) return "fa-regular fa-file-pdf";
+    if (name.endsWith(".zip") || name.endsWith(".rar") || name.endsWith(".7z")) return "fa-regular fa-file-zipper";
+    if (mime.startsWith("text/") || name.endsWith(".txt") || name.endsWith(".log")) return "fa-regular fa-file-lines";
+
+    return "fa-regular fa-file";
+  }
+
+  function attachmentUrl(attachment) {
+    return attachment?.preview_url || attachment?.view_url || attachment?.download_url || attachment?.url || "";
+  }
+
+  function attachmentImageThumbnailUrl(attachment) {
+    const fileId = attachment?.provider_file_id || attachment?.file_id || attachment?.drive_file_id || "";
+
+    if (fileId) {
+      return `https://drive.google.com/thumbnail?id=${encodeURIComponent(fileId)}&sz=w1000`;
+    }
+
+    return attachment?.thumbnail_url || attachment?.download_url || attachment?.view_url || attachmentUrl(attachment);
+  }
+
+
+  async function loadPostAttachments(post) {
+    if (!post?.id) return [];
+
+    try {
+      const data = await communityApi(`/community/threads/${encodeURIComponent(post.id)}/attachments`);
+      post.attachments = Array.isArray(data.items) ? data.items : [];
+      return post.attachments;
+    } catch (error) {
+      console.warn("Comunidad: no pude cargar adjuntos del hilo.", post.id, error);
+      post.attachments = [];
+      return [];
+    }
+  }
+
+  async function hydratePostAttachments(posts) {
+    const list = Array.isArray(posts) ? posts : [];
+    await Promise.all(list.map(loadPostAttachments));
+    return list;
+  }
+
+  async function uploadPendingAttachments(threadId) {
+    if (!threadId || !pendingAttachments.length) return [];
+
+    const formData = new FormData();
+
+    pendingAttachments.forEach((attachment) => {
+      if (attachment?.file) {
+        formData.append("files", attachment.file, attachment.file.name || attachment.name || "archivo");
+      }
+    });
+
+    const data = await communityApi(`/community/threads/${encodeURIComponent(threadId)}/attachments`, {
+      method: "POST",
+      body: formData,
+    });
+
+    return Array.isArray(data.items) ? data.items : [];
+  }
+
+
   async function renderPosts() {
     if (!els.list) return;
     if (isRendering) return;
@@ -380,6 +477,7 @@
       showListMessage("Cargando Comunidad desde backend...", "fa-spinner fa-spin");
 
       const posts = await loadPostsFromApi();
+      await hydratePostAttachments(posts);
 
       postsState = posts;
       renderStats(posts);
@@ -430,8 +528,12 @@
     els.attachmentPreview.innerHTML = pendingAttachments
       .map((attachment, index) => `
         <article class="community-attachment-preview">
-          <span><i class="fa-regular fa-image"></i> ${escapeHtml(attachment.name)}</span>
-          <button type="button" class="community-icon-btn" data-remove-attachment="${index}" aria-label="Quitar imagen">
+          <span>
+            <i class="${attachmentIcon(attachment)}"></i>
+            ${escapeHtml(attachment.name)}
+            ${attachment.size ? `<small>${escapeHtml(formatBytes(attachment.size))}</small>` : ""}
+          </span>
+          <button type="button" class="community-icon-btn" data-remove-attachment="${index}" aria-label="Quitar adjunto">
             <i class="fa-solid fa-xmark"></i>
           </button>
         </article>
@@ -443,6 +545,10 @@
         const index = Number(button.dataset.removeAttachment);
         pendingAttachments.splice(index, 1);
         renderAttachmentPreview();
+
+        if (els.images && !pendingAttachments.length) {
+          els.images.value = "";
+        }
       });
     });
   }
@@ -450,21 +556,71 @@
   function handleImageSelection(event) {
     const files = Array.from(event.target.files || []);
 
-    pendingAttachments = files.slice(0, 3).map((file) => ({
-      name: file.name,
-      size: file.size,
-      type: file.type,
-    }));
-
-    if (pendingAttachments.length) {
-      window.alert("Las imágenes todavía no se suben al backend. Las conectamos en la fase de adjuntos.");
+    if (files.length > 20) {
+      window.alert("Por ahora podés adjuntar hasta 20 archivos por hilo.");
     }
+
+    pendingAttachments = files.slice(0, 20).map((file) => ({
+      file,
+      name: file.name,
+      filename: file.name,
+      size: file.size,
+      size_bytes: file.size,
+      type: file.type || "application/octet-stream",
+      mime_type: file.type || "application/octet-stream",
+    }));
 
     renderAttachmentPreview();
   }
 
-  function renderPostAttachments() {
-    return "";
+  function renderPostAttachments(post) {
+    const attachments = Array.isArray(post?.attachments) ? post.attachments : [];
+
+    if (!attachments.length) return "";
+
+    return `
+      <div class="community-post-attachments">
+        ${attachments.map((attachment) => {
+          const url = attachmentUrl(attachment);
+          const filename = attachment.filename || attachment.name || "archivo";
+          const size = formatBytes(attachment.size_bytes || attachment.size);
+          const mime = attachment.mime_type || attachment.type || "archivo";
+          const icon = attachmentIcon(attachment);
+          const escapedUrl = escapeHtml(url);
+          const escapedName = escapeHtml(filename);
+
+          if (isImageAttachment(attachment) && url) {
+            const thumbnailUrl = attachmentImageThumbnailUrl(attachment);
+
+            return `
+              <button class="community-post-attachment is-previewable" type="button" data-community-attachment-kind="image" data-community-attachment-src="${escapedUrl}" data-community-attachment-name="${escapedName}">
+                <img src="${escapeHtml(thumbnailUrl)}" alt="${escapedName}" loading="lazy">
+                <span><i class="${icon}"></i> ${escapedName}</span>
+                <small>${escapeHtml(size || mime)}</small>
+              </button>
+            `;
+          }
+
+          if ((isVideoAttachment(attachment) || isAudioAttachment(attachment)) && url) {
+            return `
+              <button class="community-post-attachment is-previewable" type="button" data-community-attachment-kind="iframe" data-community-attachment-src="${escapedUrl}" data-community-attachment-name="${escapedName}">
+                <span class="community-file-tile"><i class="${icon}"></i></span>
+                <span>${escapedName}</span>
+                <small>${escapeHtml(size || mime)}</small>
+              </button>
+            `;
+          }
+
+          return `
+            <a class="community-post-attachment" href="${escapeHtml(attachment.download_url || attachment.view_url || url)}" target="_blank" rel="noopener">
+              <span class="community-file-tile"><i class="${icon}"></i></span>
+              <span>${escapedName}</span>
+              <small>${escapeHtml(size || mime)}</small>
+            </a>
+          `;
+        }).join("")}
+      </div>
+    `;
   }
 
   function injectCommunityApiV2Styles() {
@@ -620,7 +776,7 @@
           ` : `
             <form class="community-reply-form" data-community-reply-form>
               <label>Responder hilo</label>
-              <textarea rows="3" maxlength="900" placeholder="Escribí una respuesta útil, consejo o posible solución..." required></textarea>
+              <textarea rows="3" placeholder="Escribí una respuesta útil, consejo o posible solución..." required></textarea>
               <div class="community-form-actions">
                 <span class="community-form-hint">Se guarda en la plataforma para todos los alumnos.</span>
                 <button class="btn btn-primary btn-sm" type="submit">
@@ -714,6 +870,40 @@
         deletePost(postId);
       });
 
+      card.querySelectorAll("[data-community-attachment-src]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const src = button.dataset.communityAttachmentSrc || "";
+          const name = button.dataset.communityAttachmentName || "archivo";
+          const kind = button.dataset.communityAttachmentKind || "file";
+
+          if (!src) return;
+
+          const modal = document.createElement("div");
+          modal.className = "community-attachment-modal";
+
+          const mediaHtml = kind === "image"
+            ? `<img src="${escapeHtml(src)}" alt="${escapeHtml(name)}">`
+            : `<iframe src="${escapeHtml(src)}" title="${escapeHtml(name)}" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+
+          modal.innerHTML = `
+            <div class="community-attachment-modal-backdrop" data-close-attachment-modal></div>
+            <figure>
+              <button type="button" class="community-icon-btn" data-close-attachment-modal aria-label="Cerrar adjunto">
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+              ${mediaHtml}
+              <figcaption>${escapeHtml(name)}</figcaption>
+            </figure>
+          `;
+
+          modal.querySelectorAll("[data-close-attachment-modal]").forEach((close) => {
+            close.addEventListener("click", () => modal.remove());
+          });
+
+          document.body.appendChild(modal);
+        });
+      });
+
       card.querySelector("[data-community-reply-form]")?.addEventListener("submit", (event) => {
         event.preventDefault();
 
@@ -787,6 +977,21 @@
           course,
         },
       });
+
+      const createdThreadId = data?.item?.id || data?.id;
+
+      if (createdThreadId && pendingAttachments.length) {
+        try {
+          const uploadedAttachments = await uploadPendingAttachments(createdThreadId);
+
+          if (data?.item) {
+            data.item.attachments = uploadedAttachments;
+          }
+        } catch (error) {
+          console.error("Comunidad: hilo creado, pero falló la subida de adjuntos.", error);
+          window.alert(`El hilo se creó, pero no pude subir los adjuntos: ${error.message}`);
+        }
+      }
 
       const created = normalizeThread(data.item);
       threadRepliesCache.set(created.id, []);
@@ -1024,12 +1229,144 @@
     els.seedDemo = $("#communitySeedDemo");
   }
 
+  function injectCommunityAttachmentStyles() {
+    if (document.getElementById("communityAttachmentStyles")) return;
+
+    const style = document.createElement("style");
+    style.id = "communityAttachmentStyles";
+    style.textContent = `
+      .community-post-attachments {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
+        gap: 0.75rem;
+        margin: 1rem 0;
+      }
+
+      .community-post-attachment {
+        border: 1px solid rgba(125, 249, 255, 0.28);
+        border-radius: 16px;
+        background: rgba(8, 12, 28, 0.52);
+        color: inherit;
+        padding: 0.55rem;
+        cursor: pointer;
+        text-align: left;
+        overflow: hidden;
+        text-decoration: none;
+        min-height: 126px;
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+        justify-content: center;
+      }
+
+      .community-post-attachment:hover {
+        transform: translateY(-1px);
+        border-color: rgba(125, 249, 255, 0.55);
+      }
+
+      .community-post-attachment img {
+        width: 100%;
+        height: 112px;
+        object-fit: contain;
+        border-radius: 12px;
+        display: block;
+        background: rgba(0, 0, 0, 0.18);
+      }
+
+      .community-post-attachment span {
+        display: block;
+        font-size: 0.8rem;
+        opacity: 0.9;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .community-post-attachment small,
+      .community-attachment-preview small {
+        opacity: 0.68;
+        font-size: 0.72rem;
+        margin-left: 0.35rem;
+      }
+
+      .community-file-tile {
+        width: 100%;
+        min-height: 74px;
+        border-radius: 12px;
+        display: grid !important;
+        place-items: center;
+        background: rgba(125, 249, 255, 0.08);
+        font-size: 2rem !important;
+      }
+
+      .community-attachment-modal {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: grid;
+        place-items: center;
+        padding: 1rem;
+      }
+
+      .community-attachment-modal-backdrop {
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.78);
+        backdrop-filter: blur(6px);
+      }
+
+      .community-attachment-modal figure {
+        position: relative;
+        z-index: 1;
+        width: min(980px, 96vw);
+        max-height: 92vh;
+        margin: 0;
+        border: 1px solid rgba(125, 249, 255, 0.35);
+        border-radius: 22px;
+        background: rgba(8, 12, 28, 0.96);
+        padding: 1rem;
+        box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5);
+      }
+
+      .community-attachment-modal figure button {
+        position: absolute;
+        top: 0.65rem;
+        right: 0.65rem;
+        z-index: 2;
+      }
+
+      .community-attachment-modal img,
+      .community-attachment-modal iframe {
+        width: 100%;
+        max-height: 78vh;
+        min-height: 360px;
+        border: 0;
+        border-radius: 16px;
+        display: block;
+        object-fit: contain;
+        background: rgba(0, 0, 0, 0.25);
+      }
+
+      .community-attachment-modal figcaption {
+        margin-top: 0.7rem;
+        font-size: 0.85rem;
+        opacity: 0.85;
+      }
+    `;
+
+    document.head.appendChild(style);
+  }
+
+
   function init() {
     injectCommunityApiV2Styles();
+    injectCommunityAttachmentStyles();
     cacheElements();
     bindEvents();
     renderPosts();
   }
 
   document.addEventListener("DOMContentLoaded", init);
+  // COMMUNITY_DRIVE_THUMBNAILS_FIX_20260625
+  // COMMUNITY_ATTACHMENTS_FRONT_APPS_SCRIPT_V1_20260625
 })();
