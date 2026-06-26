@@ -19,6 +19,155 @@
   <link rel="icon" href="favicon.ico" type="image/x-icon" />
   <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
   <link rel="stylesheet" href="css/pelusita.css?v=20260611b" />
+
+<style id="community-attachment-preview-compact">
+  /* ===== PATCH: previews de adjuntos compactas ===== */
+
+  .community-attachments-grid,
+  .community-post-attachments,
+  .community-attachments,
+  .community-thread-attachments {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 16px !important;
+    align-items: flex-start !important;
+  }
+
+  .community-attachments-grid > *,
+  .community-post-attachments > *,
+  .community-attachments > *,
+  .community-thread-attachments > * {
+    flex: 0 0 auto !important;
+    width: clamp(180px, 22vw, 260px) !important;
+    max-width: 100% !important;
+  }
+
+  .community-attachment-card,
+  .community-post-attachment,
+  .community-attachment-item,
+  .community-file-card {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: flex-start !important;
+    overflow: hidden !important;
+    border-radius: 18px !important;
+    background: rgba(7, 14, 34, 0.92) !important;
+    border: 1px solid rgba(86, 231, 255, 0.28) !important;
+    box-shadow: 0 0 0 1px rgba(126, 92, 255, 0.12) inset !important;
+    min-height: unset !important;
+  }
+
+  .community-attachment-thumb,
+  .community-post-attachment-thumb,
+  .community-file-thumb,
+  .community-attachment-preview {
+    width: 100% !important;
+    aspect-ratio: 1 / 1 !important;
+    min-height: 160px !important;
+    max-height: 220px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 12px !important;
+    background: linear-gradient(180deg, rgba(21,32,58,.95), rgba(8,14,32,.96)) !important;
+    overflow: hidden !important;
+    border-bottom: 1px solid rgba(86, 231, 255, 0.16) !important;
+  }
+
+  /* Si ya tenés una clase para video, le damos formato horizontal */
+  .community-attachment-card.is-video .community-attachment-thumb,
+  .community-post-attachment.is-video .community-post-attachment-thumb,
+  .community-attachment-item.is-video .community-attachment-preview {
+    aspect-ratio: 16 / 9 !important;
+    max-height: none !important;
+  }
+
+  .community-attachment-thumb img,
+  .community-post-attachment-thumb img,
+  .community-file-thumb img,
+  .community-attachment-preview img,
+  .community-attachment-thumb video,
+  .community-post-attachment-thumb video,
+  .community-file-thumb video,
+  .community-attachment-preview video,
+  .community-attachment-thumb iframe,
+  .community-post-attachment-thumb iframe,
+  .community-file-thumb iframe,
+  .community-attachment-preview iframe {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain !important;
+    border: 0 !important;
+    border-radius: 12px !important;
+    background: transparent !important;
+  }
+
+  .community-attachment-meta,
+  .community-post-attachment-meta,
+  .community-file-meta {
+    padding: 10px 12px 12px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 4px !important;
+  }
+
+  .community-attachment-name,
+  .community-post-attachment-name,
+  .community-file-name {
+    font-size: 14px !important;
+    line-height: 1.25 !important;
+    font-weight: 600 !important;
+    color: #eef7ff !important;
+    word-break: break-word !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  .community-attachment-size,
+  .community-post-attachment-size,
+  .community-file-size {
+    font-size: 12px !important;
+    line-height: 1.2 !important;
+    color: rgba(210, 230, 255, 0.72) !important;
+  }
+
+  /* Modal / preview grande: que no se deforme */
+  .community-attachment-modal video,
+  .community-attachment-modal img,
+  .community-attachment-modal iframe {
+    max-width: 100% !important;
+    max-height: 72vh !important;
+    width: auto !important;
+    height: auto !important;
+    object-fit: contain !important;
+  }
+
+  @media (max-width: 900px) {
+    .community-attachments-grid > *,
+    .community-post-attachments > *,
+    .community-attachments > *,
+    .community-thread-attachments > * {
+      width: clamp(150px, 44vw, 210px) !important;
+    }
+  }
+
+  @media (max-width: 560px) {
+    .community-attachments-grid > *,
+    .community-post-attachments > *,
+    .community-attachments > *,
+    .community-thread-attachments > * {
+      width: 100% !important;
+    }
+
+    .community-attachment-thumb,
+    .community-post-attachment-thumb,
+    .community-file-thumb,
+    .community-attachment-preview {
+      aspect-ratio: 16 / 10 !important;
+      max-height: none !important;
+    }
+  }
+</style>
+
 </head>
 
 <body class="page-community">
