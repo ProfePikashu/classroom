@@ -1,0 +1,514 @@
+﻿<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Administrar Comunidad — AndyAzhTEC Classroom</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600;700;800&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="css/styles.css?v=20260621-linkedin-recomendacion" />
+  <link rel="icon" href="favicon.ico" type="image/x-icon" />
+  <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
+
+<style id="community-admin-panel-style">
+  /* COMMUNITY_ADMIN_PANEL_V1_20260626 */
+  .community-admin-grid {
+    display: grid;
+    gap: 18px;
+  }
+
+  .community-admin-summary {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(140px, 1fr));
+    gap: 14px;
+  }
+
+  .community-admin-card {
+    border: 1px solid rgba(103, 235, 255, 0.18);
+    border-radius: 18px;
+    padding: 16px;
+    background: rgba(10, 18, 38, 0.72);
+    box-shadow: 0 14px 35px rgba(0,0,0,.18);
+  }
+
+  .community-admin-card small {
+    display: block;
+    opacity: .72;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+  }
+
+  .community-admin-card strong {
+    font-size: 1.75rem;
+    line-height: 1;
+  }
+
+  .community-admin-layout {
+    display: grid;
+    grid-template-columns: minmax(280px, 380px) minmax(0, 1fr);
+    gap: 18px;
+    align-items: start;
+  }
+
+  .community-admin-panel {
+    border: 1px solid rgba(103, 235, 255, 0.16);
+    border-radius: 20px;
+    padding: 18px;
+    background: rgba(10, 18, 38, 0.68);
+  }
+
+  .community-admin-panel h2 {
+    margin-top: 0;
+  }
+
+  .community-admin-form {
+    display: grid;
+    gap: 12px;
+  }
+
+  .community-admin-form label {
+    display: grid;
+    gap: 6px;
+    font-weight: 700;
+  }
+
+  .community-admin-form input,
+  .community-admin-form select,
+  .community-admin-form textarea {
+    width: 100%;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,.14);
+    padding: 10px 12px;
+    background: rgba(255,255,255,.06);
+    color: inherit;
+  }
+
+  .community-admin-form textarea {
+    min-height: 90px;
+    resize: vertical;
+  }
+
+  .community-admin-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .community-admin-table-wrap {
+    overflow: auto;
+    border-radius: 16px;
+    border: 1px solid rgba(255,255,255,.10);
+  }
+
+  .community-admin-table {
+    width: 100%;
+    min-width: 760px;
+    border-collapse: collapse;
+  }
+
+  .community-admin-table th,
+  .community-admin-table td {
+    padding: 12px;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+    text-align: left;
+    vertical-align: top;
+  }
+
+  .community-admin-table th {
+    font-size: .82rem;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    opacity: .74;
+  }
+
+  .community-admin-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border-radius: 999px;
+    padding: 5px 9px;
+    font-size: .82rem;
+    font-weight: 800;
+    background: rgba(103,235,255,.12);
+    border: 1px solid rgba(103,235,255,.18);
+  }
+
+  .community-admin-pill.danger {
+    background: rgba(255, 82, 82, .14);
+    border-color: rgba(255, 82, 82, .28);
+  }
+
+  .community-admin-muted {
+    opacity: .68;
+  }
+
+  .community-admin-tabs {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+  }
+
+  .community-admin-tab {
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,.14);
+    background: rgba(255,255,255,.06);
+    color: inherit;
+    padding: 9px 13px;
+    cursor: pointer;
+    font-weight: 800;
+  }
+
+  .community-admin-tab.active {
+    border-color: rgba(103,235,255,.44);
+    background: rgba(103,235,255,.14);
+  }
+
+  .community-admin-hidden {
+    display: none !important;
+  }
+
+  @media (max-width: 980px) {
+    .community-admin-summary {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .community-admin-layout {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 560px) {
+    .community-admin-summary {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+</head>
+
+<body>
+  <button class="mobile-menu-toggle" id="mobileMenuToggle" type="button" aria-label="Abrir menú">
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
+
+  <div class="mobile-sidebar-overlay" id="mobileSidebarOverlay"></div>
+
+  <div class="app-shell">
+    <aside class="sidebar sidebar-v2" id="classroomSidebar">
+      <div class="sidebar-v2-brand">
+        <a href="index.html" class="sidebar-v2-brand-link" aria-label="Ir al inicio">
+          <div class="sidebar-v2-logo">
+            <i class="fa-solid fa-graduation-cap"></i>
+          </div>
+
+          <div class="sidebar-v2-brand-text">
+            <span>Andy<span>Azh</span><strong>TEC</strong></span>
+            <small>Classroom</small>
+          </div>
+        </a>
+      </div>
+
+      <nav class="sidebar-v2-nav" aria-label="Navegación principal">
+        <a href="index.html" class="sidebar-v2-link" data-sidebar-route="index.html">
+          <i class="fa-solid fa-table-columns"></i>
+          <span>Inicio</span>
+        </a>
+
+        <button class="sidebar-v2-link sidebar-v2-toggle" type="button" data-sidebar-toggle="courses" aria-expanded="false">
+          <i class="fa-solid fa-book-open-reader"></i>
+          <span>Cursos</span>
+          <i class="fa-solid fa-chevron-down sidebar-v2-chevron"></i>
+        </button>
+
+        <div class="sidebar-v2-submenu" data-sidebar-panel="courses">
+          <a href="curso-ayrpc-2025.html" class="sidebar-v2-subitem" data-sidebar-route="curso-ayrpc-2025.html">
+            <span class="submenu-dot complete"></span>
+            <span>AyRPC 2025</span>
+          </a>
+
+          <a href="clases-ayrpc-2025.html" class="sidebar-v2-subitem" data-sidebar-route="clases-ayrpc-2025.html">
+            <span class="submenu-line"></span>
+            <span>Clases</span>
+          </a>
+
+          <a href="rubricas-ayrpc-2025.html" class="sidebar-v2-subitem staff-only" data-sidebar-route="rubricas-ayrpc-2025.html">
+            <span class="submenu-line"></span>
+            <span>Rúbricas</span>
+          </a>
+
+          <a href="curso-ayrpc-2026.html" class="sidebar-v2-subitem" data-sidebar-route="curso-ayrpc-2026.html">
+            <span class="submenu-dot soon"></span>
+            <span>AyRPC 2026</span>
+          </a>
+        </div>
+
+        <a href="archivos.html" class="sidebar-v2-link" data-sidebar-route="archivos.html">
+          <i class="fa-solid fa-folder-open"></i>
+          <span>Materiales</span>
+        </a>
+
+        <a href="exampro.html" class="sidebar-v2-link sidebar-v2-featured" data-sidebar-route="exampro.html">
+          <i class="fa-solid fa-file-circle-check"></i>
+          <span>ExamPro</span>
+        </a>
+
+        <a href="gestion.html" class="sidebar-v2-link" data-sidebar-route="gestion.html">
+          <i class="fa-solid fa-folder-tree"></i>
+          <span>Gestión</span>
+        </a>
+
+        <a href="comunidad.html" class="sidebar-v2-link" data-sidebar-route="comunidad.html">
+          <i class="fa-solid fa-comments"></i>
+          <span>Comunidad</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-v2-spacer"></div>
+
+      <div class="sidebar-v2-staff staff-only">
+        <button class="sidebar-v2-admin-btn" id="sidebarAdminToggle" type="button" aria-expanded="false">
+          <i class="fa-solid fa-screwdriver-wrench"></i>
+          <span>Administrar</span>
+          <i class="fa-solid fa-chevron-up"></i>
+        </button>
+
+        <div class="sidebar-v2-admin-popover" id="sidebarAdminPopover">
+          <a href="asistencias.html" data-sidebar-route="asistencias.html">
+            <i class="fa-solid fa-clipboard-check"></i>
+            <span>Asistencias</span>
+          </a>
+
+          <a href="alumnos.html" data-sidebar-route="alumnos.html">
+            <i class="fa-solid fa-users"></i>
+            <span>Alumnos</span>
+          </a>
+
+          <a href="centro-notificaciones.html" data-sidebar-route="centro-notificaciones.html">
+            <i class="fa-solid fa-bell"></i>
+            <span>Centro de notificaciones</span>
+          </a>
+          <a href="administrar-comunidad.html" class="sidebar-v2-subitem">
+            <i class="fa-solid fa-shield-halved"></i>
+            <span>Comunidad</span>
+          </a>
+
+
+          <a href="admin.html" data-sidebar-route="admin.html">
+            <i class="fa-solid fa-user-shield"></i>
+            <span>Roles y permisos</span>
+          </a>
+
+          <a href="rubricas-ayrpc-2025.html" data-sidebar-route="rubricas-ayrpc-2025.html">
+            <i class="fa-solid fa-clipboard-list"></i>
+            <span>Rúbricas</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="sidebar-v2-pelusita-dock" id="sidebarPelusitaDock" aria-label="Pelusita asistente"></div>
+    </aside>
+
+    
+<main class="main-content community-admin-page" data-page="administrar-comunidad">
+  <!-- COMMUNITY_ADMIN_PANEL_V1_20260626 -->
+  <section class="hero-section">
+    <div>
+      <span class="eyebrow">Panel docente</span>
+      <h1>Administrar Comunidad</h1>
+      <p>
+        Moderá hilos, sanciones y participación de alumnos desde un solo lugar.
+      </p>
+    </div>
+  </section>
+
+  <section class="community-admin-grid">
+    <div class="community-admin-summary">
+      <article class="community-admin-card">
+        <small>Hilos activos</small>
+        <strong id="communityAdminThreads">—</strong>
+      </article>
+
+      <article class="community-admin-card">
+        <small>Respuestas</small>
+        <strong id="communityAdminReplies">—</strong>
+      </article>
+
+      <article class="community-admin-card">
+        <small>Sanciones activas</small>
+        <strong id="communityAdminSanctions">—</strong>
+      </article>
+
+      <article class="community-admin-card">
+        <small>Hilos ocultos</small>
+        <strong id="communityAdminHiddenThreads">—</strong>
+      </article>
+
+      <article class="community-admin-card">
+        <small>Respuestas ocultas</small>
+        <strong id="communityAdminHiddenReplies">—</strong>
+      </article>
+    </div>
+
+    <div class="community-admin-layout">
+      <section class="community-admin-panel">
+        <h2>Nueva sanción</h2>
+        <p class="community-admin-muted">
+          Usá <strong>silenciar</strong> para bloquear publicaciones/respuestas.
+          Usá <strong>banear</strong> para bloquear participación completa.
+        </p>
+
+        <form id="communitySanctionForm" class="community-admin-form">
+          <label>
+            Tipo
+            <select id="communitySanctionType" required>
+              <option value="mute">Silenciar usuario</option>
+              <option value="ban">Banear usuario</option>
+            </select>
+          </label>
+
+          <label>
+            DNI
+            <input id="communityTargetDni" type="text" placeholder="DNI del alumno">
+          </label>
+
+          <label>
+            Twitch
+            <input id="communityTargetTwitch" type="text" placeholder="Usuario de Twitch">
+          </label>
+
+          <label>
+            Nombre visible
+            <input id="communityTargetName" type="text" placeholder="Nombre del alumno">
+          </label>
+
+          <label>
+            Motivo
+            <textarea id="communitySanctionReason" required placeholder="Ej: spam, insultos, contenido fuera de lugar..."></textarea>
+          </label>
+
+          <label>
+            Vence en
+            <select id="communitySanctionDuration">
+              <option value="">Sin vencimiento</option>
+              <option value="1">1 día</option>
+              <option value="3">3 días</option>
+              <option value="7">7 días</option>
+              <option value="30">30 días</option>
+            </select>
+          </label>
+
+          <div class="community-admin-actions">
+            <button class="btn btn-primary" type="submit">
+              <i class="fa-solid fa-gavel"></i>
+              Aplicar sanción
+            </button>
+
+            <button class="btn btn-outline" type="button" id="communityAdminRefresh">
+              <i class="fa-solid fa-rotate"></i>
+              Actualizar
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <section class="community-admin-panel">
+        <div class="community-admin-tabs">
+          <button class="community-admin-tab active" type="button" data-community-admin-tab="sanctions">
+            Sanciones
+          </button>
+          <button class="community-admin-tab" type="button" data-community-admin-tab="stats">
+            Usuarios activos
+          </button>
+        </div>
+
+        <div id="communityAdminMessage" class="community-admin-muted">
+          Cargando datos de comunidad...
+        </div>
+
+        <div id="communitySanctionsPanel">
+          <div class="community-admin-table-wrap">
+            <table class="community-admin-table">
+              <thead>
+                <tr>
+                  <th>Usuario</th>
+                  <th>Tipo</th>
+                  <th>Motivo</th>
+                  <th>Creada</th>
+                  <th>Vence</th>
+                  <th>Acción</th>
+                </tr>
+              </thead>
+              <tbody id="communitySanctionsBody">
+                <tr>
+                  <td colspan="6">Cargando sanciones...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="communityStatsPanel" class="community-admin-hidden">
+          <div class="community-admin-table-wrap">
+            <table class="community-admin-table">
+              <thead>
+                <tr>
+                  <th>Usuario</th>
+                  <th>Hilos</th>
+                  <th>Respuestas</th>
+                  <th>Adjuntos</th>
+                  <th>Total</th>
+                  <th>Última actividad</th>
+                </tr>
+              </thead>
+              <tbody id="communityStatsBody">
+                <tr>
+                  <td colspan="6">Cargando usuarios activos...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </div>
+  </section>
+</main>
+
+  </div>
+
+  <script src="js/auth.js?v=20260612-notifications-global-v2"></script>
+  <script src="js/roles.js?v=20260612-notifications-global-v2"></script>
+  <script src="js/courses-data.js"></script>
+  <script src="js/main.js?v=20260612-newsletter-api-v1"></script>
+  <script src="js/notifications-local.js?v=20260620-community-notifications-v2"></script>
+  <script src="js/administrar-comunidad.js?v=20260626-community-moderation-v1"></script>
+  <script src="js/pelusita.js?v=20260612-sidebar-dock"></script>  <script src="js/pelusita-dialog.js?v=20260612-guide-compact"></script>
+  <script src="js/sidebar-v2.js?v=20260612-pelusita-dock-v2"></script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
