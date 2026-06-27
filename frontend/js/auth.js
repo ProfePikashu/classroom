@@ -10,7 +10,7 @@
     http://127.0.0.1:8000
 
   Producción:
-    https://exampro-backend-1n6d.onrender.com
+    https://api.andyazhtec.com
 */
 const EXAMPRO_API_BASE = (
   window.location.hostname === "localhost" ||
@@ -18,7 +18,7 @@ const EXAMPRO_API_BASE = (
   window.location.protocol === "file:"
 )
   ? "http://127.0.0.1:8000"
-  : "https://exampro-backend-1n6d.onrender.com";
+  : "https://api.andyazhtec.com";
 
 const CLASSROOM_SHEET_2025_API = "https://script.google.com/macros/s/AKfycbxajMTyRA6SBGeMYDikKlN2nrmONnlPYG88iDNVsYt-fE-ooH6XYW3wT6N5EV3FVxxU/exec";
 

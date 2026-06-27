@@ -1,7 +1,7 @@
 (function(){
   const ASSET_BASE = "media/pelusita/";
   const SOUND_BASE = "media/sounds/";
-  const EXAMPRO_URL = "https://exampro-backend-1n6d.onrender.com/login";
+  const EXAMPRO_URL = "https://exampro.andyazhtec.com/login";
 
   /*
     Estados visuales de Pelusita

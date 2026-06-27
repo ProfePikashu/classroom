@@ -321,7 +321,7 @@ document.addEventListener("DOMContentLoaded", () => {
   ClassroomApp.init();
 });
 
-const CLASSROOM_API_BASE_URL = "https://exampro-backend-1n6d.onrender.com";
+const CLASSROOM_API_BASE_URL = "https://api.andyazhtec.com";
 
 function getClassroomAuthToken() {
   const session = getClassroomSessionSafe();

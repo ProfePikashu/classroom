@@ -13,7 +13,7 @@ const ClassroomStudents = {
     window.location.hostname === "127.0.0.1" ||
     window.location.protocol === "file:"
       ? "http://127.0.0.1:8000"
-      : "https://exampro-backend-1n6d.onrender.com",
+      : "https://api.andyazhtec.com",
 
   limit: 40,
   offset: 0,

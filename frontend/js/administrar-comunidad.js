@@ -3,7 +3,7 @@
 (() => {
   const SESSION_KEY = "andyazh-classroom-session";
   const LOCAL_API_BASE = "http://127.0.0.1:8000/api/classroom";
-  const PROD_API_BASE = "https://exampro-backend-1n6d.onrender.com/api/classroom";
+  const PROD_API_BASE = "https://api.andyazhtec.com/api/classroom";
 
   const els = {};
 

@@ -519,7 +519,7 @@
       return "http://127.0.0.1:8000";
     }
 
-    return "https://exampro-backend-1n6d.onrender.com";
+    return "https://api.andyazhtec.com";
   }
 
   function loadSession() {

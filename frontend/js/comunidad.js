@@ -4,7 +4,7 @@
   const SESSION_KEY = "andyazh-classroom-session";
   const LEGACY_STORAGE_KEY = "andyazh-classroom-community-posts";
   const LOCAL_API_BASE = "http://127.0.0.1:8000/api/classroom";
-  const PROD_API_BASE = "https://exampro-backend-1n6d.onrender.com/api/classroom";
+  const PROD_API_BASE = "https://api.andyazhtec.com/api/classroom";
 
   const TYPE_LABELS = {
     consulta: "Consulta",
@@ -2970,7 +2970,7 @@ console.log(`[Comunidad] ${PATCH_ID} activo.`);
 
     return local
       ? "http://127.0.0.1:8000/api/classroom"
-      : "https://exampro-backend-1n6d.onrender.com/api/classroom";
+      : "https://api.andyazhtec.com/api/classroom";
   }
 
   function extractPostIdFromReplyUrl(url) {
@@ -3070,7 +3070,7 @@ console.log(`[Comunidad] ${PATCH_ID} activo.`);
     const local = ["127.0.0.1", "localhost"].includes(window.location.hostname);
     const baseUrl = local
       ? "http://127.0.0.1:8000/api/classroom"
-      : "https://exampro-backend-1n6d.onrender.com/api/classroom";
+      : "https://api.andyazhtec.com/api/classroom";
 
     const comments = Array.from(document.querySelectorAll(".community-comment[data-reply-id]"));
 
@@ -4249,7 +4249,7 @@ console.log(`[Comunidad] ${PATCH_ID} activo.`);
 
     return local
       ? "http://127.0.0.1:8000/api/classroom"
-      : "https://exampro-backend-1n6d.onrender.com/api/classroom";
+      : "https://api.andyazhtec.com/api/classroom";
   }
 
   async function apiDeleteReply(replyId, reason) {
@@ -4609,7 +4609,7 @@ console.log(`[Comunidad] ${PATCH_ID} activo.`);
 
     return local
       ? "http://127.0.0.1:8000/api/classroom"
-      : "https://exampro-backend-1n6d.onrender.com/api/classroom";
+      : "https://api.andyazhtec.com/api/classroom";
   }
 
   function escapeHtml(value) {
@@ -5040,7 +5040,7 @@ console.log(`[Comunidad] ${PATCH_ID} activo.`);
 
     return local
       ? "http://127.0.0.1:8000/api/classroom"
-      : "https://exampro-backend-1n6d.onrender.com/api/classroom";
+      : "https://api.andyazhtec.com/api/classroom";
   }
 
   async function communityApi(path, options = {}) {
@@ -6040,7 +6040,7 @@ console.log(`[Comunidad] ${PATCH_ID} activo.`);
 
     return local
       ? "http://127.0.0.1:8000/api/classroom"
-      : "https://exampro-backend-1n6d.onrender.com/api/classroom";
+      : "https://api.andyazhtec.com/api/classroom";
   }
 
   async function communityApi(path, options = {}) {
@@ -6659,7 +6659,7 @@ console.log(`[Comunidad] ${PATCH_ID} activo.`);
 
     return local
       ? "http://127.0.0.1:8000/api/classroom"
-      : "https://exampro-backend-1n6d.onrender.com/api/classroom";
+      : "https://api.andyazhtec.com/api/classroom";
   }
 
   async function communityApi(path, options = {}) {
@@ -7143,7 +7143,7 @@ console.log(`[Comunidad] ${PATCH_ID} activo.`);
 
     return local
       ? "http://127.0.0.1:8000/api/classroom"
-      : "https://exampro-backend-1n6d.onrender.com/api/classroom";
+      : "https://api.andyazhtec.com/api/classroom";
   }
 
   async function api(path, options = {}) {
