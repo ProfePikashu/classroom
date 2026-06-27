@@ -120,6 +120,50 @@ Cuando el temario esté cerrado, esta pantalla va a transformarse en el panel co
       ]
     },
 
+    // COMMUNITY_PAGE_HELP_V1_20260627
+    "comunidad.html": {
+      title: "Comunidad",
+      state: "pelusita-state2",
+      intro:
+`Hola, soy Pelusita 🐾
+
+Esta es la Comunidad del Classroom. Acá podés crear hilos, responder consultas, compartir aportes y adjuntar capturas o archivos útiles.`,
+      guide: [
+        {
+          title: "Crear un hilo",
+          text: "Tocá “Nuevo hilo”, elegí si es Consulta, Aporte o Recomendación, escribí un título claro y completá el contenido."
+        },
+        {
+          title: "Responder",
+          text: "Abrí un hilo y tocá “Responder”. Podés escribir una respuesta corta o larga, y si hace falta sumar archivos."
+        },
+        {
+          title: "Adjuntos",
+          text: "Podés adjuntar imágenes, GIFs, videos, PDFs, ZIPs, logs y otros archivos. En imágenes o GIFs se intenta mostrar vista previa."
+        },
+        {
+          title: "Editar",
+          text: "Si el hilo o respuesta es tuyo, usá el lápiz para editar. En respuestas también podés quitar adjuntos viejos o agregar nuevos."
+        },
+        {
+          title: "Borrar",
+          text: "El tachito borra tu propia respuesta. Docentes y moderadores pueden borrar respuestas si hace falta moderar."
+        },
+        {
+          title: "Links",
+          text: "Si pegás un enlace como bit.ly, Drive, GitHub, YouTube o una URL completa, la Comunidad intenta convertirlo en link clickeable."
+        },
+        {
+          title: "Moderación",
+          text: "El menú de tres puntos es para docentes y moderadores. Sirve para ocultar respuestas, silenciar usuarios o aplicar sanciones."
+        },
+        {
+          title: "Problemas comunes",
+          text: "Si algo no carga, actualizá la página. Si un adjunto no muestra vista previa, igual debería poder abrirse como archivo."
+        }
+      ]
+    },
+
     "exampro.html": {
       title: "ExamPro",
       state: "pelusita-state3",
