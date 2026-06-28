@@ -195,7 +195,7 @@ const CursoAyRPC2025Panel = {
     document.getElementById("ayrpcStudentTwitch").textContent = String(twitch).startsWith("@") ? twitch : `@${twitch}`;
     document.getElementById("ayrpcStudentEmail").textContent = email;
 
-    const source = supabaseData && sheetData ? "Supabase + Planilla" : supabaseData ? "Supabase" : sheetData ? "Planilla" : "Sesión local";
+    const source = supabaseData || sheetData ? "Datos sincronizados" : "Sesión local";
     document.getElementById("ayrpcDataSource").textContent = source;
   },
 
