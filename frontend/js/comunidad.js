@@ -7790,3 +7790,162 @@ console.log(`[Comunidad] ${PATCH_ID} activo.`);
 
 
 // COMMUNITY_REPLY_INLINE_ATTACHMENT_EDIT_V1_20260627
+
+
+/* ============================================================
+   COMMUNITY_REPLY_SUBMIT_LOADING_V1_20260628
+   Loading anti doble click para responder.
+============================================================ */
+(() => {
+  const PATCH_ID = "COMMUNITY_REPLY_SUBMIT_LOADING_V1_20260628";
+
+  if (window.__communityReplySubmitLoadingV1) return;
+  window.__communityReplySubmitLoadingV1 = true;
+
+  const busyForms = new WeakSet();
+
+  function findSubmitButton(form) {
+    return (
+      form.querySelector("[data-community-submit-reply]") ||
+      form.querySelector('button[type="submit"]') ||
+      form.querySelector("button")
+    );
+  }
+
+  function setLoading(form) {
+    if (!form || busyForms.has(form)) return false;
+
+    const textarea = form.querySelector("textarea");
+    const button = findSubmitButton(form);
+
+    if (!textarea || !button) return false;
+
+    const body = String(textarea.value || "").trim();
+    if (!body) return false;
+
+    busyForms.add(form);
+
+    form.dataset.replySubmitting = "1";
+    button.dataset.originalHtml = button.innerHTML;
+    button.disabled = true;
+    button.setAttribute("aria-busy", "true");
+    button.classList.add("community-reply-submit-loading");
+
+    button.innerHTML = `
+      <span class="community-reply-submit-spinner" aria-hidden="true"></span>
+      <span>Enviando...</span>
+    `;
+
+    return true;
+  }
+
+  function resetLoading(form) {
+    if (!form) return;
+
+    const button = findSubmitButton(form);
+
+    busyForms.delete(form);
+    form.dataset.replySubmitting = "0";
+
+    if (button) {
+      button.disabled = false;
+      button.removeAttribute("aria-busy");
+      button.classList.remove("community-reply-submit-loading");
+
+      if (button.dataset.originalHtml) {
+        button.innerHTML = button.dataset.originalHtml;
+        delete button.dataset.originalHtml;
+      }
+    }
+  }
+
+  function bindReplySubmitLoading() {
+    document.addEventListener("submit", (event) => {
+      const form = event.target;
+
+      if (!form?.matches?.("[data-community-reply-form], .community-reply-form")) return;
+
+      if (busyForms.has(form)) {
+        event.preventDefault();
+        event.stopPropagation();
+        event.stopImmediatePropagation();
+        return;
+      }
+
+      setLoading(form);
+
+      setTimeout(() => {
+        resetLoading(form);
+      }, 15000);
+    }, true);
+
+    document.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-community-submit-reply]");
+
+      if (!button) return;
+
+      const form = button.closest("[data-community-reply-form], .community-reply-form");
+
+      if (!form) return;
+
+      if (busyForms.has(form)) {
+        event.preventDefault();
+        event.stopPropagation();
+        event.stopImmediatePropagation();
+        return;
+      }
+
+      setLoading(form);
+
+      setTimeout(() => {
+        resetLoading(form);
+      }, 15000);
+    }, true);
+  }
+
+  function injectStyles() {
+    if (document.getElementById("communityReplySubmitLoadingStyleV1")) return;
+
+    const style = document.createElement("style");
+    style.id = "communityReplySubmitLoadingStyleV1";
+    style.textContent = `
+      .community-reply-submit-loading {
+        pointer-events: none !important;
+        opacity: .9 !important;
+      }
+
+      .community-reply-submit-spinner {
+        width: 1em !important;
+        height: 1em !important;
+        display: inline-block !important;
+        margin-right: .45rem !important;
+        border-radius: 999px !important;
+        border: 2px solid currentColor !important;
+        border-right-color: transparent !important;
+        vertical-align: -0.15em !important;
+        animation: communityReplySubmitSpinV1 .72s linear infinite !important;
+      }
+
+      @keyframes communityReplySubmitSpinV1 {
+        to { transform: rotate(360deg); }
+      }
+    `;
+
+    document.head.appendChild(style);
+  }
+
+  function boot() {
+    injectStyles();
+    bindReplySubmitLoading();
+    console.log(`[Comunidad] ${PATCH_ID} activo.`);
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", boot);
+  } else {
+    boot();
+  }
+})();
+
+
+// COMMUNITY_REPLY_SUBMIT_LOADING_V1_20260628
