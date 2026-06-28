@@ -765,7 +765,7 @@
         `).join("")
       : commentsCount
         ? `<p class="community-no-comments">Abrí el hilo para cargar las respuestas.</p>`
-        : `<p class="community-no-comments">Sin respuestas todavía. Meté mano, cobarde técnico.</p>`;
+        : `<p class="community-no-comments">Sin respuestas todavía.</p>`;
 
     return `
       <article class="community-post-card" data-post-id="${escapeHtml(post.id)}">
