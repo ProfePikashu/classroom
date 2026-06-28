@@ -266,23 +266,27 @@
               </label>
             </div>
 
-            <div class="notification-admin-mail-note">
-              <i class="fa-solid fa-envelope-circle-check"></i>
-              <div>
-                <strong>Email desactivado por defecto.</strong>
-                <p>Por ahora estas notificaciones se administran para la campanita. Cuando conectemos email, el alumno podrá elegir si quiere recibir correos y cuáles categorías acepta.</p>
+            <div class="notification-admin-actions notification-admin-actions-with-mail">
+              <div class="notification-admin-mail-note notification-admin-mail-toggle">
+                <i class="fa-solid fa-envelope-circle-check"></i>
+                <div>
+                  <strong>Enviar por correo</strong>
+                  <div class="notification-mail-radio-group" role="radiogroup" aria-label="Enviar por correo">
+                    <label>
+                      <input type="radio" name="notificationSendEmail" value="true">
+                      Sí
+                    </label>
+                    <label>
+                      <input type="radio" name="notificationSendEmail" value="false" checked>
+                      No
+                    </label>
+                  </div>
+                </div>
               </div>
-            </div>
 
-            <div class="notification-admin-actions">
               <button class="btn btn-primary" type="submit">
                 <i class="fa-solid fa-paper-plane"></i>
                 Guardar notificación
-              </button>
-
-              <button class="btn btn-outline" id="notificationPreviewDemo" type="button">
-                <i class="fa-solid fa-eye"></i>
-                Vista demo
               </button>
             </div>
           </form>

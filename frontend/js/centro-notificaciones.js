@@ -694,7 +694,7 @@
       audience: audience.audience_type,
       course: String(explicitCourse || audience.course || "").trim() || null,
       link_url: String(link || "").trim() || null,
-      send_email: false,
+      send_email: form.querySelector('input[name="notificationSendEmail"]:checked')?.value === "true",
       email_required: false,
     };
   }
@@ -1185,7 +1185,7 @@
     badge.className = "notification-admin-mail-note";
     badge.innerHTML = `
       <i class="fa-solid fa-database"></i>
-      Centro conectado a Supabase. El email sigue desactivado por defecto.
+      Centro conectado a Supabase. Notificaciones internas activas.
     `;
 
     hero.appendChild(badge);
