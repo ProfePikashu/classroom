@@ -2022,3 +2022,248 @@
   console.log("[Centro] Patch delete backend dominante activo.");
 })();
 
+/* === Centro notificaciones: mostrar audiencia academica solo si correo = SI 20260628 === */
+(function initAcademicMailPreviewToggle() {
+  "use strict";
+
+  const preview = document.getElementById("notificationAcademicMailPreview");
+  const form = document.getElementById("notificationAdminForm");
+
+  if (!preview) return;
+
+  const controls = [
+    document.getElementById("notificationAcademicMailSource"),
+    document.getElementById("notificationAcademicMailSegment"),
+    document.getElementById("notificationAcademicMailPreviewBtn"),
+  ].filter(Boolean);
+
+  function isSendEmailEnabled() {
+    return document.querySelector('input[name="notificationSendEmail"]:checked')?.value === "true";
+  }
+
+  function syncAcademicMailPreviewVisibility() {
+    const enabled = isSendEmailEnabled();
+
+    preview.hidden = !enabled;
+    preview.classList.toggle("is-disabled", !enabled);
+
+    controls.forEach((control) => {
+      control.disabled = !enabled;
+    });
+  }
+
+  document
+    .querySelectorAll('input[name="notificationSendEmail"]')
+    .forEach((radio) => {
+      radio.addEventListener("change", syncAcademicMailPreviewVisibility);
+    });
+
+  if (form) {
+    form.addEventListener("reset", () => {
+      window.setTimeout(syncAcademicMailPreviewVisibility, 0);
+    });
+  }
+
+  syncAcademicMailPreviewVisibility();
+
+  window.ClassroomAcademicMailPreviewSync = syncAcademicMailPreviewVisibility;
+})();
+
+/* === Centro notificaciones: dry-run audiencia academica Planilla 2025 20260628 === */
+(function initAcademicMailAudienceDryRun() {
+  "use strict";
+
+  const SHEET_2025_API = "https://script.google.com/macros/s/AKfycbxpazFcJG0A6ki-rgbaLY8LBKCAAYuZZsfSrLP4zsu97JbtSK9XbBTkVHHMYuUtsp50/exec";
+
+  const button = document.getElementById("notificationAcademicMailPreviewBtn");
+  const resultBox = document.getElementById("notificationAcademicMailPreviewResult");
+  const sourceSelect = document.getElementById("notificationAcademicMailSource");
+  const segmentSelect = document.getElementById("notificationAcademicMailSegment");
+
+  if (!button || !resultBox) return;
+
+  function clean(value) {
+    return String(value ?? "").trim();
+  }
+
+  function normalize(value) {
+    return clean(value)
+      .toUpperCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/\s+/g, " ");
+  }
+
+  function isValidEmail(item) {
+    const email = clean(item.Correo || item.email);
+    return /\S+@\S+\.\S+/.test(email);
+  }
+
+  function isValidDni(item) {
+    const dni = clean(item.DNI || item.dni).replace(/\D+/g, "");
+    return dni.length >= 7;
+  }
+
+  function getRawApto(item) {
+    return normalize(item.APTO || item.apt_examen || item.estado);
+  }
+
+  function getRawResultado(item) {
+    return normalize(item.Resultado || item.exam_status || "");
+  }
+
+  function getRawRecuperatorio(item) {
+    return normalize(item.Recuperatorio || item.recovery_status || "");
+  }
+
+  function isApto(item) {
+    const apto = getRawApto(item);
+    return apto === "SI" || apto === "APTO";
+  }
+
+  function isPendingRecovery2025(item) {
+    const resultado = getRawResultado(item);
+    const recuperatorio = getRawRecuperatorio(item);
+
+    return (
+      isValidDni(item) &&
+      isValidEmail(item) &&
+      isApto(item) &&
+      resultado !== "APROBADO" &&
+      recuperatorio !== "APROBADO" &&
+      recuperatorio !== "DESAPROBADO"
+    );
+  }
+
+  function countItems(items, predicate) {
+    return items.filter(predicate).length;
+  }
+
+  function renderLoading() {
+    resultBox.classList.remove("is-ready", "is-error");
+    resultBox.classList.add("is-loading");
+    resultBox.innerHTML = `
+      <strong>Calculando audiencia...</strong>
+      <span>Consultando Planilla AyRPC 2025 en modo dry-run. No se envía ningún correo.</span>
+    `;
+  }
+
+  function renderError(error) {
+    resultBox.classList.remove("is-ready", "is-loading");
+    resultBox.classList.add("is-error");
+    resultBox.innerHTML = `
+      <strong>No se pudo calcular la audiencia.</strong>
+      <span>${String(error?.message || error || "Error desconocido")}</span>
+    `;
+  }
+
+  function renderResult(summary) {
+    resultBox.classList.remove("is-loading", "is-error");
+    resultBox.classList.add("is-ready");
+
+    resultBox.innerHTML = `
+      <div class="academic-mail-summary-head">
+        <strong>${summary.pendingRecovery} destinatarios potenciales</strong>
+        <span>Dry-run: no se envió ningún correo.</span>
+      </div>
+
+      <div class="academic-mail-summary-grid">
+        <span>Total planilla <strong>${summary.total}</strong></span>
+        <span>Base válida <strong>${summary.validBase}</strong></span>
+        <span>APTO = SI <strong>${summary.aptos}</strong></span>
+        <span>Excluidos por examen aprobado <strong>${summary.approvedExam}</strong></span>
+        <span>Excluidos por recuperatorio cerrado <strong>${summary.closedRecovery}</strong></span>
+        <span>Sin DNI/email válido <strong>${summary.invalidContact}</strong></span>
+      </div>
+
+      <p class="academic-mail-summary-rule">
+        Regla usada: APTO = SI, Resultado distinto de APROBADO, Recuperatorio distinto de APROBADO/DESAPROBADO, con DNI y correo válidos.
+      </p>
+    `;
+  }
+
+  async function fetchSheet2025Items(source) {
+    const sheetParam = source === "personal-tests" ? "&sheet=pruebasPersonales" : "";
+
+    const response = await fetch(`${SHEET_2025_API}?list=1${sheetParam}`, {
+      cache: "no-store",
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.ok) {
+      throw new Error(data?.error || data?.message || "La planilla no respondió correctamente.");
+    }
+
+    return Array.isArray(data.items) ? data.items : [];
+  }
+
+  function buildPendingRecoverySummary(items) {
+    const validBaseItems = items.filter((item) => isValidDni(item) && isValidEmail(item));
+    const aptoItems = validBaseItems.filter(isApto);
+
+    return {
+      total: items.length,
+      validBase: validBaseItems.length,
+      invalidContact: items.length - validBaseItems.length,
+      aptos: aptoItems.length,
+      approvedExam: countItems(aptoItems, (item) => getRawResultado(item) === "APROBADO"),
+      closedRecovery: countItems(aptoItems, (item) => {
+        const rec = getRawRecuperatorio(item);
+        return rec === "APROBADO" || rec === "DESAPROBADO";
+      }),
+      pendingRecovery: countItems(items, isPendingRecovery2025),
+    };
+  }
+
+  function buildPersonalTestsSummary(items) {
+    const validEmailItems = items.filter(isValidEmail);
+
+    return {
+      total: items.length,
+      validBase: validEmailItems.length,
+      invalidContact: items.length - validEmailItems.length,
+      aptos: validEmailItems.length,
+      approvedExam: 0,
+      closedRecovery: 0,
+      pendingRecovery: validEmailItems.length,
+    };
+  }
+
+  async function calculateAcademicMailAudience() {
+    const source = sourceSelect?.value || "sheet-ayrpc-2025";
+    const segment = segmentSelect?.value || "pending-recovery-2025";
+
+    const allowedSources = ["sheet-ayrpc-2025", "personal-tests"];
+
+    if (!allowedSources.includes(source) || segment !== "pending-recovery-2025") {
+      renderError("Esta combinación de fuente/segmento todavía no está implementada.");
+      return;
+    }
+
+    renderLoading();
+
+    try {
+      const items = await fetchSheet2025Items(source);
+      const summary = source === "personal-tests"
+        ? buildPersonalTestsSummary(items)
+        : buildPendingRecoverySummary(items);
+
+      renderResult(summary);
+
+      window.ClassroomAcademicMailAudienceLastPreview = {
+        source,
+        segment,
+        summary,
+        calculatedAt: new Date().toISOString(),
+        dryRun: true,
+        sendsMail: false,
+      };
+    } catch (error) {
+      console.error("[Centro] Error calculando audiencia academica", error);
+      renderError(error);
+    }
+  }
+
+  button.addEventListener("click", calculateAcademicMailAudience);
+})();
