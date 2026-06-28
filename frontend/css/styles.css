@@ -17288,3 +17288,39 @@ html[data-theme="light"] .academic-mail-summary-grid strong,
     grid-template-columns: 1fr;
   }
 }
+
+/* === Centro notificaciones: boton envio prueba mail 20260628 === */
+.notification-academic-mail-send-test-btn[disabled] {
+  opacity: 0.52;
+  cursor: not-allowed;
+  filter: grayscale(0.25);
+}
+
+.notification-academic-mail-preview-result .academic-mail-send-test-status {
+  margin-top: 0.65rem;
+  padding: 0.72rem 0.85rem;
+  border-radius: 12px;
+  border: 1px solid rgba(80, 220, 255, 0.25);
+  background: rgba(80, 220, 255, 0.08);
+  color: rgba(220, 240, 255, 0.86);
+  font-size: 0.84rem;
+  line-height: 1.55;
+}
+
+.notification-academic-mail-preview-result .academic-mail-send-test-status.is-error {
+  border-color: rgba(255, 91, 132, 0.35);
+  background: rgba(255, 91, 132, 0.08);
+  color: rgba(255, 218, 228, 0.92);
+}
+
+.notification-academic-mail-preview-result .academic-mail-send-test-status.is-success {
+  border-color: rgba(102, 255, 178, 0.32);
+  background: rgba(102, 255, 178, 0.08);
+  color: rgba(216, 255, 234, 0.92);
+}
+
+html[data-theme="light"] .notification-academic-mail-preview-result .academic-mail-send-test-status,
+:root[data-theme="light"] .notification-academic-mail-preview-result .academic-mail-send-test-status {
+  color: rgba(48, 42, 76, 0.82);
+  background: rgba(255, 255, 255, 0.68);
+}

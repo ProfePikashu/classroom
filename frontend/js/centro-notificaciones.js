@@ -2267,3 +2267,201 @@
 
   button.addEventListener("click", calculateAcademicMailAudience);
 })();
+
+/* === Centro notificaciones: enviar prueba mail personal-tests 20260628 === */
+(function initAcademicMailSendTestButton() {
+  "use strict";
+
+  const sendButton = document.getElementById("notificationAcademicMailSendTestBtn");
+  const previewButton = document.getElementById("notificationAcademicMailPreviewBtn");
+  const resultBox = document.getElementById("notificationAcademicMailPreviewResult");
+  const sourceSelect = document.getElementById("notificationAcademicMailSource");
+  const segmentSelect = document.getElementById("notificationAcademicMailSegment");
+
+  if (!sendButton || !resultBox || !sourceSelect) return;
+
+  function getApiBase() {
+    const configured =
+      window.CLASSROOM_API_BASE ||
+      window.EXAMPRO_API_BASE ||
+      localStorage.getItem("andyazh-api-base") ||
+      "";
+
+    if (configured) {
+      return String(configured).replace(/\/+$/, "");
+    }
+
+    const host = window.location.hostname;
+
+    if (host === "localhost" || host === "127.0.0.1") {
+      return "http://127.0.0.1:8000";
+    }
+
+    return "https://api.andyazhtec.com";
+  }
+
+  function getSessionToken() {
+    try {
+      const raw = localStorage.getItem("andyazh-classroom-session");
+      if (!raw) return "";
+      const session = JSON.parse(raw);
+      return session?.token || session?.access_token || session?.jwt || session?.auth_token || "";
+    } catch (_) {
+      return "";
+    }
+  }
+
+  function isEmailSendEnabled() {
+    return document.querySelector('input[name="notificationSendEmail"]:checked')?.value === "true";
+  }
+
+  function getLastPreview() {
+    return window.ClassroomAcademicMailAudienceLastPreview || null;
+  }
+
+  function isPersonalTestsPreviewReady() {
+    const last = getLastPreview();
+    const summary = last?.summary || {};
+
+    return Boolean(
+      isEmailSendEnabled() &&
+      sourceSelect.value === "personal-tests" &&
+      (segmentSelect?.value || "pending-recovery-2025") === "pending-recovery-2025" &&
+      last?.source === "personal-tests" &&
+      last?.segment === "pending-recovery-2025" &&
+      Number(summary.pendingRecovery || summary.validBase || summary.eligible || summary.total || 0) > 0
+    );
+  }
+
+  function syncSendButtonState() {
+    sendButton.disabled = !isPersonalTestsPreviewReady();
+    sendButton.title = sendButton.disabled
+      ? "Disponible solo despues de calcular Pruebas personales."
+      : "Enviar correo de prueba a pruebasPersonales.";
+  }
+
+  function appendStatus(message, kind = "info") {
+    const previous = resultBox.querySelector(".academic-mail-send-test-status");
+    if (previous) previous.remove();
+
+    const box = document.createElement("div");
+    box.className = `academic-mail-send-test-status ${kind === "error" ? "is-error" : kind === "success" ? "is-success" : ""}`;
+    box.innerHTML = message;
+    resultBox.appendChild(box);
+  }
+
+  async function sendPersonalTestsMail() {
+    if (!isPersonalTestsPreviewReady()) {
+      appendStatus(
+        "<strong>No se envio.</strong><br>Primero calcula destinatarios con la fuente <strong>Pruebas personales</strong>.",
+        "error"
+      );
+      syncSendButtonState();
+      return;
+    }
+
+    const token = getSessionToken();
+
+    if (!token) {
+      appendStatus("<strong>No se envio.</strong><br>No encontre token de sesion del Classroom.", "error");
+      return;
+    }
+
+    const confirmation = window.confirm(
+      "Esto enviara un correo real SOLO a la hoja pruebasPersonales. Continuar?"
+    );
+
+    if (!confirmation) {
+      return;
+    }
+
+    sendButton.disabled = true;
+    const originalText = sendButton.innerHTML;
+    sendButton.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Enviando...';
+
+    appendStatus("<strong>Enviando prueba...</strong><br>Se esta enviando solo a pruebasPersonales.", "info");
+
+    try {
+      const response = await fetch(`${getApiBase()}/api/classroom/notifications/email-test-send`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          source: "personal-tests",
+          subject: "[PRUEBA] AyRPC - Recuperatorio disponible en Classroom",
+          title: "Recuperatorio aun disponible",
+          badge_text: "Ingresa al recuperatorio antes de que cierre",
+          cta_label: "Ingresar al recuperatorio",
+          cta_url: "https://classroom.andyazhtec.com/curso-ayrpc-2025.html",
+        }),
+      });
+
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok || !data.ok) {
+        throw new Error(data?.detail || data?.error || `HTTP ${response.status}`);
+      }
+
+      appendStatus(
+        `<strong>Prueba enviada.</strong><br>` +
+        `Intentados: <strong>${data.attempted ?? "-"}</strong> - ` +
+        `Enviados: <strong>${data.sent ?? "-"}</strong> - ` +
+        `Omitidos: <strong>${data.skipped ?? "-"}</strong> - ` +
+        `Fallidos: <strong>${data.failed ?? "-"}</strong>`,
+        "success"
+      );
+
+      window.ClassroomAcademicMailLastSendTest = {
+        ok: true,
+        sentAt: new Date().toISOString(),
+        data,
+      };
+    } catch (error) {
+      console.error("[Centro] Error enviando prueba de correo", error);
+
+      appendStatus(
+        `<strong>No se pudo enviar la prueba.</strong><br>${String(error?.message || error)}`,
+        "error"
+      );
+
+      window.ClassroomAcademicMailLastSendTest = {
+        ok: false,
+        sentAt: new Date().toISOString(),
+        error: String(error?.message || error),
+      };
+    } finally {
+      sendButton.innerHTML = originalText;
+      syncSendButtonState();
+    }
+  }
+
+  sendButton.addEventListener("click", sendPersonalTestsMail);
+
+  sourceSelect.addEventListener("change", () => {
+    window.ClassroomAcademicMailAudienceLastPreview = null;
+    syncSendButtonState();
+  });
+
+  segmentSelect?.addEventListener("change", () => {
+    window.ClassroomAcademicMailAudienceLastPreview = null;
+    syncSendButtonState();
+  });
+
+  document
+    .querySelectorAll('input[name="notificationSendEmail"]')
+    .forEach((radio) => {
+      radio.addEventListener("change", syncSendButtonState);
+    });
+
+  previewButton?.addEventListener("click", () => {
+    window.setTimeout(syncSendButtonState, 600);
+    window.setTimeout(syncSendButtonState, 1800);
+    window.setTimeout(syncSendButtonState, 3200);
+  });
+
+  syncSendButtonState();
+
+  window.ClassroomAcademicMailSendTestSync = syncSendButtonState;
+})();
