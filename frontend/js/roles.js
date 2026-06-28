@@ -16,26 +16,7 @@ const CLASSROOM_TEACHER_NAMES = [
   "ARTURO ANDRÉS CORIA",
 ];
 
-const CLASSROOM_STATIC_ROLE_ASSIGNMENTS = [
-  {
-    twitch: "lanonapupi",
-    dni: "24823085",
-    role: "moderator",
-    roleLabel: "Moderador",
-  },
-  {
-    twitch: "gabestigarribia",
-    dni: "38481942",
-    role: "moderator",
-    roleLabel: "Moderador",
-  },
-  {
-    twitch: "ezequiel_asp",
-    dni: "38505118",
-    role: "moderator",
-    roleLabel: "Moderador",
-  },
-];
+const CLASSROOM_STATIC_ROLE_ASSIGNMENTS = [];
 
 const ClassroomRoles = {
   storageKey: "andyazh-classroom-session",
