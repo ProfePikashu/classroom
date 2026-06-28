@@ -321,7 +321,13 @@ document.addEventListener("DOMContentLoaded", () => {
   ClassroomApp.init();
 });
 
-const CLASSROOM_API_BASE_URL = "https://api.andyazhtec.com";
+const CLASSROOM_API_BASE_URL = (
+  window.location.hostname === "localhost" ||
+  window.location.hostname === "127.0.0.1" ||
+  window.location.protocol === "file:"
+)
+  ? "http://127.0.0.1:8000"
+  : "https://api.andyazhtec.com";
 
 function getClassroomAuthToken() {
   const session = getClassroomSessionSafe();
