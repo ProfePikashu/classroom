@@ -2747,3 +2747,215 @@ if (String(item.id) !== String(id)) return item;
     init();
   }
 })();
+
+/* === Notification Preferences Modal Override 20260628 === */
+(function notificationPrefsModalOverride() {
+  "use strict";
+
+  const PREFS_KEY = "andyazh-classroom-notification-prefs-mock";
+
+  const DEFAULT_MATRIX_PREFS = {
+    homeNews: true,
+    homeCommunity: true,
+    homeEvaluations: true,
+    homeClasses: true,
+    homeAlerts: true,
+
+    bellNews: true,
+    bellCommunity: true,
+    bellEvaluations: true,
+    bellClasses: true,
+    bellAlerts: true,
+
+    emailNews: false,
+    emailCommunity: false,
+    emailEvaluations: true,
+    emailClasses: false,
+    emailAlerts: true
+  };
+
+  function escapeHtml(value) {
+    return String(value || "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  function loadPrefs() {
+    try {
+      const saved = JSON.parse(localStorage.getItem(PREFS_KEY) || "{}");
+      return { ...DEFAULT_MATRIX_PREFS, ...saved };
+    } catch {
+      return { ...DEFAULT_MATRIX_PREFS };
+    }
+  }
+
+  function savePrefs(prefs) {
+    const current = loadPrefs();
+    const next = { ...current, ...(prefs || {}) };
+    localStorage.setItem(PREFS_KEY, JSON.stringify(next));
+    return next;
+  }
+
+  function prefSwitch(key, checked, label) {
+    return `
+      <label class="notification-pref-toggle" title="${escapeHtml(label)}">
+        <span class="notification-pref-toggle-label">${escapeHtml(label)}</span>
+        <input type="checkbox" data-notification-modal-pref="${escapeHtml(key)}" ${checked ? "checked" : ""}>
+        <span class="notification-pref-toggle-ui"></span>
+      </label>
+    `;
+  }
+
+  function row(id, icon, title, description, prefs) {
+    const map = {
+      news: ["homeNews", "bellNews", "emailNews"],
+      community: ["homeCommunity", "bellCommunity", "emailCommunity"],
+      evaluations: ["homeEvaluations", "bellEvaluations", "emailEvaluations"],
+      classes: ["homeClasses", "bellClasses", "emailClasses"],
+      alerts: ["homeAlerts", "bellAlerts", "emailAlerts"]
+    };
+
+    const keys = map[id];
+
+    return `
+      <div class="notification-pref-matrix-row">
+        <div class="notification-pref-topic">
+          <i class="fa-solid ${escapeHtml(icon)}"></i>
+          <span>
+            <strong>${escapeHtml(title)}</strong>
+            <small>${escapeHtml(description)}</small>
+          </span>
+        </div>
+
+        ${prefSwitch(keys[0], prefs[keys[0]], "Inicio")}
+        ${prefSwitch(keys[1], prefs[keys[1]], "Campanita")}
+        ${prefSwitch(keys[2], prefs[keys[2]], "Correo")}
+      </div>
+    `;
+  }
+
+  function closeModal() {
+    const modal = document.getElementById("notificationPrefsModal");
+    if (!modal) return;
+
+    modal.classList.remove("open");
+    modal.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("notification-prefs-modal-open");
+  }
+
+  function buildModal() {
+    const previous = document.getElementById("notificationPrefsModal");
+    if (previous) previous.remove();
+
+    const prefs = loadPrefs();
+    const modal = document.createElement("div");
+
+    modal.id = "notificationPrefsModal";
+    modal.className = "notification-prefs-modal-backdrop";
+    modal.setAttribute("aria-hidden", "true");
+
+    modal.innerHTML = `
+      <section class="notification-prefs-modal" role="dialog" aria-modal="true" aria-labelledby="notificationPrefsModalTitle">
+        <div class="notification-prefs-modal-head">
+          <div>
+            <p class="eyebrow">Classroom</p>
+            <h2 id="notificationPrefsModalTitle">Preferencias de notificación</h2>
+            <p>Elegí qué querés recibir y por dónde. Por ahora se guarda localmente; después lo conectamos al backend y al correo del dominio.</p>
+          </div>
+
+          <button class="notification-prefs-modal-close" type="button" data-notification-prefs-close aria-label="Cerrar preferencias">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <div class="notification-pref-matrix">
+          <div class="notification-pref-matrix-head">
+            <span>Tipo de aviso</span>
+            <span>Inicio</span>
+            <span>Campanita</span>
+            <span>Correo</span>
+          </div>
+
+          ${row("news", "fa-bullhorn", "Novedades y avisos", "Comunicados generales del curso o plataforma.", prefs)}
+          ${row("community", "fa-comments", "Comunidad", "Hilos, respuestas y actividad técnica.", prefs)}
+          ${row("evaluations", "fa-file-circle-check", "Evaluaciones", "Notas, devoluciones, recuperatorios y correcciones.", prefs)}
+          ${row("classes", "fa-person-chalkboard", "Clases", "Materiales, clases disponibles y seguimiento académico.", prefs)}
+          ${row("alerts", "fa-triangle-exclamation", "Alertas", "Fechas límite, cambios urgentes o avisos críticos.", prefs)}
+        </div>
+
+        <div class="notification-prefs-modal-foot">
+          <small id="notificationPrefsModalStatus">Guardado local en este navegador.</small>
+
+          <button class="btn btn-primary" type="button" data-notification-prefs-close>
+            <i class="fa-solid fa-check"></i>
+            Listo
+          </button>
+        </div>
+      </section>
+    `;
+
+    document.body.appendChild(modal);
+
+    modal.addEventListener("click", (event) => {
+      if (event.target === modal || event.target.closest("[data-notification-prefs-close]")) {
+        event.preventDefault();
+        closeModal();
+      }
+    });
+
+    modal.querySelectorAll("[data-notification-modal-pref]").forEach((input) => {
+      input.addEventListener("change", () => {
+        savePrefs({ [input.dataset.notificationModalPref]: input.checked });
+
+        const status = modal.querySelector("#notificationPrefsModalStatus");
+        if (status) {
+          status.textContent = `Guardado local: ${new Date().toLocaleTimeString("es-AR", {
+            hour: "2-digit",
+            minute: "2-digit"
+          })}`;
+        }
+      });
+    });
+
+    return modal;
+  }
+
+  function openModal() {
+    const modal = buildModal();
+
+    modal.classList.add("open");
+    modal.setAttribute("aria-hidden", "false");
+    document.body.classList.add("notification-prefs-modal-open");
+  }
+
+  document.addEventListener("click", (event) => {
+    const settings = event.target.closest("#notificationsSettingsLink");
+
+    if (!settings) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    const widget = document.getElementById("notificationsWidget");
+    const panel = document.getElementById("notificationsPanel");
+
+    widget?.classList.remove("open");
+    panel?.setAttribute("aria-hidden", "true");
+
+    openModal();
+  }, true);
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") closeModal();
+  });
+
+  window.ClassroomNotificationPrefsModal = {
+    open: openModal,
+    close: closeModal,
+    loadPrefs,
+    savePrefs
+  };
+})();
