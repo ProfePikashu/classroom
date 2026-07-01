@@ -1,4 +1,4 @@
-/* ============================================================
+﻿/* ============================================================
    AndyAzhTEC Classroom — auth.js
    Login por DNI + Twitch contra ExamPro
    ============================================================ */
@@ -308,8 +308,23 @@ const ClassroomAuth = {
         twitch: student.twitch || cleanTwitch,
         email: student.email || "",
         displayName: fullName || cleanTwitch,
-        role: data.role === "alumno" ? "student" : data.role || "student",
-        roleLabel: data.role === "alumno" ? "Alumno" : "Alumno",
+        role:
+          data.role === "alumno"
+            ? "student"
+            : data.role === "classroom_moderator"
+              ? "moderator"
+              : data.role === "docente"
+                ? "teacher"
+                : data.role || "student",
+        roleLabel:
+          data.roleLabel ||
+          data.role_label ||
+          (data.role === "classroom_moderator"
+            ? "Moderador"
+            : data.role === "docente"
+              ? "Docente"
+              : "Alumno"),
+        backendRole: data.role || "alumno",
         course: "AyRPC 2025",
         alumno,
         exampro: {
@@ -539,3 +554,5 @@ const ClassroomAuth = {
   setInterval(normalizeSavedModeratorSession, 800);
   setTimeout(normalizeSavedModeratorSession, 300);
 })();
+
+
