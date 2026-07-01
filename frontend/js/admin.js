@@ -338,3 +338,100 @@ document.addEventListener("DOMContentLoaded", () => {
     init();
   }
 })();
+
+/* === BACKEND MODERATORS ADMIN LIST PATCH 20260701 === */
+(function backendModeratorsAdminListPatch() {
+  "use strict";
+
+  function patchAdmin() {
+    const app = window.ClassroomAdmin;
+
+    if (!app || app.__backendModeratorsAdminListPatched) return;
+
+    app.__backendModeratorsAdminListPatched = true;
+
+    app.renderModerators = function patchedRenderModerators() {
+      const container = document.getElementById("moderatorsList");
+
+      if (!container) return;
+
+      const assignments = this.getAssignments().filter((item) => item.role === "moderator");
+
+      if (!assignments.length) {
+        container.innerHTML = `
+          <div class="empty-admin-state">
+            No hay moderadores asignados.
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = assignments.map((item, index) => {
+        const isBackend = Boolean(item.backendManaged || item.source === "backend");
+
+        return `
+          <article class="moderator-card">
+            <div>
+              <strong>@${item.twitch}</strong>
+              <span>DNI ${item.dni}</span>
+              <small>${item.roleLabel || "Moderador"}${isBackend ? " · Backend" : ""}</small>
+            </div>
+
+            ${
+              isBackend
+                ? `
+                  <button class="btn btn-outline danger-btn" type="button" disabled title="Moderador definido en backend">
+                    <i class="fa-solid fa-server"></i>
+                    Backend
+                  </button>
+                `
+                : `
+                  <button class="btn btn-outline danger-btn" type="button" data-remove-moderator="${index}">
+                    <i class="fa-solid fa-user-minus"></i>
+                    Quitar
+                  </button>
+                `
+            }
+          </article>
+        `;
+      }).join("");
+
+      container.querySelectorAll("[data-remove-moderator]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const ok = confirm("¿Quitar rol de moderador?");
+          if (!ok) return;
+
+          this.removeModerator(Number(button.dataset.removeModerator));
+        });
+      });
+    };
+
+    app.removeModerator = function patchedRemoveModerator(index) {
+      const assignments = this.getAssignments();
+      const target = assignments[index];
+
+      if (target?.backendManaged || target?.source === "backend") {
+        alert("Este moderador está definido en backend. No se puede quitar desde este panel.");
+        this.renderModerators();
+        return;
+      }
+
+      assignments.splice(index, 1);
+      this.saveAssignments(assignments.filter((item) => !(item.backendManaged || item.source === "backend")));
+      this.renderModerators();
+    };
+
+    app.renderModerators();
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", patchAdmin);
+  } else {
+    patchAdmin();
+  }
+
+  setTimeout(patchAdmin, 300);
+  setTimeout(patchAdmin, 900);
+})();
+/* === END BACKEND MODERATORS ADMIN LIST PATCH 20260701 === */
+

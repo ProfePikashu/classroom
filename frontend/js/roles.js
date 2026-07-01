@@ -16,7 +16,48 @@ const CLASSROOM_TEACHER_NAMES = [
   "ARTURO ANDRÉS CORIA",
 ];
 
-const CLASSROOM_STATIC_ROLE_ASSIGNMENTS = [];
+const CLASSROOM_STATIC_ROLE_ASSIGNMENTS = [
+  {
+    twitch: "lanonapupi",
+    dni: "24823085",
+    role: "moderator",
+    roleLabel: "Moderador",
+    backendManaged: true,
+    source: "backend",
+  },
+  {
+    twitch: "gabestigarribia",
+    dni: "38481942",
+    role: "moderator",
+    roleLabel: "Moderador",
+    backendManaged: true,
+    source: "backend",
+  },
+  {
+    twitch: "ezequiel_asp",
+    dni: "38505118",
+    role: "moderator",
+    roleLabel: "Moderador",
+    backendManaged: true,
+    source: "backend",
+  },
+  {
+    twitch: "aniii69_",
+    dni: "35341170",
+    role: "moderator",
+    roleLabel: "Moderador",
+    backendManaged: true,
+    source: "backend",
+  },
+  {
+    twitch: "anii69_",
+    dni: "35341170",
+    role: "moderator",
+    roleLabel: "Moderador",
+    backendManaged: true,
+    source: "backend",
+  },
+];
 
 const ClassroomRoles = {
   storageKey: "andyazh-classroom-session",
@@ -317,5 +358,6 @@ document.addEventListener("DOMContentLoaded", () => {
     init();
   }
 })();
+
 
 
