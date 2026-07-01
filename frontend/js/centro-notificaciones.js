@@ -1700,7 +1700,29 @@ if (!items.length) {
     if (audience === "course") return item?.course || "Curso";
     if (audience === "students") return "Alumnos";
     if (audience === "staff") return "Staff";
-    if (audience === "specific_user") return "Usuario";
+    if (audience === "specific_user") {
+      const rawTwitch = String(
+        item?.recipient_twitch ||
+        item?.target_twitch ||
+        item?.student_twitch ||
+        item?.twitch ||
+        item?.username ||
+        item?.recipient_username ||
+        item?.target_username ||
+        item?.meta?.twitch ||
+        item?.metadata?.twitch ||
+        item?.data?.twitch ||
+        ""
+      ).trim();
+
+      const twitch = rawTwitch.replace(/^@+/, "");
+
+      if (twitch && twitch !== "specific_user") {
+        return `@${twitch}`;
+      }
+
+      return "Usuario específico";
+    }
 
     return "Todos";
   }
@@ -2561,6 +2583,7 @@ if (!items.length) {
 
   window.ClassroomAcademicMailSendTestSync = syncSendButtonState;
 })();
+
 
 
 

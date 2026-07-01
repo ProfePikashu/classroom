@@ -1,4 +1,4 @@
-
+﻿
 (() => {
   "use strict";
 
@@ -2428,47 +2428,17 @@ if (String(item.id) !== String(id)) return item;
 
   function buildDefaultCards() {
     return `
-      <article class="home-cmd-card home-notice-card is-info" data-home-default-card="1">
+      <article class="home-cmd-card home-notice-card is-neutral" data-home-empty-state="1">
         <div class="home-cmd-prompt">C:\\classroom&gt;</div>
         <div class="home-cmd-content">
           <div class="home-cmd-tags">
-            <span>AVISO</span>
-            <span>SISTEMA</span>
+            <span>AVISOS</span>
+            <span>VACÍO</span>
           </div>
-          <h3>Recuperaciones y asistencias</h3>
-          <p>Próximamente se van a registrar avisos cuando un alumno recupere una clase o quede un cambio pendiente de revisar.</p>
-          <div class="home-notice-meta">
-            <strong>Publicado por Sistema</strong>
-          </div>
-        </div>
-      </article>
-
-      <article class="home-cmd-card home-notice-card is-info" data-home-default-card="1">
-        <div class="home-cmd-prompt">C:\\classroom&gt;</div>
-        <div class="home-cmd-content">
-          <div class="home-cmd-tags">
-            <span>NOVEDAD</span>
-            <span>CURSO</span>
-          </div>
-          <h3>Novedades del curso</h3>
-          <p>Acá van a aparecer anuncios, accesos importantes, cambios de cursada y comunicaciones internas del Classroom.</p>
+          <h3>Aún no hay avisos para mostrar</h3>
+          <p>Cuando haya novedades reales del Classroom, van a aparecer acá.</p>
           <div class="home-notice-meta">
             <strong>Canal interno AndyAzhTEC</strong>
-          </div>
-        </div>
-      </article>
-
-      <article class="home-cmd-card home-notice-card is-neutral" data-home-default-card="1">
-        <div class="home-cmd-prompt">C:\\classroom&gt;</div>
-        <div class="home-cmd-content">
-          <div class="home-cmd-tags">
-            <span>LOG</span>
-            <span>ACTIVIDAD</span>
-          </div>
-          <h3>Actividad reciente</h3>
-          <p>Este espacio centraliza avisos, novedades y actividad reciente del Classroom.</p>
-          <div class="home-notice-meta">
-            <strong>Pelusita online · avisos activos</strong>
           </div>
         </div>
       </article>
@@ -2959,3 +2929,4 @@ if (String(item.id) !== String(id)) return item;
     savePrefs
   };
 })();
+

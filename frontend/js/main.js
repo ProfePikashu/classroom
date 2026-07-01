@@ -1,4 +1,4 @@
-/* ════════════════════════════════════════════════════════
+﻿/* ════════════════════════════════════════════════════════
    AndyAzhTEC Classroom — main.js
    Tema claro/oscuro + navegación + submenu cursos + sonidos UI
 ════════════════════════════════════════════════════════ */
@@ -407,34 +407,11 @@ function isClassroomStaff() {
 }
 
 function getClassroomNews() {
-  const fallback = [
-    {
-      id: "mock-welcome",
-      title: "Bienvenido al Classroom",
-      description: "Las novedades importantes del curso van a aparecer acá y también en la campanita.",
-      type: "info",
-      course: "Todos",
-      audience: "all",
-      createdAt: new Date().toISOString(),
-      createdBy: "Sistema",
-    },
-    {
-      id: "mock-recovery",
-      title: "Recuperaciones y asistencias",
-      description: "Próximamente se van a registrar avisos cuando un alumno recupere una clase o quede un cambio pendiente de revisar.",
-      type: "admin",
-      course: "AyRPC 2025",
-      audience: "staff",
-      createdAt: new Date().toISOString(),
-      createdBy: "Sistema",
-    },
-  ];
-
   try {
     const stored = JSON.parse(localStorage.getItem(CLASSROOM_NEWS_STORAGE_KEY) || "[]");
-    return Array.isArray(stored) && stored.length ? stored : fallback;
+    return Array.isArray(stored) ? stored : [];
   } catch {
-    return fallback;
+    return [];
   }
 }
 
@@ -1283,3 +1260,4 @@ document.addEventListener("DOMContentLoaded", () => {
     init();
   }
 })();
+
