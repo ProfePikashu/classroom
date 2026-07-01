@@ -2595,3 +2595,731 @@ if (!items.length) {
 
 
 
+
+/* ============================================================
+   AndyAzhTEC Classroom - Modal de vista previa de correo
+   Etapa 1: estructura editable + preview HTML, sin envío real.
+   ============================================================ */
+(function initClassroomMailPreviewModal() {
+  const isNotificationCenter = /centro-notificaciones\.html(?:$|\?|\#)/.test(window.location.pathname || "");
+  if (!isNotificationCenter) return;
+
+  const PRESETS = {
+    announcement: {
+      label: "Aviso común",
+      subject: "AndyAzhTEC Classroom - Nuevo aviso disponible",
+      eyebrow: "AndyAzhTEC Classroom",
+      title: "Nuevo aviso",
+      course: "Classroom",
+      tag: "Aviso general",
+      accent: "warning",
+      greeting: "Hola, {{nombre}}:",
+      body: "Hay un nuevo aviso disponible en el Classroom. Ingresá para revisar la información completa.",
+      highlight: "Este mensaje corresponde a una comunicación general del curso.",
+      buttonText: "Ingresar a Classroom",
+      buttonUrl: "https://profepikashu.github.io/classroom/",
+      footer: "Prof. Arturo Coria<br>AndyAzhTEC Classroom"
+    },
+    community: {
+      label: "Comunidad",
+      subject: "AndyAzhTEC Classroom - Nueva actividad en Comunidad",
+      eyebrow: "AndyAzhTEC Classroom",
+      title: "Actividad en Comunidad",
+      course: "Classroom",
+      tag: "Comunidad",
+      accent: "info",
+      greeting: "Hola, {{nombre}}:",
+      body: "Hay nueva actividad en la Comunidad del Classroom. Podés ingresar para ver el hilo, responder o seguir la conversación.",
+      highlight: "La comunidad centraliza consultas, aportes y recomendaciones del curso.",
+      buttonText: "Ir a Comunidad",
+      buttonUrl: "https://profepikashu.github.io/classroom/comunidad.html",
+      footer: "Prof. Arturo Coria<br>AndyAzhTEC Classroom"
+    },
+    academic: {
+      label: "Académico / nota cargada",
+      subject: "AyRPC - Hay una novedad académica disponible en Classroom",
+      eyebrow: "AndyAzhTEC Classroom",
+      title: "Novedad académica",
+      course: "Curso AyRPC 2025",
+      tag: "Información académica",
+      accent: "orange",
+      greeting: "Hola, {{nombre}}:",
+      body: "Hay una novedad académica disponible en el Classroom. Ingresá para revisar la información completa y verificar el detalle correspondiente.",
+      highlight: "Este aviso puede estar relacionado con notas, devoluciones, recuperatorios o cambios importantes del curso.",
+      buttonText: "Ingresar a Classroom",
+      buttonUrl: "https://profepikashu.github.io/classroom/",
+      footer: "Prof. Arturo Coria<br>Armado y Reparación de PC — AyRPC 2025<br>AndyAzhTEC Classroom"
+    },
+    recovery_corrected: {
+      label: "Recuperatorio corregido",
+      subject: "AyRPC - La corrección de tu RECUPERATORIO ya está disponible en Classroom",
+      eyebrow: "AndyAzhTEC Classroom",
+      title: "Devolución disponible",
+      course: "Curso AyRPC 2025",
+      tag: "Corrección de recuperatorio",
+      accent: "orange",
+      greeting: "Hola, {{nombre}}:",
+      body: "La corrección de tu recuperatorio correspondiente al curso <strong>Armado y Reparación de PC - 2025</strong> ya se encuentra disponible. Para visualizarla, deberás ingresar primero a <strong>Classroom</strong> y, desde allí, acceder al apartado de <strong>ExamPro</strong> siguiendo las indicaciones de la plataforma.",
+      highlight: "Desde <strong>ExamPro</strong> podrás ver punto a punto la devolución de tu evaluación.",
+      buttonText: "Ingresar a Classroom",
+      buttonUrl: "https://profepikashu.github.io/classroom/",
+      footer: "Prof. Arturo Coria<br>Armado y Reparación de PC — AyRPC 2025<br>AndyAzhTEC Classroom"
+    },
+    recovery_available: {
+      label: "Recuperatorio disponible",
+      subject: "¡¡RECORDATORIO!! Recuperatorio de AyRPC 2025 disponible",
+      eyebrow: "AndyAzhTEC Classroom",
+      title: "Recuperatorio AÚN disponible",
+      course: "Curso AyRPC 2025",
+      tag: "Ingresá al recuperatorio antes de que cierre",
+      accent: "warning",
+      greeting: "Hola, {{nombre}}:",
+      body: "Aún figura en el sistema que te encontrás <strong>APTO/A</strong> para rendir el recuperatorio del examen de <strong>AyRPC 2025</strong>, pero todavía no aparece registrada la aprobación de esta última instancia.",
+      highlight: "El recuperatorio estará disponible hasta la fecha indicada. Luego de esa fecha, ya no será posible rendirlo.",
+      buttonText: "Ingresar al recuperatorio",
+      buttonUrl: "https://profepikashu.github.io/classroom/curso-ayrpc-2025.html",
+      footer: "Prof. Arturo Coria<br>Armado y Reparación de PC — AyRPC 2025<br>AndyAzhTEC Classroom"
+    },
+    system: {
+      label: "Sistema",
+      subject: "AndyAzhTEC Classroom - Aviso del sistema",
+      eyebrow: "AndyAzhTEC Classroom",
+      title: "Aviso del sistema",
+      course: "Classroom",
+      tag: "Sistema",
+      accent: "neutral",
+      greeting: "Hola, {{nombre}}:",
+      body: "Hay una actualización o aviso interno del sistema Classroom.",
+      highlight: "Este mensaje corresponde a una comunicación técnica o administrativa del sistema.",
+      buttonText: "Ingresar a Classroom",
+      buttonUrl: "https://profepikashu.github.io/classroom/",
+      footer: "Prof. Arturo Coria<br>AndyAzhTEC Classroom"
+    }
+  };
+
+  const ACCENTS = {
+    info: {
+      border: "#2563eb",
+      soft: "rgba(37,99,235,.12)",
+      softBorder: "rgba(96,165,250,.35)",
+      text: "#bfdbfe",
+      buttonA: "#2563eb",
+      buttonB: "#7c3aed"
+    },
+    warning: {
+      border: "#eab308",
+      soft: "rgba(234,179,8,.12)",
+      softBorder: "rgba(250,204,21,.35)",
+      text: "#fde68a",
+      buttonA: "#f59e0b",
+      buttonB: "#7c3aed"
+    },
+    orange: {
+      border: "#f97316",
+      soft: "rgba(249,115,22,.14)",
+      softBorder: "rgba(251,146,60,.42)",
+      text: "#fed7aa",
+      buttonA: "#f97316",
+      buttonB: "#7c3aed"
+    },
+    danger: {
+      border: "#ef4444",
+      soft: "rgba(239,68,68,.13)",
+      softBorder: "rgba(248,113,113,.42)",
+      text: "#fecaca",
+      buttonA: "#ef4444",
+      buttonB: "#7c3aed"
+    },
+    neutral: {
+      border: "#7c3aed",
+      soft: "rgba(124,58,237,.13)",
+      softBorder: "rgba(167,139,250,.38)",
+      text: "#ddd6fe",
+      buttonA: "#7c3aed",
+      buttonB: "#2563eb"
+    }
+  };
+
+  function qs(selector) {
+    return document.querySelector(selector);
+  }
+
+  function escapeHtml(value) {
+    return String(value ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  function nl2br(value) {
+    return escapeHtml(value).replace(/\n/g, "<br>");
+  }
+
+  function getCurrentNotificationType() {
+    return String(qs("#notificationType")?.value || "announcement").trim();
+  }
+
+  function getCurrentSeverity() {
+    return String(qs("#notificationSeverity")?.value || "").trim();
+  }
+
+  function inferPresetKey() {
+    const type = getCurrentNotificationType();
+    const title = String(qs("#notificationTitle")?.value || "").toLowerCase();
+    const body = String(qs("#notificationBody")?.value || "").toLowerCase();
+
+    if (title.includes("recuperatorio") && (title.includes("correg") || body.includes("correg"))) {
+      return "recovery_corrected";
+    }
+
+    if (title.includes("recuperatorio") || body.includes("recuperatorio")) {
+      return "recovery_available";
+    }
+
+    if (type === "community") return "community";
+    if (type === "academic") return "academic";
+    if (type === "system") return "system";
+
+    return "announcement";
+  }
+
+  function severityToAccent() {
+    const severity = getCurrentSeverity().toLowerCase();
+    const type = getCurrentNotificationType();
+
+    if (severity.includes("danger") || severity.includes("rojo")) return "danger";
+    if (severity.includes("orange") || severity.includes("naranja")) return "orange";
+    if (severity.includes("warning") || severity.includes("amarillo")) return "warning";
+    if (severity.includes("neutral") || severity.includes("violeta")) return "neutral";
+    if (type === "academic") return "orange";
+    if (type === "community") return "info";
+    if (type === "system") return "neutral";
+
+    return "warning";
+  }
+
+  function createModal() {
+    if (qs("#mailPreviewModal")) return;
+
+    const style = document.createElement("style");
+    style.textContent = `
+      .mail-preview-backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        background: rgba(2, 6, 23, .78);
+        backdrop-filter: blur(10px);
+      }
+
+      .mail-preview-backdrop.is-open {
+        display: flex;
+      }
+
+      .mail-preview-modal {
+        width: min(1180px, 96vw);
+        max-height: 92vh;
+        overflow: hidden;
+        border: 1px solid rgba(34, 211, 238, .35);
+        border-radius: 22px;
+        background: linear-gradient(135deg, rgba(8, 13, 32, .98), rgba(15, 23, 42, .98));
+        box-shadow: 0 24px 90px rgba(0, 0, 0, .5), 0 0 45px rgba(124, 58, 237, .18);
+        color: #e5e7eb;
+      }
+
+      .mail-preview-header,
+      .mail-preview-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        padding: 18px 20px;
+        border-bottom: 1px solid rgba(148, 163, 184, .16);
+      }
+
+      .mail-preview-footer {
+        border-top: 1px solid rgba(148, 163, 184, .16);
+        border-bottom: 0;
+      }
+
+      .mail-preview-title small {
+        display: block;
+        color: #22d3ee;
+        font-size: 11px;
+        font-weight: 900;
+        letter-spacing: .16em;
+        text-transform: uppercase;
+      }
+
+      .mail-preview-title strong {
+        display: block;
+        margin-top: 4px;
+        color: #fff;
+        font-size: 20px;
+      }
+
+      .mail-preview-close {
+        border: 1px solid rgba(248, 113, 113, .45);
+        border-radius: 14px;
+        background: rgba(127, 29, 29, .18);
+        color: #fecaca;
+        padding: 10px 14px;
+        font-weight: 900;
+        cursor: pointer;
+      }
+
+      .mail-preview-body {
+        display: grid;
+        grid-template-columns: minmax(320px, 430px) 1fr;
+        gap: 18px;
+        padding: 18px 20px;
+        overflow: auto;
+        max-height: calc(92vh - 146px);
+      }
+
+      .mail-preview-form {
+        display: grid;
+        gap: 12px;
+        align-content: start;
+      }
+
+      .mail-preview-form label {
+        display: grid;
+        gap: 6px;
+        color: #cbd5e1;
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .mail-preview-form input,
+      .mail-preview-form select,
+      .mail-preview-form textarea {
+        width: 100%;
+        border: 1px solid rgba(34, 211, 238, .25);
+        border-radius: 13px;
+        background: rgba(2, 6, 23, .72);
+        color: #f8fafc;
+        padding: 11px 12px;
+        font: inherit;
+        outline: none;
+      }
+
+      .mail-preview-form textarea {
+        min-height: 76px;
+        resize: vertical;
+      }
+
+      .mail-preview-frame-wrap {
+        min-height: 520px;
+        overflow: hidden;
+        border: 1px solid rgba(124, 58, 237, .32);
+        border-radius: 18px;
+        background: #050816;
+      }
+
+      .mail-preview-frame {
+        width: 100%;
+        height: 620px;
+        border: 0;
+        background: #ffffff;
+      }
+
+      .mail-preview-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: flex-end;
+      }
+
+      .mail-preview-btn {
+        border: 1px solid rgba(34, 211, 238, .35);
+        border-radius: 14px;
+        background: rgba(8, 47, 73, .38);
+        color: #67e8f9;
+        padding: 11px 15px;
+        font-weight: 900;
+        cursor: pointer;
+      }
+
+      .mail-preview-btn.primary {
+        border-color: rgba(168, 85, 247, .6);
+        background: linear-gradient(135deg, #7c3aed, #a855f7);
+        color: #fff;
+      }
+
+      @media (max-width: 900px) {
+        .mail-preview-body {
+          grid-template-columns: 1fr;
+        }
+
+        .mail-preview-frame {
+          height: 560px;
+        }
+      }
+    `;
+
+    document.head.appendChild(style);
+
+    const modal = document.createElement("div");
+    modal.id = "mailPreviewModal";
+    modal.className = "mail-preview-backdrop";
+    modal.innerHTML = `
+      <section class="mail-preview-modal" role="dialog" aria-modal="true" aria-labelledby="mailPreviewTitle">
+        <header class="mail-preview-header">
+          <div class="mail-preview-title">
+            <small>Vista previa de correo</small>
+            <strong id="mailPreviewTitle">Editar estructura del mail</strong>
+          </div>
+          <button type="button" class="mail-preview-close" data-mail-preview-close>✕ Cerrar</button>
+        </header>
+
+        <div class="mail-preview-body">
+          <form class="mail-preview-form" id="mailPreviewForm">
+            <label>
+              Preset
+              <select id="mailPreviewPreset">
+                ${Object.entries(PRESETS).map(([key, preset]) => `<option value="${key}">${escapeHtml(preset.label)}</option>`).join("")}
+              </select>
+            </label>
+
+            <label>
+              Color visual
+              <select id="mailPreviewAccent">
+                <option value="info">Azul — comunidad/info</option>
+                <option value="warning">Amarillo — aviso</option>
+                <option value="orange">Naranja — académico/importante</option>
+                <option value="danger">Rojo — crítico</option>
+                <option value="neutral">Violeta — sistema</option>
+              </select>
+            </label>
+
+            <label>
+              Asunto
+              <input id="mailPreviewSubject" type="text">
+            </label>
+
+            <label>
+              Título superior
+              <input id="mailPreviewMainTitle" type="text">
+            </label>
+
+            <label>
+              Curso / subtítulo
+              <input id="mailPreviewCourse" type="text">
+            </label>
+
+            <label>
+              Etiqueta interna
+              <input id="mailPreviewTag" type="text">
+            </label>
+
+            <label>
+              Saludo
+              <input id="mailPreviewGreeting" type="text">
+            </label>
+
+            <label>
+              Mensaje principal
+              <textarea id="mailPreviewBody"></textarea>
+            </label>
+
+            <label>
+              Bloque destacado
+              <textarea id="mailPreviewHighlight"></textarea>
+            </label>
+
+            <label>
+              Texto del botón
+              <input id="mailPreviewButtonText" type="text">
+            </label>
+
+            <label>
+              Link del botón
+              <input id="mailPreviewButtonUrl" type="url">
+            </label>
+
+            <label>
+              Firma
+              <textarea id="mailPreviewFooter"></textarea>
+            </label>
+          </form>
+
+          <div class="mail-preview-frame-wrap">
+            <iframe id="mailPreviewFrame" class="mail-preview-frame" title="Vista previa del correo"></iframe>
+          </div>
+        </div>
+
+        <footer class="mail-preview-footer">
+          <span id="mailPreviewHint">Esto todavía no envía mails: solo arma y previsualiza el formato.</span>
+          <div class="mail-preview-actions">
+            <button type="button" class="mail-preview-btn" id="mailPreviewReload">Actualizar vista previa</button>
+            <button type="button" class="mail-preview-btn primary" id="mailPreviewUseCurrentMessage">Usar mensaje actual</button>
+          </div>
+        </footer>
+      </section>
+    `;
+
+    document.body.appendChild(modal);
+
+    modal.addEventListener("click", (event) => {
+      if (event.target === modal || event.target.closest("[data-mail-preview-close]")) {
+        closeModal();
+      }
+    });
+
+    qs("#mailPreviewPreset")?.addEventListener("change", () => {
+      loadPreset(qs("#mailPreviewPreset")?.value || "announcement", true);
+    });
+
+    qs("#mailPreviewAccent")?.addEventListener("change", renderPreview);
+    qs("#mailPreviewReload")?.addEventListener("click", renderPreview);
+    qs("#mailPreviewUseCurrentMessage")?.addEventListener("click", () => {
+      hydrateFromNotificationForm();
+      renderPreview();
+    });
+
+    qs("#mailPreviewForm")?.addEventListener("input", renderPreview);
+  }
+
+  function setValue(id, value) {
+    const el = qs(id);
+    if (el) el.value = value ?? "";
+  }
+
+  function getValue(id) {
+    return qs(id)?.value ?? "";
+  }
+
+  function loadPreset(key, forcePresetValues = false) {
+    const preset = PRESETS[key] || PRESETS.announcement;
+
+    setValue("#mailPreviewPreset", key);
+    setValue("#mailPreviewAccent", preset.accent || severityToAccent());
+    setValue("#mailPreviewSubject", preset.subject);
+    setValue("#mailPreviewMainTitle", preset.title);
+    setValue("#mailPreviewCourse", preset.course);
+    setValue("#mailPreviewTag", preset.tag);
+    setValue("#mailPreviewGreeting", preset.greeting);
+    setValue("#mailPreviewBody", preset.body);
+    setValue("#mailPreviewHighlight", preset.highlight);
+    setValue("#mailPreviewButtonText", preset.buttonText);
+    setValue("#mailPreviewButtonUrl", preset.buttonUrl);
+    setValue("#mailPreviewFooter", preset.footer);
+
+    if (!forcePresetValues) {
+      hydrateFromNotificationForm();
+    }
+
+    renderPreview();
+  }
+
+  function hydrateFromNotificationForm() {
+    const title = String(qs("#notificationTitle")?.value || "").trim();
+    const body = String(qs("#notificationBody")?.value || "").trim();
+    const link = String(qs("#notificationLink")?.value || "").trim();
+
+    if (title) {
+      setValue("#mailPreviewSubject", title);
+    }
+
+    if (body) {
+      setValue("#mailPreviewBody", body);
+    }
+
+    if (link) {
+      setValue("#mailPreviewButtonUrl", link);
+    }
+
+    const accent = severityToAccent();
+    setValue("#mailPreviewAccent", accent);
+  }
+
+  function getPreviewData() {
+    return {
+      accent: getValue("#mailPreviewAccent") || "warning",
+      subject: getValue("#mailPreviewSubject"),
+      title: getValue("#mailPreviewMainTitle"),
+      course: getValue("#mailPreviewCourse"),
+      tag: getValue("#mailPreviewTag"),
+      greeting: getValue("#mailPreviewGreeting"),
+      body: getValue("#mailPreviewBody"),
+      highlight: getValue("#mailPreviewHighlight"),
+      buttonText: getValue("#mailPreviewButtonText"),
+      buttonUrl: getValue("#mailPreviewButtonUrl"),
+      footer: getValue("#mailPreviewFooter")
+    };
+  }
+
+  function renderMailHtml(data) {
+    const accent = ACCENTS[data.accent] || ACCENTS.warning;
+    const buttonUrl = data.buttonUrl || "https://profepikashu.github.io/classroom/";
+    const safeUrl = escapeHtml(buttonUrl);
+
+    return `<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>${escapeHtml(data.subject || "Vista previa")}</title>
+</head>
+<body style="margin:0;padding:0;background:#ffffff;font-family:Arial,Helvetica,sans-serif;color:#0f172a;">
+  <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background:#ffffff;padding:30px 12px;">
+    <tr>
+      <td align="center">
+        <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="max-width:660px;background:#07111f;border-radius:22px;overflow:hidden;border:1px solid ${accent.border};box-shadow:0 0 34px rgba(37,99,235,.20),0 0 80px rgba(124,58,237,.14);">
+          <tr>
+            <td style="padding:30px 30px 24px;background:linear-gradient(135deg,#07111f 0%,#0f172a 46%,#1e1b4b 100%);border-bottom:1px solid rgba(96,165,250,.35);">
+              <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
+                <tr>
+                  <td style="vertical-align:middle;">
+                    <div style="font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:#93c5fd;font-weight:900;">
+                      AndyAzhTEC Classroom
+                    </div>
+                    <div style="margin-top:10px;font-size:28px;line-height:1.15;color:#ffffff;font-weight:900;">
+                      ${escapeHtml(data.title)}
+                    </div>
+                    <div style="margin-top:8px;font-size:14px;color:#c4b5fd;font-weight:700;">
+                      ${escapeHtml(data.course)}
+                    </div>
+                  </td>
+                  <td align="right" style="vertical-align:middle;width:76px;">
+                    <div style="width:64px;height:64px;border-radius:18px;background:rgba(15,23,42,.78);border:1px solid rgba(147,197,253,.5);text-align:center;">
+                      <img src="https://profepikashu.github.io/classroom/media/icons/classroomicoclaro.png" alt="Classroom" width="44" height="44" style="display:block;margin:10px auto;border:0;outline:none;text-decoration:none;">
+                    </div>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="padding:26px;">
+              <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background:linear-gradient(180deg,rgba(15,23,42,.98),rgba(2,6,23,.98));border:1px solid rgba(51,65,85,.95);border-radius:18px;">
+                <tr>
+                  <td style="padding:26px;">
+                    <div style="margin-bottom:18px;padding:10px 12px;border-radius:12px;background:${accent.soft};border:1px solid ${accent.softBorder};color:${accent.text};font-size:12px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;">
+                      ${escapeHtml(data.tag)}
+                    </div>
+
+                    <p style="margin:0 0 18px;color:#f8fafc;font-size:17px;line-height:1.65;">
+                      ${nl2br(data.greeting)}
+                    </p>
+
+                    <p style="margin:0 0 18px;color:#dbeafe;font-size:15px;line-height:1.75;">
+                      ${String(data.body || "").replace(/\n/g, "<br>")}
+                    </p>
+
+                    <table cellpadding="0" cellspacing="0" role="presentation" style="margin:28px auto 24px;">
+                      <tr>
+                        <td style="border-radius:14px;background:linear-gradient(135deg,${accent.buttonA},${accent.buttonB});box-shadow:0 0 22px rgba(37,99,235,.34);">
+                          <a href="${safeUrl}" target="_blank" style="display:inline-block;padding:15px 26px;color:#ffffff;text-decoration:none;font-size:15px;font-weight:900;border-radius:14px;letter-spacing:.02em;">
+                            ${escapeHtml(data.buttonText)}
+                          </a>
+                        </td>
+                      </tr>
+                    </table>
+
+                    <div style="margin-top:22px;padding:16px;border-radius:14px;background:rgba(15,23,42,.9);border:1px solid rgba(124,58,237,.35);">
+                      <p style="margin:0;color:#ddd6fe;font-size:14px;line-height:1.7;">
+                        ${String(data.highlight || "").replace(/\n/g, "<br>")}
+                      </p>
+                    </div>
+                  </td>
+                </tr>
+              </table>
+
+              <p style="margin:20px 4px 0;color:#475569;font-size:12px;line-height:1.6;text-align:center;">
+                Si el botón no funciona, copiá y pegá este enlace en tu navegador:<br>
+                <a href="${safeUrl}" style="color:#2563eb;text-decoration:underline;">${safeUrl}</a>
+              </p>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="padding:18px 28px;background:#020617;border-top:1px solid rgba(30,41,59,.95);">
+              <p style="margin:0;color:#94a3b8;font-size:12px;line-height:1.65;">
+                ${data.footer || ""}
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+  }
+
+  function renderPreview() {
+    const frame = qs("#mailPreviewFrame");
+    if (!frame) return;
+
+    const html = renderMailHtml(getPreviewData());
+    frame.srcdoc = html;
+    window.ClassroomMailPreviewModal.currentHtml = html;
+    window.ClassroomMailPreviewModal.currentData = getPreviewData();
+  }
+
+  function openModal() {
+    createModal();
+
+    const presetKey = inferPresetKey();
+    loadPreset(presetKey, false);
+
+    qs("#mailPreviewModal")?.classList.add("is-open");
+  }
+
+  function closeModal() {
+    qs("#mailPreviewModal")?.classList.remove("is-open");
+  }
+
+  function ensureTriggerButton() {
+    const sendEmailBox =
+      qs("#notificationSendEmail") ||
+      document.querySelector('input[name="notificationSendEmail"]')?.closest("label, .notification-send-email, .mail-toggle, div") ||
+      document.querySelector('input[name="notificationSendEmail"]')?.parentElement;
+
+    const target =
+      document.querySelector("#notificationAdminForm .notification-form-actions") ||
+      document.querySelector("#notificationAdminForm") ||
+      document.querySelector(".notifications-center-composer") ||
+      sendEmailBox;
+
+    if (!target || qs("#mailPreviewOpenBtn")) return;
+
+    const button = document.createElement("button");
+    button.type = "button";
+    button.id = "mailPreviewOpenBtn";
+    button.className = "btn btn-outline";
+    button.innerHTML = '<i class="fa-solid fa-envelope-open-text"></i> Vista previa del correo';
+    button.addEventListener("click", openModal);
+
+    const saveButton = qs("#notificationAdminForm button[type='submit']") || qs("#notificationSaveBtn");
+
+    if (saveButton?.parentElement) {
+      saveButton.parentElement.insertBefore(button, saveButton);
+    } else {
+      target.appendChild(button);
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    createModal();
+    ensureTriggerButton();
+
+    setTimeout(ensureTriggerButton, 300);
+    setTimeout(ensureTriggerButton, 1000);
+  });
+
+  window.ClassroomMailPreviewModal = {
+    open: openModal,
+    close: closeModal,
+    render: renderPreview,
+    currentHtml: "",
+    currentData: null
+  };
+})();
