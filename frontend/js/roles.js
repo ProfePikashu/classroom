@@ -49,14 +49,6 @@ const CLASSROOM_STATIC_ROLE_ASSIGNMENTS = [
     backendManaged: true,
     source: "backend",
   },
-  {
-    twitch: "anii69_",
-    dni: "35341170",
-    role: "moderator",
-    roleLabel: "Moderador",
-    backendManaged: true,
-    source: "backend",
-  },
 ];
 
 const ClassroomRoles = {
@@ -358,6 +350,7 @@ document.addEventListener("DOMContentLoaded", () => {
     init();
   }
 })();
+
 
 
 
