@@ -377,6 +377,10 @@
   function render() {
     if (!els.list) return;
 
+    if (/centro-notificaciones\.html(?:$|\?|\#)/.test(window.location.pathname || "")) {
+      return;
+    }
+
     if (
       window.ClassroomNotificationCenterBackend ||
       window.ClassroomNotificationAdminItems
@@ -2501,6 +2505,7 @@
 
   window.ClassroomAcademicMailSendTestSync = syncSendButtonState;
 })();
+
 
 
 
