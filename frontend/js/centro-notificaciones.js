@@ -3323,3 +3323,444 @@ if (!items.length) {
     currentData: null
   };
 })();
+
+/* ============================================================
+   AndyAzhTEC Classroom - Destinatarios manuales para correo académico
+   Etapa 1: UI + validación + cálculo, sin envío real todavía.
+   ============================================================ */
+(function initAcademicMailManualRecipients() {
+  const isNotificationCenter = /centro-notificaciones\.html(?:$|\?|\#)/.test(window.location.pathname || "");
+  if (!isNotificationCenter) return;
+
+  const SOURCE_VALUE = "manual-list";
+
+  function qs(selector) {
+    return document.querySelector(selector);
+  }
+
+  function escapeHtml(value) {
+    return String(value ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  function getSourceSelect() {
+    return qs("#notificationAcademicMailSource");
+  }
+
+  function getSegmentSelect() {
+    return qs("#notificationAcademicMailSegment");
+  }
+
+  function getResultBox() {
+    return qs("#notificationAcademicMailPreviewResult");
+  }
+
+  function getPreviewButton() {
+    return qs("#notificationAcademicMailPreviewBtn");
+  }
+
+  function getSendTestButton() {
+    return qs("#notificationAcademicMailSendTestBtn");
+  }
+
+  function isManualSource() {
+    return getSourceSelect()?.value === SOURCE_VALUE;
+  }
+
+  function ensureManualOption() {
+    const source = getSourceSelect();
+    if (!source) return;
+
+    if (![...source.options].some((option) => option.value === SOURCE_VALUE)) {
+      const option = document.createElement("option");
+      option.value = SOURCE_VALUE;
+      option.textContent = "Lista manual";
+      source.appendChild(option);
+    }
+  }
+
+  function findAcademicMailCard() {
+    const source = getSourceSelect();
+    if (!source) return null;
+
+    return (
+      source.closest(".notification-academic-mail-preview") ||
+      source.closest(".notification-academic-mail-preview-grid")?.parentElement ||
+      source.closest("section, article, .card, .panel, .notification-admin-card, div")
+    );
+  }
+
+  function ensureStyles() {
+    if (qs("#academicMailManualRecipientsStyles")) return;
+
+    const style = document.createElement("style");
+    style.id = "academicMailManualRecipientsStyles";
+    style.textContent = `
+      .academic-mail-manual-box {
+        margin-top: 14px;
+        padding: 14px;
+        border: 1px solid rgba(34, 211, 238, .25);
+        border-radius: 16px;
+        background: rgba(2, 6, 23, .45);
+      }
+
+      .academic-mail-manual-box[hidden] {
+        display: none !important;
+      }
+
+      .academic-mail-manual-box label {
+        display: grid;
+        gap: 8px;
+        color: #dbeafe;
+        font-size: 12px;
+        font-weight: 900;
+      }
+
+      .academic-mail-manual-box textarea {
+        min-height: 116px;
+        width: 100%;
+        resize: vertical;
+        border: 1px solid rgba(34, 211, 238, .25);
+        border-radius: 14px;
+        background: rgba(2, 6, 23, .78);
+        color: #f8fafc;
+        padding: 12px;
+        font: inherit;
+        outline: none;
+      }
+
+      .academic-mail-manual-help {
+        margin-top: 8px;
+        color: #94a3b8;
+        font-size: 12px;
+        line-height: 1.5;
+      }
+
+      .academic-mail-manual-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 12px;
+      }
+
+      .academic-mail-manual-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 7px 10px;
+        border-radius: 999px;
+        background: rgba(34, 211, 238, .10);
+        border: 1px solid rgba(34, 211, 238, .22);
+        color: #67e8f9;
+        font-size: 12px;
+        font-weight: 900;
+      }
+
+      .academic-mail-preview-inline-btn {
+        margin-left: 0;
+      }
+
+      .academic-mail-manual-result-list {
+        margin: 10px 0 0;
+        padding-left: 18px;
+        color: #cbd5e1;
+        font-size: 13px;
+        line-height: 1.6;
+      }
+
+      .academic-mail-manual-error {
+        color: #fecaca;
+      }
+
+      .academic-mail-manual-ok {
+        color: #bbf7d0;
+      }
+    `;
+
+    document.head.appendChild(style);
+  }
+
+  function ensureManualBox() {
+    const card = findAcademicMailCard();
+    const source = getSourceSelect();
+
+    if (!card || !source || qs("#academicMailManualBox")) return;
+
+    const box = document.createElement("div");
+    box.id = "academicMailManualBox";
+    box.className = "academic-mail-manual-box";
+    box.hidden = true;
+    box.innerHTML = `
+      <label>
+        Destinatarios manuales
+        <textarea id="academicMailManualRecipients" placeholder="Pegá mails separados por salto de línea, coma o punto y coma.&#10;Ejemplo:&#10;aniii69@gmail.com&#10;moderador@correo.com"></textarea>
+      </label>
+
+      <div class="academic-mail-manual-help">
+        Se eliminarán duplicados automáticamente. Si hay mails inválidos, no se calculará la lista.
+      </div>
+
+      <div class="academic-mail-manual-actions">
+        <span class="academic-mail-manual-pill" id="academicMailManualCounter">
+          0 destinatarios detectados
+        </span>
+      </div>
+    `;
+
+    const grid =
+      source.closest(".notification-academic-mail-preview-grid") ||
+      source.parentElement;
+
+    if (grid?.parentElement) {
+      grid.parentElement.insertBefore(box, grid.nextSibling);
+    } else {
+      card.appendChild(box);
+    }
+
+    qs("#academicMailManualRecipients")?.addEventListener("input", () => {
+      updateManualCounter();
+    });
+  }
+
+  function ensurePreviewButtonInsideAcademicCard() {
+    const card = findAcademicMailCard();
+    const calculateBtn = getPreviewButton();
+
+    if (!card || !calculateBtn) return;
+
+    let button = qs("#mailPreviewOpenBtn");
+
+    if (!button) {
+      button = document.createElement("button");
+      button.type = "button";
+      button.id = "mailPreviewOpenBtn";
+      button.className = "btn btn-outline academic-mail-preview-inline-btn";
+      button.innerHTML = '<i class="fa-solid fa-envelope-open-text"></i> Vista previa del correo';
+
+      button.addEventListener("click", () => {
+        if (window.ClassroomMailPreviewModal?.open) {
+          window.ClassroomMailPreviewModal.open();
+        } else {
+          alert("El modal de vista previa todavía no está disponible. Recargá la página con Ctrl + F5.");
+        }
+      });
+    }
+
+    const sendTest = getSendTestButton();
+
+    if (sendTest?.parentElement) {
+      sendTest.parentElement.insertBefore(button, sendTest.nextSibling);
+    } else if (calculateBtn.parentElement) {
+      calculateBtn.parentElement.insertBefore(button, calculateBtn.nextSibling);
+    }
+  }
+
+  function parseManualRecipients(raw) {
+    const chunks = String(raw || "")
+      .split(/[\n,;]+/g)
+      .map((item) => item.trim())
+      .filter(Boolean);
+
+    const seen = new Set();
+    const valid = [];
+    const invalid = [];
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    chunks.forEach((email) => {
+      const normalized = email.toLowerCase();
+
+      if (!emailRegex.test(normalized)) {
+        invalid.push(email);
+        return;
+      }
+
+      if (!seen.has(normalized)) {
+        seen.add(normalized);
+        valid.push(normalized);
+      }
+    });
+
+    return {
+      totalRaw: chunks.length,
+      valid,
+      invalid,
+      duplicated: chunks.length - valid.length - invalid.length
+    };
+  }
+
+  function getManualRecipientsRaw() {
+    return qs("#academicMailManualRecipients")?.value || "";
+  }
+
+  function getManualRecipientsInfo() {
+    return parseManualRecipients(getManualRecipientsRaw());
+  }
+
+  function updateManualCounter() {
+    const counter = qs("#academicMailManualCounter");
+    if (!counter) return;
+
+    const info = getManualRecipientsInfo();
+
+    if (info.invalid.length) {
+      counter.textContent = `${info.valid.length} válidos · ${info.invalid.length} inválidos`;
+      counter.classList.add("academic-mail-manual-error");
+      counter.classList.remove("academic-mail-manual-ok");
+    } else {
+      counter.textContent = `${info.valid.length} destinatarios detectados`;
+      counter.classList.add("academic-mail-manual-ok");
+      counter.classList.remove("academic-mail-manual-error");
+    }
+  }
+
+  function renderManualResult() {
+    const resultBox = getResultBox();
+    if (!resultBox) return;
+
+    const info = getManualRecipientsInfo();
+
+    if (!info.valid.length && !info.invalid.length) {
+      resultBox.innerHTML = `
+        <div class="academic-mail-manual-error">
+          No pegaste ningún destinatario todavía.
+        </div>
+      `;
+      window.ClassroomAcademicMailAudienceLastPreview = null;
+      return;
+    }
+
+    if (info.invalid.length) {
+      resultBox.innerHTML = `
+        <div class="academic-mail-manual-error">
+          <strong>No se puede calcular la lista porque hay mails inválidos:</strong>
+          <ul class="academic-mail-manual-result-list">
+            ${info.invalid.map((email) => `<li>${escapeHtml(email)}</li>`).join("")}
+          </ul>
+        </div>
+      `;
+      window.ClassroomAcademicMailAudienceLastPreview = null;
+      return;
+    }
+
+    window.ClassroomAcademicMailAudienceLastPreview = {
+      source: SOURCE_VALUE,
+      segment: "manual",
+      recipients: info.valid,
+      summary: {
+        total: info.valid.length,
+        eligible: info.valid.length,
+        validBase: info.valid.length,
+        pendingRecovery: info.valid.length,
+        invalid: 0
+      }
+    };
+
+    resultBox.innerHTML = `
+      <div class="academic-mail-manual-ok">
+        <strong>Lista manual calculada correctamente.</strong><br>
+        Destinatarios válidos: <strong>${info.valid.length}</strong>
+        ${info.duplicated > 0 ? `<br>Duplicados omitidos: <strong>${info.duplicated}</strong>` : ""}
+      </div>
+      <ul class="academic-mail-manual-result-list">
+        ${info.valid.slice(0, 12).map((email) => `<li>${escapeHtml(email)}</li>`).join("")}
+        ${info.valid.length > 12 ? `<li>... y ${info.valid.length - 12} más</li>` : ""}
+      </ul>
+    `;
+
+    syncSendButtonForManual();
+  }
+
+  function syncManualVisibility() {
+    const box = qs("#academicMailManualBox");
+    const segment = getSegmentSelect();
+
+    if (box) {
+      box.hidden = !isManualSource();
+    }
+
+    if (segment) {
+      segment.disabled = isManualSource();
+      segment.title = isManualSource()
+        ? "La lista manual no usa segmento."
+        : "";
+    }
+
+    if (isManualSource()) {
+      updateManualCounter();
+
+      const resultBox = getResultBox();
+      if (resultBox && !getManualRecipientsRaw().trim()) {
+        resultBox.innerHTML = "Pegá una lista de mails y tocá Calcular destinatarios.";
+      }
+    }
+
+    syncSendButtonForManual();
+  }
+
+  function syncSendButtonForManual() {
+    const sendButton = getSendTestButton();
+    if (!sendButton) return;
+
+    if (!isManualSource()) return;
+
+    const info = getManualRecipientsInfo();
+    const ok = info.valid.length > 0 && info.invalid.length === 0;
+
+    sendButton.disabled = !ok;
+    sendButton.title = ok
+      ? "Listo para enviar prueba con lista manual cuando conectemos el endpoint."
+      : "Pegá destinatarios manuales válidos y calculá la lista.";
+  }
+
+  function interceptManualCalculate() {
+    const button = getPreviewButton();
+    if (!button || button.dataset.manualRecipientsAttached === "1") return;
+
+    button.dataset.manualRecipientsAttached = "1";
+
+    button.addEventListener("click", (event) => {
+      if (!isManualSource()) return;
+
+      event.preventDefault();
+      event.stopPropagation();
+      event.stopImmediatePropagation();
+
+      renderManualResult();
+    }, true);
+  }
+
+  function init() {
+    ensureStyles();
+    ensureManualOption();
+    ensureManualBox();
+    ensurePreviewButtonInsideAcademicCard();
+    interceptManualCalculate();
+    syncManualVisibility();
+
+    getSourceSelect()?.addEventListener("change", () => {
+      syncManualVisibility();
+    });
+
+    getSegmentSelect()?.addEventListener("change", () => {
+      syncManualVisibility();
+    });
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    init();
+    setTimeout(init, 250);
+    setTimeout(init, 900);
+  });
+
+  window.ClassroomAcademicMailManualRecipients = {
+    init,
+    parse: parseManualRecipients,
+    getInfo: getManualRecipientsInfo,
+    render: renderManualResult
+  };
+})();
