@@ -1648,12 +1648,19 @@
     return items.filter((item) => {
       const itemType = String(item?.type || "announcement").toLowerCase();
 
-      const isAcademic = itemType === "academic";
+      const audienceType = String(
+        item?.audience_type ||
+        item?.audience ||
+        item?.target ||
+        ""
+      ).toLowerCase();
+
+      const isSpecificUser = audienceType === "specific_user";
       const isAllTypes = !type || type === "all" || type === "todos";
 
       const matchesType =
         isAllTypes
-          ? !isAcademic
+          ? !isSpecificUser
           : itemType === type;
 
       const haystack = [
@@ -2467,4 +2474,5 @@
 
   window.ClassroomAcademicMailSendTestSync = syncSendButtonState;
 })();
+
 
