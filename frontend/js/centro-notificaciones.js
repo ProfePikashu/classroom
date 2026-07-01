@@ -2617,7 +2617,7 @@ if (!items.length) {
       body: "Hay un nuevo aviso disponible en el Classroom. Ingresá para revisar la información completa.",
       highlight: "Este mensaje corresponde a una comunicación general del curso.",
       buttonText: "Ingresar a Classroom",
-      buttonUrl: "https://profepikashu.github.io/classroom/",
+      buttonUrl: "https://classroom.andyazhtec.com/",
       footer: "Prof. Arturo Coria<br>AndyAzhTEC Classroom"
     },
     community: {
@@ -2632,7 +2632,7 @@ if (!items.length) {
       body: "Hay nueva actividad en la Comunidad del Classroom. Podés ingresar para ver el hilo, responder o seguir la conversación.",
       highlight: "La comunidad centraliza consultas, aportes y recomendaciones del curso.",
       buttonText: "Ir a Comunidad",
-      buttonUrl: "https://profepikashu.github.io/classroom/comunidad.html",
+      buttonUrl: "https://classroom.andyazhtec.com/comunidad.html",
       footer: "Prof. Arturo Coria<br>AndyAzhTEC Classroom"
     },
     academic: {
@@ -2647,7 +2647,7 @@ if (!items.length) {
       body: "Hay una novedad académica disponible en el Classroom. Ingresá para revisar la información completa y verificar el detalle correspondiente.",
       highlight: "Este aviso puede estar relacionado con notas, devoluciones, recuperatorios o cambios importantes del curso.",
       buttonText: "Ingresar a Classroom",
-      buttonUrl: "https://profepikashu.github.io/classroom/",
+      buttonUrl: "https://classroom.andyazhtec.com/",
       footer: "Prof. Arturo Coria<br>Armado y Reparación de PC — AyRPC 2025<br>AndyAzhTEC Classroom"
     },
     recovery_corrected: {
@@ -2662,7 +2662,7 @@ if (!items.length) {
       body: "La corrección de tu recuperatorio correspondiente al curso <strong>Armado y Reparación de PC - 2025</strong> ya se encuentra disponible. Para visualizarla, deberás ingresar primero a <strong>Classroom</strong> y, desde allí, acceder al apartado de <strong>ExamPro</strong> siguiendo las indicaciones de la plataforma.",
       highlight: "Desde <strong>ExamPro</strong> podrás ver punto a punto la devolución de tu evaluación.",
       buttonText: "Ingresar a Classroom",
-      buttonUrl: "https://profepikashu.github.io/classroom/",
+      buttonUrl: "https://classroom.andyazhtec.com/",
       footer: "Prof. Arturo Coria<br>Armado y Reparación de PC — AyRPC 2025<br>AndyAzhTEC Classroom"
     },
     recovery_available: {
@@ -2677,7 +2677,7 @@ if (!items.length) {
       body: "Aún figura en el sistema que te encontrás <strong>APTO/A</strong> para rendir el recuperatorio del examen de <strong>AyRPC 2025</strong>, pero todavía no aparece registrada la aprobación de esta última instancia.",
       highlight: "El recuperatorio estará disponible hasta la fecha indicada. Luego de esa fecha, ya no será posible rendirlo.",
       buttonText: "Ingresar al recuperatorio",
-      buttonUrl: "https://profepikashu.github.io/classroom/curso-ayrpc-2025.html",
+      buttonUrl: "https://classroom.andyazhtec.com/curso-ayrpc-2025.html",
       footer: "Prof. Arturo Coria<br>Armado y Reparación de PC — AyRPC 2025<br>AndyAzhTEC Classroom"
     },
     system: {
@@ -2692,7 +2692,7 @@ if (!items.length) {
       body: "Hay una actualización o aviso interno del sistema Classroom.",
       highlight: "Este mensaje corresponde a una comunicación técnica o administrativa del sistema.",
       buttonText: "Ingresar a Classroom",
-      buttonUrl: "https://profepikashu.github.io/classroom/",
+      buttonUrl: "https://classroom.andyazhtec.com/",
       footer: "Prof. Arturo Coria<br>AndyAzhTEC Classroom"
     }
   };
@@ -3157,7 +3157,7 @@ if (!items.length) {
 
   function renderMailHtml(data) {
     const accent = ACCENTS[data.accent] || ACCENTS.warning;
-    const buttonUrl = data.buttonUrl || "https://profepikashu.github.io/classroom/";
+    const buttonUrl = data.buttonUrl || "https://classroom.andyazhtec.com/";
     const safeUrl = escapeHtml(buttonUrl);
 
     return `<!doctype html>
@@ -3188,7 +3188,7 @@ if (!items.length) {
                   </td>
                   <td align="right" style="vertical-align:middle;width:76px;">
                     <div style="width:64px;height:64px;border-radius:18px;background:rgba(15,23,42,.78);border:1px solid rgba(147,197,253,.5);text-align:center;">
-                      <img src="https://profepikashu.github.io/classroom/media/icons/classroomicoclaro.png" alt="Classroom" width="44" height="44" style="display:block;margin:10px auto;border:0;outline:none;text-decoration:none;">
+                      <img src="https://classroom.andyazhtec.com/media/icons/classroomicoclaro.png" alt="Classroom" width="44" height="44" style="display:block;margin:10px auto;border:0;outline:none;text-decoration:none;">
                     </div>
                   </td>
                 </tr>
@@ -3764,3 +3764,4 @@ if (!items.length) {
     render: renderManualResult
   };
 })();
+
