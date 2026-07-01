@@ -53,78 +53,6 @@
   MVP local. Luego se conecta a Supabase/backend.
 */
 
-(function forceHideSpecificUserFromAllFilter() {
-  const isCentroPage = /centro-notificaciones\.html(?:$|\?|\#)/.test(window.location.pathname || "");
-  if (!isCentroPage) return;
-
-  function getTypeFilter() {
-    return (
-      document.querySelector("#notificationAdminFilterType") ||
-      document.querySelector("[data-notification-admin-filter-type]") ||
-      document.querySelector(".notification-admin-filter-type") ||
-      document.querySelector('select[name="notificationAdminFilterType"]')
-    );
-  }
-
-  function isAllTypesSelected() {
-    const value = String(getTypeFilter()?.value || "all").toLowerCase();
-    return !value || value === "all" || value === "todos";
-  }
-
-  function cardIsSpecificUser(card) {
-    const text = String(card?.textContent || "").toLowerCase();
-    return text.includes("specific_user");
-  }
-
-  function enforceSpecificUserVisibility() {
-    const hideSpecificUser = isAllTypesSelected();
-
-    document
-      .querySelectorAll(".notification-admin-item, article.notification-admin-item")
-      .forEach((card) => {
-        if (!cardIsSpecificUser(card)) return;
-
-        card.style.display = hideSpecificUser ? "none" : "";
-        card.setAttribute(
-          "data-specific-user-hidden-from-all",
-          hideSpecificUser ? "true" : "false"
-        );
-      });
-  }
-
-  document.addEventListener("DOMContentLoaded", () => {
-    enforceSpecificUserVisibility();
-
-    getTypeFilter()?.addEventListener("change", enforceSpecificUserVisibility);
-    getTypeFilter()?.addEventListener("input", enforceSpecificUserVisibility);
-
-    const list =
-      document.querySelector("#notificationAdminList") ||
-      document.querySelector("#notificationsAdminList") ||
-      document.querySelector("[data-notification-admin-list]") ||
-      document.querySelector(".notification-admin-list");
-
-    if (list) {
-      const observer = new MutationObserver(() => {
-        enforceSpecificUserVisibility();
-      });
-
-      observer.observe(list, {
-        childList: true,
-        subtree: true
-      });
-    }
-
-    window.addEventListener("focus", enforceSpecificUserVisibility);
-    document.addEventListener("visibilitychange", enforceSpecificUserVisibility);
-
-    setTimeout(enforceSpecificUserVisibility, 100);
-    setTimeout(enforceSpecificUserVisibility, 500);
-    setTimeout(enforceSpecificUserVisibility, 1200);
-  });
-
-  window.ClassroomForceHideSpecificUserFromAll = enforceSpecificUserVisibility;
-})();
 (function initNotificationCenterAdmin() {
   "use strict";
 
@@ -2560,7 +2488,6 @@
 
   window.ClassroomAcademicMailSendTestSync = syncSendButtonState;
 })();
-
 
 
 
