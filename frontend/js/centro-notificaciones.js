@@ -377,6 +377,13 @@
   function render() {
     if (!els.list) return;
 
+    if (
+      window.ClassroomNotificationCenterBackend ||
+      window.ClassroomNotificationAdminItems
+    ) {
+      return;
+    }
+
     const items = getFilteredItems();
 
     els.counter.textContent = String(loadItems().length);
@@ -2494,6 +2501,9 @@
 
   window.ClassroomAcademicMailSendTestSync = syncSendButtonState;
 })();
+
+
+
 
 
 
