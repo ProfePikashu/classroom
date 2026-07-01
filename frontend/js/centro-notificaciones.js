@@ -343,9 +343,11 @@
       const isAllTypes = !type || type === "all" || type === "todos";
 
       const matchesType =
-        isAllTypes
-          ? !isSpecificUser
-          : itemType === type;
+        type === "specific_user"
+          ? isSpecificUser
+          : isAllTypes
+            ? !isSpecificUser
+            : itemType === type;
 
       const haystack = [
         item.title,
@@ -1551,6 +1553,7 @@
 
   function searchEl() {
     return (
+      document.querySelector("#notificationSearch") ||
       document.querySelector("#notificationAdminSearch") ||
       document.querySelector("[data-notification-admin-search]") ||
       document.querySelector(".notification-admin-search")
@@ -1559,6 +1562,7 @@
 
   function typeFilterEl() {
     return (
+      document.querySelector("#notificationFilterType") ||
       document.querySelector("#notificationAdminTypeFilter") ||
       document.querySelector("[data-notification-admin-type-filter]") ||
       document.querySelector(".notification-admin-type-filter")
@@ -1673,9 +1677,11 @@
       const isAllTypes = !type || type === "all" || type === "todos";
 
       const matchesType =
-        isAllTypes
-          ? !isSpecificUser
-          : itemType === type;
+        type === "specific_user"
+          ? isSpecificUser
+          : isAllTypes
+            ? !isSpecificUser
+            : itemType === type;
 
       const haystack = [
         item?.title,
@@ -2488,6 +2494,8 @@
 
   window.ClassroomAcademicMailSendTestSync = syncSendButtonState;
 })();
+
+
 
 
 
