@@ -4,3 +4,6 @@
 /force_replace_*.py
 /*-scan.txt
 /*-review.txt
+
+# Archivos locales de limpieza
+_archivo_limpieza_*/
