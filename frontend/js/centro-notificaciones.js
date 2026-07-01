@@ -1,4 +1,4 @@
-/* === CENTRO IGNORE BELL ME REFRESH 20260623 === */
+﻿/* === CENTRO IGNORE BELL ME REFRESH 20260623 === */
 (function centroIgnoreBellMeRefresh() {
   "use strict";
 
@@ -1648,11 +1648,13 @@
     return items.filter((item) => {
       const itemType = String(item?.type || "announcement").toLowerCase();
 
+      const isAcademic = itemType === "academic";
+      const isAllTypes = !type || type === "all" || type === "todos";
+
       const matchesType =
-        !type ||
-        type === "all" ||
-        type === "todos" ||
-        itemType === type;
+        isAllTypes
+          ? !isAcademic
+          : itemType === type;
 
       const haystack = [
         item?.title,
@@ -2465,3 +2467,4 @@
 
   window.ClassroomAcademicMailSendTestSync = syncSendButtonState;
 })();
+
