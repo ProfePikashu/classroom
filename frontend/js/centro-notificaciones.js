@@ -331,7 +331,21 @@
     const type = els.filterType.value;
 
     return loadItems().filter((item) => {
-      const matchesType = type === "all" || item.type === type;
+      const itemType = String(item?.type || "announcement").toLowerCase();
+      const audienceType = String(
+        item?.audience_type ||
+        item?.audience ||
+        item?.target ||
+        ""
+      ).toLowerCase();
+
+      const isSpecificUser = audienceType === "specific_user";
+      const isAllTypes = !type || type === "all" || type === "todos";
+
+      const matchesType =
+        isAllTypes
+          ? !isSpecificUser
+          : itemType === type;
 
       const haystack = [
         item.title,
@@ -2474,5 +2488,6 @@
 
   window.ClassroomAcademicMailSendTestSync = syncSendButtonState;
 })();
+
 
 
