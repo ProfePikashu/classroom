@@ -1,4 +1,4 @@
-/* ════════════════════════════════════════════════════════
+﻿/* ════════════════════════════════════════════════════════
    AndyAzhTEC Classroom — roles.js
 ════════════════════════════════════════════════════════ */
 
@@ -116,7 +116,19 @@ const ClassroomRoles = {
   },
 
   isModeratorSession(session) {
-    return this.getAssignedRole(session) === "moderator";
+    if (!session) return false;
+
+    const role = String(session.role || "").trim().toLowerCase();
+    const backendRole = String(session.backendRole || session.exampro?.role || "").trim().toLowerCase();
+    const provider = String(session.provider || "").trim().toLowerCase();
+
+    return (
+      role === "moderator" ||
+      role === "classroom_moderator" ||
+      backendRole === "classroom_moderator" ||
+      provider.includes("moderator") ||
+      this.getAssignedRole(session) === "moderator"
+    );
   },
 
   apply(session) {
@@ -305,3 +317,5 @@ document.addEventListener("DOMContentLoaded", () => {
     init();
   }
 })();
+
+
