@@ -53,44 +53,6 @@
   MVP local. Luego se conecta a Supabase/backend.
 */
 
-(function addSpecificUsersFilterOption() {
-  const isCentroPage = /centro-notificaciones\.html(?:$|\?|\#)/.test(window.location.pathname || "");
-  if (!isCentroPage) return;
-
-  function getTypeFilter() {
-    return (
-      document.querySelector("#notificationAdminFilterType") ||
-      document.querySelector("[data-notification-admin-filter-type]") ||
-      document.querySelector(".notification-admin-filter-type") ||
-      document.querySelector('select[name="notificationAdminFilterType"]')
-    );
-  }
-
-  function ensureOption() {
-    const select = getTypeFilter();
-    if (!select) return;
-
-    if ([...select.options].some((option) => option.value === "specific_user")) return;
-
-    const option = document.createElement("option");
-    option.value = "specific_user";
-    option.textContent = "Usuarios específicos";
-
-    const academicOption = [...select.options].find((item) => item.value === "academic");
-
-    if (academicOption) {
-      academicOption.insertAdjacentElement("afterend", option);
-    } else {
-      select.appendChild(option);
-    }
-  }
-
-  document.addEventListener("DOMContentLoaded", () => {
-    ensureOption();
-    setTimeout(ensureOption, 200);
-    setTimeout(ensureOption, 800);
-  });
-})();
 (function forceHideSpecificUserFromAllFilter() {
   const isCentroPage = /centro-notificaciones\.html(?:$|\?|\#)/.test(window.location.pathname || "");
   if (!isCentroPage) return;
@@ -453,11 +415,9 @@
       const isAllTypes = !type || type === "all" || type === "todos";
 
       const matchesType =
-        type === "specific_user"
-          ? isSpecificUser
-          : isAllTypes
-            ? !isSpecificUser
-            : itemType === type;
+        isAllTypes
+          ? !isSpecificUser
+          : itemType === type;
 
       const haystack = [
         item.title,
@@ -1785,11 +1745,9 @@
       const isAllTypes = !type || type === "all" || type === "todos";
 
       const matchesType =
-        type === "specific_user"
-          ? isSpecificUser
-          : isAllTypes
-            ? !isSpecificUser
-            : itemType === type;
+        isAllTypes
+          ? !isSpecificUser
+          : itemType === type;
 
       const haystack = [
         item?.title,
@@ -2602,7 +2560,6 @@
 
   window.ClassroomAcademicMailSendTestSync = syncSendButtonState;
 })();
-
 
 
 
