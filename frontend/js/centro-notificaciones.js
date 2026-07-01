@@ -876,7 +876,63 @@
 
     if (!list) return;
 
-    if (!items.length) {
+    
+    const currentTypeBeforePaint = String(
+      document.querySelector("#notificationFilterType")?.value ||
+      document.querySelector("#notificationAdminTypeFilter")?.value ||
+      "all"
+    ).trim().toLowerCase();
+
+    const currentSearchBeforePaint = String(
+      document.querySelector("#notificationSearch")?.value ||
+      document.querySelector("#notificationAdminSearch")?.value ||
+      ""
+    ).trim().toLowerCase();
+
+    items = Array.isArray(items) ? items.filter((item) => {
+      const itemType = String(item?.type || "announcement").trim().toLowerCase();
+
+      const audienceType = String(
+        item?.audience_type ||
+        item?.audience ||
+        item?.target ||
+        ""
+      ).trim().toLowerCase();
+
+      const isSpecificUser = audienceType === "specific_user";
+      const isAllTypes =
+        !currentTypeBeforePaint ||
+        currentTypeBeforePaint === "all" ||
+        currentTypeBeforePaint === "todos";
+
+      const matchesType =
+        currentTypeBeforePaint === "specific_user"
+          ? isSpecificUser
+          : isAllTypes
+            ? !isSpecificUser
+            : itemType === currentTypeBeforePaint;
+
+      if (!matchesType) return false;
+
+      if (!currentSearchBeforePaint) return true;
+
+      const haystack = [
+        item?.title,
+        item?.body,
+        item?.description,
+        item?.type,
+        item?.severity,
+        item?.audience,
+        item?.audience_type,
+        item?.target,
+        item?.course,
+        item?.link,
+        item?.link_url
+      ].join(" ").toLowerCase();
+
+      return haystack.includes(currentSearchBeforePaint);
+    }) : [];
+if (!items.length) {
       list.innerHTML = `
         <div class="notification-admin-empty">
           <i class="fa-regular fa-bell"></i>
@@ -2505,6 +2561,8 @@
 
   window.ClassroomAcademicMailSendTestSync = syncSendButtonState;
 })();
+
+
 
 
 
