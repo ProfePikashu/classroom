@@ -284,6 +284,51 @@
                 </div>
               </div>
 
+              <div class="notification-academic-mail-preview is-disabled" id="notificationAcademicMailPreview" hidden>
+                <div class="notification-academic-mail-preview-head">
+                  <div>
+                    <strong>Audiencia de correo académico</strong>
+                    <p>Calculá destinatarios desde la planilla antes de guardar o enviar.</p>
+                  </div>
+                  <span class="notification-academic-mail-preview-badge">DRY-RUN</span>
+                </div>
+
+                <div class="notification-academic-mail-preview-grid">
+                  <label>
+                    <span>Fuente de correo</span>
+                    <select id="notificationAcademicMailSource">
+                      <option value="ayrpc_2025">Planilla AyRPC 2025</option>
+                    </select>
+                  </label>
+
+                  <label>
+                    <span>Segmento</span>
+                    <select id="notificationAcademicMailSegment">
+                      <option value="recuperatorio_pendientes">Pendientes de recuperatorio</option>
+                      <option value="todos">Todos los alumnos</option>
+                    </select>
+                  </label>
+
+                  <button class="btn btn-secondary" type="button" id="notificationAcademicMailPreviewBtn">
+                    <i class="fa-solid fa-magnifying-glass-chart"></i>
+                    Calcular destinatarios
+                  </button>
+
+                  <button class="btn btn-primary" type="button" id="notificationAcademicMailSendTestBtn" disabled>
+                    <i class="fa-solid fa-paper-plane"></i>
+                    Enviar prueba
+                  </button>
+
+                  <button class="btn btn-secondary" type="button" id="notificationAcademicMailEmailPreviewBtn">
+                    <i class="fa-solid fa-envelope-open-text"></i>
+                    Vista previa del correo
+                  </button>
+                </div>
+
+                <div class="notification-academic-mail-preview-result" id="notificationAcademicMailPreviewResult">
+                  Todavía no se calcularon destinatarios.
+                </div>
+              </div>
               <button class="btn btn-primary" type="submit">
                 <i class="fa-solid fa-paper-plane"></i>
                 Guardar notificación
