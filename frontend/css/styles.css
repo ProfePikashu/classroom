@@ -16967,11 +16967,27 @@ html[data-theme="light"] .notification-pref-matrix-row {
 
 @media (max-width: 720px) {
   .notification-admin-actions-with-mail {
-    flex-direction: column;
+    flex-wrap: wrap;
+    align-items: stretch;
   }
 
   .notification-admin-mail-toggle,
-  .notification-admin-actions-with-mail .btn {
+  .notification-admin-actions-with-mail > button[type="submit"] {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .notification-admin-actions-with-mail > .notification-academic-mail-preview,
+  .notification-admin-actions-with-mail > #notificationAcademicMailPreview {
+    flex: 1 1 100%;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  .notification-academic-mail-preview-grid .btn {
     width: 100%;
     justify-content: center;
   }
@@ -17325,71 +17341,4 @@ html[data-theme="light"] .notification-academic-mail-preview-result .academic-ma
   background: rgba(255, 255, 255, 0.68);
 }
 
-/* ============================================================
-   Centro notificaciones: fix card correo académico off-canvas
-   Diagnóstico: visible pero desplazada fuera del contenedor.
-   ============================================================ */
-
-.notification-admin-actions-with-mail {
-  align-items: stretch !important;
-}
-
-.notification-admin-actions-with-mail > .notification-academic-mail-preview,
-#notificationAcademicMailPreview {
-  align-self: stretch !important;
-  justify-self: stretch !important;
-
-  width: 100% !important;
-  max-width: 100% !important;
-  min-width: 0 !important;
-
-  margin-left: 0 !important;
-  margin-right: 0 !important;
-
-  transform: none !important;
-  translate: none !important;
-  left: auto !important;
-  right: auto !important;
-
-  box-sizing: border-box !important;
-  grid-column: 1 / -1 !important;
-}
-
-.notification-admin-actions-with-mail > .notification-academic-mail-preview {
-  flex: 1 1 100% !important;
-}
-
-.notification-academic-mail-preview-grid {
-  width: 100% !important;
-  max-width: 100% !important;
-  min-width: 0 !important;
-  box-sizing: border-box !important;
-}
-
-.notification-academic-mail-preview-grid > * {
-  min-width: 0 !important;
-}
-
-@media (max-width: 860px) {
-  .notification-admin-actions-with-mail {
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: stretch !important;
-    width: 100% !important;
-    max-width: 100% !important;
-  }
-
-  .notification-admin-actions-with-mail > .notification-admin-mail-toggle,
-  .notification-admin-actions-with-mail > .notification-academic-mail-preview,
-  .notification-admin-actions-with-mail > button[type="submit"] {
-    width: 100% !important;
-    max-width: 100% !important;
-    margin-left: 0 !important;
-    margin-right: 0 !important;
-  }
-
-  .notification-admin-actions-with-mail > button[type="submit"] {
-    justify-content: center !important;
-  }
-}
 
