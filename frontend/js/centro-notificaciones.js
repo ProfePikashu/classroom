@@ -1541,18 +1541,6 @@ if (!items.length) {
     const card = findEmailCard();
 
     if (card) {
-      const isAcademicMailPanel =
-        card.matches?.(".notification-academic-mail-preview") ||
-        card.querySelector?.("#notificationAcademicMailSource") ||
-        card.querySelector?.("#notificationAcademicMailSegment") ||
-        card.querySelector?.("#notificationAcademicMailPreviewBtn");
-
-      if (isAcademicMailPanel) {
-        card.classList.remove("center-email-card-hidden");
-        card.removeAttribute("aria-hidden");
-        return;
-      }
-
       card.classList.add("center-email-card-hidden");
       card.setAttribute("aria-hidden", "true");
     }
@@ -3912,5 +3900,3 @@ if (!items.length) {
     fix: scheduleForce
   };
 })();
-
-
