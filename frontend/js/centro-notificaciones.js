@@ -3765,3 +3765,138 @@ if (!items.length) {
   };
 })();
 
+
+/* ============================================================
+   Centro Notificaciones - anclar panel de correo académico
+   Evita que el panel se vaya off-canvas en mobile/tablet.
+   ============================================================ */
+(function pinAcademicMailPanelMobile() {
+  const isNotificationCenter = /centro-notificaciones\.html(?:$|\?|\#)/.test(window.location.pathname || "");
+  if (!isNotificationCenter) return;
+
+  function qs(selector) {
+    return document.querySelector(selector);
+  }
+
+  function getPanel() {
+    const source = qs("#notificationAcademicMailSource");
+    if (!source) return null;
+
+    return (
+      source.closest(".notification-academic-mail-preview") ||
+      source.closest("[data-notification-academic-mail-preview]") ||
+      source.closest("section, article, .card, .panel")
+    );
+  }
+
+  function getSendMailRow() {
+    const checkedRadio = document.querySelector('input[name="notificationSendEmail"]:checked');
+    const anyRadio = document.querySelector('input[name="notificationSendEmail"]');
+
+    return (
+      checkedRadio?.closest(".notification-send-email-row, .notification-mail-toggle, .mail-toggle, label, div") ||
+      anyRadio?.closest(".notification-send-email-row, .notification-mail-toggle, .mail-toggle, label, div") ||
+      anyRadio?.parentElement
+    );
+  }
+
+  function isEmailEnabled() {
+    return document.querySelector('input[name="notificationSendEmail"]:checked')?.value === "true";
+  }
+
+  function forcePanelLayout() {
+    const panel = getPanel();
+    const sendRow = getSendMailRow();
+
+    if (!panel || !sendRow) return;
+
+    // Lo movemos debajo del selector Enviar por correo para que no quede off-canvas.
+    if (panel.previousElementSibling !== sendRow) {
+      sendRow.insertAdjacentElement("afterend", panel);
+    }
+
+    const enabled = isEmailEnabled();
+
+    panel.hidden = !enabled;
+    panel.style.display = enabled ? "block" : "none";
+    panel.style.position = "static";
+    panel.style.inset = "auto";
+    panel.style.left = "auto";
+    panel.style.right = "auto";
+    panel.style.top = "auto";
+    panel.style.bottom = "auto";
+    panel.style.transform = "none";
+    panel.style.float = "none";
+    panel.style.clear = "both";
+    panel.style.width = "100%";
+    panel.style.maxWidth = "100%";
+    panel.style.minWidth = "0";
+    panel.style.margin = enabled ? "14px 0 0" : "0";
+    panel.style.boxSizing = "border-box";
+    panel.style.overflow = "hidden";
+    panel.style.gridColumn = "1 / -1";
+    panel.style.zIndex = "1";
+
+    const grid = panel.querySelector(".notification-academic-mail-preview-grid");
+    if (grid) {
+      grid.style.width = "100%";
+      grid.style.maxWidth = "100%";
+      grid.style.minWidth = "0";
+      grid.style.boxSizing = "border-box";
+
+      if (window.matchMedia("(max-width: 820px)").matches) {
+        grid.style.display = "grid";
+        grid.style.gridTemplateColumns = "1fr";
+        grid.style.gap = "12px";
+      }
+    }
+
+    panel.querySelectorAll("select, textarea, input, button").forEach((el) => {
+      el.style.maxWidth = "100%";
+      el.style.boxSizing = "border-box";
+    });
+
+    panel.querySelectorAll("button").forEach((button) => {
+      if (window.matchMedia("(max-width: 820px)").matches) {
+        button.style.width = "100%";
+      }
+    });
+  }
+
+  function scheduleForce() {
+    forcePanelLayout();
+    requestAnimationFrame(forcePanelLayout);
+    setTimeout(forcePanelLayout, 80);
+    setTimeout(forcePanelLayout, 250);
+    setTimeout(forcePanelLayout, 700);
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    scheduleForce();
+
+    document
+      .querySelectorAll('input[name="notificationSendEmail"]')
+      .forEach((radio) => {
+        radio.addEventListener("change", scheduleForce);
+        radio.addEventListener("click", scheduleForce);
+      });
+
+    window.addEventListener("resize", scheduleForce);
+    window.addEventListener("orientationchange", scheduleForce);
+
+    const form = qs("#notificationAdminForm");
+    if (form) {
+      const observer = new MutationObserver(scheduleForce);
+      observer.observe(form, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ["hidden", "style", "class"]
+      });
+    }
+  });
+
+  window.ClassroomPinAcademicMailPanelMobile = {
+    fix: scheduleForce
+  };
+})();
