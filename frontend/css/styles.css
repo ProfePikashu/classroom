@@ -17348,3 +17348,21 @@ html[data-theme="light"] .notification-academic-mail-preview-result .academic-ma
 }
 
 
+
+/* === Centro notificaciones: botones audiencia correo academico 20260702 === */
+.notification-academic-mail-preview-grid .btn-secondary {
+  border-color: rgba(0, 245, 255, 0.52);
+  background: rgba(0, 245, 255, 0.08);
+  color: #00f5ff;
+  box-shadow: inset 0 0 0 1px rgba(0, 245, 255, 0.12);
+}
+
+.notification-academic-mail-preview-grid .btn-secondary:hover:not(:disabled) {
+  background: rgba(0, 245, 255, 0.14);
+  border-color: rgba(0, 245, 255, 0.78);
+}
+
+.notification-academic-mail-preview-grid .btn:disabled {
+  opacity: 0.58;
+  cursor: not-allowed;
+}
