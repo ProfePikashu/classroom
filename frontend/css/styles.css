@@ -16967,29 +16967,35 @@ html[data-theme="light"] .notification-pref-matrix-row {
 
 @media (max-width: 720px) {
   .notification-admin-actions-with-mail {
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
     align-items: stretch;
-  }
-
-  .notification-admin-mail-toggle,
-  .notification-admin-actions-with-mail > button[type="submit"] {
+    justify-items: stretch;
     width: 100%;
-    justify-content: center;
+    max-width: 100%;
+    overflow: visible;
   }
 
+  .notification-admin-actions-with-mail > .notification-admin-mail-toggle,
   .notification-admin-actions-with-mail > .notification-academic-mail-preview,
-  .notification-admin-actions-with-mail > #notificationAcademicMailPreview {
-    flex: 1 1 100%;
+  .notification-admin-actions-with-mail > #notificationAcademicMailPreview,
+  .notification-admin-actions-with-mail > button[type="submit"] {
     width: 100%;
     max-width: 100%;
     min-width: 0;
     margin-left: 0;
     margin-right: 0;
+    justify-self: stretch;
+  }
+
+  .notification-admin-actions-with-mail > button[type="submit"],
+  .notification-academic-mail-preview-grid .btn {
+    justify-content: center;
   }
 
   .notification-academic-mail-preview-grid .btn {
     width: 100%;
-    justify-content: center;
   }
 }
 
