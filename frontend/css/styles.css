@@ -17477,3 +17477,179 @@ html[data-theme="light"] .page-asistencias .attendance-badge.ausente{background:
 html[data-theme="light"] .page-asistencias .attendance-badge.apto{background:#dcfce7!important;color:#14532d!important;border:1.5px solid #16a34a!important}
 html[data-theme="light"] .page-asistencias .attendance-badge.no-apto{background:#fee2e2!important;color:#7f1d1d!important;border:1.5px solid #dc2626!important}
 html[data-theme="light"] .page-asistencias .attendance-badge.none{background:#e2e8f0!important;color:#334155!important;border:1.5px solid #94a3b8!important}
+
+/* === LIGHT THEME POLISH - ALUMNOS + ASISTENCIAS V1 === */
+
+html[data-theme="light"] body:has(.students-page-panel),
+html[data-theme="light"] body.page-asistencias {
+  color: #1e293b !important;
+}
+
+html[data-theme="light"] .students-hero-panel,
+html[data-theme="light"] .students-toolbar,
+html[data-theme="light"] .students-list-panel,
+html[data-theme="light"] .page-asistencias .attendance-admin-panel.panel {
+  background:
+    radial-gradient(circle at top right, rgba(216, 180, 254, .22), transparent 34%),
+    linear-gradient(135deg, #ffffff 0%, #f8fbff 55%, #f7f2ff 100%) !important;
+  border: 1px solid rgba(196, 181, 253, .48) !important;
+  box-shadow: 0 18px 45px rgba(148, 163, 184, .18) !important;
+}
+
+html[data-theme="light"] .students-hero-panel h2,
+html[data-theme="light"] .students-list-panel h3,
+html[data-theme="light"] .page-asistencias .attendance-admin-head h2 {
+  color: #172033 !important;
+  text-shadow: none !important;
+}
+
+html[data-theme="light"] .students-hero-panel p,
+html[data-theme="light"] .students-status,
+html[data-theme="light"] .students-search span,
+html[data-theme="light"] .students-source-filter span,
+html[data-theme="light"] .page-asistencias .attendance-admin-head p,
+html[data-theme="light"] .page-asistencias .attendance-status {
+  color: #475569 !important;
+}
+
+html[data-theme="light"] .student-stat-card,
+html[data-theme="light"] .page-asistencias .attendance-kpi {
+  background: rgba(255, 255, 255, .9) !important;
+  border: 1px solid rgba(125, 211, 252, .42) !important;
+  box-shadow: 0 10px 26px rgba(148, 163, 184, .13) !important;
+}
+
+html[data-theme="light"] .student-stat-card span,
+html[data-theme="light"] .page-asistencias .attendance-kpi span {
+  color: #64748b !important;
+}
+
+html[data-theme="light"] .student-stat-card strong,
+html[data-theme="light"] .page-asistencias .attendance-kpi strong {
+  color: #1e293b !important;
+}
+
+html[data-theme="light"] .students-search-box,
+html[data-theme="light"] .students-source-filter select,
+html[data-theme="light"] .page-asistencias .attendance-toolbar input,
+html[data-theme="light"] .page-asistencias .attendance-toolbar select,
+html[data-theme="light"] .page-asistencias .attendance-course-picker select {
+  background: #ffffff !important;
+  color: #1e293b !important;
+  border: 1px solid rgba(196, 181, 253, .55) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.9), 0 8px 18px rgba(148,163,184,.10) !important;
+}
+
+html[data-theme="light"] .students-search-box input,
+html[data-theme="light"] #studentsSearchInput {
+  color: #1e293b !important;
+}
+
+html[data-theme="light"] .students-search-box input::placeholder,
+html[data-theme="light"] #studentsSearchInput::placeholder {
+  color: #64748b !important;
+}
+
+html[data-theme="light"] .students-table-wrap,
+html[data-theme="light"] .students-table-wrap.compact,
+html[data-theme="light"] .page-asistencias .attendance-table-wrap {
+  background: #ffffff !important;
+  border: 1px solid rgba(196, 181, 253, .42) !important;
+  box-shadow: 0 14px 36px rgba(148, 163, 184, .15) !important;
+}
+
+html[data-theme="light"] .students-table th,
+html[data-theme="light"] .students-table-compact th,
+html[data-theme="light"] .page-asistencias .attendance-table th {
+  background: #eef6ff !important;
+  color: #334155 !important;
+  border-bottom: 1px solid rgba(148, 163, 184, .24) !important;
+}
+
+html[data-theme="light"] .students-table td,
+html[data-theme="light"] .students-table-compact td,
+html[data-theme="light"] .page-asistencias .attendance-table td {
+  background: #ffffff !important;
+  color: #1f2937 !important;
+  border-bottom: 1px solid rgba(148, 163, 184, .20) !important;
+}
+
+html[data-theme="light"] .students-table tbody tr:nth-child(even) td,
+html[data-theme="light"] .page-asistencias .attendance-table tbody tr:nth-child(even) td {
+  background: #f8fbff !important;
+}
+
+html[data-theme="light"] .students-table tbody tr:hover td,
+html[data-theme="light"] .page-asistencias .attendance-table tbody tr:hover td {
+  background: #eef6ff !important;
+}
+
+html[data-theme="light"] .students-table-student strong,
+html[data-theme="light"] .page-asistencias .attendance-student-main strong {
+  color: #1e293b !important;
+  opacity: 1 !important;
+}
+
+html[data-theme="light"] .students-table-student small,
+html[data-theme="light"] .students-table-dni,
+html[data-theme="light"] .students-table-twitch,
+html[data-theme="light"] .students-table-phone,
+html[data-theme="light"] .students-table-email,
+html[data-theme="light"] .page-asistencias .attendance-student-main small,
+html[data-theme="light"] .page-asistencias .attendance-time {
+  color: #475569 !important;
+  opacity: 1 !important;
+}
+
+html[data-theme="light"] .student-table-avatar,
+html[data-theme="light"] .page-asistencias .attendance-avatar {
+  background: linear-gradient(135deg, #dff6ff, #ede9fe) !important;
+  color: #334155 !important;
+  border: 1px solid rgba(125, 211, 252, .68) !important;
+  box-shadow: 0 8px 18px rgba(125, 211, 252, .18) !important;
+}
+
+html[data-theme="light"] .student-badge.course {
+  background: #e0f2fe !important;
+  color: #075985 !important;
+  border: 1px solid rgba(14, 165, 233, .32) !important;
+}
+
+html[data-theme="light"] .student-profile-backdrop {
+  background: rgba(226, 232, 240, .72) !important;
+  backdrop-filter: blur(10px);
+}
+
+html[data-theme="light"] .student-profile-dialog {
+  background: linear-gradient(135deg, #ffffff, #f8f5ff) !important;
+  border: 1px solid rgba(196, 181, 253, .55) !important;
+  box-shadow: 0 26px 80px rgba(148, 163, 184, .30) !important;
+}
+
+html[data-theme="light"] .student-profile-dialog h3,
+html[data-theme="light"] .student-profile-title,
+html[data-theme="light"] .student-profile-field strong {
+  color: #1e293b !important;
+}
+
+html[data-theme="light"] .student-profile-dialog p,
+html[data-theme="light"] .student-profile-field span,
+html[data-theme="light"] .student-profile-source {
+  color: #475569 !important;
+}
+
+html[data-theme="light"] .student-profile-field {
+  background: #ffffff !important;
+  border: 1px solid rgba(196, 181, 253, .38) !important;
+}
+
+html[data-theme="light"] .page-asistencias .attendance-table .sticky-col {
+  background: #f8fbff !important;
+  color: #1e293b !important;
+  box-shadow: 12px 0 20px rgba(148, 163, 184, .12) !important;
+}
+
+html[data-theme="light"] .btn-table,
+html[data-theme="light"] .page-asistencias .btn-table {
+  font-weight: 900 !important;
+}
