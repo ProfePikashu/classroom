@@ -17366,3 +17366,114 @@ html[data-theme="light"] .notification-academic-mail-preview-result .academic-ma
   opacity: 0.58;
   cursor: not-allowed;
 }
+
+/* === ADMIN ASISTENCIAS VISTA PLANILLA V1 === */
+.page-asistencias .attendance-admin-panel{display:flex;flex-direction:column;gap:18px;overflow:hidden}
+.attendance-admin-head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px}
+.attendance-admin-head h2{margin:0 0 8px;font-family:Orbitron,sans-serif}
+.attendance-admin-head p{max-width:760px;color:var(--text-muted,#94a3b8);line-height:1.55}
+.attendance-course-picker,.attendance-toolbar label{display:flex;flex-direction:column;gap:7px;font-size:12px;color:var(--text-muted,#94a3b8);font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.attendance-course-picker select,.attendance-toolbar input,.attendance-toolbar select{min-height:42px;border:1px solid rgba(148,163,184,.22);border-radius:12px;background:rgba(15,23,42,.72);color:var(--text,#e5e7eb);padding:0 13px;font:inherit;outline:none}
+.attendance-kpis{display:grid;grid-template-columns:repeat(6,minmax(120px,1fr));gap:12px}
+.attendance-kpi{border:1px solid rgba(148,163,184,.18);border-radius:16px;background:rgba(15,23,42,.55);padding:14px}
+.attendance-kpi span{display:block;color:var(--text-muted,#94a3b8);font-size:11px;text-transform:uppercase;letter-spacing:.06em}
+.attendance-kpi strong{display:block;margin-top:7px;font-size:24px;color:var(--text,#e5e7eb)}
+.attendance-toolbar{display:grid;grid-template-columns:minmax(260px,1fr) 220px auto;align-items:end;gap:12px}
+.attendance-status{border:1px dashed rgba(148,163,184,.25);border-radius:14px;padding:12px 14px;color:var(--text-muted,#94a3b8);background:rgba(15,23,42,.35)}
+.attendance-table-wrap{width:100%;overflow:auto;border:1px solid rgba(148,163,184,.18);border-radius:18px;background:rgba(2,6,23,.28)}
+.attendance-table{width:max-content;min-width:100%;border-collapse:separate;border-spacing:0;font-size:13px}
+.attendance-table th,.attendance-table td{padding:10px 12px;border-bottom:1px solid rgba(148,163,184,.13);white-space:nowrap;text-align:left}
+.attendance-table th{position:sticky;top:0;z-index:4;background:rgba(15,23,42,.96);color:#cbd5e1;font-size:11px;text-transform:uppercase;letter-spacing:.05em}
+.attendance-table .sticky-col{position:sticky;left:0;z-index:3;background:rgba(15,23,42,.96)}
+.attendance-table th.sticky-col{z-index:5}
+.attendance-student-main{display:flex;align-items:center;gap:10px;min-width:230px}
+.attendance-avatar{width:34px;height:34px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(135deg,rgba(14,165,233,.22),rgba(168,85,247,.18));border:1px solid rgba(125,211,252,.24)}
+.attendance-student-main strong{display:block;color:var(--text,#e5e7eb)}
+.attendance-student-main small{display:block;color:var(--text-muted,#94a3b8);font-size:11px}
+.attendance-badge{display:inline-flex;align-items:center;justify-content:center;min-width:86px;border-radius:999px;padding:5px 9px;font-size:11px;font-weight:800;letter-spacing:.03em}
+.attendance-badge.presente{background:rgba(34,197,94,.14);color:#86efac;border:1px solid rgba(34,197,94,.32)}
+.attendance-badge.recuperada{background:rgba(129,140,248,.16);color:#c4b5fd;border:1px solid rgba(129,140,248,.36)}
+.attendance-badge.revisar{background:rgba(245,158,11,.15);color:#fcd34d;border:1px solid rgba(245,158,11,.34)}
+.attendance-badge.ausente{background:rgba(239,68,68,.14);color:#fca5a5;border:1px solid rgba(239,68,68,.34)}
+.attendance-badge.none{background:rgba(148,163,184,.12);color:#cbd5e1;border:1px solid rgba(148,163,184,.22)}
+.attendance-badge.apto{background:rgba(34,197,94,.16);color:#bbf7d0;border:1px solid rgba(34,197,94,.38)}
+.attendance-badge.no-apto{background:rgba(239,68,68,.14);color:#fecaca;border:1px solid rgba(239,68,68,.34)}
+.attendance-time{color:var(--text-muted,#94a3b8);font-family:"JetBrains Mono",monospace;font-size:12px}
+@media (max-width:900px){.attendance-admin-head{flex-direction:column}.attendance-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.attendance-toolbar{grid-template-columns:1fr}.attendance-course-picker{width:100%}.attendance-course-picker select{width:100%}}
+
+/* === ADMIN ASISTENCIAS HOTFIX VISUAL V2 === */
+.page-asistencias .attendance-admin-panel.panel{padding:22px;background:rgba(6,10,28,.72);border:1px solid rgba(168,85,247,.35);border-radius:18px}
+.page-asistencias .attendance-kpis{display:grid!important;grid-template-columns:repeat(6,minmax(120px,1fr))!important;gap:12px!important}
+.page-asistencias .attendance-kpi{display:block!important;border:1px solid rgba(34,211,238,.22);border-radius:14px;background:rgba(15,23,42,.72);padding:13px 14px;box-shadow:0 0 18px rgba(14,165,233,.06)}
+.page-asistencias .attendance-kpi span{display:block!important;color:#94a3b8!important;font-size:11px!important;text-transform:uppercase;letter-spacing:.08em}
+.page-asistencias .attendance-kpi strong{display:block!important;margin-top:6px!important;color:#f8fafc!important;font-size:24px!important;line-height:1}
+.page-asistencias .attendance-toolbar{display:grid!important;grid-template-columns:minmax(280px,1fr) 220px auto!important;gap:12px!important;align-items:end!important}
+.page-asistencias .attendance-toolbar label,.page-asistencias .attendance-course-picker{display:flex!important;flex-direction:column!important;gap:7px!important}
+.page-asistencias .attendance-toolbar input,.page-asistencias .attendance-toolbar select,.page-asistencias .attendance-course-picker select{width:100%;min-height:42px;border-radius:12px;border:1px solid rgba(148,163,184,.28);background:#0f172a;color:#e5e7eb;padding:0 12px}
+.page-asistencias .attendance-table-wrap{max-width:100%;overflow:auto;border-radius:16px;border:1px solid rgba(148,163,184,.2);background:#050816}
+.page-asistencias .attendance-table{width:max-content;min-width:100%;border-collapse:separate!important;border-spacing:0!important;table-layout:auto}
+.page-asistencias .attendance-table th,.page-asistencias .attendance-table td{padding:10px 12px!important;border-bottom:1px solid rgba(148,163,184,.14)!important;vertical-align:middle!important;white-space:nowrap!important}
+.page-asistencias .attendance-table th{background:#0f172a!important;color:#cbd5e1!important;font-size:11px!important;text-transform:uppercase;letter-spacing:.05em}
+.page-asistencias .attendance-table td{color:#e5e7eb!important}
+.page-asistencias .attendance-table .sticky-col{position:sticky;left:0;z-index:3;background:#0b1022!important;box-shadow:12px 0 20px rgba(0,0,0,.22)}
+.page-asistencias .attendance-table th.sticky-col{z-index:5;background:#0f172a!important}
+.page-asistencias .attendance-student-main{display:flex!important;align-items:center!important;gap:10px!important;min-width:245px!important}
+.page-asistencias .attendance-student-main strong{font-size:13px!important;line-height:1.25!important}
+.page-asistencias .attendance-student-main small{font-size:11px!important;color:#94a3b8!important;line-height:1.35!important}
+.page-asistencias .attendance-badge{display:inline-flex!important;min-width:92px!important;align-items:center!important;justify-content:center!important;border-radius:999px!important;padding:5px 9px!important;font-size:11px!important;font-weight:800!important;line-height:1!important}
+@media (max-width:900px){.page-asistencias .attendance-kpis{grid-template-columns:repeat(2,minmax(0,1fr))!important}.page-asistencias .attendance-toolbar{grid-template-columns:1fr!important}}
+
+/* === ADMIN ASISTENCIAS MODAL FICHA V1 === */
+.attendance-modal[hidden]{display:none!important}
+.attendance-modal{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;padding:22px}
+.attendance-modal-backdrop{position:absolute;inset:0;background:rgba(2,6,23,.78);backdrop-filter:blur(10px)}
+.attendance-modal-card{position:relative;width:min(940px,96vw);max-height:88vh;overflow:auto;border:1px solid rgba(34,211,238,.28);border-radius:22px;background:linear-gradient(135deg,rgba(15,23,42,.98),rgba(16,10,38,.98));box-shadow:0 24px 80px rgba(0,0,0,.45),0 0 35px rgba(14,165,233,.12);padding:22px}
+.attendance-modal-close{position:absolute;top:14px;right:14px;width:38px;height:38px;border:1px solid rgba(148,163,184,.25);border-radius:12px;background:rgba(15,23,42,.78);color:#e5e7eb;cursor:pointer}
+.attendance-modal-close:hover{border-color:rgba(34,211,238,.55);color:#67e8f9}
+.attendance-profile-head{display:flex;align-items:center;gap:14px;padding-right:44px;margin-bottom:18px}
+.attendance-profile-avatar{width:54px;height:54px;border-radius:18px;display:grid;place-items:center;background:linear-gradient(135deg,rgba(34,211,238,.22),rgba(168,85,247,.22));border:1px solid rgba(125,211,252,.28);font-size:22px}
+.attendance-profile-head h3{margin:0;font-family:Orbitron,sans-serif;font-size:24px}
+.attendance-profile-head p{margin:5px 0 0;color:#94a3b8}
+.attendance-profile-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.attendance-profile-field{border:1px solid rgba(148,163,184,.16);border-radius:16px;background:rgba(15,23,42,.55);padding:13px}
+.attendance-profile-field span{display:block;color:#94a3b8;font-size:11px;text-transform:uppercase;letter-spacing:.07em}
+.attendance-profile-field strong{display:block;margin-top:6px;color:#f8fafc;word-break:break-word}
+@media(max-width:760px){.attendance-profile-grid{grid-template-columns:1fr}.attendance-modal-card{padding:18px}}
+
+/* === ADMIN ASISTENCIAS MODAL ACTIONS V2 === */
+.attendance-profile-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px;padding-top:16px;border-top:1px solid rgba(148,163,184,.16)}
+.attendance-profile-actions .btn{min-height:40px}
+body:has(.attendance-modal:not([hidden])){overflow:hidden}
+
+/* === ADMIN ASISTENCIAS LIGHT PASTEL V1 === */
+html[data-theme="light"] .page-asistencias .attendance-admin-panel.panel{background:rgba(255,255,255,.82)!important;border-color:rgba(196,181,253,.42)!important;box-shadow:0 18px 45px rgba(148,163,184,.16)!important}
+html[data-theme="light"] .page-asistencias .attendance-admin-head p{color:#64748b!important}
+html[data-theme="light"] .page-asistencias .attendance-kpi{background:#f8fafc!important;border-color:rgba(125,211,252,.36)!important;box-shadow:none!important}
+html[data-theme="light"] .page-asistencias .attendance-kpi span{color:#64748b!important}
+html[data-theme="light"] .page-asistencias .attendance-kpi strong{color:#334155!important}
+html[data-theme="light"] .page-asistencias .attendance-toolbar input,html[data-theme="light"] .page-asistencias .attendance-toolbar select,html[data-theme="light"] .page-asistencias .attendance-course-picker select{background:#fff!important;color:#334155!important;border-color:rgba(196,181,253,.42)!important}
+html[data-theme="light"] .page-asistencias .attendance-status{background:#f1f5f9!important;color:#64748b!important;border-color:rgba(148,163,184,.28)!important}
+html[data-theme="light"] .page-asistencias .attendance-table-wrap{background:#fff!important;border-color:rgba(196,181,253,.38)!important}
+html[data-theme="light"] .page-asistencias .attendance-table th{background:#f1f5f9!important;color:#475569!important}
+html[data-theme="light"] .page-asistencias .attendance-table td{background:#fff!important;color:#334155!important;border-bottom-color:rgba(148,163,184,.18)!important}
+html[data-theme="light"] .page-asistencias .attendance-table .sticky-col{background:#f8fafc!important;box-shadow:12px 0 20px rgba(148,163,184,.14)!important}
+html[data-theme="light"] .page-asistencias .attendance-table th.sticky-col{background:#f1f5f9!important}
+html[data-theme="light"] .page-asistencias .attendance-student-main small{color:#64748b!important}
+html[data-theme="light"] .attendance-modal-backdrop{background:rgba(226,232,240,.72)!important;backdrop-filter:blur(10px)}
+html[data-theme="light"] .attendance-modal-card{background:linear-gradient(135deg,#ffffff,#f8f5ff)!important;border-color:rgba(196,181,253,.55)!important;box-shadow:0 24px 70px rgba(148,163,184,.28)!important}
+html[data-theme="light"] .attendance-profile-head h3{color:#334155!important}
+html[data-theme="light"] .attendance-profile-head p{color:#64748b!important}
+html[data-theme="light"] .attendance-profile-field{background:#fff!important;border-color:rgba(196,181,253,.38)!important}
+html[data-theme="light"] .attendance-profile-field span{color:#64748b!important}
+html[data-theme="light"] .attendance-profile-field strong{color:#334155!important}
+html[data-theme="light"] .attendance-modal-close{background:#fff!important;color:#475569!important;border-color:rgba(196,181,253,.45)!important}
+
+/* === ADMIN ASISTENCIAS LIGHT BADGES ACCESSIBLE V2 === */
+html[data-theme="light"] .page-asistencias .attendance-badge{font-weight:900!important;text-shadow:none!important;box-shadow:inset 0 0 0 1px rgba(255,255,255,.55),0 1px 2px rgba(15,23,42,.08)!important}
+html[data-theme="light"] .page-asistencias .attendance-badge.presente{background:#dcfce7!important;color:#166534!important;border:1.5px solid #22c55e!important}
+html[data-theme="light"] .page-asistencias .attendance-badge.recuperada{background:#ede9fe!important;color:#5b21b6!important;border:1.5px solid #8b5cf6!important}
+html[data-theme="light"] .page-asistencias .attendance-badge.revisar{background:#fef3c7!important;color:#92400e!important;border:1.5px solid #f59e0b!important}
+html[data-theme="light"] .page-asistencias .attendance-badge.ausente{background:#fee2e2!important;color:#991b1b!important;border:1.5px solid #ef4444!important}
+html[data-theme="light"] .page-asistencias .attendance-badge.apto{background:#dcfce7!important;color:#14532d!important;border:1.5px solid #16a34a!important}
+html[data-theme="light"] .page-asistencias .attendance-badge.no-apto{background:#fee2e2!important;color:#7f1d1d!important;border:1.5px solid #dc2626!important}
+html[data-theme="light"] .page-asistencias .attendance-badge.none{background:#e2e8f0!important;color:#334155!important;border:1.5px solid #94a3b8!important}

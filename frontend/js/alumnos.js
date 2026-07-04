@@ -1,11 +1,9 @@
 /* ============================================================
-   AndyAzhTEC Classroom — alumnos.js
+   AndyAzhTEC Classroom \u2014 alumnos.js
    Listado tabular de alumnos desde ExamPro / Planilla 2025 / Todos
    ============================================================ */
 
 "use strict";
-
-const CLASSROOM_STUDENTS_SHEET_2025_API = "https://script.google.com/macros/s/AKfycbxajMTyRA6SBGeMYDikKlN2nrmONnlPYG88iDNVsYt-fE-ooH6XYW3wT6N5EV3FVxxU/exec";
 
 const ClassroomStudents = {
   apiBase:
@@ -28,7 +26,7 @@ const ClassroomStudents = {
 
   sourceLabels: {
     exampro: "ExamPro",
-    sheet2025: "Planilla 2025",
+    sheet2025: "Supabase 2025",
     all: "Todos",
   },
 
@@ -193,7 +191,7 @@ const ClassroomStudents = {
       session?.classroomReadToken ||
       session?.exampro?.accessToken ||
       session?.exampro?.token ||
-      session?.accessToken ||
+      session?.access_token || session?.token || session?.accessToken ||
       "";
 
     if (token) {
@@ -262,20 +260,34 @@ const ClassroomStudents = {
     return items;
   },
 
+  buildSupabase2025Url(search = "") {
+    const params = new URLSearchParams({
+      course: "ayrpc-2025",
+      limit: "2000",
+      offset: "0",
+    });
+
+    if (search) {
+      params.set("search", search);
+    }
+
+    return `${this.apiBase}/api/classroom/admin/attendance/students?${params.toString()}`;
+  },
+
   async fetchSheetStudents() {
-    const data = await this.fetchJson(`${CLASSROOM_STUDENTS_SHEET_2025_API}?list=1`, {
+    const data = await this.fetchJson(this.buildSupabase2025Url(""), {
       cache: "no-store",
+      headers: this.getAuthHeaders(),
     });
 
     if (!data.ok) {
-      throw new Error(data.error || "No se pudo leer Planilla 2025.");
+      throw new Error(data.error || data.detail || "No se pudo leer Supabase AyRPC 2025.");
     }
 
     return Array.isArray(data.items)
       ? data.items.map(item => this.normalizeSheetStudent(item))
       : [];
   },
-
   async loadSheetStudents() {
     const allItems = await this.fetchSheetStudents();
     const items = this.filterLocalStudents(allItems);
@@ -327,7 +339,7 @@ const ClassroomStudents = {
         ...existing,
         ...student,
         id: student.id || existing.id,
-        source: "ExamPro + Planilla 2025",
+        source: "ExamPro + Supabase 2025",
         source_priority: "all",
         full_name: student.full_name || existing.full_name,
         nombre: student.nombre || existing.nombre,
@@ -402,29 +414,51 @@ const ClassroomStudents = {
   },
 
   normalizeSheetStudent(student) {
+    const dni = String(student.dni || student.DNI || "").replace(/\D+/g, "");
+    const twitch = String(
+      student.twitch_normalized ||
+      student.twitch ||
+      student["Usuario de Twitch (en caso de no tener, deberá crear uno y usarlo en la cursada)"] ||
+      student["Usuario de Twitch (en caso de no tener, debera crear uno y usarlo en la cursada)"] ||
+      ""
+    )
+      .trim()
+      .toLowerCase()
+      .replace(/^@/, "");
+
+    const fullName =
+      student.full_name_normalized ||
+      student.full_name_raw ||
+      student.full_name ||
+      student.nombre ||
+      student["Nombre Completo"] ||
+      "";
+
+    const email = student.email || student.Correo || "";
+    const telefono = student.phone_display || student.telefono || student["Teléfono (con Código de Área)"] || student["Telefono (con Codigo de Area)"] || "";
+
     return {
       ...student,
-      id: student.id || (student.dni ? `sheet-2025-${student.dni}` : ""),
-      source: "Planilla 2025",
+      id: student.id || student.legacy_row || (dni ? `sheet-2025-${dni}` : ""),
+      source: "Supabase AyRPC 2025",
       cursada: student.cursada || "AyRPC 2025",
-      full_name: student.full_name || student.nombre || student["Nombre Completo"] || "",
-      nombre: student.nombre || student.full_name || student["Nombre Completo"] || "",
-      email: student.email || student.Correo || "",
-      telefono: student.telefono || student["Teléfono (con Código de Área)"] || "",
-      twitch: String(student.twitch || student["Usuario de Twitch (en caso de no tener, deberá crear uno y usarlo en la cursada)"] || "")
-        .trim()
-        .toLowerCase()
-        .replace(/^@/, ""),
-      dni: String(student.dni || student.DNI || "").replace(/\D+/g, ""),
-      apt_examen: student.apt_examen || student.APTO || "",
-      resultado: student.resultado || student.Resultado || "",
-      exam_status: student.exam_status || "",
-      recuperatorio: student.recuperatorio || student.Recuperatorio || "",
-      observaciones: student.observaciones || student.Observaciones || "",
+      full_name: fullName,
+      nombre: fullName,
+      email,
+      telefono,
+      whatsapp_number: student.whatsapp_number || "",
+      twitch,
+      dni,
+      apt_examen: student.apt_examen || student.apt_calculated || student.apt_sheet || student.APTO || "",
+      resultado: student.resultado || student.result || student.Resultado || "",
+      exam_status: student.exam_status || student.participated || "",
+      recuperatorio: student.recuperatorio || student.recovery || student.Recuperatorio || "",
+      observaciones: student.observaciones || student.observations || student.Observaciones || "",
       mail_enviado: student.mail_enviado || student["Mail enviado"] || "",
+      valid_classes: student.valid_classes || 0,
       stats: student.stats || {
-        examenes_total: 0,
-        emails_total: student.email || student.Correo ? 1 : 0,
+        examenes_total: student.result || student.resultado ? 1 : 0,
+        emails_total: email ? 1 : 0,
         pdfs_total: 0,
       },
     };
@@ -495,8 +529,8 @@ const ClassroomStudents = {
 
   createStudentRow(student, index) {
     const name = student.full_name || student.nombre || student.display_name || student.twitch || "Alumno sin nombre";
-    const twitch = student.twitch ? `@${String(student.twitch).replace(/^@/, "")}` : "—";
-    const dni = student.dni || "—";
+    const twitch = student.twitch ? `@${String(student.twitch).replace(/^@/, "")}` : "\u2014";
+    const dni = student.dni || "\u2014";
     const cursada = student.cursada || "AyRPC 2025";
     const source = student.source || this.getSourceLabel();
     const fichaId = student.exampro?.id || student.id || dni || "";
@@ -597,14 +631,14 @@ const ClassroomStudents = {
 
   getStudentSourceDetail(student, source, dni, fichaId) {
     if (source === "Planilla 2025") {
-      return dni && dni !== "—" ? `Planilla 2025 · DNI ${dni}` : "Planilla 2025";
+      return dni && dni !== "\u2014" ? `Planilla 2025 \u00B7 DNI ${dni}` : "Planilla 2025";
     }
 
     if (source === "ExamPro + Planilla 2025") {
-      return dni && dni !== "—" ? `ExamPro + Planilla · DNI ${dni}` : "ExamPro + Planilla";
+      return dni && dni !== "\u2014" ? `ExamPro + Planilla \u00B7 DNI ${dni}` : "ExamPro + Planilla";
     }
 
-    return fichaId ? `ExamPro · ID ${fichaId}` : "ExamPro";
+    return fichaId ? `ExamPro \u00B7 ID ${fichaId}` : "ExamPro";
   },
 
   openProfileByIndex(index) {
@@ -615,8 +649,8 @@ const ClassroomStudents = {
     this.ensureProfileModal();
 
     const name = student.full_name || student.nombre || student.display_name || student.twitch || "Alumno sin nombre";
-    const twitch = student.twitch ? `@${String(student.twitch).replace(/^@/, "")}` : "—";
-    const dni = student.dni || "—";
+    const twitch = student.twitch ? `@${String(student.twitch).replace(/^@/, "")}` : "\u2014";
+    const dni = student.dni || "\u2014";
     const email = student.email || "";
     const phone = student.telefono || "";
     const cursada = student.cursada || "AyRPC 2025";
@@ -638,13 +672,13 @@ const ClassroomStudents = {
           <div>
             <p class="eyebrow">${this.escapeHtml(source)}</p>
             <h3>${this.escapeHtml(name)}</h3>
-            <p>${this.escapeHtml(twitch)} · DNI ${this.escapeHtml(dni)}</p>
+            <p>${this.escapeHtml(twitch)} \u00B7 DNI ${this.escapeHtml(dni)}</p>
           </div>
         </div>
 
         <div class="student-profile-grid">
-          ${this.profileField("Teléfono", phone || "—", "fa-phone")}
-          ${this.profileField("Correo", email || "—", "fa-envelope")}
+          ${this.profileField("Telefono", phone || "\u2014", "fa-phone")}
+          ${this.profileField("Correo", email || "\u2014", "fa-envelope")}
           ${this.profileField("Cursada", cursada, "fa-book-open-reader")}
           ${this.profileField("Estado", estado.label, estado.icon)}
           ${this.profileField("Examen", examStatus.label, examStatus.icon)}
@@ -692,7 +726,7 @@ const ClassroomStudents = {
           <i class="fa-solid ${this.escapeHtml(icon)}"></i>
           ${this.escapeHtml(label)}
         </span>
-        <strong>${this.escapeHtml(value || "—")}</strong>
+        <strong>${this.escapeHtml(value || "\u2014")}</strong>
       </div>
     `;
   },
@@ -794,7 +828,7 @@ const ClassroomStudents = {
 
     if (explicit.includes("EN_REVISION") || explicit.includes("REVIS")) {
       return {
-        label: "EN REVISIÓN",
+        label: "EN REVISION",
         className: "info",
         icon: "fa-clock",
       };
@@ -846,7 +880,7 @@ const ClassroomStudents = {
       normalized.includes("hoja recuperatorios")
     ) {
       return {
-        label: "—",
+        label: "\u2014",
         className: "muted",
         icon: "fa-minus",
       };
@@ -962,7 +996,7 @@ document.addEventListener("DOMContentLoaded", () => {
     panel.innerHTML = `
       <div class="admin-data-change-head">
         <div>
-          <p class="eyebrow danger">Revisión requerida</p>
+          <p class="eyebrow danger">Revision requerida</p>
           <h2>Solicitudes de cambio de datos</h2>
           <p>Pedidos enviados por alumnos cuando detectan un dato incorrecto en su perfil.</p>
         </div>
@@ -1072,7 +1106,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const deleteButton = event.target.closest("[data-request-delete]");
       if (deleteButton) {
-        const ok = window.confirm("¿Eliminar esta solicitud de cambio de datos?");
+        const ok = window.confirm("Eliminar esta solicitud de cambio de datos?");
         if (!ok) return;
 
         const id = deleteButton.dataset.requestDelete;

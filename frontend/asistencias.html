@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
@@ -16,7 +16,7 @@
   <link rel="icon" href="favicon.ico" type="image/x-icon" />
 </head>
 
-<body class=" page-asistencias".replace('class=" ', 'class="') + '">
+<body class="page-asistencias">
   <button class="mobile-menu-toggle" id="mobileMenuToggle" type="button" aria-label="Abrir menú">
     <span></span>
     <span></span>
@@ -164,94 +164,58 @@
         </div>
       </header>
 
-      <section class="attendance-hero panel">
-        <div>
-          <p class="eyebrow">Planillas conectadas</p>
-          <h2>Control de asistencia y recuperaciones</h2>
-          <p>
-            Desde acá docente y moderadores pueden acceder rápido a las planillas de asistencia.
-            La próxima etapa será conectar las recuperaciones del Classroom para registrar cambios
-            y generar alertas internas.
-          </p>
+      <section class="attendance-admin-panel panel">
+  <div class="attendance-admin-head">
+    <div>
+      <p class="eyebrow">Panel académico</p>
+      <h2>Asistencia por cursada</h2>
+      <p>Vista tipo planilla para controlar inscripción, datos base, presentes, tiempos, recuperaciones y aptitud a examen.</p>
+    </div>
+    <label class="attendance-course-picker">
+      <span>Cursada</span>
+      <select id="attendanceCourseSelect">
+        <option value="ayrpc-2025">AyRPC 2025</option>
+        <option value="ayrpc-2026">AyRPC 2026</option>
+      </select>
+    </label>
+  </div>
+
+  <div class="attendance-kpis" id="attendanceKpis"></div>
+
+  <div class="attendance-toolbar">
+    <label>
+      <span>Buscar</span>
+      <input id="attendanceSearchInput" type="search" placeholder="Nombre, DNI, Twitch o correo" autocomplete="off" />
+    </label>
+    <label>
+      <span>Estado</span>
+      <select id="attendanceStatusFilter">
+        <option value="all">Todos</option>
+        <option value="apto">Aptos a examen</option>
+        <option value="debe">Deben clases</option>
+        <option value="revisar">En revisar</option>
+        <option value="ausente">Ausentes</option>
+        <option value="recuperada">Con recuperadas</option>
+      </select>
+    </label>
+    <button class="btn btn-outline" id="attendanceRefreshBtn" type="button">
+      <i class="fa-solid fa-rotate-right"></i>
+      Actualizar vista
+    </button>
+  </div>
+
+  <div class="attendance-status" id="attendanceStatus">Preparando vista de asistencia...</div>
+  <div class="attendance-table-wrap" id="attendanceTableWrap"></div>
+</section>
+      <div class="attendance-modal" id="attendanceStudentModal" hidden>
+        <div class="attendance-modal-backdrop" data-attendance-modal-close></div>
+        <div class="attendance-modal-card" role="dialog" aria-modal="true" aria-labelledby="attendanceStudentModalTitle">
+          <button class="attendance-modal-close" type="button" data-attendance-modal-close aria-label="Cerrar ficha">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+          <div id="attendanceStudentModalBody"></div>
         </div>
-
-        <div class="attendance-hero-badge">
-          <i class="fa-solid fa-lock"></i>
-          <span>Solo administración</span>
-        </div>
-      </section>
-
-      <section class="attendance-alerts-panel">
-        <div class="attendance-alerts-header">
-          <div>
-            <p class="eyebrow">Centro de avisos</p>
-            <h3>Recuperaciones pendientes de revisar</h3>
-          </div>
-
-          <span class="attendance-alerts-chip">
-            <i class="fa-solid fa-bell"></i>
-            Próximamente
-          </span>
-        </div>
-
-        <p>
-          Acá vamos a listar eventos como: “un alumno recuperó Clase 3”, “se habilitó actualización
-          de planilla”, “cambio pendiente de aprobar” o “registro sincronizado”.
-        </p>
-      </section>
-
-      <section class="attendance-sheets-grid">
-
-          <article class="attendance-sheet-card">
-            <div class="attendance-sheet-icon">
-              <i class="fa-solid fa-table-list"></i>
-            </div>
-
-            <div class="attendance-sheet-content">
-              <span class="attendance-sheet-badge">AyRPC 2025</span>
-              <h3>Planilla General AyRPC 2025</h3>
-              <p>Base principal de alumnos, asistencias, estados de cursada y seguimiento general.</p>
-
-              <div class="attendance-sheet-actions">
-                <a class="btn btn-primary" href="https://docs.google.com/spreadsheets/d/1M2vqQFvtC79QrpLQRJ3486Bs9mVb1BxAO7lnzurBjLo/edit" target="_blank" rel="noopener">
-                  <i class="fa-brands fa-google-drive"></i>
-                  <span>Abrir planilla</span>
-                </a>
-
-                <button class="btn btn-outline" type="button" disabled title="Próximamente">
-                  <i class="fa-solid fa-bell"></i>
-                  <span>Alertas pronto</span>
-                </button>
-              </div>
-            </div>
-          </article>
-
-
-          <article class="attendance-sheet-card">
-            <div class="attendance-sheet-icon">
-              <i class="fa-solid fa-rotate-right"></i>
-            </div>
-
-            <div class="attendance-sheet-content">
-              <span class="attendance-sheet-badge">Pendiente</span>
-              <h3>Recuperatorios / asistencias recuperadas</h3>
-              <p>Espacio reservado para conectar las recuperaciones de clases desde Classroom.</p>
-
-              <div class="attendance-sheet-actions">
-                <a class="btn btn-primary" href="https://docs.google.com/spreadsheets/d/1M2vqQFvtC79QrpLQRJ3486Bs9mVb1BxAO7lnzurBjLo/edit" target="_blank" rel="noopener">
-                  <i class="fa-brands fa-google-drive"></i>
-                  <span>Abrir planilla</span>
-                </a>
-
-                <button class="btn btn-outline" type="button" disabled title="Próximamente">
-                  <i class="fa-solid fa-bell"></i>
-                  <span>Alertas pronto</span>
-                </button>
-              </div>
-            </div>
-          </article>
-
-      </section>
+      </div>
     </main>
   </div>
   <script src="js/auth.js?v=20260612-notifications-global-v2"></script>
@@ -259,23 +223,7 @@
   <script src="js/main.js?v=20260612-newsletter-api-v1"></script>
   <script src="js/notifications-local.js?v=20260620-community-notifications-v2"></script>
   <script src="js/pelusita.js?v=20260612-sidebar-dock"></script>  <script src="js/pelusita-dialog.js?v=20260612-guide-compact"></script>
+  <script src="js/asistencias.js?v=20260704-admin-attendance-supa-v2"></script>
   <script src="js/sidebar-v2.js?v=20260612-pelusita-dock-v2"></script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
