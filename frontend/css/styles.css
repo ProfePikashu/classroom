@@ -17653,3 +17653,144 @@ html[data-theme="light"] .btn-table,
 html[data-theme="light"] .page-asistencias .btn-table {
   font-weight: 900 !important;
 }
+
+/* === ADMIN ASISTENCIAS HORIZONTAL SCROLL UX V1 === */
+.attendance-scroll-tools {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin: 0 0 10px;
+}
+
+.attendance-table-scroll {
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: visible;
+  cursor: grab;
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(139, 92, 246, .55) rgba(148, 163, 184, .16);
+}
+
+.attendance-table-scroll.is-dragging {
+  cursor: grabbing;
+  user-select: none;
+}
+
+.attendance-table-scroll .attendance-table {
+  min-width: 2200px;
+}
+
+html[data-theme="light"] .attendance-scroll-tools .btn {
+  background: #ffffff !important;
+  color: #3b0764 !important;
+  border: 1px solid rgba(168, 85, 247, .35) !important;
+  box-shadow: 0 8px 18px rgba(148, 163, 184, .12) !important;
+}
+
+html[data-theme="light"] .attendance-table-scroll {
+  scrollbar-color: rgba(168, 85, 247, .55) rgba(226, 232, 240, .85);
+}
+
+@media (max-width: 760px) {
+  .attendance-scroll-tools {
+    justify-content: stretch;
+  }
+
+  .attendance-scroll-tools .btn {
+    flex: 1;
+  }
+}
+
+
+/* === ADMIN ASISTENCIAS HORIZONTAL SCROLL UX V2 === */
+.attendance-scroll-tools {
+  display: none !important;
+}
+
+.attendance-table-shell {
+  position: relative;
+  width: 100%;
+}
+
+.attendance-table-scroll {
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: visible;
+  cursor: grab;
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(139, 92, 246, .55) rgba(148, 163, 184, .16);
+}
+
+.attendance-table-scroll.is-dragging {
+  cursor: grabbing;
+  user-select: none;
+}
+
+.attendance-table-scroll .attendance-table {
+  min-width: 2200px;
+}
+
+.attendance-scroll-arrow {
+  position: absolute;
+  top: 11px;
+  z-index: 24;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  border: 1px solid rgba(139, 92, 246, .42);
+  background: rgba(15, 23, 42, .88);
+  color: #e9d5ff;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, .22);
+  cursor: pointer;
+  transition: opacity .16s ease, transform .16s ease, filter .16s ease;
+}
+
+.attendance-scroll-arrow:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.attendance-scroll-arrow:disabled {
+  opacity: .30;
+  filter: grayscale(1);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.attendance-scroll-arrow-left {
+  left: clamp(238px, 18vw, 316px);
+}
+
+.attendance-scroll-arrow-right {
+  right: 12px;
+}
+
+html[data-theme="light"] .attendance-scroll-arrow {
+  background: #ffffff;
+  color: #4c1d95;
+  border-color: rgba(168, 85, 247, .40);
+  box-shadow: 0 8px 18px rgba(148, 163, 184, .18);
+}
+
+html[data-theme="light"] .attendance-scroll-arrow:disabled {
+  color: #94a3b8;
+  border-color: rgba(148, 163, 184, .32);
+  background: #f1f5f9;
+}
+
+html[data-theme="light"] .attendance-table-scroll {
+  scrollbar-color: rgba(168, 85, 247, .55) rgba(226, 232, 240, .85);
+}
+
+@media (max-width: 760px) {
+  .attendance-scroll-arrow-left {
+    left: 12px;
+  }
+
+  .attendance-scroll-arrow {
+    top: 9px;
+  }
+}

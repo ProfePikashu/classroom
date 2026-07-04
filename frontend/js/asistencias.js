@@ -1,4 +1,4 @@
-/* AndyAzhTEC Classroom — Admin Asistencias */
+/* AndyAzhTEC Classroom â€” Admin Asistencias */
 
 "use strict";
 
@@ -89,6 +89,12 @@ const AdminAsistencias = {
     this.refreshBtn?.addEventListener("click", () => this.render());
 
     this.tableWrap?.addEventListener("click", (event) => {
+      const scrollBtn = event.target.closest("[data-attendance-scroll]");
+      if (scrollBtn) {
+        this.scrollTable(scrollBtn.dataset.attendanceScroll);
+        return;
+      }
+
       const btn = event.target.closest("[data-attendance-profile]");
       if (btn) this.openProfile(Number(btn.dataset.attendanceProfile));
     });
@@ -152,14 +158,14 @@ const AdminAsistencias = {
   normalizeApiRow(row) {
     const clases = this.clases.map(({ n }) => [
       row[`class_${n}_status`] || "SIN DATOS",
-      row[`class_${n}_time`] || "—"
+      row[`class_${n}_time`] || "\\u2014"
     ]);
 
     return {
       legacyRow: row.legacy_row,
-      inscripcion: row.inscription_at || "—",
+      inscripcion: row.inscription_at || "\u2014",
       nombre: row.full_name_normalized || row.full_name_raw || "Sin nombre",
-      dni: row.dni || "—",
+      dni: row.dni || "\\u2014",
       email: row.email || "",
       telefono: row.phone_display || "",
       whatsapp: row.whatsapp_number || "",
@@ -223,11 +229,11 @@ const AdminAsistencias = {
       this.rows = (studentsData?.items || []).map(row => this.normalizeApiRow(row));
 
       this.renderKpis(this.summary, this.rows);
-      this.renderTable(this.rows);
+      this.renderTable(this.rows); this.enableTableDragScroll();
 
       if (this.status) {
         const total = Number(studentsData?.total || this.rows.length);
-        this.status.textContent = `${cursoLabel}: ${this.rows.length} alumnos mostrados de ${total}. Fuente: Supabase vía API Classroom.`;
+        this.status.textContent = `${cursoLabel}: ${this.rows.length} alumnos mostrados de ${total}. Fuente: Supabase via API Classroom.`;
       }
     } catch (error) {
       this.lastError = error?.message || "No se pudieron cargar las asistencias.";
@@ -293,13 +299,13 @@ const AdminAsistencias = {
               <div class="attendance-avatar"><i class="fa-solid fa-user-graduate"></i></div>
               <div>
                 <strong>${this.escapeHtml(alumno.nombre)}</strong>
-                <small>@${this.escapeHtml(alumno.twitch || "sin-twitch")} · DNI ${this.escapeHtml(alumno.dni)}</small>
+                <small>@${this.escapeHtml(alumno.twitch || "sin-twitch")} - DNI ${this.escapeHtml(alumno.dni)}</small>
               </div>
             </div>
           </td>
           <td>${this.escapeHtml(alumno.inscripcion)}</td>
-          <td>${this.escapeHtml(alumno.email || "—")}</td>
-          <td>${this.escapeHtml(alumno.telefono || "—")}</td>
+          <td>${this.escapeHtml(alumno.email || "\u2014")}</td>
+          <td>${this.escapeHtml(alumno.telefono || "\u2014")}</td>
           ${classCells}
           <td><strong>${resumen.validas}/7</strong></td>
           <td>${this.badge(resumen.apto ? "APTO" : "NO APTO")}</td>
@@ -309,15 +315,23 @@ const AdminAsistencias = {
     }).join("");
 
     this.tableWrap.innerHTML = `
-      <table class="attendance-table">
+      <div class="attendance-table-shell">
+        <button class="attendance-scroll-arrow attendance-scroll-arrow-left" type="button" data-attendance-scroll="left" aria-label="Mover columnas a la izquierda" disabled>
+          <i class="fa-solid fa-chevron-left"></i>
+        </button>
+        <button class="attendance-scroll-arrow attendance-scroll-arrow-right" type="button" data-attendance-scroll="right" aria-label="Mover columnas a la derecha">
+          <i class="fa-solid fa-chevron-right"></i>
+        </button>
+        <div class="attendance-table-scroll">
+          <table class="attendance-table">
         <thead>
           <tr>
             <th class="sticky-col">Alumno</th>
-            <th>Inscripción</th>
+            <th>Inscripcion</th>
             <th>Correo</th>
-            <th>Teléfono</th>
+            <th>Telefono</th>
             ${classHeaders}
-            <th>Válidas</th>
+            <th>Validas</th>
             <th>Examen</th>
             <th>Acciones</th>
           </tr>
@@ -325,8 +339,78 @@ const AdminAsistencias = {
         <tbody>
           ${body || `<tr><td colspan="22">No hay alumnos para mostrar.</td></tr>`}
         </tbody>
-      </table>
+          </table>
+        </div>
+      </div>
     `;
+  },
+
+
+
+  scrollTable(direction) {
+    const scroller = this.tableWrap?.querySelector(".attendance-table-scroll");
+    if (!scroller) return;
+
+    const amount = Math.max(420, Math.round(scroller.clientWidth * 0.72));
+
+    scroller.scrollBy({
+      left: direction === "left" ? -amount : amount,
+      behavior: "smooth"
+    });
+
+    window.setTimeout(() => this.updateScrollButtons(), 280);
+  },
+
+  updateScrollButtons() {
+    const scroller = this.tableWrap?.querySelector(".attendance-table-scroll");
+    if (!scroller) return;
+
+    const leftBtn = this.tableWrap?.querySelector('[data-attendance-scroll="left"]');
+    const rightBtn = this.tableWrap?.querySelector('[data-attendance-scroll="right"]');
+    const maxScroll = Math.max(0, scroller.scrollWidth - scroller.clientWidth);
+
+    if (leftBtn) leftBtn.disabled = maxScroll <= 2 || scroller.scrollLeft <= 4;
+    if (rightBtn) rightBtn.disabled = maxScroll <= 2 || scroller.scrollLeft >= maxScroll - 4;
+  },
+
+  enableTableDragScroll() {
+    const scroller = this.tableWrap?.querySelector(".attendance-table-scroll");
+    if (!scroller) return;
+
+    this.updateScrollButtons();
+
+    if (scroller.dataset.dragReady === "1") return;
+    scroller.dataset.dragReady = "1";
+
+    let isDown = false;
+    let startX = 0;
+    let startLeft = 0;
+
+    scroller.addEventListener("scroll", () => this.updateScrollButtons(), { passive: true });
+    window.addEventListener("resize", () => this.updateScrollButtons());
+
+    scroller.addEventListener("pointerdown", (event) => {
+      if (event.target.closest("button, a, input, select, textarea")) return;
+
+      isDown = true;
+      startX = event.clientX;
+      startLeft = scroller.scrollLeft;
+      scroller.classList.add("is-dragging");
+      scroller.setPointerCapture?.(event.pointerId);
+    });
+
+    scroller.addEventListener("pointermove", (event) => {
+      if (!isDown) return;
+      event.preventDefault();
+      scroller.scrollLeft = startLeft - (event.clientX - startX);
+    });
+
+    ["pointerup", "pointercancel", "pointerleave"].forEach((type) => {
+      scroller.addEventListener(type, () => {
+        isDown = false;
+        scroller.classList.remove("is-dragging");
+      });
+    });
   },
 
   badge(value) {
@@ -356,24 +440,24 @@ const AdminAsistencias = {
         <div>
           <p class="eyebrow">Ficha de asistencia</p>
           <h3 id="attendanceStudentModalTitle">${this.escapeHtml(alumno.nombre)}</h3>
-          <p>@${this.escapeHtml(alumno.twitch || "sin-twitch")} · DNI ${this.escapeHtml(alumno.dni)}</p>
+          <p>@${this.escapeHtml(alumno.twitch || "sin-twitch")} - DNI ${this.escapeHtml(alumno.dni)}</p>
         </div>
       </div>
 
       <div class="attendance-profile-grid">
-        ${this.profileField("Inscripción", alumno.inscripcion)}
+        ${this.profileField("Inscripcion", alumno.inscripcion)}
         ${this.profileField("Correo", alumno.email)}
-        ${this.profileField("Teléfono", alumno.telefono)}
-        ${this.profileField("Twitch login", alumno.twitch ? "@" + alumno.twitch : "—")}
-        ${this.profileField("Clases válidas", resumen.validas + "/7")}
-        ${this.profileField("Apto examen", resumen.apto ? "Sí" : "No")}
-        ${this.profileField("Participación examen", alumno.participado || "—")}
-        ${this.profileField("Resultado", alumno.resultado || "—")}
-        ${this.profileField("Recuperatorio", alumno.recuperatorio || "—")}
+        ${this.profileField("Telefono", alumno.telefono)}
+        ${this.profileField("Twitch login", alumno.twitch ? "@" + alumno.twitch : "\\u2014")}
+        ${this.profileField("Clases vÃ¡lidas", resumen.validas + "/7")}
+        ${this.profileField("Apto examen", resumen.apto ? "Si" : "No")}
+        ${this.profileField("Participacion examen", alumno.participado || "\\u2014")}
+        ${this.profileField("Resultado", alumno.resultado || "\\u2014")}
+        ${this.profileField("Recuperatorio", alumno.recuperatorio || "\\u2014")}
       </div>
 
       <div class="attendance-profile-actions">
-        <a class="btn btn-outline" href="mailto:${this.escapeHtml(alumno.email || "")}">
+        <a class="btn btn-outline" href="mailto:${this.escapeHtml(alumno.email || "\u2014")}">
           <i class="fa-solid fa-envelope"></i>
           <span>Enviar mail</span>
         </a>
@@ -401,7 +485,7 @@ const AdminAsistencias = {
     return `
       <div class="attendance-profile-field">
         <span>${this.escapeHtml(label)}</span>
-        <strong>${this.escapeHtml(value || "—")}</strong>
+        <strong>${this.escapeHtml(value || "\\u2014")}</strong>
       </div>
     `;
   },
