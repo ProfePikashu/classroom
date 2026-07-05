@@ -2187,11 +2187,9 @@ if (!items.length) {
   window.ClassroomAcademicMailPreviewSync = syncAcademicMailPreviewVisibility;
 })();
 
-/* === Centro notificaciones: dry-run audiencia academica Planilla 2025 20260628 === */
+/* === Centro notificaciones: dry-run audiencia academica Supabase 2025 20260704 === */
 (function initAcademicMailAudienceDryRun() {
   "use strict";
-
-  const SHEET_2025_API = "https://script.google.com/macros/s/AKfycbxpazFcJG0A6ki-rgbaLY8LBKCAAYuZZsfSrLP4zsu97JbtSK9XbBTkVHHMYuUtsp50/exec";
 
   const button = document.getElementById("notificationAcademicMailPreviewBtn");
   const resultBox = document.getElementById("notificationAcademicMailPreviewResult");
@@ -2262,7 +2260,7 @@ if (!items.length) {
     resultBox.classList.add("is-loading");
     resultBox.innerHTML = `
       <strong>Calculando audiencia...</strong>
-      <span>Consultando Planilla AyRPC 2025 en modo dry-run. No se envía ningún correo.</span>
+      <span>Consultando Supabase AyRPC 2025 en modo dry-run. No se envía ningún correo.</span>
     `;
   }
 
@@ -2286,7 +2284,7 @@ if (!items.length) {
       </div>
 
       <div class="academic-mail-summary-grid">
-        <span>Total planilla <strong>${summary.total}</strong></span>
+        <span>Total Supabase <strong>${summary.total}</strong></span>
         <span>Base válida <strong>${summary.validBase}</strong></span>
         <span>APTO = SI <strong>${summary.aptos}</strong></span>
         <span>Excluidos por examen aprobado <strong>${summary.approvedExam}</strong></span>
@@ -2300,20 +2298,82 @@ if (!items.length) {
     `;
   }
 
-  async function fetchSheet2025Items(source) {
-    const sheetParam = source === "personal-tests" ? "&sheet=pruebasPersonales" : "";
+  function getApiBase() {
+    const configured =
+      window.CLASSROOM_API_BASE ||
+      window.EXAMPRO_API_BASE ||
+      localStorage.getItem("andyazh-api-base") ||
+      "";
 
-    const response = await fetch(`${SHEET_2025_API}?list=1${sheetParam}`, {
-      cache: "no-store",
-    });
-
-    const data = await response.json();
-
-    if (!response.ok || !data.ok) {
-      throw new Error(data?.error || data?.message || "La planilla no respondió correctamente.");
+    if (configured) {
+      return String(configured).replace(/\/+$/, "");
     }
 
-    return Array.isArray(data.items) ? data.items : [];
+    const host = window.location.hostname;
+
+    if (host === "localhost" || host === "127.0.0.1") {
+      return "http://127.0.0.1:8000";
+    }
+
+    return "https://api.andyazhtec.com";
+  }
+
+  function getClassroomToken() {
+    const session =
+      window.ClassroomAuth?.getSession?.() ||
+      JSON.parse(localStorage.getItem("andyazh-classroom-session") || "null");
+
+    return (
+      session?.classroomReadToken ||
+      session?.exampro?.accessToken ||
+      session?.exampro?.access_token ||
+      session?.accessToken ||
+      session?.access_token ||
+      session?.token ||
+      ""
+    );
+  }
+
+  async function fetchSupabase2025Items(source) {
+    if (source === "personal-tests") {
+      throw new Error("Pruebas personales esta deshabilitado hasta migrar esa fuente a Supabase.");
+    }
+
+    if (source !== "sheet-ayrpc-2025") {
+      throw new Error("Fuente academica no implementada.");
+    }
+
+    const token = getClassroomToken();
+
+    if (!token) {
+      throw new Error("No hay sesion Classroom valida para calcular la audiencia.");
+    }
+
+    const url = `${getApiBase()}/api/classroom/admin/attendance/students?course=ayrpc-2025&limit=2000&offset=0`;
+
+    const response = await fetch(url, {
+      cache: "no-store",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const data = await response.json().catch(() => null);
+
+    if (!response.ok || !data?.ok) {
+      throw new Error(data?.detail || data?.error || data?.message || "Supabase no respondio correctamente.");
+    }
+
+    const rows = Array.isArray(data.items) ? data.items : [];
+
+    return rows.map((row) => ({
+      ...row,
+      DNI: row.dni,
+      Correo: row.email,
+      APTO: row.apt_calculated,
+      Resultado: row.result,
+      Recuperatorio: row.recovery,
+    }));
   }
 
   function buildPendingRecoverySummary(items) {
@@ -2352,7 +2412,7 @@ if (!items.length) {
     const source = sourceSelect?.value || "sheet-ayrpc-2025";
     const segment = segmentSelect?.value || "pending-recovery-2025";
 
-    const allowedSources = ["sheet-ayrpc-2025", "personal-tests"];
+    const allowedSources = ["sheet-ayrpc-2025"];
 
     if (!allowedSources.includes(source) || segment !== "pending-recovery-2025") {
       renderError("Esta combinación de fuente/segmento todavía no está implementada.");
@@ -2362,7 +2422,7 @@ if (!items.length) {
     renderLoading();
 
     try {
-      const items = await fetchSheet2025Items(source);
+      const items = await fetchSupabase2025Items(source);
       const summary = source === "personal-tests"
         ? buildPersonalTestsSummary(items)
         : buildPendingRecoverySummary(items);
