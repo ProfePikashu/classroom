@@ -1,6 +1,6 @@
 /* ============================================================
    AndyAzhTEC Classroom \u2014 alumnos.js
-   Listado tabular de alumnos desde ExamPro / Planilla 2025 / Todos
+   Listado tabular de alumnos desde ExamPro / Supabase 2025 / Todos
    ============================================================ */
 
 "use strict";
@@ -274,7 +274,7 @@ const ClassroomStudents = {
     return `${this.apiBase}/api/classroom/admin/attendance/students?${params.toString()}`;
   },
 
-  async fetchSheetStudents() {
+  async fetchSupabase2025Students() {
     const data = await this.fetchJson(this.buildSupabase2025Url(""), {
       cache: "no-store",
       headers: this.getAuthHeaders(),
@@ -289,7 +289,7 @@ const ClassroomStudents = {
       : [];
   },
   async loadSheetStudents() {
-    const allItems = await this.fetchSheetStudents();
+    const allItems = await this.fetchSupabase2025Students();
     const items = this.filterLocalStudents(allItems);
 
     this.students = items;
@@ -300,7 +300,7 @@ const ClassroomStudents = {
   async loadAllStudents() {
     const [examproItems, sheetItems] = await Promise.all([
       this.fetchAllExamProStudents(),
-      this.fetchSheetStudents(),
+      this.fetchSupabase2025Students(),
     ]);
 
     const merged = this.mergeStudents(examproItems, sheetItems);
@@ -630,11 +630,11 @@ const ClassroomStudents = {
   },
 
   getStudentSourceDetail(student, source, dni, fichaId) {
-    if (source === "Planilla 2025") {
-      return dni && dni !== "\u2014" ? `Planilla 2025 \u00B7 DNI ${dni}` : "Planilla 2025";
+    if (source === "Supabase 2025") {
+      return dni && dni !== "\u2014" ? `Supabase 2025 \u00B7 DNI ${dni}` : "Supabase 2025";
     }
 
-    if (source === "ExamPro + Planilla 2025") {
+    if (source === "ExamPro + Supabase 2025") {
       return dni && dni !== "\u2014" ? `ExamPro + Planilla \u00B7 DNI ${dni}` : "ExamPro + Planilla";
     }
 
