@@ -1,11 +1,9 @@
-﻿/* ════════════════════════════════════════════════════════
+/* ════════════════════════════════════════════════════════
    AndyAzhTEC Classroom — gestion.js
 ════════════════════════════════════════════════════════ */
 
 "use strict";
 
-const GESTION_API_CONSTANCIA = "https://script.google.com/macros/s/AKfycbwwMlT9cIOV3Nm057_XPfHT-tXaeKYv6cHZS4yMbtj5gd4q6NZZELCaMDRCb0YUD8v_hg/exec";
-const GESTION_API_CERTIFICADO = "https://script.google.com/macros/s/AKfycbyglMr8TlH5BjsCfg57wmsSVhUqIwrSveAh6FH1fxIOJUgX4e35Jc5nuJ9Cl261rZ9dkQ/exec";
 const GESTION_API_BAJA = "{ASIGNAR_ENDPOINT_BAJA}";
 
 const ClassroomGestion = {
@@ -23,6 +21,52 @@ const ClassroomGestion = {
   getDni() {
     const session = this.getSession();
     return session?.dni || "";
+  },
+
+  getApiBase() {
+    const configured =
+      window.CLASSROOM_API_BASE ||
+      window.EXAMPRO_API_BASE ||
+      localStorage.getItem("andyazh-api-base") ||
+      "";
+
+    if (configured) {
+      return String(configured).replace(/\/+$/, "");
+    }
+
+    const host = window.location.hostname;
+
+    if (host === "localhost" || host === "127.0.0.1") {
+      return "http://127.0.0.1:8000";
+    }
+
+    return "https://api.andyazhtec.com";
+  },
+
+  getClassroomToken() {
+    const session = this.getSession();
+
+    return (
+      session?.classroomReadToken ||
+      session?.exampro?.accessToken ||
+      session?.exampro?.access_token ||
+      session?.accessToken ||
+      session?.access_token ||
+      session?.token ||
+      ""
+    );
+  },
+
+  getAuthHeaders() {
+    const token = this.getClassroomToken();
+
+    if (!token) {
+      throw new Error("No se encontr? token de sesi?n Classroom.");
+    }
+
+    return {
+      Authorization: `Bearer ${token}`,
+    };
   },
 
   bindButtons() {
@@ -111,12 +155,17 @@ const ClassroomGestion = {
     button.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Generando...';
 
     try {
-      const response = await fetch(GESTION_API_CERTIFICADO + "?dni=" + encodeURIComponent(dni));
-      const data = await response.json();
+      const response = await fetch(`${this.getApiBase()}/api/classroom/me/documents/certificate?course=ayrpc-2025`, {
+        cache: "no-store",
+        headers: this.getAuthHeaders(),
+      });
 
-      if (data.error) {
+      const data = await response.json().catch(() => null);
+
+      if (!response.ok || !data?.ok) {
+        const message = data?.detail || data?.error || "No se pudo generar el certificado.";
         if (certTab && !certTab.closed) certTab.close();
-        alert("Error: " + data.error);
+        alert("Error: " + message);
         return;
       }
 
@@ -296,11 +345,11 @@ Muchas gracias.`;
     const dni = this.getDni();
 
     if (!dni) {
-      alert("No se encontró el DNI del alumno en sesión.");
+      alert("No se encontr? el DNI del alumno en sesi?n.");
       return;
     }
 
-    window.open(`${GESTION_API_CONSTANCIA}?action=constancia_pdf&dni=${encodeURIComponent(dni)}`, "_blank");
+    alert("La solicitud de constancia personalizada est? en preparaci?n. Pronto vas a poder pedirla desde Classroom para que el profe la revise y la genere con el formato correspondiente.");
   },
 
   async solicitarBaja() {
@@ -349,4 +398,3 @@ Muchas gracias.`;
 document.addEventListener("DOMContentLoaded", () => {
   ClassroomGestion.init();
 });
-
