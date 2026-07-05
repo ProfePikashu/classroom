@@ -1,4 +1,3 @@
-const AYRPC2025_SHEET_API = "https://script.google.com/macros/s/AKfycbxdB1fbiT1S04N5LaiOqHCojJcO12YCOPg7ln21bFrMrEot5GSdyWzy6j6CyEAsuDen/exec";
 const AYRPC2025_RECUPERATORIO_URL = "https://profepikashu.github.io/exampro/recuperatorio/";
 
 const CursoAyRPC2025Panel = {
@@ -20,14 +19,14 @@ const CursoAyRPC2025Panel = {
     this.paintBaseSession(session);
 
     const supabaseData = await this.refreshFromSupabase(session);
-    const sheetData = await this.refreshFromSheet(session);
+    const courseStatusData = await this.refreshFromCourseStatus(session);
 
-    const merged = this.mergeStudentData(session, supabaseData, sheetData);
+    const merged = this.mergeStudentData(session, supabaseData, courseStatusData);
 
     this.saveMergedSession(session, merged);
-    this.paintStudent(merged, supabaseData, sheetData);
+    this.paintStudent(merged, supabaseData, courseStatusData);
     this.paintAttendance(merged);
-    this.paintRecovery(merged, supabaseData, sheetData);
+    this.paintRecovery(merged, supabaseData, courseStatusData);
     this.patchPelusita();
   },
 
@@ -42,6 +41,38 @@ const CursoAyRPC2025Panel = {
 
   normalizeText(value) {
     return String(value || "").trim();
+  },
+
+  getApiBase() {
+    const configured =
+      window.CLASSROOM_API_BASE ||
+      window.EXAMPRO_API_BASE ||
+      localStorage.getItem("andyazh-api-base") ||
+      "";
+
+    if (configured) {
+      return String(configured).replace(/\/+$/, "");
+    }
+
+    const host = window.location.hostname;
+
+    if (host === "localhost" || host === "127.0.0.1") {
+      return "http://127.0.0.1:8000";
+    }
+
+    return "https://api.andyazhtec.com";
+  },
+
+  getClassroomToken(session) {
+    return (
+      session?.classroomReadToken ||
+      session?.exampro?.accessToken ||
+      session?.exampro?.access_token ||
+      session?.accessToken ||
+      session?.access_token ||
+      session?.token ||
+      ""
+    );
   },
 
   normalizeStatus(value) {
@@ -136,18 +167,57 @@ const CursoAyRPC2025Panel = {
     }
   },
 
-  async refreshFromSheet(session) {
-    const dni = this.normalizeDni(session.dni || session.alumno?.DNI);
-    if (!dni) return null;
+  async refreshFromCourseStatus(session) {
+    const token = this.getClassroomToken(session);
+
+    if (!token) return null;
 
     try {
-      const response = await fetch(`${AYRPC2025_SHEET_API}?dni=${encodeURIComponent(dni)}`, { cache: "no-store" });
-      const data = await response.json();
+      const response = await fetch(`${this.getApiBase()}/api/classroom/me/course-status?course=ayrpc-2025`, {
+        cache: "no-store",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-      if (!data || data.error || data.estado === "BAJA") return null;
-      return data;
+      const data = await response.json().catch(() => null);
+
+      if (!response.ok || !data?.ok) return null;
+
+      const student = data.student || {};
+      const academic = data.academic || {};
+      const raw = data.raw || {};
+      const attendance = Array.isArray(data.attendance) ? data.attendance : [];
+
+      const legacy = {
+        ...raw,
+        DNI: student.dni || raw.dni,
+        Correo: student.email || raw.email,
+        email: student.email || raw.email,
+        "Nombre Completo": student.full_name || raw.full_name_normalized || raw.full_name_raw,
+        full_name: student.full_name || raw.full_name_normalized || raw.full_name_raw,
+        "Usuario de Twitch": student.twitch || raw.twitch_normalized,
+        twitch: student.twitch || raw.twitch_normalized,
+        APTO: academic.apt_calculated || raw.apt_calculated,
+        "Apto": academic.apt_calculated || raw.apt_calculated,
+        apt_examen: academic.apt_calculated || raw.apt_calculated,
+        Resultado: academic.result || raw.result,
+        resultado: academic.result || raw.result,
+        Recuperatorio: academic.recovery || raw.recovery,
+        recuperatorio: academic.recovery || raw.recovery,
+      };
+
+      this.classes.forEach((item) => {
+        const row = attendance.find((entry) => Number(entry.class_number) === Number(item.n)) || {};
+        legacy[item.statusKey] = row.status || raw[`class_${item.n}_status`] || "";
+        legacy[item.timeKey] = row.time || raw[`class_${item.n}_time`] || "";
+      });
+
+      legacy.__courseStatus = data;
+
+      return legacy;
     } catch (error) {
-      console.warn("No se pudo refrescar Planilla General:", error);
+      console.warn("No se pudo refrescar estado de cursada desde Classroom:", error);
       return null;
     }
   },
@@ -395,7 +465,7 @@ En esta pantalla ves tu situación personal de AyRPC 2025: asistencia, tiempos r
           msg.textContent =
 `El acceso al recuperatorio aparece si figurás como apto para examen y todavía no consta una evaluación aprobada.
 
-Primero se revisan datos de ExamPro/Supabase y después la Planilla General.`;
+Primero se revisan datos de Classroom/Supabase.`;
           window.PelusitaClassroom.state?.("pelusita-state3");
         });
 
