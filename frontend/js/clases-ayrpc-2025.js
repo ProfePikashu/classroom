@@ -1,6 +1,4 @@
-﻿"use strict";
-
-const AYRPC2025_VERIFIER_API = "https://script.google.com/macros/s/AKfycbxdB1fbiT1S04N5LaiOqHCojJcO12YCOPg7ln21bFrMrEot5GSdyWzy6j6CyEAsuDen/exec";
+"use strict";
 
 const RECOVERY_SUBMIT_ENDPOINT = "{ASIGNAR_ENDPOINT_RECUPERACION}";
 
@@ -253,36 +251,94 @@ const AyRPC2025Classes = {
     } catch (error) {}
   },
 
+  getApiBase() {
+    const configured =
+      window.CLASSROOM_API_BASE ||
+      window.EXAMPRO_API_BASE ||
+      localStorage.getItem("andyazh-api-base") ||
+      "";
+
+    if (configured) {
+      return String(configured).replace(/\/+$/, "");
+    }
+
+    const host = window.location.hostname;
+
+    if (host === "localhost" || host === "127.0.0.1") {
+      return "http://127.0.0.1:8000";
+    }
+
+    return "https://api.andyazhtec.com";
+  },
+
+  getClassroomToken(session) {
+    return (
+      session?.classroomReadToken ||
+      session?.exampro?.accessToken ||
+      session?.exampro?.access_token ||
+      session?.accessToken ||
+      session?.access_token ||
+      session?.token ||
+      ""
+    );
+  },
+
   async refreshOfficialAttendance() {
     const session = this.getSession();
     if (!session) return;
 
-    const dni = String(
-      session.dni ||
-      session.student?.dni ||
-      session.alumno?.dni ||
-      ""
-    ).replace(/\D+/g, "");
-
-    if (!dni) return;
+    const token = this.getClassroomToken(session);
+    if (!token) return;
 
     try {
-      const response = await fetch(AYRPC2025_VERIFIER_API + "?dni=" + encodeURIComponent(dni));
-      const data = await response.json();
+      const response = await fetch(`${this.getApiBase()}/api/classroom/me/course-status?course=ayrpc-2025`, {
+        cache: "no-store",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-      if (!data || data.error || data.estado === "BAJA") return;
+      const data = await response.json().catch(() => null);
+
+      if (!response.ok || !data?.ok) return;
+
+      const student = data.student || {};
+      const academic = data.academic || {};
+      const raw = data.raw || {};
+      const attendance = Array.isArray(data.attendance) ? data.attendance : [];
 
       if (!session.alumno) session.alumno = {};
 
-      Object.assign(session.alumno, data);
+      Object.assign(session.alumno, raw, {
+        DNI: student.dni || raw.dni || session.dni,
+        dni: student.dni || raw.dni || session.dni,
+        Correo: student.email || raw.email || session.email,
+        email: student.email || raw.email || session.email,
+        "Nombre Completo": student.full_name || raw.full_name_normalized || raw.full_name_raw || session.displayName,
+        full_name: student.full_name || raw.full_name_normalized || raw.full_name_raw || session.displayName,
+        "Usuario de Twitch": student.twitch || raw.twitch_normalized || session.twitch,
+        twitch: student.twitch || raw.twitch_normalized || session.twitch,
+        APTO: academic.apt_calculated || raw.apt_calculated,
+        apt_examen: academic.apt_calculated || raw.apt_calculated,
+        Resultado: academic.result || raw.result,
+        resultado: academic.result || raw.result,
+        Recuperatorio: academic.recovery || raw.recovery,
+        recuperatorio: academic.recovery || raw.recovery,
+        __courseStatus: data,
+      });
 
-      // Normalizar DNI por si después otra pantalla lo necesita.
-      session.dni = session.dni || data.dni || dni;
-      session.alumno.dni = session.alumno.dni || data.dni || dni;
+      this.data.classes.forEach((item) => {
+        const row = attendance.find((entry) => Number(entry.class_number) === Number(item.number)) || {};
+        session.alumno[item.attendance_key] = row.status || raw[`class_${item.number}_status`] || session.alumno[item.attendance_key] || "-";
+      });
+
+      session.dni = session.dni || student.dni || raw.dni;
+      session.email = session.email || student.email || raw.email || "";
+      session.twitch = session.twitch || student.twitch || raw.twitch_normalized || "";
 
       localStorage.setItem("andyazh-classroom-session", JSON.stringify(session));
     } catch (error) {
-      console.warn("No se pudo refrescar asistencia oficial AyRPC 2025:", error);
+      console.warn("No se pudo refrescar asistencia oficial AyRPC 2025 desde Classroom:", error);
     }
   },
 
