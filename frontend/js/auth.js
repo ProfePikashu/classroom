@@ -1,6 +1,6 @@
 ﻿/* ============================================================
    AndyAzhTEC Classroom — auth.js
-   Login por DNI + Twitch contra ExamPro
+   Login por DNI + Twitch contra Classroom
    ============================================================ */
 
 "use strict";
@@ -20,7 +20,6 @@ const EXAMPRO_API_BASE = (
   ? "http://127.0.0.1:8000"
   : "https://api.andyazhtec.com";
 
-const CLASSROOM_SHEET_2025_API = "https://script.google.com/macros/s/AKfycbxajMTyRA6SBGeMYDikKlN2nrmONnlPYG88iDNVsYt-fE-ooH6XYW3wT6N5EV3FVxxU/exec";
 
 const ClassroomAuth = {
   storageKey: "andyazh-classroom-session",
@@ -145,109 +144,11 @@ const ClassroomAuth = {
     };
   },
 
-  getSheetValue(data, keys, fallback = "") {
-    for (const key of keys) {
-      const value = data?.[key];
-
-      if (value !== undefined && value !== null && String(value).trim() !== "") {
-        return String(value).trim();
-      }
-    }
-
-    return fallback;
-  },
-
-  getSheetTwitch(data) {
-    return this.normalize(
-      this.getSheetValue(data, [
-        "Usuario de Twitch",
-        "Usuario Twitch",
-        "Twitch",
-        "TWITCH",
-        "Usuario de Twitch (en caso de no tener, deberá crear uno y usarlo en la cursada)",
-        "twitch",
-        "twitch_username",
-      ])
-    );
-  },
-
   async loginWithSheetFallback(cleanDni, cleanTwitch, originalMessage = "") {
-    try {
-      const response = await fetch(`${CLASSROOM_SHEET_2025_API}?dni=${encodeURIComponent(cleanDni)}`, {
-        cache: "no-store",
-      });
-
-      const data = await response.json().catch(() => null);
-
-      if (!response.ok || !data || data.error || data.estado === "BAJA") {
-        return {
-          ok: false,
-          message: originalMessage || "No se pudo validar el acceso con ExamPro ni con Planilla 2025.",
-        };
-      }
-
-      const sheetTwitch = this.getSheetTwitch(data);
-
-      if (!sheetTwitch || sheetTwitch !== cleanTwitch) {
-        return {
-          ok: false,
-          message: "El DNI figura en Planilla 2025, pero el usuario de Twitch no coincide.",
-        };
-      }
-
-      const fullName = this.getSheetValue(data, [
-        "Nombre Completo",
-        "Nombre completo",
-        "NOMBRE COMPLETO",
-        "Alumno",
-        "ALUMNO",
-        "Nombre",
-        "NOMBRE",
-      ], cleanTwitch);
-
-      const email = this.getSheetValue(data, [
-        "Correo",
-        "Correo electrónico",
-        "Correo Electronico",
-        "Email",
-        "EMAIL",
-        "Mail",
-        "MAIL",
-      ], "");
-
-      const session = {
-        dni: this.getSheetValue(data, ["DNI", "dni"], cleanDni),
-        twitch: cleanTwitch,
-        email,
-        displayName: fullName,
-        role: "student",
-        roleLabel: "Alumno",
-        course: "AyRPC 2025",
-        alumno: {
-          ...data,
-          DNI: this.getSheetValue(data, ["DNI", "dni"], cleanDni),
-          Correo: email,
-          "Nombre Completo": fullName,
-          "Usuario de Twitch": cleanTwitch,
-          "Usuario de Twitch (en caso de no tener, deberá crear uno y usarlo en la cursada)": cleanTwitch,
-        },
-        exampro: null,
-        createdAt: new Date().toISOString(),
-        provider: "planilla-ayrpc-2025",
-      };
-
-      this.setSession(session);
-
-      return {
-        ok: true,
-        session,
-      };
-    } catch (error) {
-      return {
-        ok: false,
-        message: originalMessage || "No se pudo conectar con ExamPro ni con Planilla 2025.",
-      };
-    }
+    return {
+      ok: false,
+      message: originalMessage || "No se pudo validar el acceso con Classroom.",
+    };
   },
 
   async loginWithStudent(dni, twitch) {
@@ -358,7 +259,7 @@ const ClassroomAuth = {
       return await this.loginWithSheetFallback(
         cleanDni,
         cleanTwitch,
-        "No se pudo conectar con ExamPro. Se intentó validar contra Planilla 2025."
+        "No se pudo conectar con Classroom. Verifica la conexion e intentalo nuevamente."
       );
     }
   },
@@ -554,5 +455,3 @@ const ClassroomAuth = {
   setInterval(normalizeSavedModeratorSession, 800);
   setTimeout(normalizeSavedModeratorSession, 300);
 })();
-
-
