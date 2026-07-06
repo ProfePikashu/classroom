@@ -633,7 +633,7 @@ const ClassroomStudents = {
 
         if (token) return token;
       } catch {
-        // Ignorar sesiones inv?lidas.
+        // Ignorar sesiones invalidas.
       }
     }
 
@@ -644,7 +644,7 @@ const ClassroomStudents = {
     const token = this.getClassroomToken();
 
     if (!token) {
-      throw new Error("No se encontr? token Classroom.");
+      throw new Error("No se encontro token Classroom.");
     }
 
     return {
@@ -664,7 +664,7 @@ const ClassroomStudents = {
     const name = student.full_name || student.nombre || student.display_name || student.twitch || "Alumno";
 
     if (!dni) {
-      alert("Este alumno no tiene DNI v?lido para aplicar baja.");
+      alert("Este alumno no tiene DNI valido para aplicar baja.");
       return;
     }
 
@@ -675,7 +675,7 @@ const ClassroomStudents = {
       return;
     }
 
-    const confirmed = window.confirm(`?Confirm?s dar de baja a ${name}? El alumno dejar? de poder acceder al Classroom.`);
+    const confirmed = window.confirm(`Confirmas dar de baja a ${name}? El alumno dejara de poder acceder al Classroom.`);
 
     if (!confirmed) return;
 
@@ -720,7 +720,7 @@ const ClassroomStudents = {
       }
 
       this.renderTable();
-      alert("Baja aplicada correctamente. El alumno ya no podr? acceder al Classroom.");
+      alert("Baja aplicada correctamente. El alumno ya no podra acceder al Classroom.");
     } catch (error) {
       alert("No se pudo aplicar la baja.");
     }
@@ -1369,7 +1369,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const token = getToken();
 
     if (!token) {
-      throw new Error("No se encontr? token Classroom.");
+      throw new Error("No se encontro token Classroom.");
     }
 
     const response = await fetch(`${getApiBase()}${path}`, {
@@ -1385,7 +1385,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const data = await response.json().catch(() => null);
 
     if (!response.ok || data?.ok === false) {
-      throw new Error(data?.detail || data?.error || "No se pudo completar la operaci?n.");
+      throw new Error(data?.detail || data?.error || "No se pudo completar la operacion.");
     }
 
     return data;
@@ -1429,7 +1429,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <div>
           <p class="eyebrow danger">Bajas de cursada</p>
           <h2>Solicitudes de baja</h2>
-          <p>Pedidos enviados por alumnos desde Gesti?n. Al aprobar una baja, el alumno deja de poder acceder al Classroom.</p>
+          <p>Pedidos enviados por alumnos desde Gestion. Al aprobar una baja, el alumno deja de poder acceder al Classroom.</p>
         </div>
 
         <div class="admin-data-change-actions">
@@ -1563,11 +1563,11 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!approveButton) return;
 
       const id = approveButton.dataset.withdrawalApprove;
-      const ok = window.confirm("?Confirm?s aprobar la baja? El alumno dejar? de poder acceder al Classroom.");
+      const ok = window.confirm("Confirmas aprobar la baja? El alumno dejara de poder acceder al Classroom.");
 
       if (!ok) return;
 
-      const notes = prompt("Opcional: nota interna de resoluci?n.", "") || "";
+      const notes = prompt("Opcional: nota interna de resolucion.", "") || "";
 
       approveButton.disabled = true;
       approveButton.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Aplicando...`;

@@ -59,7 +59,7 @@ const ClassroomGestion = {
     const token = this.getClassroomToken();
 
     if (!token) {
-      throw new Error("No se encontr? token de sesi?n Classroom.");
+      throw new Error("No se encontro token de sesion Classroom.");
     }
 
     return {
@@ -343,26 +343,26 @@ Muchas gracias.`;
     const dni = this.getDni();
 
     if (!dni) {
-      alert("No se encontr? el DNI del alumno en sesi?n.");
+      alert("No se encontro el DNI del alumno en sesion.");
       return;
     }
 
-    alert("La solicitud de constancia personalizada est? en preparaci?n. Pronto vas a poder pedirla desde Classroom para que el profe la revise y la genere con el formato correspondiente.");
+    alert("La solicitud de constancia personalizada esta en preparacion. Pronto vas a poder pedirla desde Classroom para que el profe la revise y la genere con el formato correspondiente.");
   },
 
   async solicitarBaja() {
     const session = this.getSession();
 
     if (!session?.dni) {
-      alert("No se encontr? una sesi?n v?lida.");
+      alert("No se encontro una sesion valida.");
       return;
     }
 
-    const confirmed = confirm("?Confirm?s que quer?s solicitar la baja del curso? El equipo docente revisar? el pedido antes de aplicarlo.");
+    const confirmed = confirm("Confirmas que queres solicitar la baja del curso? El equipo docente revisara el pedido antes de aplicarlo.");
 
     if (!confirmed) return;
 
-    const reason = prompt("Opcional: indic? brevemente el motivo de la baja.", "") || "";
+    const reason = prompt("Opcional: indica brevemente el motivo de la baja.", "") || "";
 
     try {
       const response = await fetch(`${this.getApiBase()}/api/classroom/me/withdrawal-request?course=ayrpc-2025`, {
@@ -386,11 +386,11 @@ Muchas gracias.`;
       }
 
       if (data.already_pending) {
-        alert("Ya ten?s una solicitud de baja pendiente de revisi?n.");
+        alert("Ya tenes una solicitud de baja pendiente de revision.");
         return;
       }
 
-      alert("Solicitud de baja enviada correctamente. El equipo docente la revisar? antes de confirmar la baja.");
+      alert("Solicitud de baja enviada correctamente. El equipo docente la revisara antes de confirmar la baja.");
     } catch (error) {
       alert("No se pudo enviar la solicitud de baja.");
     }
