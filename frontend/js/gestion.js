@@ -4,8 +4,6 @@
 
 "use strict";
 
-const GESTION_API_BAJA = "{ASIGNAR_ENDPOINT_BAJA}";
-
 const ClassroomGestion = {
   init() {
     this.bindButtons();
@@ -356,41 +354,45 @@ Muchas gracias.`;
     const session = this.getSession();
 
     if (!session?.dni) {
-      alert("No se encontró una sesión válida.");
+      alert("No se encontr? una sesi?n v?lida.");
       return;
     }
 
-    const confirmed = confirm("¿Confirmás que querés solicitar la baja del curso?");
+    const confirmed = confirm("?Confirm?s que quer?s solicitar la baja del curso? El equipo docente revisar? el pedido antes de aplicarlo.");
 
     if (!confirmed) return;
 
-    if (GESTION_API_BAJA.includes("{ASIGNAR")) {
-      alert("Solicitud preparada. Falta conectar el endpoint de baja.");
-      return;
-    }
+    const reason = prompt("Opcional: indic? brevemente el motivo de la baja.", "") || "";
 
     try {
-      const response = await fetch(GESTION_API_BAJA, {
+      const response = await fetch(`${this.getApiBase()}/api/classroom/me/withdrawal-request?course=ayrpc-2025`, {
         method: "POST",
+        cache: "no-store",
         headers: {
           "Content-Type": "application/json",
+          ...this.getAuthHeaders(),
         },
         body: JSON.stringify({
-          dni: session.dni,
-          twitch: session.twitch,
-          course: session.course || "AyRPC 2025",
-          action: "request_course_withdrawal",
+          reason: reason.trim(),
         }),
       });
 
-      if (!response.ok) {
-        alert("No se pudo enviar la solicitud.");
+      const data = await response.json().catch(() => null);
+
+      if (!response.ok || !data?.ok) {
+        const message = data?.detail || data?.error || "No se pudo enviar la solicitud de baja.";
+        alert("Error: " + message);
         return;
       }
 
-      alert("Solicitud enviada correctamente.");
+      if (data.already_pending) {
+        alert("Ya ten?s una solicitud de baja pendiente de revisi?n.");
+        return;
+      }
+
+      alert("Solicitud de baja enviada correctamente. El equipo docente la revisar? antes de confirmar la baja.");
     } catch (error) {
-      alert("No se pudo enviar la solicitud.");
+      alert("No se pudo enviar la solicitud de baja.");
     }
   },
 };
