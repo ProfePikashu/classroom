@@ -147,7 +147,7 @@
         <div>
           <p class="eyebrow">
             <i class="fa-solid fa-database"></i>
-            ExamPro / Supabase
+            Supabase
           </p>
 
           <h1>Alumnos</h1>
@@ -195,7 +195,7 @@
             <p class="eyebrow">Base unificada Classroom</p>
             <h2>Alumnos cargados en Classroom</h2>
             <p>
-              Esta vista puede leer desde ExamPro, Supabase 2025 o una vista unificada de ambas fuentes.
+              Esta vista lee directamente la base Supabase AyRPC 2025.
             </p>
           </div>
 
@@ -212,7 +212,7 @@
 
             <div class="student-stat-card">
               <span>Fuente</span>
-              <strong id="studentsSourceLabel">ExamPro</strong>
+              <strong id="studentsSourceLabel">Supabase 2025</strong>
             </div>
           </div>
         </article>
@@ -224,15 +224,6 @@
               <i class="fa-solid fa-magnifying-glass"></i>
               <input id="studentsSearchInput" type="search" placeholder="Nombre, DNI, Twitch o email" autocomplete="off" />
             </div>
-          </label>
-
-          <label class="students-source-filter">
-            <span>Fuente</span>
-            <select id="studentsSourceSelect">
-              <option value="exampro">ExamPro</option>
-              <option value="sheet2025">Supabase 2025</option>
-              <option value="all">Todos</option>
-            </select>
           </label>
 
           <div class="students-toolbar-actions">
@@ -257,7 +248,7 @@
           </div>
 
           <div class="students-status" id="studentsStatus">
-            Cargando alumnos desde ExamPro...
+            Cargando alumnos desde Supabase 2025...
           </div>
 
           <div class="students-grid" id="studentsGrid"></div>
@@ -271,7 +262,7 @@
   <script src="js/roles.js?v=20260612-notifications-global-v2"></script>
   <script src="js/main.js?v=20260612-newsletter-api-v1"></script>
   <script src="js/notifications-local.js?v=20260620-community-notifications-v2"></script>
-  <script src="js/alumnos.js?v=20260705-withdrawals-v3"></script>
+  <script src="js/alumnos.js?v=20260705-supabase-source-v2"></script>
   <script src="js/pelusita.js?v=20260612-sidebar-dock"></script>  <script src="js/pelusita-dialog.js?v=20260612-guide-compact"></script>
   <script src="js/sidebar-v2.js?v=20260612-pelusita-dock-v2"></script>
 </body>

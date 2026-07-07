@@ -1,6 +1,6 @@
 /* ============================================================
    AndyAzhTEC Classroom \u2014 alumnos.js
-   Listado tabular de alumnos desde ExamPro / Supabase 2025 / Todos
+   Listado tabular de alumnos desde Supabase 2025
    ============================================================ */
 
 "use strict";
@@ -18,16 +18,14 @@ const ClassroomStudents = {
   total: 0,
   loading: false,
   currentSearch: "",
-  currentSource: "exampro",
+  currentSource: "sheet2025",
   sortKey: "name",
   sortDirection: "asc",
   students: [],
   renderedStudents: [],
 
   sourceLabels: {
-    exampro: "ExamPro",
     sheet2025: "Supabase 2025",
-    all: "Todos",
   },
 
   init() {
@@ -88,7 +86,7 @@ const ClassroomStudents = {
 
     if (this.sourceSelect) {
       this.sourceSelect.addEventListener("change", () => {
-        this.currentSource = this.sourceSelect.value || "exampro";
+        this.currentSource = this.sourceSelect.value || "sheet2025";
         this.offset = 0;
         this.students = [];
         this.loadStudents(true);
@@ -110,11 +108,11 @@ const ClassroomStudents = {
   },
 
   getSelectedSource() {
-    return this.sourceSelect?.value || this.currentSource || "exampro";
+    return this.sourceSelect?.value || this.currentSource || "sheet2025";
   },
 
   getSourceLabel(source = this.getSelectedSource()) {
-    return this.sourceLabels[source] || "ExamPro";
+    return this.sourceLabels[source] || "Supabase 2025";
   },
 
   setLoadingState(isLoading) {
