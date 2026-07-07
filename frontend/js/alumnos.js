@@ -33,6 +33,7 @@ const ClassroomStudents = {
   init() {
     this.cacheDom();
     this.bindEvents();
+    this.initWithdrawalRequestsPanel();
     this.loadStudents(true);
   },
 
@@ -583,6 +584,214 @@ const ClassroomStudents = {
         </td>
       </tr>
     `;
+  },
+
+  initWithdrawalRequestsPanel() {
+    this.ensureWithdrawalRequestsPanel();
+    this.bindWithdrawalRequestsPanel();
+    this.renderWithdrawalRequestsPanel();
+  },
+
+  ensureWithdrawalRequestsPanel() {
+    let panel = document.getElementById("solicitudes-baja-curso");
+
+    if (panel) return panel;
+
+    const host =
+      document.querySelector(".students-list-panel") ||
+      document.querySelector(".students-page-panel") ||
+      document.querySelector("main") ||
+      document.body;
+
+    panel = document.createElement("section");
+    panel.id = "solicitudes-baja-curso";
+    panel.className = "admin-data-change-panel panel admin-withdrawal-panel";
+    panel.innerHTML = `
+      <div class="admin-data-change-head">
+        <div>
+          <p class="eyebrow danger">Bajas de cursada</p>
+          <h2>Solicitudes de baja</h2>
+          <p>Pedidos enviados por alumnos desde Gestion. Al aprobar una baja, el alumno deja de poder acceder al Classroom.</p>
+        </div>
+
+        <div class="admin-data-change-actions">
+          <button type="button" id="adminWithdrawalRefresh">
+            <i class="fa-solid fa-rotate"></i>
+            Actualizar
+          </button>
+          <span class="admin-data-change-counter" id="adminWithdrawalCounter">0 pendientes</span>
+        </div>
+      </div>
+
+      <div class="admin-data-change-list" id="adminWithdrawalList">
+        <div class="admin-data-change-empty">
+          <i class="fa-solid fa-spinner fa-spin"></i>
+          <span>Cargando solicitudes de baja...</span>
+        </div>
+      </div>
+    `;
+
+    if (host.classList?.contains("students-list-panel")) {
+      host.insertAdjacentElement("beforebegin", panel);
+    } else if (host.classList?.contains("students-page-panel")) {
+      host.appendChild(panel);
+    } else {
+      host.prepend(panel);
+    }
+
+    return panel;
+  },
+
+  bindWithdrawalRequestsPanel() {
+    if (this.withdrawalRequestsPanelBound) return;
+
+    this.withdrawalRequestsPanelBound = true;
+
+    document.addEventListener("click", async (event) => {
+      const refreshButton = event.target.closest("#adminWithdrawalRefresh");
+      if (refreshButton) {
+        this.renderWithdrawalRequestsPanel();
+        return;
+      }
+
+      const approveButton = event.target.closest("[data-withdrawal-approve]");
+      if (!approveButton) return;
+
+      const requestId = approveButton.dataset.withdrawalApprove;
+      const ok = window.confirm("Confirmas aprobar la baja? El alumno dejara de poder acceder al Classroom.");
+
+      if (!ok) return;
+
+      const notes = window.prompt("Opcional: nota interna de resolucion.", "") || "";
+
+      approveButton.disabled = true;
+      approveButton.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Aplicando...';
+
+      try {
+        await this.approveWithdrawalRequest(requestId, notes.trim());
+        alert("Baja aplicada correctamente.");
+        this.renderWithdrawalRequestsPanel();
+        this.loadStudents(true);
+      } catch (error) {
+        alert("Error: " + (error?.message || "No se pudo aprobar la baja."));
+        this.renderWithdrawalRequestsPanel();
+      }
+    });
+  },
+
+  async fetchWithdrawalRequests(status = "all") {
+    const url = `${this.getApiBase()}/api/classroom/admin/withdrawal-requests?course=ayrpc-2025&status=${encodeURIComponent(status)}&limit=100`;
+
+    const response = await fetch(url, {
+      cache: "no-store",
+      headers: this.getAuthHeaders(),
+    });
+
+    const data = await response.json().catch(() => null);
+
+    if (!response.ok || data?.ok === false) {
+      throw new Error(data?.detail || data?.error || "No se pudieron cargar las solicitudes de baja.");
+    }
+
+    return Array.isArray(data?.items) ? data.items : [];
+  },
+
+  async approveWithdrawalRequest(requestId, notes = "") {
+    const response = await fetch(`${this.getApiBase()}/api/classroom/admin/withdrawal-requests/${encodeURIComponent(requestId)}/approve`, {
+      method: "POST",
+      cache: "no-store",
+      headers: {
+        "Content-Type": "application/json",
+        ...this.getAuthHeaders(),
+      },
+      body: JSON.stringify({
+        notes,
+      }),
+    });
+
+    const data = await response.json().catch(() => null);
+
+    if (!response.ok || !data?.ok) {
+      throw new Error(data?.detail || data?.error || "No se pudo aprobar la baja.");
+    }
+
+    return data;
+  },
+
+  async renderWithdrawalRequestsPanel() {
+    const panel = this.ensureWithdrawalRequestsPanel();
+    const list = panel.querySelector("#adminWithdrawalList");
+    const counter = panel.querySelector("#adminWithdrawalCounter");
+
+    if (!list || !counter) return;
+
+    try {
+      const items = await this.fetchWithdrawalRequests("all");
+      const pending = items.filter((item) => item.status === "pending");
+
+      counter.textContent = `${pending.length} pendiente${pending.length === 1 ? "" : "s"}`;
+
+      if (!items.length) {
+        list.innerHTML = `
+          <div class="admin-data-change-empty">
+            <i class="fa-solid fa-circle-check"></i>
+            <span>No hay solicitudes de baja por ahora.</span>
+          </div>
+        `;
+        return;
+      }
+
+      list.innerHTML = items.map((item) => {
+        const isApproved = item.status === "approved";
+        const statusLabel = isApproved ? "Aprobada" : item.status === "rejected" ? "Rechazada" : "Pendiente";
+
+        return `
+          <article class="admin-data-change-item ${isApproved ? "is-resolved" : "is-pending"}" data-withdrawal-id="${this.escapeHtml(item.id)}">
+            <div class="admin-data-change-alert">
+              <i class="fa-solid ${isApproved ? "fa-user-slash" : "fa-triangle-exclamation"}"></i>
+            </div>
+
+            <div class="admin-data-change-body">
+              <div class="admin-data-change-titleline">
+                <strong>${this.escapeHtml(item.student_name || "Alumno")}</strong>
+                <span>${this.escapeHtml(statusLabel)}</span>
+              </div>
+
+              <p>${this.escapeHtml(item.reason || "Sin motivo detallado.")}</p>
+
+              <div class="admin-data-change-meta">
+                ${item.dni ? `<span>DNI: ${this.escapeHtml(item.dni)}</span>` : ""}
+                ${item.twitch ? `<span>Twitch: ${this.escapeHtml(item.twitch)}</span>` : ""}
+                ${item.email ? `<span>Email: ${this.escapeHtml(item.email)}</span>` : ""}
+                ${item.created_at ? `<span>${this.escapeHtml(new Date(item.created_at).toLocaleString("es-AR"))}</span>` : ""}
+              </div>
+
+              <div class="admin-data-change-actions">
+                ${item.status === "pending" ? `
+                  <button type="button" class="danger" data-withdrawal-approve="${this.escapeHtml(item.id)}">
+                    <i class="fa-solid fa-user-slash"></i>
+                    Aprobar baja
+                  </button>
+                ` : `
+                  <button type="button" disabled>
+                    <i class="fa-solid fa-check"></i>
+                    Baja aplicada
+                  </button>
+                `}
+              </div>
+            </div>
+          </article>
+        `;
+      }).join("");
+    } catch (error) {
+      counter.textContent = "Error";
+      list.innerHTML = `
+        <div class="admin-data-change-empty">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+          <span>${this.escapeHtml(error?.message || "No se pudieron cargar las solicitudes de baja.")}</span>
+        </div>
+      `;
+    }
   },
 
   getApiBase() {
@@ -1291,320 +1500,6 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   window.addEventListener("classroom:data-change-requests-updated", render);
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", init);
-  } else {
-    init();
-  }
-})();
-
-
-/* === Alumnos Withdrawal Requests Admin 20260705 === */
-(function initAlumnosWithdrawalRequestsAdmin() {
-  "use strict";
-
-  function safeJson(value, fallback) {
-    try {
-      return JSON.parse(value) || fallback;
-    } catch {
-      return fallback;
-    }
-  }
-
-  function getSession() {
-    const keys = [
-      "andyazh-classroom-session",
-      "andyazhClassroomSession",
-      "classroomSession",
-      "exampro_student_session",
-      "examproSession",
-    ];
-
-    for (const key of keys) {
-      const value = localStorage.getItem(key) || sessionStorage.getItem(key);
-      const parsed = safeJson(value, null);
-
-      if (parsed) return parsed;
-    }
-
-    return {};
-  }
-
-  function getApiBase() {
-    const configured =
-      window.CLASSROOM_API_BASE ||
-      window.EXAMPRO_API_BASE ||
-      localStorage.getItem("andyazh-api-base") ||
-      "";
-
-    if (configured) {
-      return String(configured).replace(/\/+$/, "");
-    }
-
-    const host = window.location.hostname;
-
-    if (host === "localhost" || host === "127.0.0.1") {
-      return "http://127.0.0.1:8000";
-    }
-
-    return "https://api.andyazhtec.com";
-  }
-
-  function getToken() {
-    const session = getSession();
-
-    return (
-      session?.classroomReadToken ||
-      session?.exampro?.accessToken ||
-      session?.exampro?.access_token ||
-      session?.accessToken ||
-      session?.access_token ||
-      session?.token ||
-      ""
-    );
-  }
-
-  async function api(path, options = {}) {
-    const token = getToken();
-
-    if (!token) {
-      throw new Error("No se encontro token Classroom.");
-    }
-
-    const response = await fetch(`${getApiBase()}${path}`, {
-      cache: "no-store",
-      ...options,
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-        ...(options.headers || {}),
-      },
-    });
-
-    const data = await response.json().catch(() => null);
-
-    if (!response.ok || data?.ok === false) {
-      throw new Error(data?.detail || data?.error || "No se pudo completar la operacion.");
-    }
-
-    return data;
-  }
-
-  function formatDate(value) {
-    if (!value) return "";
-    try {
-      return new Intl.DateTimeFormat("es-AR", {
-        dateStyle: "short",
-        timeStyle: "short",
-      }).format(new Date(value));
-    } catch {
-      return value;
-    }
-  }
-
-  function escapeHtml(value) {
-    return String(value ?? "")
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#039;");
-  }
-
-  function ensurePanel() {
-    let panel = document.getElementById("solicitudes-baja-curso");
-
-    if (panel) return panel;
-
-    const main = document.querySelector("main .main-content")
-      || document.querySelector("main")
-      || document.body;
-
-    panel = document.createElement("section");
-    panel.id = "solicitudes-baja-curso";
-    panel.className = "admin-data-change-panel panel admin-withdrawal-panel";
-    panel.innerHTML = `
-      <div class="admin-data-change-head">
-        <div>
-          <p class="eyebrow danger">Bajas de cursada</p>
-          <h2>Solicitudes de baja</h2>
-          <p>Pedidos enviados por alumnos desde Gestion. Al aprobar una baja, el alumno deja de poder acceder al Classroom.</p>
-        </div>
-
-        <div class="admin-data-change-actions">
-          <button type="button" id="adminWithdrawalRefresh">
-            <i class="fa-solid fa-rotate"></i>
-            Actualizar
-          </button>
-          <span class="admin-data-change-counter" id="adminWithdrawalCounter">0 pendientes</span>
-        </div>
-      </div>
-
-      <div class="admin-data-change-list" id="adminWithdrawalList">
-        <div class="admin-data-change-empty">
-          <i class="fa-solid fa-spinner fa-spin"></i>
-          <span>Cargando solicitudes de baja...</span>
-        </div>
-      </div>
-    `;
-
-    const dataChangePanel = document.getElementById("solicitudes-cambios-datos");
-    if (dataChangePanel) {
-      dataChangePanel.insertAdjacentElement("afterend", panel);
-    } else {
-      const firstPanel = main.querySelector(".panel, section, article");
-      if (firstPanel) {
-        firstPanel.insertAdjacentElement("beforebegin", panel);
-      } else {
-        main.prepend(panel);
-      }
-    }
-
-    return panel;
-  }
-
-  async function loadRequests(status = "all") {
-    const data = await api(`/api/classroom/admin/withdrawal-requests?course=ayrpc-2025&status=${encodeURIComponent(status)}&limit=100`);
-    return data.items || [];
-  }
-
-  function renderItems(items) {
-    const panel = ensurePanel();
-    const list = panel.querySelector("#adminWithdrawalList");
-    const counter = panel.querySelector("#adminWithdrawalCounter");
-
-    const pending = items.filter((item) => item.status === "pending");
-    counter.textContent = `${pending.length} pendiente${pending.length === 1 ? "" : "s"}`;
-
-    if (!items.length) {
-      list.innerHTML = `
-        <div class="admin-data-change-empty">
-          <i class="fa-solid fa-circle-check"></i>
-          <span>No hay solicitudes de baja por ahora.</span>
-        </div>
-      `;
-      return;
-    }
-
-    list.innerHTML = items.map((item) => {
-      const isApproved = item.status === "approved";
-      const statusLabel = isApproved ? "Aprobada" : item.status === "rejected" ? "Rechazada" : "Pendiente";
-
-      return `
-        <article class="admin-data-change-item ${isApproved ? "is-resolved" : "is-pending"}" data-withdrawal-id="${escapeHtml(item.id)}">
-          <div class="admin-data-change-alert">
-            <i class="fa-solid ${isApproved ? "fa-user-slash" : "fa-triangle-exclamation"}"></i>
-          </div>
-
-          <div class="admin-data-change-body">
-            <div class="admin-data-change-titleline">
-              <strong>${escapeHtml(item.student_name || "Alumno")}</strong>
-              <span>${escapeHtml(statusLabel)}</span>
-            </div>
-
-            <p>${escapeHtml(item.reason || "Sin motivo detallado.")}</p>
-
-            <div class="admin-data-change-meta">
-              ${item.dni ? `<span>DNI: ${escapeHtml(item.dni)}</span>` : ""}
-              ${item.twitch ? `<span>Twitch: ${escapeHtml(item.twitch)}</span>` : ""}
-              ${item.email ? `<span>Email: ${escapeHtml(item.email)}</span>` : ""}
-              <span>${escapeHtml(formatDate(item.created_at))}</span>
-            </div>
-
-            <div class="admin-data-change-actions">
-              ${item.status === "pending" ? `
-                <button type="button" class="danger" data-withdrawal-approve="${escapeHtml(item.id)}">
-                  <i class="fa-solid fa-user-slash"></i>
-                  Aprobar baja
-                </button>
-              ` : `
-                <button type="button" disabled>
-                  <i class="fa-solid fa-check"></i>
-                  Baja aplicada
-                </button>
-              `}
-            </div>
-          </div>
-        </article>
-      `;
-    }).join("");
-  }
-
-  async function render() {
-    const panel = ensurePanel();
-    const list = panel.querySelector("#adminWithdrawalList");
-
-    try {
-      const items = await loadRequests("all");
-      renderItems(items);
-    } catch (error) {
-      list.innerHTML = `
-        <div class="admin-data-change-empty">
-          <i class="fa-solid fa-triangle-exclamation"></i>
-          <span>${escapeHtml(error?.message || "No se pudieron cargar las solicitudes de baja.")}</span>
-        </div>
-      `;
-    }
-  }
-
-  function bindDelegatedActions() {
-    if (window.__classroomWithdrawalAdminBound) return;
-    window.__classroomWithdrawalAdminBound = true;
-
-    document.addEventListener("click", async (event) => {
-      const refreshButton = event.target.closest("#adminWithdrawalRefresh");
-      if (refreshButton) {
-        render();
-        return;
-      }
-
-      const approveButton = event.target.closest("[data-withdrawal-approve]");
-      if (!approveButton) return;
-
-      const id = approveButton.dataset.withdrawalApprove;
-      const ok = window.confirm("Confirmas aprobar la baja? El alumno dejara de poder acceder al Classroom.");
-
-      if (!ok) return;
-
-      const notes = prompt("Opcional: nota interna de resolucion.", "") || "";
-
-      approveButton.disabled = true;
-      approveButton.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Aplicando...`;
-
-      try {
-        await api(`/api/classroom/admin/withdrawal-requests/${encodeURIComponent(id)}/approve`, {
-          method: "POST",
-          body: JSON.stringify({
-            notes: notes.trim(),
-          }),
-        });
-
-        alert("Baja aplicada correctamente.");
-        render();
-      } catch (error) {
-        alert("Error: " + (error?.message || "No se pudo aprobar la baja."));
-        render();
-      }
-    });
-  }
-
-  function init() {
-    ensurePanel();
-    bindDelegatedActions();
-    render();
-
-    if (window.location.hash === "#solicitudes-baja-curso") {
-      setTimeout(() => {
-        document.getElementById("solicitudes-baja-curso")?.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-        });
-      }, 150);
-    }
-  }
-
-  window.addEventListener("classroom:withdrawal-requests-updated", render);
 
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", init);
