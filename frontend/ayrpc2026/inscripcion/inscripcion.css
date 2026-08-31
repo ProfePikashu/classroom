@@ -1570,3 +1570,52 @@ a {
   }
 
 }
+/* =========================================================
+   SEGURIDAD DEL FORMULARIO
+========================================================= */
+
+.registration-honeypot {
+  position: absolute !important;
+  left: -10000px !important;
+  top: auto !important;
+  width: 1px !important;
+  height: 1px !important;
+  overflow: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+.registration-turnstile-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.registration-turnstile-copy {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.registration-turnstile-copy > i {
+  font-size: 1.15rem;
+}
+
+.registration-turnstile-copy > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.registration-turnstile-copy strong {
+  font-weight: 700;
+}
+
+.registration-turnstile-copy small {
+  opacity: 0.72;
+}
+
+.registration-turnstile-widget {
+  min-height: 65px;
+}

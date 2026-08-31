@@ -9,6 +9,26 @@
     "andyazh-ayrpc2026-registration-theme";
 
   const TOTAL_STEPS = 4;
+  const TURNSTILE_SITE_KEY =
+    "0x4AAAAAAEij_Z9z2XG5mH63";
+
+  const API_BASE =
+    (
+      window.location.protocol === "file:" ||
+      ["localhost", "127.0.0.1"].includes(
+        window.location.hostname
+      )
+    )
+      ? "http://127.0.0.1:8000"
+      : "https://api.andyazhtec.com";
+
+  const REGISTRATION_ENDPOINT =
+    `${API_BASE}/api/classroom/course-registration`;
+
+  let turnstileWidgetId = null;
+  let turnstileToken = "";
+  let turnstileRenderTimer = null;
+
 
   const form =
     document.getElementById("registrationForm");
@@ -33,6 +53,8 @@
 
   const submitButton =
     document.getElementById("submitButton");
+  const honeypotInput =
+    document.getElementById("website");
 
   const stepTitle =
     document.getElementById("stepTitle");
@@ -204,6 +226,147 @@
         .trim();
 
     return clean;
+  }
+
+  function ensureTurnstileRendered() {
+
+    if (turnstileWidgetId !== null) {
+      return;
+    }
+
+    if (
+      !window.turnstile ||
+      typeof window.turnstile.render !== "function"
+    ) {
+
+      clearTimeout(turnstileRenderTimer);
+
+      turnstileRenderTimer =
+        setTimeout(
+          ensureTurnstileRendered,
+          150
+        );
+
+      return;
+    }
+
+    clearTimeout(turnstileRenderTimer);
+
+    turnstileWidgetId =
+      window.turnstile.render(
+        "#turnstileWidget",
+        {
+          sitekey: TURNSTILE_SITE_KEY,
+          theme: "auto",
+
+          callback(token) {
+            turnstileToken =
+              String(token || "").trim();
+          },
+
+          "expired-callback"() {
+            turnstileToken = "";
+          },
+
+          "error-callback"() {
+            turnstileToken = "";
+          }
+        }
+      );
+  }
+
+
+  function resetTurnstileVerification() {
+
+    turnstileToken = "";
+
+    if (
+      window.turnstile &&
+      turnstileWidgetId !== null
+    ) {
+
+      try {
+        window.turnstile.reset(
+          turnstileWidgetId
+        );
+      } catch {
+        // Si Cloudflare ya destruyo el widget,
+        // permitimos que vuelva a renderizarse.
+        turnstileWidgetId = null;
+        ensureTurnstileRendered();
+      }
+    }
+  }
+
+
+  function buildRegistrationPayload(data) {
+
+    return {
+      nombre:
+        data.nombre,
+
+      apellido:
+        data.apellido,
+
+      identificacion:
+        data.dni,
+
+      identificacion_extranjera:
+        Boolean(
+          data.identificacion_extranjera
+        ),
+
+      email:
+        data.email,
+
+      telefono_pais:
+        data.telefono_pais,
+
+      telefono_area:
+        data.telefono_area,
+
+      telefono_numero:
+        data.telefono_numero,
+
+      twitch:
+        cleanTwitch(data.twitch),
+
+      como_te_enteraste:
+        data.como_te_enteraste || null,
+
+      experiencia_previa:
+        data.experiencia_previa || null,
+
+      situacion_it:
+        data.situacion_it || null,
+
+      provincia:
+        data.provincia || null,
+
+      localidad:
+        data.localidad || null,
+
+      objetivo:
+        data.objetivo || null,
+
+      turnstile_token:
+        turnstileToken,
+
+      website:
+        String(
+          honeypotInput?.value || ""
+        ).trim()
+    };
+  }
+
+
+  async function readApiResponse(response) {
+
+    try {
+      return await response.json();
+    } catch {
+      return {};
+    }
   }
 
   function collectData() {
@@ -487,6 +650,7 @@
 
     if (currentStep === TOTAL_STEPS) {
       paintSummary();
+      ensureTurnstileRendered();
     }
 
     updateProgressUI();
@@ -726,7 +890,9 @@
     );
 
     addSummaryItem(
-      "DNI",
+      data.identificacion_extranjera
+        ? "Identificación"
+        : "DNI",
       data.dni
     );
 
@@ -1035,7 +1201,7 @@
 
   form.addEventListener(
     "submit",
-    (event) => {
+    async (event) => {
 
       event.preventDefault();
 
@@ -1043,9 +1209,107 @@
         return;
       }
 
-      clearDraft();
+      if (!turnstileToken) {
 
-      paintSuccess();
+        ensureTurnstileRendered();
+
+        alert(
+          "Esperá un momento y completá la verificación de seguridad antes de confirmar la inscripción."
+        );
+
+        return;
+      }
+
+      const data =
+        collectData();
+
+      const payload =
+        buildRegistrationPayload(data);
+
+      const originalButtonHtml =
+        submitButton.innerHTML;
+
+      submitButton.disabled = true;
+
+      submitButton.innerHTML =
+        '<i class="fa-solid fa-spinner fa-spin"></i> Registrando...';
+
+      try {
+
+        const response =
+          await fetch(
+            REGISTRATION_ENDPOINT,
+            {
+              method: "POST",
+
+              headers: {
+                "Content-Type":
+                  "application/json"
+              },
+
+              body:
+                JSON.stringify(payload)
+            }
+          );
+
+        const result =
+          await readApiResponse(response);
+
+        if (!response.ok) {
+
+          resetTurnstileVerification();
+
+          if (response.status === 409) {
+
+            alert(
+              result.detail ||
+              "La identificación ingresada ya está asociada a otro usuario de Twitch. Revisá los datos o contactanos."
+            );
+
+            return;
+          }
+
+          if (response.status === 403) {
+
+            alert(
+              "No pudimos validar la verificación de seguridad. Volvé a verificarte e intentá nuevamente."
+            );
+
+            return;
+          }
+
+          alert(
+            result.detail ||
+            "No pudimos completar la inscripción. Revisá los datos e intentá nuevamente."
+          );
+
+          return;
+        }
+
+        clearDraft();
+
+        paintSuccess();
+
+      } catch (error) {
+
+        console.error(
+          "Error enviando inscripción AyRPC 2026:",
+          error
+        );
+
+        resetTurnstileVerification();
+
+        alert(
+          "No pudimos comunicarnos con el servidor. Tus datos siguen guardados en este navegador; podés volver a intentarlo."
+        );
+
+      } finally {
+
+        submitButton.disabled = false;
+
+        submitButton.innerHTML =
+          originalButtonHtml;
+      }
     }
   );
 
