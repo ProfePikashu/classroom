@@ -1,0 +1,842 @@
+﻿<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Inscripción AyRPC 2026 — AndyAzhTEC</title>
+
+  <meta
+    name="description"
+    content="Inscripción al Curso de Armado y Reparación de PC AyRPC 2026 de AndyAzhTEC."
+  />
+
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+  />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;800;900&family=Exo+2:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="inscripcion.css?v=20260831-v1" />
+</head>
+
+<body>
+
+  <div class="registration-background" aria-hidden="true">
+    <div class="registration-grid"></div>
+    <div class="registration-glow registration-glow-one"></div>
+    <div class="registration-glow registration-glow-two"></div>
+  </div>
+
+  <header class="registration-topbar">
+    <a class="registration-brand" href="../../cursos.html">
+      <div class="registration-brand-icon">
+        <i class="fa-solid fa-graduation-cap"></i>
+      </div>
+
+      <div class="registration-brand-copy">
+        <strong>
+          Andy<span>Azh</span><b>TEC</b>
+        </strong>
+        <small>Classroom · Cursos</small>
+      </div>
+    </a>
+
+    <div class="registration-topbar-actions">
+<button
+        class="registration-icon-button"
+        id="themeToggle"
+        type="button"
+        aria-label="Cambiar tema"
+        title="Cambiar tema"
+      >
+        <i class="fa-solid fa-moon"></i>
+      </button>
+
+    </div>
+  </header>
+
+  <main class="registration-shell">
+
+    <section class="registration-hero">
+
+      <div class="registration-hero-copy">
+
+        <span class="registration-badge">
+          <i class="fa-solid fa-screwdriver-wrench"></i>
+          AyRPC 2026
+        </span>
+
+        <h1>
+          Inscripción al curso de
+          <span>Armado y Reparación de PC</span>
+        </h1>
+
+        <p>
+          Completá tu inscripción para formar parte de la edición 2026.
+          Tus datos principales serán los mismos que utilizarás posteriormente
+          para ingresar a AndyAzhTEC Classroom.
+        </p>
+
+        <div class="registration-meta">
+
+          <div>
+            <i class="fa-solid fa-calendar-days"></i>
+            <span>
+              <small>Inicio estimado</small>
+              <strong>Octubre 2026</strong>
+            </span>
+          </div>
+
+          <div>
+            <i class="fa-solid fa-layer-group"></i>
+            <span>
+              <small>Programa</small>
+              <strong>12 módulos</strong>
+            </span>
+          </div>
+
+          <div>
+            <i class="fa-solid fa-signal"></i>
+            <span>
+              <small>Modalidad</small>
+              <strong>Online</strong>
+            </span>
+          </div>
+
+        </div>
+
+      </div>
+
+      <div class="registration-hero-orb" aria-hidden="true">
+        <div class="registration-orb-ring"></div>
+        <i class="fa-solid fa-microchip"></i>
+      </div>
+
+    </section>
+
+    <section class="registration-autosave-bar">
+
+      <div>
+        <i class="fa-solid fa-cloud-arrow-down"></i>
+
+        <span>
+          <strong id="saveStatus">Borrador local preparado</strong>
+          <small>
+            Tu avance se guarda automáticamente en este dispositivo.
+          </small>
+        </span>
+      </div>
+
+      <span class="registration-save-percent" id="draftPercent">
+        0%
+      </span>
+
+    </section>
+
+    <section class="registration-card">
+
+      <div class="registration-progress-header">
+
+        <div>
+          <p class="registration-eyebrow">
+            Inscripción AyRPC 2026
+          </p>
+
+          <h2 id="stepTitle">
+            Tus datos
+          </h2>
+        </div>
+
+        <strong id="stepCounter">
+          Paso 1 de 4
+        </strong>
+
+      </div>
+
+      <div class="registration-progress">
+
+        <div class="registration-progress-line">
+          <span id="progressLine"></span>
+        </div>
+
+        <div class="registration-steps">
+
+          <div class="registration-step active" data-progress-step="1">
+            <span>1</span>
+            <small>Tus datos</small>
+          </div>
+
+          <div class="registration-step" data-progress-step="2">
+            <span>2</span>
+            <small>Twitch</small>
+          </div>
+
+          <div class="registration-step" data-progress-step="3">
+            <span>3</span>
+            <small>Sobre vos</small>
+          </div>
+
+          <div class="registration-step" data-progress-step="4">
+            <span>4</span>
+            <small>Confirmar</small>
+          </div>
+
+        </div>
+
+      </div>
+
+      <form id="registrationForm" novalidate>
+
+        <!-- =================================================
+             PASO 1
+        ================================================== -->
+
+        <section
+          class="registration-form-step active"
+          data-form-step="1"
+          data-step-name="Tus datos"
+        >
+
+          <div class="registration-section-copy">
+            <h3>Primero, tus datos principales</h3>
+
+            <p>
+              Estos datos forman parte de tu perfil de alumno y servirán
+              para identificarte dentro del ecosistema AndyAzhTEC.
+            </p>
+          </div>
+
+          <div class="registration-fields registration-fields-two">
+
+            <label class="registration-field">
+              <span>Nombre <b>*</b></span>
+
+              <div class="registration-input-wrap">
+                <i class="fa-solid fa-user"></i>
+
+                <input
+                  type="text"
+                  name="nombre"
+                  id="nombre"
+                  autocomplete="given-name"
+                  placeholder="Tu nombre"
+                  required
+                />
+              </div>
+            </label>
+
+            <label class="registration-field">
+              <span>Apellido <b>*</b></span>
+
+              <div class="registration-input-wrap">
+                <i class="fa-solid fa-user"></i>
+
+                <input
+                  type="text"
+                  name="apellido"
+                  id="apellido"
+                  autocomplete="family-name"
+                  placeholder="Tu apellido"
+                  required
+                />
+              </div>
+            </label>
+
+            <div class="registration-field">
+              <span id="identificationLabel">DNI argentino <b>*</b></span>
+
+              <div class="registration-input-wrap">
+                <i class="fa-solid fa-id-card"></i>
+
+                <input
+                  type="text"
+                  name="dni"
+                  id="dni"
+                  inputmode="numeric"
+                  autocomplete="off"
+                  placeholder="Ej: 30123456"
+                  minlength="7"
+                  maxlength="8"
+                  required
+                />
+              </div>
+
+              <label class="registration-inline-check">
+                <input
+                  type="checkbox"
+                  name="identificacion_extranjera"
+                  id="foreignIdentification"
+                />
+
+                <span>
+                  No tengo DNI argentino / utilizar identificación extranjera
+                </span>
+              </label>
+
+              <small id="identificationHelp">
+                Ingresá entre 1.000.000 y 99.999.999, sin puntos.
+                Si ya participaste de otra edición de AyRPC,
+                utilizaremos este dato para reconocer tu mismo perfil.
+              </small>
+            </div>
+
+            <label class="registration-field">
+              <span>Correo electrónico <b>*</b></span>
+
+              <div class="registration-input-wrap">
+                <i class="fa-solid fa-envelope"></i>
+
+                <input
+                  type="email"
+                  name="email"
+                  id="email"
+                  autocomplete="email"
+                  placeholder="nombre@correo.com"
+                  required
+                />
+              </div>
+            </label>
+
+            <div class="registration-field registration-field-wide">
+              <span>Teléfono / WhatsApp <b>*</b></span>
+
+              <div class="registration-phone-grid">
+
+                <label>
+                  <small>Código país</small>
+
+                  <div class="registration-input-wrap">
+                    <i class="fa-solid fa-earth-americas"></i>
+
+                    <input
+                      type="text"
+                      name="telefono_pais"
+                      id="telefonoPais"
+                      inputmode="tel"
+                      autocomplete="tel-country-code"
+                      value="+549"
+                      placeholder="+549"
+                      required
+                    />
+                  </div>
+                </label>
+
+                <label>
+                  <small>Código de área</small>
+
+                  <div class="registration-input-wrap">
+                    <i class="fa-solid fa-location-dot"></i>
+
+                    <input
+                      type="text"
+                      name="telefono_area"
+                      id="telefonoArea"
+                      inputmode="numeric"
+                      autocomplete="tel-area-code"
+                      placeholder="Ej: 351"
+                      required
+                    />
+                  </div>
+                </label>
+
+                <label>
+                  <small>Número</small>
+
+                  <div class="registration-input-wrap">
+                    <i class="fa-brands fa-whatsapp"></i>
+
+                    <input
+                      type="text"
+                      name="telefono_numero"
+                      id="telefonoNumero"
+                      inputmode="numeric"
+                      autocomplete="tel-local"
+                      placeholder="Ej: 1234567"
+                      required
+                    />
+                  </div>
+                </label>
+
+              </div>
+
+              <small>
+                Para Argentina dejamos +549 por defecto.
+                Si cursás desde otro país, reemplazalo por el código correspondiente.
+              </small>
+            </div>
+
+          </div>
+
+        </section>
+
+        <!-- =================================================
+             PASO 2
+        ================================================== -->
+
+        <section
+          class="registration-form-step"
+          data-form-step="2"
+          data-step-name="Tu usuario de Twitch"
+        >
+
+          <div class="registration-section-copy">
+            <h3>Tu usuario de Twitch</h3>
+
+            <p>
+              Este dato es fundamental durante la cursada.
+            </p>
+          </div>
+
+          <div class="registration-info-card registration-info-card-twitch">
+
+            <div class="registration-info-icon">
+              <i class="fa-brands fa-twitch"></i>
+            </div>
+
+            <div>
+              <h4>¿Por qué necesitamos tu usuario de Twitch?</h4>
+
+              <p>
+                Las clases en vivo se realizan a través de Twitch.
+                Durante la cursada utilizamos herramientas que identifican
+                tu usuario y registran tu tiempo de conexión para calcular
+                la asistencia a cada clase.
+              </p>
+
+              <p>
+                Por eso necesitás utilizar durante las clases
+                <strong>el mismo usuario que registres acá.</strong>
+              </p>
+            </div>
+
+          </div>
+
+          <label class="registration-field registration-field-featured">
+            <span>Usuario de Twitch <b>*</b></span>
+
+            <div class="registration-input-wrap">
+              <i class="fa-brands fa-twitch"></i>
+
+              <span class="registration-input-prefix">@</span>
+
+              <input
+                type="text"
+                name="twitch"
+                id="twitch"
+                autocomplete="off"
+                placeholder="usuario_twitch"
+                required
+              />
+            </div>
+
+            <small>
+              Nunca vamos a pedirte tu contraseña de Twitch.
+            </small>
+          </label>
+
+          <div class="registration-example-card">
+
+            <div class="registration-example-good">
+              <i class="fa-solid fa-circle-check"></i>
+
+              <span>
+                <strong>Correcto</strong>
+                profe_pikashu
+              </span>
+            </div>
+
+            <div>
+              <i class="fa-solid fa-circle-xmark"></i>
+
+              <span>
+                <strong>No pongas</strong>
+                https://twitch.tv/profe_pikashu
+              </span>
+            </div>
+
+            <div>
+              <i class="fa-solid fa-circle-xmark"></i>
+
+              <span>
+                <strong>No pongas</strong>
+                tu nombre visible si tu usuario real es otro
+              </span>
+            </div>
+
+          </div>
+
+          <div class="registration-warning-card">
+            <i class="fa-solid fa-circle-info"></i>
+
+            <p>
+              <strong>¿Todavía no tenés Twitch?</strong>
+              Vas a necesitar crear una cuenta gratuita antes de iniciar
+              la cursada y utilizar ese mismo usuario durante las clases.
+            </p>
+          </div>
+
+        </section>
+
+        <!-- =================================================
+             PASO 3
+        ================================================== -->
+
+        <section
+          class="registration-form-step"
+          data-form-step="3"
+          data-step-name="Sobre vos"
+        >
+
+          <div class="registration-section-copy">
+            <h3>Contanos un poquito sobre vos</h3>
+
+            <p>
+              Estas respuestas nos ayudan a conocer mejor a quienes
+              participan del curso. No modifican tu acceso al Classroom.
+            </p>
+          </div>
+
+          <div class="registration-fields registration-fields-two">
+
+            <label class="registration-field">
+              <span>¿Cómo te enteraste del curso? <b>*</b></span>
+
+              <div class="registration-input-wrap">
+                <i class="fa-solid fa-bullhorn"></i>
+
+                <select
+                  name="como_te_enteraste"
+                  id="comoTeEnteraste"
+                  required
+                >
+                  <option value="">Seleccionar...</option>
+                  <option value="twitch">Twitch</option>
+                  <option value="youtube">YouTube</option>
+                  <option value="instagram">Instagram</option>
+                  <option value="tiktok">TikTok</option>
+                  <option value="whatsapp">WhatsApp</option>
+                  <option value="facebook">Facebook</option>
+                  <option value="recomendacion">Recomendación de otra persona</option>
+                  <option value="edicion-anterior">Ya hice una edición anterior</option>
+                  <option value="ambito-educativo">UTN / ámbito educativo</option>
+                  <option value="google">Google / buscador</option>
+                  <option value="otro">Otro</option>
+                </select>
+              </div>
+            </label>
+
+            <label class="registration-field">
+              <span>Experiencia con computadoras <b>*</b></span>
+
+              <div class="registration-input-wrap">
+                <i class="fa-solid fa-computer"></i>
+
+                <select
+                  name="experiencia_previa"
+                  id="experienciaPrevia"
+                  required
+                >
+                  <option value="">Seleccionar...</option>
+                  <option value="ninguna">Ninguna</option>
+                  <option value="basica">Básica</option>
+                  <option value="intermedia">Intermedia</option>
+                  <option value="avanzada">Avanzada</option>
+                  <option value="trabajo-en-el-rubro">Trabajo en el rubro</option>
+                </select>
+              </div>
+            </label>
+
+            <label class="registration-field registration-field-wide">
+              <span>
+                ¿Actualmente estudiás o trabajás en algo relacionado
+                con informática?
+              </span>
+
+              <div class="registration-input-wrap">
+                <i class="fa-solid fa-briefcase"></i>
+
+                <input
+                  type="text"
+                  name="situacion_it"
+                  id="situacionIt"
+                  placeholder="Opcional"
+                />
+              </div>
+            </label>
+
+            <label class="registration-field">
+              <span>Provincia</span>
+
+              <div class="registration-input-wrap">
+                <i class="fa-solid fa-map-location-dot"></i>
+
+                <input
+                  type="text"
+                  name="provincia"
+                  id="provincia"
+                  autocomplete="address-level1"
+                  placeholder="Ej: Buenos Aires"
+                />
+              </div>
+            </label>
+
+            <label class="registration-field">
+              <span>Localidad</span>
+
+              <div class="registration-input-wrap">
+                <i class="fa-solid fa-location-dot"></i>
+
+                <input
+                  type="text"
+                  name="localidad"
+                  id="localidad"
+                  autocomplete="address-level2"
+                  placeholder="Ej: Merlo"
+                />
+              </div>
+            </label>
+
+            <label class="registration-field registration-field-wide">
+              <span>
+                ¿Qué te gustaría aprender o conseguir haciendo AyRPC?
+              </span>
+
+              <textarea
+                name="objetivo"
+                id="objetivo"
+                rows="5"
+                placeholder="Contanos brevemente qué esperás del curso..."
+              ></textarea>
+            </label>
+
+          </div>
+
+        </section>
+
+        <!-- =================================================
+             PASO 4
+        ================================================== -->
+
+        <section
+          class="registration-form-step"
+          data-form-step="4"
+          data-step-name="Confirmar inscripción"
+        >
+
+          <div class="registration-section-copy">
+            <h3>Revisá tu inscripción</h3>
+
+            <p>
+              Confirmá que tus datos principales estén correctos,
+              especialmente DNI y usuario de Twitch.
+            </p>
+          </div>
+
+          <div class="registration-summary" id="registrationSummary"></div>
+
+          <label class="registration-confirm-check">
+            <input
+              type="checkbox"
+              name="confirmacion"
+              id="confirmacion"
+              required
+            />
+
+            <span>
+              Confirmo que los datos ingresados son correctos y que utilizaré
+              el usuario de Twitch indicado durante la cursada.
+            </span>
+          </label>
+</section>
+
+        <!-- =================================================
+             NAVEGACION
+        ================================================== -->
+
+        <div class="registration-navigation">
+
+          <button
+            class="registration-btn registration-btn-secondary"
+            type="button"
+            id="prevButton"
+            disabled
+          >
+            <i class="fa-solid fa-arrow-left"></i>
+            Atrás
+          </button>
+
+          <button
+            class="registration-btn registration-btn-primary"
+            type="button"
+            id="nextButton"
+          >
+            Siguiente
+            <i class="fa-solid fa-arrow-right"></i>
+          </button>
+
+          <button
+            class="registration-btn registration-btn-primary registration-submit"
+            type="submit"
+            id="submitButton"
+            hidden
+          >
+            <i class="fa-solid fa-circle-check"></i>
+            Confirmar inscripción
+          </button>
+
+        </div>
+
+      </form>
+
+    </section>
+
+    <!-- =====================================================
+         RESULTADO DE PRUEBA
+    ====================================================== -->
+
+    <section class="registration-success" id="registrationSuccess" hidden>
+
+      <div class="registration-success-icon">
+        <i class="fa-solid fa-circle-check"></i>
+      </div>
+
+      <span class="registration-badge">
+        Inscripción AyRPC 2026
+      </span>
+
+      <h2>¡Completaste tu inscripción!</h2>
+
+      <p>
+        Revisá que tus datos sean correctos.
+        Esta información será utilizada para tu registro en AyRPC 2026
+        y tu posterior acceso a AndyAzhTEC Classroom.
+      </p>
+
+      <div class="registration-success-data">
+
+        <div>
+          <small>Alumno</small>
+          <strong id="successName">—</strong>
+        </div>
+
+        <div>
+          <small>Twitch</small>
+          <strong id="successTwitch">—</strong>
+        </div>
+
+        <div>
+          <small>Curso</small>
+          <strong>AyRPC 2026</strong>
+        </div>
+
+      </div>
+
+      <div class="registration-success-actions">
+
+        <a
+          href="../../curso-ayrpc-2026.html"
+          class="registration-btn registration-btn-primary"
+        >
+          <i class="fa-solid fa-screwdriver-wrench"></i>
+          Volver a AyRPC 2026
+        </a>
+
+        <button
+          class="registration-btn registration-btn-secondary"
+          id="restartDemoButton"
+          type="button"
+        >
+          <i class="fa-solid fa-rotate-right"></i>
+          Realizar otra inscripción
+        </button>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- =======================================================
+       MODAL BORRADOR
+  ======================================================== -->
+
+  <div
+    class="registration-modal-backdrop"
+    id="resumeModal"
+    hidden
+  >
+
+    <div
+      class="registration-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="resumeModalTitle"
+    >
+
+      <div class="registration-modal-icon">
+        <i class="fa-solid fa-clock-rotate-left"></i>
+      </div>
+
+      <span class="registration-badge">
+        Inscripción sin terminar
+      </span>
+
+      <h2 id="resumeModalTitle">
+        ¿Querés continuar tu inscripción?
+      </h2>
+
+      <p>
+        Encontramos información guardada anteriormente en este navegador.
+      </p>
+
+      <div class="registration-modal-status">
+
+        <div>
+          <small>Último guardado</small>
+          <strong id="resumeSavedAt">—</strong>
+        </div>
+
+        <div>
+          <small>Avance</small>
+          <strong id="resumePercent">—</strong>
+        </div>
+
+      </div>
+
+      <div class="registration-modal-actions">
+
+        <button
+          class="registration-btn registration-btn-primary"
+          id="resumeButton"
+          type="button"
+        >
+          <i class="fa-solid fa-play"></i>
+          Continuar inscripción
+        </button>
+
+        <button
+          class="registration-btn registration-btn-secondary"
+          id="restartButton"
+          type="button"
+        >
+          Empezar de nuevo
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <script src="inscripcion.js?v=20260831-v1"></script>
+
+</body>
+</html>
