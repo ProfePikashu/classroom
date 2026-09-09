@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
@@ -24,7 +24,7 @@
     rel="stylesheet"
   />
 
-  <link rel="stylesheet" href="inscripcion.css?v=20260831-v1" />
+  <link rel="stylesheet" href="inscripcion.css?v=20260908-branding1" />
   <script
     src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit"
     defer
@@ -32,29 +32,49 @@
 </head>
 
 <body>
+<section class="institutional-branding" aria-label="Organizaciones responsables del curso">
 
-  <div class="registration-background" aria-hidden="true">
-    <div class="registration-grid"></div>
-    <div class="registration-glow registration-glow-one"></div>
-    <div class="registration-glow registration-glow-two"></div>
-  </div>
+    <div class="institutional-branding__primary">
 
-  <header class="registration-topbar">
-    <a class="registration-brand" href="../../cursos.html">
-      <div class="registration-brand-icon">
-        <i class="fa-solid fa-graduation-cap"></i>
-      </div>
+        <div class="institutional-brand institutional-brand--andy">
+            <div class="institutional-brand__andy-stage">
+                <iframe
+                    src="/branding/animation/standby.html"
+                    title="Logo animado AndyAzhTEC"
+                    tabindex="-1"
+                    aria-hidden="true">
+                </iframe>
+            </div>
 
-      <div class="registration-brand-copy">
-        <strong>
-          Andy<span>Azh</span><b>TEC</b>
-        </strong>
-        <small>Classroom · Cursos</small>
-      </div>
-    </a>
+            <div class="institutional-brand__andy-copy" aria-label="AndyAzhTEC">
+                <span class="institutional-brand__andy-name">
+                    <span class="institutional-brand__andy">Andy</span><span class="institutional-brand__azh">Azh</span><span class="institutional-brand__tec">TEC</span>
+                </span>
+                <span class="institutional-brand__tagline">TECH SOLUTIONS</span>
+            </div>
+        </div>
 
-    <div class="registration-topbar-actions">
-<button
+        <div class="institutional-branding__collab" aria-hidden="true">×</div>
+
+        <div class="institutional-brand institutional-brand--itec">
+            <img
+                src="/assets/brands/itec-logo.png"
+                alt="iTEC">
+        </div>
+
+    </div>
+
+    <div class="institutional-branding__divider" aria-hidden="true"></div>
+
+    <div class="institutional-brand institutional-brand--utnba">
+        <img
+            src="/assets/brands/utnba-logo.jpg"
+            alt="UTN.BA - Universidad Tecnológica Nacional, Facultad Regional Buenos Aires">
+    </div>
+
+
+    <div class="institutional-branding__theme">
+        <button
         class="registration-icon-button"
         id="themeToggle"
         type="button"
@@ -63,11 +83,15 @@
       >
         <i class="fa-solid fa-moon"></i>
       </button>
-
     </div>
-  </header>
+</section>
 
-  <main class="registration-shell">
+  <div class="registration-background" aria-hidden="true">
+    <div class="registration-grid"></div>
+    <div class="registration-glow registration-glow-one"></div>
+    <div class="registration-glow registration-glow-two"></div>
+  </div>
+<main class="registration-shell">
 
     <section class="registration-hero">
 
@@ -84,18 +108,33 @@
         </h1>
 
         <p>
-          Completá tu inscripción para formar parte de la edición 2026.
-          Tus datos principales serán los mismos que utilizarás posteriormente
-          para ingresar a AndyAzhTEC Classroom.
-        </p>
+  Completá tu inscripción para formar parte de AyRPC 2026.
+  El curso comienza el <strong>24 de octubre de 2026</strong> y está organizado
+  en 12 módulos, con clases en vivo, gestión académica mediante Classroom y examen.
+</p>
+
+<div class="registration-modules-summary">
+  <span>1. Presentación e introducción</span>
+  <span>2. Componentes de una PC</span>
+  <span>3. Compatibilidad y armado</span>
+  <span>4. Sistemas operativos</span>
+  <span>5. BIOS / UEFI</span>
+  <span>6. Drivers y herramientas</span>
+  <span>7. Microsoldadura I</span>
+  <span>8. Microsoldadura II</span>
+  <span>9. Diagnóstico</span>
+  <span>10. Redes</span>
+  <span>11. Introducción a ciberseguridad</span>
+  <span>12. Malware y protección</span>
+</div>
 
         <div class="registration-meta">
 
           <div>
             <i class="fa-solid fa-calendar-days"></i>
             <span>
-              <small>Inicio estimado</small>
-              <strong>Octubre 2026</strong>
+              <small>Inicio de clases</small>
+              <strong>24 de octubre de 2026</strong>
             </span>
           </div>
 
@@ -111,7 +150,7 @@
             <i class="fa-solid fa-signal"></i>
             <span>
               <small>Modalidad</small>
-              <strong>Online</strong>
+              <strong>Clases en vivo, gestión por Classroom y examen</strong>
             </span>
           </div>
 
@@ -121,31 +160,21 @@
 
       <div class="registration-hero-orb" aria-hidden="true">
         <div class="registration-orb-ring"></div>
-        <i class="fa-solid fa-microchip"></i>
+        <img
+  class="registration-mascot registration-mascot-dark"
+  src="/media/icons/classroomico.png"
+  alt=""
+/>
+
+<img
+  class="registration-mascot registration-mascot-light"
+  src="/media/icons/classroomicoclaro.png"
+  alt=""
+/>
       </div>
 
     </section>
-
-    <section class="registration-autosave-bar">
-
-      <div>
-        <i class="fa-solid fa-cloud-arrow-down"></i>
-
-        <span>
-          <strong id="saveStatus">Borrador local preparado</strong>
-          <small>
-            Tu avance se guarda automáticamente en este dispositivo.
-          </small>
-        </span>
-      </div>
-
-      <span class="registration-save-percent" id="draftPercent">
-        0%
-      </span>
-
-    </section>
-
-    <section class="registration-card">
+<section class="registration-card">
 
       <div class="registration-progress-header">
 
@@ -541,14 +570,12 @@
                 >
                   <option value="">Seleccionar...</option>
                   <option value="twitch">Twitch</option>
-                  <option value="youtube">YouTube</option>
-                  <option value="instagram">Instagram</option>
-                  <option value="tiktok">TikTok</option>
-                  <option value="whatsapp">WhatsApp</option>
-                  <option value="facebook">Facebook</option>
+                  <option value="itec">iTEC</option>
+                  <option value="utn">UTN</option>
+                  <option value="otro-ambito-educativo">Otro ámbito educativo</option>
+                  <option value="redes-sociales">Redes Sociales</option>
                   <option value="recomendacion">Recomendación de otra persona</option>
                   <option value="edicion-anterior">Ya hice una edición anterior</option>
-                  <option value="ambito-educativo">UTN / ámbito educativo</option>
                   <option value="google">Google / buscador</option>
                   <option value="otro">Otro</option>
                 </select>
@@ -628,7 +655,7 @@
 
             <label class="registration-field registration-field-wide">
               <span>
-                ¿Qué te gustaría aprender o conseguir haciendo AyRPC?
+                ¿Qué te gustaría aprender y qué objetivo esperás alcanzar con este curso?
               </span>
 
               <textarea
@@ -801,6 +828,27 @@
 
     </section>
 
+  
+    <footer class="registration-autosave-bar registration-autosave-footer">
+
+
+      <div>
+        <i class="fa-solid fa-cloud-arrow-down"></i>
+
+        <span>
+          <strong id="saveStatus">Borrador local preparado</strong>
+          <small>
+            Tu avance se guarda automáticamente en este dispositivo.
+          </small>
+        </span>
+      </div>
+
+      <span class="registration-save-percent" id="draftPercent">
+        0%
+      </span>
+
+    
+    </footer>
   </main>
 
   <!-- =======================================================
@@ -879,3 +927,9 @@
 
 </body>
 </html>
+
+
+
+
+
+

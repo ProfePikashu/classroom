@@ -1,0 +1,502 @@
+﻿<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>AndyAzhTEC — Standby Loop V1</title>
+
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+
+body{
+    min-height:100vh;
+    display:grid;
+    place-items:center;
+    overflow:hidden;
+    font-family:Arial,Helvetica,sans-serif;
+    background:
+        linear-gradient(45deg,#151922 25%,transparent 25%),
+        linear-gradient(-45deg,#151922 25%,transparent 25%),
+        linear-gradient(45deg,transparent 75%,#151922 75%),
+        linear-gradient(-45deg,transparent 75%,#151922 75%),
+        #0c0f15;
+    background-size:32px 32px;
+    background-position:
+        0 0,
+        0 16px,
+        16px -16px,
+        -16px 0;
+}
+
+body.dark{background:#060911}
+body.light{background:#eceff3}
+
+.preview{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:24px;
+}
+
+.stage{
+    position:relative;
+    width:min(76vw,720px);
+    aspect-ratio:1253 / 1172;
+    overflow:hidden;
+    isolation:isolate;
+    filter:
+        drop-shadow(0 0 10px rgba(0,229,255,.10))
+        drop-shadow(0 0 20px rgba(236,72,153,.10));
+    animation: signalFlickerLoop 6s steps(1,end) infinite;
+}
+
+.logo-group{
+    position:absolute;
+    inset:0;
+}
+
+.piece,
+.ghost-piece{
+    position:absolute;
+    display:block;
+    user-select:none;
+    pointer-events:none;
+    will-change:transform,opacity,filter;
+}
+
+/* posiciones reales */
+.outer{
+    left:7.821%;
+    top:.683%;
+    width:80.925%;
+    height:66.553%;
+}
+
+.inner{
+    left:9.737%;
+    top:22.099%;
+    width:76.217%;
+    height:54.778%;
+}
+
+.chevron{
+    left:25.539%;
+    top:68.003%;
+    width:44.533%;
+    height:23.976%;
+}
+
+/* logo base siempre armado */
+.logo-group.base{
+    animation:
+        standbyPulse 6s ease-in-out infinite,
+        standbyBaseJitter 6s steps(1,end) infinite;
+}
+
+.base-piece{
+    opacity:1;
+}
+
+@keyframes standbyPulse{
+    0%, 29%, 42%, 69%, 86%, 100%{
+        filter:
+            brightness(1)
+            drop-shadow(0 0 5px rgba(0,229,255,.10));
+    }
+
+    33%{
+        filter:
+            brightness(1.12)
+            drop-shadow(0 0 10px rgba(0,229,255,.22))
+            drop-shadow(0 0 12px rgba(255,0,180,.16));
+    }
+
+    76%{
+        filter:
+            brightness(1.28)
+            drop-shadow(0 0 18px rgba(0,229,255,.38))
+            drop-shadow(0 0 22px rgba(255,0,180,.26));
+    }
+}
+
+@keyframes standbyBaseJitter{
+    0%, 29%, 42%, 69%, 86%, 100%{
+        transform:translate(0,0) skew(0);
+        opacity:1;
+    }
+
+    /* glitch corto */
+    30%{transform:translate(-8px,4px) skewX(-1deg);opacity:.92}
+    31%{transform:translate(10px,-5px) skewX(1deg);opacity:.84}
+    32%{transform:translate(-5px,3px);opacity:.92}
+    33%{transform:translate(3px,-2px)}
+    34%{transform:translate(0,0);opacity:1}
+
+    /* glitch full chaos */
+    70%{transform:translate(-18px,8px) skewX(-2.4deg);opacity:.88}
+    71%{transform:translate(22px,-11px) skewX(2deg);opacity:.76}
+    72%{transform:translate(-15px,7px) skewX(-1.4deg);opacity:.90}
+    73%{transform:translate(11px,-6px)}
+    74%{transform:translate(-24px,10px) skewX(-3deg);opacity:.82}
+    75%{transform:translate(27px,-14px) skewX(2.6deg);opacity:.72}
+    76%{transform:translate(-18px,9px);opacity:.88}
+    77%{transform:translate(13px,-6px)}
+    78%{transform:translate(-8px,4px)}
+    79%{transform:translate(4px,-2px)}
+    80%{transform:translate(-2px,1px)}
+    81%{transform:translate(0,0);opacity:1}
+}
+
+/* stacks de glitch */
+.glitch-stack{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    z-index:14;
+    mix-blend-mode:screen;
+}
+
+.slice{
+    position:absolute;
+    inset:0;
+    opacity:0;
+}
+
+.slice-1{clip-path:inset(5% 0 81% 0)}
+.slice-2{clip-path:inset(18% 0 64% 0)}
+.slice-3{clip-path:inset(34% 0 46% 0)}
+.slice-4{clip-path:inset(51% 0 28% 0)}
+.slice-5{clip-path:inset(70% 0 11% 0)}
+
+.ghost-piece{
+    filter:saturate(1.25) brightness(1.08);
+}
+
+.glitch-stack.cyan .ghost-piece{
+    filter:
+        hue-rotate(-28deg)
+        saturate(2)
+        brightness(1.25)
+        drop-shadow(0 0 6px rgba(0,229,255,.40));
+}
+.glitch-stack.magenta .ghost-piece{
+    filter:
+        hue-rotate(20deg)
+        saturate(1.95)
+        brightness(1.18)
+        drop-shadow(0 0 6px rgba(255,0,180,.35));
+}
+.glitch-stack.blue .ghost-piece{
+    filter:
+        hue-rotate(-82deg)
+        saturate(2.8)
+        contrast(1.12)
+        brightness(1.38)
+        drop-shadow(0 0 8px rgba(25,90,255,.55));
+}
+.glitch-stack.red .ghost-piece{
+    filter:
+        hue-rotate(92deg)
+        saturate(3)
+        contrast(1.14)
+        brightness(1.30)
+        drop-shadow(0 0 8px rgba(255,20,45,.52));
+}
+
+.glitch-stack.cyan .slice-1{animation: sliceAloop 6s steps(1,end) infinite}
+.glitch-stack.cyan .slice-2{animation: sliceBloop 6s steps(1,end) infinite}
+.glitch-stack.cyan .slice-3{animation: sliceCloop 6s steps(1,end) infinite}
+.glitch-stack.cyan .slice-4{animation: sliceDloop 6s steps(1,end) infinite}
+.glitch-stack.cyan .slice-5{animation: sliceEloop 6s steps(1,end) infinite}
+
+.glitch-stack.magenta .slice-1{animation: sliceBloop 6s steps(1,end) infinite}
+.glitch-stack.magenta .slice-2{animation: sliceCloop 6s steps(1,end) infinite}
+.glitch-stack.magenta .slice-3{animation: sliceDloop 6s steps(1,end) infinite}
+.glitch-stack.magenta .slice-4{animation: sliceEloop 6s steps(1,end) infinite}
+.glitch-stack.magenta .slice-5{animation: sliceAloop 6s steps(1,end) infinite}
+
+.glitch-stack.blue .slice-1{animation: sliceCloop 6s steps(1,end) infinite}
+.glitch-stack.blue .slice-2{animation: sliceEloop 6s steps(1,end) infinite}
+.glitch-stack.blue .slice-3{animation: sliceAloop 6s steps(1,end) infinite}
+.glitch-stack.blue .slice-4{animation: sliceBloop 6s steps(1,end) infinite}
+.glitch-stack.blue .slice-5{animation: sliceDloop 6s steps(1,end) infinite}
+
+.glitch-stack.red .slice-1{animation: sliceDloop 6s steps(1,end) infinite}
+.glitch-stack.red .slice-2{animation: sliceAloop 6s steps(1,end) infinite}
+.glitch-stack.red .slice-3{animation: sliceEloop 6s steps(1,end) infinite}
+.glitch-stack.red .slice-4{animation: sliceCloop 6s steps(1,end) infinite}
+.glitch-stack.red .slice-5{animation: sliceBloop 6s steps(1,end) infinite}
+
+/* FLICKER GENERAL DEL LOOP */
+@keyframes signalFlickerLoop{
+    0%, 29%, 35%, 69%, 82%, 100%{opacity:1}
+    30%{opacity:.72}
+    31%{opacity:.94}
+    32%{opacity:.82}
+    70%{opacity:.52}
+    71%{opacity:.86}
+    72%{opacity:.64}
+    73%{opacity:.91}
+    74%{opacity:.58}
+    75%{opacity:.80}
+    76%{opacity:.68}
+    77%{opacity:.92}
+}
+
+/* SLICES - versión loop con dos ventanas:
+   30-35% glitch corto
+   70-82% glitch bestia
+*/
+
+@keyframes sliceAloop{
+    0%,29%,35%,69%,82%,100%{opacity:0;transform:translate(0,0) skew(0)}
+
+    30%{opacity:.62;transform:translate(-16px,6px) skewX(-5deg)}
+    31%{opacity:.28;transform:translate(10px,-5px)}
+    32%{opacity:.54;transform:translate(-8px,4px)}
+    33%{opacity:.18;transform:translate(5px,-2px)}
+    34%{opacity:0}
+
+    70%{opacity:.96;transform:translate(-48px,21px) skewX(-14deg)}
+    71%{opacity:.60;transform:translate(30px,-14px) skewX(8deg)}
+    72%{opacity:.88;transform:translate(-36px,16px)}
+    73%{opacity:.34;transform:translate(18px,-8px)}
+    74%{opacity:.92;transform:translate(42px,-18px) skewX(11deg)}
+    75%{opacity:.28;transform:translate(-24px,11px)}
+    76%{opacity:.80;transform:translate(-40px,-15px) skewX(-12deg)}
+    77%{opacity:.22;transform:translate(14px,6px)}
+    78%{opacity:.48;transform:translate(-16px,7px)}
+    79%{opacity:.16;transform:translate(7px,-3px)}
+    80%{opacity:.06;transform:translate(-3px,1px)}
+    81%{opacity:0}
+}
+
+@keyframes sliceBloop{
+    0%,29%,35%,69%,82%,100%{opacity:0;transform:translate(0,0) skew(0)}
+
+    30%{opacity:.58;transform:translate(18px,-7px) skewX(6deg)}
+    31%{opacity:.24;transform:translate(-9px,5px)}
+    32%{opacity:.48;transform:translate(7px,-3px)}
+    33%{opacity:.16;transform:translate(-4px,2px)}
+    34%{opacity:0}
+
+    70%{opacity:.92;transform:translate(49px,-22px) skewX(15deg)}
+    71%{opacity:.54;transform:translate(-30px,16px)}
+    72%{opacity:.78;transform:translate(34px,16px)}
+    73%{opacity:.26;transform:translate(-17px,-8px)}
+    74%{opacity:.88;transform:translate(-43px,-18px) skewX(-13deg)}
+    75%{opacity:.30;transform:translate(29px,15px)}
+    76%{opacity:.94;transform:translate(52px,-23px) skewX(15deg)}
+    77%{opacity:.20;transform:translate(-12px,5px)}
+    78%{opacity:.40;transform:translate(14px,-6px)}
+    79%{opacity:.12;transform:translate(-5px,2px)}
+    80%{opacity:.05;transform:translate(2px,-1px)}
+    81%{opacity:0}
+}
+
+@keyframes sliceCloop{
+    0%,29%,35%,69%,82%,100%{opacity:0;transform:translate(0,0) skew(0)}
+
+    30%{opacity:.50;transform:translate(-14px,5px)}
+    31%{opacity:.18;transform:translate(8px,-3px)}
+    32%{opacity:.40;transform:translate(-6px,3px)}
+    33%{opacity:.14;transform:translate(4px,-2px)}
+    34%{opacity:0}
+
+    70%{opacity:.98;transform:translate(-51px,23px) skewX(-15deg)}
+    71%{opacity:.52;transform:translate(31px,-14px)}
+    72%{opacity:.84;transform:translate(-39px,18px) skewX(-12deg)}
+    73%{opacity:.24;transform:translate(14px,-6px)}
+    74%{opacity:.90;transform:translate(45px,-20px) skewX(14deg)}
+    75%{opacity:.30;transform:translate(-24px,13px)}
+    76%{opacity:.86;transform:translate(-35px,16px)}
+    77%{opacity:.20;transform:translate(9px,-4px)}
+    78%{opacity:.38;transform:translate(-12px,5px)}
+    79%{opacity:.10;transform:translate(5px,-2px)}
+    80%{opacity:.04;transform:translate(-2px,1px)}
+    81%{opacity:0}
+}
+
+@keyframes sliceDloop{
+    0%,29%,35%,69%,82%,100%{opacity:0;transform:translate(0,0) skew(0)}
+
+    30%{opacity:.46;transform:translate(13px,5px)}
+    31%{opacity:.18;transform:translate(-7px,-3px)}
+    32%{opacity:.36;transform:translate(6px,3px)}
+    33%{opacity:.12;transform:translate(-3px,-1px)}
+    34%{opacity:0}
+
+    70%{opacity:.95;transform:translate(24px,10px) skewX(6deg)}
+    71%{opacity:.48;transform:translate(-18px,-7px)}
+    72%{opacity:.86;transform:translate(-40px,18px) skewX(-12deg)}
+    73%{opacity:.24;transform:translate(17px,-8px)}
+    74%{opacity:.82;transform:translate(43px,-19px)}
+    75%{opacity:.26;transform:translate(-20px,11px)}
+    76%{opacity:.90;transform:translate(-46px,-20px) skewX(-14deg)}
+    77%{opacity:.22;transform:translate(12px,6px)}
+    78%{opacity:.36;transform:translate(-10px,-4px)}
+    79%{opacity:.10;transform:translate(4px,2px)}
+    80%{opacity:.04;transform:translate(-2px,-1px)}
+    81%{opacity:0}
+}
+
+@keyframes sliceEloop{
+    0%,29%,35%,69%,82%,100%{opacity:0;transform:translate(0,0) skew(0)}
+
+    30%{opacity:.54;transform:translate(-18px,8px) skewX(-5deg)}
+    31%{opacity:.20;transform:translate(10px,-5px)}
+    32%{opacity:.42;transform:translate(-8px,3px)}
+    33%{opacity:.14;transform:translate(4px,-2px)}
+    34%{opacity:0}
+
+    70%{opacity:1;transform:translate(-55px,24px) skewX(-16deg)}
+    71%{opacity:.60;transform:translate(36px,-18px) skewX(9deg)}
+    72%{opacity:.86;transform:translate(-42px,19px) skewX(-13deg)}
+    73%{opacity:.24;transform:translate(15px,-7px)}
+    74%{opacity:.92;transform:translate(47px,-21px) skewX(14deg)}
+    75%{opacity:.32;transform:translate(-21px,11px)}
+    76%{opacity:.80;transform:translate(-37px,-17px)}
+    77%{opacity:.18;transform:translate(10px,5px)}
+    78%{opacity:.34;transform:translate(-12px,5px)}
+    79%{opacity:.10;transform:translate(4px,-2px)}
+    80%{opacity:.04;transform:translate(-2px,1px)}
+    81%{opacity:0}
+}
+
+/* controles */
+.controls{display:flex;gap:10px}
+button{
+    border:1px solid rgba(255,255,255,.14);
+    border-radius:9px;
+    padding:10px 17px;
+    background:rgba(7,12,22,.82);
+    color:#eaf5ff;
+    font-size:14px;
+    cursor:pointer;
+    backdrop-filter:blur(8px);
+}
+button:hover{background:rgba(18,27,43,.95)}
+</style>
+<style id="aat-web-embed">
+html,
+body {
+    width: 100%;
+    height: 100%;
+    margin: 0 !important;
+    background: transparent !important;
+    overflow: hidden !important;
+}
+
+body {
+    display: grid !important;
+    place-items: center !important;
+}
+
+.preview {
+    width: 100vw !important;
+    height: 100vh !important;
+    display: grid !important;
+    place-items: center !important;
+    gap: 0 !important;
+}
+
+.stage {
+    width: min(96vw, 96vh) !important;
+    max-width: none !important;
+}
+
+.controls {
+    display: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .stage,
+    .stage * {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+    }
+}
+</style>
+</head>
+<body>
+
+<div class="preview">
+
+    <div id="stage" class="stage">
+
+        <!-- logo base armado -->
+        <div class="logo-group base">
+            <img class="piece outer base-piece" src="/branding/logo/parts/outer-frame.png" alt="">
+            <img class="piece inner base-piece" src="/branding/logo/parts/inner-a.png" alt="">
+            <img class="piece chevron base-piece" src="/branding/logo/parts/bottom-chevron.png" alt="">
+        </div>
+
+        <!-- cyan -->
+        <div class="glitch-stack cyan">
+            <div class="slice slice-1"><img class="ghost-piece outer" src="/branding/logo/parts/outer-frame.png"><img class="ghost-piece inner" src="/branding/logo/parts/inner-a.png"><img class="ghost-piece chevron" src="/branding/logo/parts/bottom-chevron.png"></div>
+            <div class="slice slice-2"><img class="ghost-piece outer" src="/branding/logo/parts/outer-frame.png"><img class="ghost-piece inner" src="/branding/logo/parts/inner-a.png"><img class="ghost-piece chevron" src="/branding/logo/parts/bottom-chevron.png"></div>
+            <div class="slice slice-3"><img class="ghost-piece outer" src="/branding/logo/parts/outer-frame.png"><img class="ghost-piece inner" src="/branding/logo/parts/inner-a.png"><img class="ghost-piece chevron" src="/branding/logo/parts/bottom-chevron.png"></div>
+            <div class="slice slice-4"><img class="ghost-piece outer" src="/branding/logo/parts/outer-frame.png"><img class="ghost-piece inner" src="/branding/logo/parts/inner-a.png"><img class="ghost-piece chevron" src="/branding/logo/parts/bottom-chevron.png"></div>
+            <div class="slice slice-5"><img class="ghost-piece outer" src="/branding/logo/parts/outer-frame.png"><img class="ghost-piece inner" src="/branding/logo/parts/inner-a.png"><img class="ghost-piece chevron" src="/branding/logo/parts/bottom-chevron.png"></div>
+        </div>
+
+        <!-- magenta -->
+        <div class="glitch-stack magenta">
+            <div class="slice slice-1"><img class="ghost-piece outer" src="/branding/logo/parts/outer-frame.png"><img class="ghost-piece inner" src="/branding/logo/parts/inner-a.png"><img class="ghost-piece chevron" src="/branding/logo/parts/bottom-chevron.png"></div>
+            <div class="slice slice-2"><img class="ghost-piece outer" src="/branding/logo/parts/outer-frame.png"><img class="ghost-piece inner" src="/branding/logo/parts/inner-a.png"><img class="ghost-piece chevron" src="/branding/logo/parts/bottom-chevron.png"></div>
+            <div class="slice slice-3"><img class="ghost-piece outer" src="/branding/logo/parts/outer-frame.png"><img class="ghost-piece inner" src="/branding/logo/parts/inner-a.png"><img class="ghost-piece chevron" src="/branding/logo/parts/bottom-chevron.png"></div>
+            <div class="slice slice-4"><img class="ghost-piece outer" src="/branding/logo/parts/outer-frame.png"><img class="ghost-piece inner" src="/branding/logo/parts/inner-a.png"><img class="ghost-piece chevron" src="/branding/logo/parts/bottom-chevron.png"></div>
+            <div class="slice slice-5"><img class="ghost-piece outer" src="/branding/logo/parts/outer-frame.png"><img class="ghost-piece inner" src="/branding/logo/parts/inner-a.png"><img class="ghost-piece chevron" src="/branding/logo/parts/bottom-chevron.png"></div>
+        </div>
+
+        <!-- blue -->
+        <div class="glitch-stack blue">
+            <div class="slice slice-1"><img class="ghost-piece outer" src="/branding/logo/parts/outer-frame.png"><img class="ghost-piece inner" src="/branding/logo/parts/inner-a.png"><img class="ghost-piece chevron" src="/branding/logo/parts/bottom-chevron.png"></div>
+            <div class="slice slice-2"><img class="ghost-piece outer" src="/branding/logo/parts/outer-frame.png"><img class="ghost-piece inner" src="/branding/logo/parts/inner-a.png"><img class="ghost-piece chevron" src="/branding/logo/parts/bottom-chevron.png"></div>
+            <div class="slice slice-3"><img class="ghost-piece outer" src="/branding/logo/parts/outer-frame.png"><img class="ghost-piece inner" src="/branding/logo/parts/inner-a.png"><img class="ghost-piece chevron" src="/branding/logo/parts/bottom-chevron.png"></div>
+            <div class="slice slice-4"><img class="ghost-piece outer" src="/branding/logo/parts/outer-frame.png"><img class="ghost-piece inner" src="/branding/logo/parts/inner-a.png"><img class="ghost-piece chevron" src="/branding/logo/parts/bottom-chevron.png"></div>
+            <div class="slice slice-5"><img class="ghost-piece outer" src="/branding/logo/parts/outer-frame.png"><img class="ghost-piece inner" src="/branding/logo/parts/inner-a.png"><img class="ghost-piece chevron" src="/branding/logo/parts/bottom-chevron.png"></div>
+        </div>
+
+        <!-- red -->
+        <div class="glitch-stack red">
+            <div class="slice slice-1"><img class="ghost-piece outer" src="/branding/logo/parts/outer-frame.png"><img class="ghost-piece inner" src="/branding/logo/parts/inner-a.png"><img class="ghost-piece chevron" src="/branding/logo/parts/bottom-chevron.png"></div>
+            <div class="slice slice-2"><img class="ghost-piece outer" src="/branding/logo/parts/outer-frame.png"><img class="ghost-piece inner" src="/branding/logo/parts/inner-a.png"><img class="ghost-piece chevron" src="/branding/logo/parts/bottom-chevron.png"></div>
+            <div class="slice slice-3"><img class="ghost-piece outer" src="/branding/logo/parts/outer-frame.png"><img class="ghost-piece inner" src="/branding/logo/parts/inner-a.png"><img class="ghost-piece chevron" src="/branding/logo/parts/bottom-chevron.png"></div>
+            <div class="slice slice-4"><img class="ghost-piece outer" src="/branding/logo/parts/outer-frame.png"><img class="ghost-piece inner" src="/branding/logo/parts/inner-a.png"><img class="ghost-piece chevron" src="/branding/logo/parts/bottom-chevron.png"></div>
+            <div class="slice slice-5"><img class="ghost-piece outer" src="/branding/logo/parts/outer-frame.png"><img class="ghost-piece inner" src="/branding/logo/parts/inner-a.png"><img class="ghost-piece chevron" src="/branding/logo/parts/bottom-chevron.png"></div>
+        </div>
+
+    </div>
+
+    <div class="controls">
+        <button onclick="toggleBackground()">Cambiar fondo</button>
+        <button onclick="togglePause()">Pausar / Reanudar</button>
+    </div>
+
+</div>
+
+<script>
+let bgState = 0;
+let paused = false;
+
+function toggleBackground(){
+    bgState = (bgState + 1) % 3;
+    document.body.classList.remove("light","dark");
+    if(bgState === 1) document.body.classList.add("dark");
+    if(bgState === 2) document.body.classList.add("light");
+}
+
+function togglePause(){
+    paused = !paused;
+    const stage = document.getElementById("stage");
+    const animated = stage.querySelectorAll("*");
+    stage.style.animationPlayState = paused ? "paused" : "running";
+    animated.forEach(el => {
+        el.style.animationPlayState = paused ? "paused" : "running";
+    });
+}
+</script>
+</body>
+</html>
+

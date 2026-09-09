@@ -1079,6 +1079,9 @@
       dniInput.inputMode =
         "text";
 
+      dniInput.minLength =
+        4;
+
       dniInput.maxLength =
         30;
 
@@ -1095,6 +1098,9 @@
 
       dniInput.inputMode =
         "numeric";
+
+      dniInput.minLength =
+        7;
 
       dniInput.maxLength =
         8;
