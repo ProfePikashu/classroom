@@ -355,6 +355,27 @@
                 />
               </div>
             </label>
+            <label class="registration-field registration-field-wide">
+              <span>Repetí tu correo electrónico <b>*</b></span>
+
+              <div class="registration-input-wrap">
+                <i class="fa-solid fa-envelope-circle-check"></i>
+
+                <input
+                  type="email"
+                  name="email_confirmacion"
+                  id="emailConfirm"
+                  autocomplete="off"
+                  placeholder="Volvé a escribir tu correo"
+                  required
+                />
+              </div>
+
+              <small>
+                Escribilo nuevamente de forma manual. No se permite copiar y pegar
+                para evitar errores en el correo de acceso al Classroom.
+              </small>
+            </label>
 
             <div class="registration-field registration-field-wide">
               <span>Teléfono / WhatsApp <b>*</b></span>
@@ -684,12 +705,33 @@
             <h3>Revisá tu inscripción</h3>
 
             <p>
-              Confirmá que tus datos principales estén correctos,
-              especialmente DNI o identificación y usuario de Twitch.
+              Confirmá cuidadosamente tus datos antes de finalizar.
+              Revisá especialmente <strong>DNI o identificación, Twitch, correo electrónico y teléfono</strong>.
             </p>
           </div>
 
-          <div class="registration-summary" id="registrationSummary"></div>
+                    <div class="registration-critical-contact">
+            <strong>
+              <i class="fa-solid fa-triangle-exclamation"></i>
+              Revisá tus datos de contacto
+            </strong>
+
+            <div>
+              <small>Correo electrónico</small>
+              <b id="reviewEmail">—</b>
+            </div>
+
+            <div>
+              <small>Teléfono / WhatsApp</small>
+              <b id="reviewPhone">—</b>
+            </div>
+
+            <p>
+              Verificá especialmente estos datos. El correo será utilizado
+              para enviarte la confirmación y la información de acceso al Classroom.
+            </p>
+          </div>
+<div class="registration-summary" id="registrationSummary"></div>
         <div class="registration-turnstile-wrap">
           <div class="registration-turnstile-copy">
             <i class="fa-solid fa-shield-halved"></i>
@@ -778,13 +820,9 @@
         Inscripción AyRPC 2026
       </span>
 
-      <h2>¡Completaste tu inscripción!</h2>
+      <h2>¡Tu inscripción ha sido exitosa!</h2>
 
-      <p>
-        Revisá que tus datos sean correctos.
-        Esta información será utilizada para tu registro en AyRPC 2026
-        y tu posterior acceso a AndyAzhTEC Classroom.
-      </p>
+      <p id="successMessage">Tu inscripción a AyRPC 2026 quedó registrada correctamente.</p>
 
       <div class="registration-success-data">
 

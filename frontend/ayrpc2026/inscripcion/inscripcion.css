@@ -1,4 +1,4 @@
-﻿:root {
+:root {
   --registration-font-body: "Exo 2", sans-serif;
   --registration-font-display: "Orbitron", sans-serif;
 
@@ -1132,6 +1132,10 @@ a {
     opacity var(--registration-transition);
 }
 
+.registration-btn[hidden] {
+  display: none !important;
+}
+
 .registration-btn:hover:not(:disabled) {
   transform: translateY(-2px);
 }
@@ -2185,4 +2189,57 @@ html[data-theme="light"]
     grid-template-columns: 1fr;
   }
 
+}
+
+/* =========================================================
+   CONFIRMACION DE CONTACTO - AYRPC 2026
+========================================================= */
+
+.registration-critical-contact {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0 0 18px;
+  padding: 16px;
+  border: 1px solid rgba(139, 92, 246, 0.32);
+  border-radius: 14px;
+  background: rgba(124, 58, 237, 0.08);
+}
+
+.registration-critical-contact > strong,
+.registration-critical-contact > p {
+  grid-column: 1 / -1;
+}
+
+.registration-critical-contact > strong {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.registration-critical-contact > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.registration-critical-contact small {
+  opacity: 0.72;
+}
+
+.registration-critical-contact b {
+  overflow-wrap: anywhere;
+}
+
+.registration-critical-contact p {
+  margin: 2px 0 0;
+  font-size: 0.88rem;
+  opacity: 0.78;
+}
+
+@media (max-width: 640px) {
+  .registration-critical-contact {
+    grid-template-columns: 1fr;
+  }
 }

@@ -1,4 +1,4 @@
-﻿"use strict";
+"use strict";
 
 (() => {
 
@@ -112,6 +112,17 @@
 
   const surnameInput =
     document.getElementById("apellido");
+  const emailInput =
+    document.getElementById("email");
+
+  const emailConfirmInput =
+    document.getElementById("emailConfirm");
+
+  const reviewEmail =
+    document.getElementById("reviewEmail");
+
+  const reviewPhone =
+    document.getElementById("reviewPhone");
 
   const phoneCountryInput =
     document.getElementById("telefonoPais");
@@ -717,6 +728,32 @@
     }
 
     if (currentStep === 1) {
+      emailInput.value =
+        String(emailInput.value || "").trim();
+
+      emailConfirmInput.value =
+        String(emailConfirmInput.value || "").trim();
+
+      const normalizedEmail =
+        emailInput.value.toLowerCase();
+
+      const normalizedEmailConfirm =
+        emailConfirmInput.value.toLowerCase();
+
+      emailConfirmInput.setCustomValidity("");
+
+      if (normalizedEmail !== normalizedEmailConfirm) {
+
+        emailConfirmInput.setCustomValidity(
+          "Los correos no coinciden. Volvé a escribirlos."
+        );
+
+        emailConfirmInput.focus();
+        emailConfirmInput.reportValidity();
+
+        return false;
+      }
+
 
       nameInput.value =
         normalizePersonName(nameInput.value);
@@ -984,7 +1021,7 @@
     );
   }
 
-  function paintSuccess() {
+  function paintSuccess(result = {}) {
 
     const data =
       collectData();
@@ -1001,7 +1038,24 @@
         ? `@${data.twitch}`
         : "—";
 
-    form.closest(
+        const successMessage =
+      document.getElementById("successMessage");
+
+    if (result.email_sent === true) {
+
+      successMessage.innerHTML =
+        'Te enviamos un correo de confirmación con la información para ingresar al <strong>Classroom</strong>. ' +
+        'Buscá el mensaje enviado por <strong>Profesor Andres Coria &lt;cursos@andyazhtec.com&gt;</strong>. ' +
+        'Si no lo encontrás en tu bandeja de entrada, revisá <strong>Spam / Correo no deseado / Promociones</strong>.';
+
+    } else {
+
+      successMessage.innerHTML =
+        'Tu inscripción quedó registrada correctamente, pero no pudimos enviar el correo de confirmación en este momento. ' +
+        'Tu lugar en <strong>AyRPC 2026</strong> está confirmado igualmente.';
+    }
+
+form.closest(
       ".registration-card"
     ).hidden = true;
 
@@ -1025,7 +1079,80 @@
   // Eventos
   // -------------------------------------------------------
 
+    // -------------------------------------------------------
+  // Confirmación manual del correo
+  // -------------------------------------------------------
+
+  emailInput.addEventListener(
+    "input",
+    () => {
+
+      if (emailConfirmInput.value) {
+        emailConfirmInput.value = "";
+      }
+
+      emailConfirmInput.setCustomValidity("");
+    }
+  );
+
+  emailConfirmInput.addEventListener(
+    "input",
+    () => {
+      emailConfirmInput.setCustomValidity("");
+    }
+  );
+
+  for (const blockedEvent of ["paste", "drop"]) {
+
+    emailConfirmInput.addEventListener(
+      blockedEvent,
+      (event) => {
+
+        event.preventDefault();
+
+        emailConfirmInput.setCustomValidity(
+          "Por seguridad, volvé a escribir el correo manualmente."
+        );
+
+        emailConfirmInput.reportValidity();
+
+        window.setTimeout(
+          () => emailConfirmInput.setCustomValidity(""),
+          1800
+        );
+      }
+    );
+  }
+
+  function updateCriticalContactReview() {
+
+    reviewEmail.textContent =
+      String(emailInput.value || "").trim() || "—";
+
+    reviewPhone.textContent =
+      buildPhoneValue({
+        telefono_pais:
+          phoneCountryInput.value,
+        telefono_area:
+          phoneAreaInput.value,
+        telefono_numero:
+          phoneNumberInput.value
+      }) || "—";
+  }
+
   form.addEventListener(
+    "input",
+    updateCriticalContactReview
+  );
+
+  form.addEventListener(
+    "change",
+    updateCriticalContactReview
+  );
+
+  updateCriticalContactReview();
+
+form.addEventListener(
     "input",
     scheduleSave
   );
@@ -1294,7 +1421,7 @@
 
         clearDraft();
 
-        paintSuccess();
+        paintSuccess(result);
 
       } catch (error) {
 
