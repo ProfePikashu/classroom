@@ -513,6 +513,8 @@
       of Object.entries(draft.fields)
     ) {
 
+      if (!progressFieldNames.includes(name)) continue;
+
       const field =
         form.elements[name];
 
@@ -527,14 +529,13 @@
 
     updateIdentificationMode();
 
-    currentStep =
-      Math.min(
-        Math.max(
-          Number(draft.currentStep) || 1,
-          1
-        ),
-        TOTAL_STEPS
-      );
+    // La confirmación no se guarda: hay que escribirla nuevamente.
+    emailConfirmInput.value = "";
+    emailConfirmInput.setCustomValidity("");
+
+    currentStep = 1;
+
+    updateCriticalContactReview();
 
     updateDraftPercentage(draft.fields);
 
@@ -660,6 +661,7 @@
       currentStep !== TOTAL_STEPS;
 
     if (currentStep === TOTAL_STEPS) {
+      updateCriticalContactReview();
       paintSummary();
       ensureTurnstileRendered();
     }

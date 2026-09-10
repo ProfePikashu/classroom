@@ -2243,3 +2243,212 @@ html[data-theme="light"]
     grid-template-columns: 1fr;
   }
 }
+/* === AYRPC 2026 · CURSO GRATUITO === */
+
+.registration-free-slot {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  margin: .8rem 0 .9rem;
+}
+
+.registration-free-badge {
+  position: relative;
+  isolation: isolate;
+
+  display: inline-grid;
+  place-items: center;
+
+  width: 220px;
+  height: 42px;
+
+  overflow: hidden;
+
+  border: 1px solid rgba(85, 232, 255, .55);
+  border-radius: 999px;
+
+  background:
+    radial-gradient(circle at 20% 25%, rgba(53,226,255,.18), transparent 38%),
+    radial-gradient(circle at 75% 70%, rgba(177,76,255,.24), transparent 42%),
+    linear-gradient(110deg, #090d1d, #12102a 55%, #090d1d);
+
+  color: #fff;
+
+  font-family: "Orbitron", sans-serif;
+  font-size: .72rem;
+  font-weight: 900;
+  letter-spacing: .09em;
+
+  cursor: default;
+
+  box-shadow:
+    0 0 8px rgba(38,226,255,.28),
+    inset 0 0 14px rgba(125,71,255,.12);
+
+  transition:
+    transform .22s ease,
+    box-shadow .25s ease;
+}
+
+/* borde electrico */
+.registration-free-badge::before {
+  content: "";
+
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+
+  border-radius: inherit;
+  padding: 1.5px;
+
+  background:
+    conic-gradient(
+      from 0deg,
+      transparent 0deg,
+      #55efff 35deg,
+      #ffffff 45deg,
+      transparent 60deg,
+      transparent 140deg,
+      #a866ff 170deg,
+      #ff67dc 190deg,
+      transparent 210deg,
+      transparent 290deg,
+      #56eaff 325deg,
+      transparent 360deg
+    );
+
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+
+  pointer-events: none;
+
+  animation: registrationElectricBorder 2.2s linear infinite;
+
+  filter:
+    drop-shadow(0 0 2px #5befff)
+    drop-shadow(0 0 4px rgba(151,79,255,.8));
+}
+
+.registration-free-main,
+.registration-free-reveal {
+  position: absolute;
+  z-index: 4;
+
+  transition:
+    opacity .2s ease,
+    transform .25s ease;
+}
+
+.registration-free-reveal {
+  opacity: 0;
+  transform: scale(.82);
+
+  font-size: .56rem;
+  letter-spacing: .05em;
+
+  white-space: nowrap;
+}
+
+.registration-free-stars,
+.registration-free-stars::before,
+.registration-free-stars::after {
+  content: "";
+
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+
+  pointer-events: none;
+
+  background-image:
+    radial-gradient(circle, rgba(255,255,255,.9) 0 1px, transparent 1.3px),
+    radial-gradient(circle, rgba(77,232,255,.85) 0 1px, transparent 1.4px),
+    radial-gradient(circle, rgba(211,126,255,.8) 0 1px, transparent 1.3px);
+
+  background-size:
+    23px 21px,
+    37px 31px,
+    51px 47px;
+
+  opacity: .08;
+}
+
+.registration-free-badge:hover {
+  transform: translateY(-1px) scale(1.035);
+
+  box-shadow:
+    0 0 8px rgba(255,255,255,.35),
+    0 0 15px rgba(47,229,255,.55),
+    0 0 24px rgba(143,68,255,.4),
+    inset 0 0 20px rgba(64,219,255,.12);
+}
+
+.registration-free-badge:hover::before {
+  animation-duration: .7s;
+}
+
+.registration-free-badge:hover .registration-free-main {
+  opacity: 0;
+  transform: scale(1.12);
+}
+
+.registration-free-badge:hover .registration-free-reveal {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.registration-free-badge:hover .registration-free-stars {
+  opacity: .45;
+  animation: registrationGalaxy 2.2s linear infinite;
+}
+
+@keyframes registrationElectricBorder {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes registrationGalaxy {
+  from {
+    background-position: 0 0, 0 0, 0 0;
+  }
+
+  to {
+    background-position:
+      46px 21px,
+      -37px 31px,
+      51px -47px;
+  }
+}
+
+@media (hover: none) {
+  .registration-free-badge::before {
+    animation-duration: 1.2s;
+  }
+}
+
+@media (max-width: 520px) {
+  .registration-free-badge {
+    width: 205px;
+    height: 40px;
+    font-size: .66rem;
+  }
+
+  .registration-free-reveal {
+    font-size: .51rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .registration-free-badge,
+  .registration-free-badge::before,
+  .registration-free-stars,
+  .registration-free-stars::before,
+  .registration-free-stars::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
