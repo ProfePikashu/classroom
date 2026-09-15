@@ -7,3 +7,15 @@
 
 # Archivos locales de limpieza
 _archivo_limpieza_*/
+*.bak
+*.bak-*
+*.tmp
+*.temp
+*~
+*.pyc
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+Thumbs.db
+.DS_Store
