@@ -426,8 +426,18 @@ const ClassroomStudents = {
   },
 
   normalizeExamProStudent(student) {
+    const courseLabels = {
+      "ayrpc-2025": "AyRPC 2025",
+      "ayrpc-2026": "AyRPC 2026",
+    };
+
     const cursos = Array.isArray(student.cursos)
-      ? student.cursos.filter(Boolean)
+      ? student.cursos
+          .filter(Boolean)
+          .map(course => {
+            const key = String(course).trim().toLowerCase();
+            return courseLabels[key] || String(course);
+          })
       : [];
 
     const cursada = cursos.length
