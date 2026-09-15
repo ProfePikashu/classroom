@@ -1,6 +1,6 @@
 /* ============================================================
    AndyAzhTEC Classroom \u2014 alumnos.js
-   Listado tabular de alumnos desde Supabase 2025
+   Listado tabular de alumnos desde Supabase
    ============================================================ */
 
 "use strict";
@@ -25,7 +25,7 @@ const ClassroomStudents = {
   renderedStudents: [],
 
   sourceLabels: {
-    sheet2025: "Supabase 2025",
+    sheet2025: "Supabase",
   },
 
   init() {
@@ -112,7 +112,7 @@ const ClassroomStudents = {
   },
 
   getSourceLabel(source = this.getSelectedSource()) {
-    return this.sourceLabels[source] || "Supabase 2025";
+    return this.sourceLabels[source] || "Supabase";
   },
 
   setLoadingState(isLoading) {
@@ -265,33 +265,48 @@ const ClassroomStudents = {
     return items;
   },
 
-  buildSupabase2025Url(search = "") {
+  buildSupabase2025Url(offset = 0, limit = 1000, search = "") {
     const params = new URLSearchParams({
-      course: "ayrpc-2025",
-      limit: "2000",
-      offset: "0",
+      limit: String(limit),
+      offset: String(offset),
     });
 
     if (search) {
       params.set("search", search);
     }
 
-    return `${this.apiBase}/api/classroom/admin/attendance/students?${params.toString()}`;
+    return `${this.apiBase}/api/classroom/students?${params.toString()}`;
   },
 
   async fetchSupabase2025Students() {
-    const data = await this.fetchJson(this.buildSupabase2025Url(""), {
-      cache: "no-store",
-      headers: this.getAuthHeaders(),
-    });
+    const pageSize = 1000;
+    let offset = 0;
+    let total = 0;
+    let items = [];
 
-    if (!data.ok) {
-      throw new Error(data.error || data.detail || "No se pudo leer Supabase AyRPC 2025.");
-    }
+    do {
+      const data = await this.fetchJson(
+        this.buildSupabase2025Url(offset, pageSize, ""),
+        {
+          cache: "no-store",
+          headers: this.getAuthHeaders(),
+        }
+      );
 
-    return Array.isArray(data.items)
-      ? data.items.map(item => this.normalizeSheetStudent(item))
-      : [];
+      if (!data.ok) {
+        throw new Error(data.error || data.detail || "No se pudo leer Supabase.");
+      }
+
+      const pageItems = Array.isArray(data.items)
+        ? data.items.map(item => this.normalizeExamProStudent(item))
+        : [];
+
+      total = Number(data.total || pageItems.length);
+      items = items.concat(pageItems);
+      offset = items.length;
+    } while (offset < total);
+
+    return items;
   },
   async loadSheetStudents() {
     const allItems = await this.fetchSupabase2025Students();
@@ -344,14 +359,14 @@ const ClassroomStudents = {
         ...existing,
         ...student,
         id: student.id || existing.id,
-        source: "ExamPro + Supabase 2025",
+        source: "Supabase",
         source_priority: "all",
         full_name: student.full_name || existing.full_name,
         nombre: student.nombre || existing.nombre,
         email: student.email || existing.email,
         telefono: student.telefono || existing.telefono,
         twitch: student.twitch || existing.twitch,
-        cursada: student.cursada || existing.cursada || "AyRPC 2025",
+        cursada: student.cursada || existing.cursada || "",
         apt_examen: student.apt_examen || existing.apt_examen,
         resultado: student.resultado || existing.resultado,
         exam_status: student.exam_status || existing.exam_status,
@@ -411,10 +426,19 @@ const ClassroomStudents = {
   },
 
   normalizeExamProStudent(student) {
+    const cursos = Array.isArray(student.cursos)
+      ? student.cursos.filter(Boolean)
+      : [];
+
+    const cursada = cursos.length
+      ? cursos.join(" · ")
+      : (student.cursada || "");
+
     return {
       ...student,
-      source: student.source || "ExamPro",
-      cursada: student.cursada || "AyRPC 2025",
+      source: "Supabase",
+      cursos,
+      cursada,
     };
   },
 
@@ -536,7 +560,7 @@ const ClassroomStudents = {
     const name = student.full_name || student.nombre || student.display_name || student.twitch || "Alumno sin nombre";
     const twitch = student.twitch ? `@${String(student.twitch).replace(/^@/, "")}` : "\u2014";
     const dni = student.dni || "\u2014";
-    const cursada = student.cursada || "AyRPC 2025";
+    const cursada = student.cursada || "Sin cursada";
     const source = student.source || this.getSourceLabel();
     const fichaId = student.exampro?.id || student.id || dni || "";
     const sourceDetail = this.getStudentSourceDetail(student, source, dni, fichaId);
@@ -991,15 +1015,11 @@ const ClassroomStudents = {
   },
 
   getStudentSourceDetail(student, source, dni, fichaId) {
-    if (source === "Supabase 2025") {
-      return dni && dni !== "\u2014" ? `Supabase 2025 \u00B7 DNI ${dni}` : "Supabase 2025";
+    if (dni && dni !== "—") {
+      return `Supabase · DNI ${dni}`;
     }
 
-    if (source === "ExamPro + Supabase 2025") {
-      return dni && dni !== "\u2014" ? `ExamPro + Planilla \u00B7 DNI ${dni}` : "ExamPro + Planilla";
-    }
-
-    return fichaId ? `ExamPro \u00B7 ID ${fichaId}` : "ExamPro";
+    return fichaId ? `Supabase · ID ${fichaId}` : "Supabase";
   },
 
   openProfileByIndex(index) {
@@ -1014,7 +1034,7 @@ const ClassroomStudents = {
     const dni = student.dni || "\u2014";
     const email = student.email || "";
     const phone = student.telefono || "";
-    const cursada = student.cursada || "AyRPC 2025";
+    const cursada = student.cursada || "Sin cursada";
     const source = student.source || this.getSourceLabel();
     const fichaId = student.exampro?.id || student.id || dni || "";
     const estado = this.formatStatus(student.apt_examen || student.estado || "");
