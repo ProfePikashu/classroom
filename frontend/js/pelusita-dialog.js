@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const PROFE_EMAIL = "acoria@frba.utn.edu.ar";
+  const PROFE_EMAIL = "contacto@andyazhtec.com";
   const PROFE_WHATSAPP = "5492236689580";
 
   const PAGE_HELP = {

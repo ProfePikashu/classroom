@@ -240,7 +240,7 @@ Si algo no aparece, tus datos no coinciden o no podés ingresar, contactá al pr
 • Qué problema estás viendo`,
       opts: [
         { text:"💬 WhatsApp", action: () => openUrl("https://wa.me/5492236689580", true), cls:"pelusita-opt-wa", state:"pelusita-state4" },
-        { text:"✉️ Email", action: () => openUrl("mailto:acoria@frba.utn.edu.ar", true), cls:"pelusita-opt-mail", state:"pelusita-state4" },
+        { text:"✉️ Email", action: () => openUrl("mailto:contacto@andyazhtec.com", true), cls:"pelusita-opt-mail", state:"pelusita-state4" },
         { text:"← Volver", action: () => openMain() }
       ]
     }

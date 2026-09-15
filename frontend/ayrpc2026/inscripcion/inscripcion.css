@@ -1626,7 +1626,7 @@ a {
 
 /* =========================================================
    BRANDING INSTITUCIONAL - AyRPC 2026
-   AndyAzhTEC × iTEC | UTN.BA
+   AndyAzhTEC × iTEC
    ========================================================= */
 
 .institutional-branding {
@@ -1775,27 +1775,6 @@ a {
             transparent
         );
 }
-
-.institutional-brand--utnba {
-    padding: 7px 12px;
-
-    border-radius: 10px;
-
-    background: #fff;
-
-    box-shadow:
-        0 4px 16px rgba(0, 0, 0, 0.18);
-}
-
-.institutional-brand--utnba img {
-    display: block;
-
-    width: min(250px, 24vw);
-    max-height: 62px;
-
-    object-fit: contain;
-}
-
 @media (max-width: 820px) {
     .institutional-branding {
         flex-direction: column;
@@ -1823,10 +1802,6 @@ a {
                 rgba(143, 92, 255, 0.36),
                 transparent
             );
-    }
-
-    .institutional-brand--utnba img {
-        width: min(280px, 72vw);
     }
 }
 
