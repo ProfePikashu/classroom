@@ -1,4 +1,4 @@
-﻿/* ============================================================
+/* ============================================================
    AndyAzhTEC Classroom — auth.js
    Login por DNI + Twitch contra Classroom
    ============================================================ */
@@ -191,10 +191,7 @@ const ClassroomAuth = {
       }
 
       const student = data.student || {};
-      const fullName = [student.nombre, student.apellido]
-        .filter(Boolean)
-        .join(" ")
-        .trim();
+      const fullName = String(student.full_name || "").trim();
 
       const alumno = {
         DNI: student.dni || cleanDni,
@@ -354,9 +351,7 @@ const ClassroomAuth = {
       displayName:
         data.displayName ||
         data.display_name ||
-        data.nombre_completo ||
-        student.nombre_completo ||
-        [student.nombre, student.apellido].filter(Boolean).join(" ") ||
+        student.full_name ||
         "Moderador",
 
       course: data.course || data.cursada || student.cursada || "AyRPC 2025",

@@ -105,10 +105,10 @@
     const session = getSession();
 
     return (
-      session.nombreCompleto ||
-      session.nombre_completo ||
+      session.displayName ||
+      session.display_name ||
+      session.full_name ||
       session.name ||
-      [session.nombre, session.apellido].filter(Boolean).join(" ") ||
       session.twitch ||
       "Staff"
     );

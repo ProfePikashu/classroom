@@ -73,12 +73,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function getStudentName(session) {
     return (
-      session.nombreCompleto ||
-      session.nombre_completo ||
-      session.name ||
-      session.nombre ||
+      session.displayName ||
+      session.display_name ||
+      session.full_name ||
       session.fullName ||
-      [session.nombre, session.apellido].filter(Boolean).join(" ") ||
+      session.name ||
       "Alumno"
     );
   }

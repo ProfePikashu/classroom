@@ -164,7 +164,7 @@ const AdminAsistencias = {
     return {
       legacyRow: row.legacy_row,
       inscripcion: row.inscription_at || "\u2014",
-      nombre: row.full_name_normalized || row.full_name_raw || "Sin nombre",
+      full_name: row.full_name_normalized || row.full_name_raw || row.full_name || "Sin nombre",
       dni: row.dni || "\\u2014",
       email: row.email || "",
       telefono: row.phone_display || "",
@@ -298,7 +298,7 @@ const AdminAsistencias = {
             <div class="attendance-student-main">
               <div class="attendance-avatar"><i class="fa-solid fa-user-graduate"></i></div>
               <div>
-                <strong>${this.escapeHtml(alumno.nombre)}</strong>
+                <strong>${this.escapeHtml(alumno.full_name)}</strong>
                 <small>@${this.escapeHtml(alumno.twitch || "sin-twitch")} - DNI ${this.escapeHtml(alumno.dni)}</small>
               </div>
             </div>
@@ -439,7 +439,7 @@ const AdminAsistencias = {
         <div class="attendance-profile-avatar"><i class="fa-solid fa-user-graduate"></i></div>
         <div>
           <p class="eyebrow">Ficha de asistencia</p>
-          <h3 id="attendanceStudentModalTitle">${this.escapeHtml(alumno.nombre)}</h3>
+          <h3 id="attendanceStudentModalTitle">${this.escapeHtml(alumno.full_name)}</h3>
           <p>@${this.escapeHtml(alumno.twitch || "sin-twitch")} - DNI ${this.escapeHtml(alumno.dni)}</p>
         </div>
       </div>

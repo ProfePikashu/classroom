@@ -362,7 +362,6 @@ const ClassroomStudents = {
         source: "Supabase",
         source_priority: "all",
         full_name: student.full_name || existing.full_name,
-        nombre: student.nombre || existing.nombre,
         email: student.email || existing.email,
         telefono: student.telefono || existing.telefono,
         twitch: student.twitch || existing.twitch,
@@ -383,8 +382,8 @@ const ClassroomStudents = {
     });
 
     return Array.from(map.values()).sort((a, b) => {
-      const nameA = String(a.full_name || a.nombre || a.twitch || "").toLowerCase();
-      const nameB = String(b.full_name || b.nombre || b.twitch || "").toLowerCase();
+      const nameA = String(a.full_name || a.twitch || "").toLowerCase();
+      const nameB = String(b.full_name || b.twitch || "").toLowerCase();
       return nameA.localeCompare(nameB, "es");
     });
   },
@@ -407,7 +406,6 @@ const ClassroomStudents = {
     return items.filter((student) => {
       const haystack = [
         student.full_name,
-        student.nombre,
         student.display_name,
         student.dni,
         student.twitch,
@@ -469,7 +467,6 @@ const ClassroomStudents = {
       student.full_name_normalized ||
       student.full_name_raw ||
       student.full_name ||
-      student.nombre ||
       student["Nombre Completo"] ||
       "";
 
@@ -482,7 +479,6 @@ const ClassroomStudents = {
       source: "Supabase AyRPC 2025",
       cursada: student.cursada || "AyRPC 2025",
       full_name: fullName,
-      nombre: fullName,
       email,
       telefono,
       whatsapp_number: student.whatsapp_number || "",
@@ -567,7 +563,7 @@ const ClassroomStudents = {
   },
 
   createStudentRow(student, index) {
-    const name = student.full_name || student.nombre || student.display_name || student.twitch || "Alumno sin nombre";
+    const name = student.full_name || student.display_name || student.twitch || "Alumno sin nombre";
     const twitch = student.twitch ? `@${String(student.twitch).replace(/^@/, "")}` : "\u2014";
     const dni = student.dni || "\u2014";
     const cursada = student.cursada || "Sin cursada";
@@ -902,7 +898,7 @@ const ClassroomStudents = {
     }
 
     const dni = String(student.dni || student.DNI || "").replace(/\D+/g, "");
-    const name = student.full_name || student.nombre || student.display_name || student.twitch || "Alumno";
+    const name = student.full_name || student.display_name || student.twitch || "Alumno";
 
     if (!dni) {
       alert("Este alumno no tiene DNI valido para aplicar baja.");
@@ -1021,7 +1017,7 @@ const ClassroomStudents = {
     if (key === "dni") return student.dni || student.DNI || "";
     if (key === "twitch") return student.twitch || "";
     if (key === "cursada") return student.cursada || "";
-    return student.full_name || student.nombre || student.display_name || student.twitch || "";
+    return student.full_name || student.display_name || student.twitch || "";
   },
 
   getStudentSourceDetail(student, source, dni, fichaId) {
@@ -1039,7 +1035,7 @@ const ClassroomStudents = {
 
     this.ensureProfileModal();
 
-    const name = student.full_name || student.nombre || student.display_name || student.twitch || "Alumno sin nombre";
+    const name = student.full_name || student.display_name || student.twitch || "Alumno sin nombre";
     const twitch = student.twitch ? `@${String(student.twitch).replace(/^@/, "")}` : "\u2014";
     const dni = student.dni || "\u2014";
     const email = student.email || "";

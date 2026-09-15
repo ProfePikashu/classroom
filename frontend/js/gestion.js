@@ -275,9 +275,11 @@ const ClassroomGestion = {
     document.getElementById("btnCopyLinkedinMessage")?.addEventListener("click", () => {
       const session = this.getSession();
       const nombre =
-        session?.nombre ||
+        session?.displayName ||
+        session?.display_name ||
+        session?.full_name ||
         session?.alumno?.["Nombre Completo"] ||
-        session?.student?.nombre ||
+        session?.student?.full_name ||
         "";
 
       const mensaje =

@@ -90,22 +90,13 @@
     const session = readSession();
 
     if (!session) return "Usuario Classroom";
-
-    const fullName = [
-      session.nombre || session.firstName || session.student?.nombre,
-      session.apellido || session.lastName || session.student?.apellido,
-    ]
-      .filter(Boolean)
-      .join(" ")
-      .trim();
-
-    return (
+return (
       session.displayName ||
       session.display_name ||
       session.name ||
-      session.student?.display_name ||
+      session.full_name ||
       session.student?.full_name ||
-      fullName ||
+      session.student?.display_name ||
       session.email ||
       session.twitch ||
       "Usuario Classroom"
