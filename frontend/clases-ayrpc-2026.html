@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Clases AyRPC 2026 — AndyAzhTEC Classroom</title>
+
+  <script src="https://www.youtube.com/iframe_api"></script>
+  <script src="https://cdn.jsdelivr.net/npm/js-yaml@4/dist/js-yaml.min.js"></script>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css?v=20260621-linkedin-recomendacion" />
+  <link rel="icon" href="favicon.ico" type="image/x-icon" />
+  <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
+  <link rel="stylesheet" href="css/clases-ayrpc-2026.css?v=20260918-layout-v2" />
+</head>
+
+<body>
+  <button class="mobile-menu-toggle" id="mobileMenuToggle" type="button" aria-label="Abrir menú">
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
+
+  <div class="mobile-sidebar-overlay" id="mobileSidebarOverlay"></div>
+
+  <div class="app-shell">
+    <aside class="sidebar sidebar-v2" id="classroomSidebar">
+      <div class="sidebar-v2-brand">
+        <a href="index.html" class="sidebar-v2-brand-link" aria-label="Ir al inicio">
+          <div class="sidebar-v2-logo">
+            <i class="fa-solid fa-graduation-cap"></i>
+          </div>
+
+          <div class="sidebar-v2-brand-text">
+            <span>Andy<span>Azh</span><strong>TEC</strong></span>
+            <small>Classroom</small>
+          </div>
+        </a>
+      </div>
+
+      <nav class="sidebar-v2-nav" aria-label="Navegación principal">
+        <a href="index.html" class="sidebar-v2-link" data-sidebar-route="index.html">
+          <i class="fa-solid fa-table-columns"></i>
+          <span>Inicio</span>
+        </a>
+
+        <button class="sidebar-v2-link sidebar-v2-toggle" type="button" data-sidebar-toggle="courses" aria-expanded="false">
+          <i class="fa-solid fa-book-open-reader"></i>
+          <span>Cursos</span>
+          <i class="fa-solid fa-chevron-down sidebar-v2-chevron"></i>
+        </button>
+
+        <div class="sidebar-v2-submenu" data-sidebar-panel="courses">
+          <a href="curso-ayrpc-2025.html" class="sidebar-v2-subitem" data-sidebar-route="curso-ayrpc-2025.html">
+            <span class="submenu-dot complete"></span>
+            <span>AyRPC 2025</span>
+          </a>
+
+          <a href="clases-ayrpc-2025.html" class="sidebar-v2-subitem" data-sidebar-route="clases-ayrpc-2025.html">
+            <span class="submenu-line"></span>
+            <span>Clases</span>
+          </a>
+
+          <a href="rubricas-ayrpc-2025.html" class="sidebar-v2-subitem staff-only" data-sidebar-route="rubricas-ayrpc-2025.html">
+            <span class="submenu-line"></span>
+            <span>Rúbricas</span>
+          </a>
+
+          <a href="curso-ayrpc-2026.html" class="sidebar-v2-subitem" data-sidebar-route="curso-ayrpc-2026.html">
+            <span class="submenu-dot soon"></span>
+            <span>AyRPC 2026</span>
+          </a>
+          <a href="clases-ayrpc-2026.html" class="sidebar-v2-subitem" data-sidebar-route="clases-ayrpc-2026.html">
+            <span class="submenu-line"></span>
+            <span>Clases</span>
+          </a>
+        </div>
+
+        <a href="archivos.html" class="sidebar-v2-link" data-sidebar-route="archivos.html">
+          <i class="fa-solid fa-folder-open"></i>
+          <span>Materiales</span>
+        </a>
+
+        <a href="exampro.html" class="sidebar-v2-link sidebar-v2-featured" data-sidebar-route="exampro.html">
+          <i class="fa-solid fa-file-circle-check"></i>
+          <span>ExamPro</span>
+        </a>
+
+        <a href="gestion.html" class="sidebar-v2-link" data-sidebar-route="gestion.html">
+          <i class="fa-solid fa-folder-tree"></i>
+          <span>Gestión</span>
+        </a>
+
+        <a href="comunidad.html" class="sidebar-v2-link" data-sidebar-route="comunidad.html">
+          <i class="fa-solid fa-comments"></i>
+          <span>Comunidad</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-v2-spacer"></div>
+
+      <div class="sidebar-v2-staff staff-only">
+        <button class="sidebar-v2-admin-btn" id="sidebarAdminToggle" type="button" aria-expanded="false">
+          <i class="fa-solid fa-screwdriver-wrench"></i>
+          <span>Administrar</span>
+          <i class="fa-solid fa-chevron-up"></i>
+        </button>
+
+        <div class="sidebar-v2-admin-popover" id="sidebarAdminPopover">
+          <a href="asistencias.html" data-sidebar-route="asistencias.html">
+            <i class="fa-solid fa-clipboard-check"></i>
+            <span>Asistencias</span>
+          </a>
+
+          <a href="alumnos.html" data-sidebar-route="alumnos.html">
+            <i class="fa-solid fa-users"></i>
+            <span>Alumnos</span>
+          </a>
+
+          <a href="centro-notificaciones.html" data-sidebar-route="centro-notificaciones.html">
+            <i class="fa-solid fa-bell"></i>
+            <span>Centro de notificaciones</span>
+          </a>
+          <a href="administrar-comunidad.html" class="sidebar-v2-subitem">
+            <i class="fa-solid fa-shield-halved"></i>
+            <span>Comunidad</span>
+          </a>
+
+
+          <a href="admin.html" data-sidebar-route="admin.html">
+            <i class="fa-solid fa-user-shield"></i>
+            <span>Roles y permisos</span>
+          </a>
+
+          <a href="rubricas-ayrpc-2025.html" data-sidebar-route="rubricas-ayrpc-2025.html">
+            <i class="fa-solid fa-clipboard-list"></i>
+            <span>Rúbricas</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="sidebar-v2-pelusita-dock" id="sidebarPelusitaDock" aria-label="Pelusita asistente"></div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">
+            <i class="fa-solid fa-chalkboard-user"></i>
+            AyRPC 2026
+          </p>
+
+          <h1>Clases</h1>
+        </div>
+
+        <div class="topbar-actions">
+          <button class="theme-toggle theme-toggle-icon" id="themeToggle" type="button" aria-label="Cambiar tema">
+            <i class="fa-solid fa-moon"></i>
+          </button>
+
+
+          <div class="user-menu" id="userMenu">
+            <button class="user-pill user-menu-toggle" id="userMenuToggle" type="button" aria-label="Abrir menú de usuario">
+              <div class="user-avatar">
+                <i class="fa-solid fa-user-astronaut"></i>
+              </div>
+
+              <div>
+                <strong data-auth-name>Usuario</strong>
+                <small data-auth-role>Rol</small>
+              </div>
+
+              <i class="fa-solid fa-chevron-down user-menu-chevron"></i>
+            </button>
+
+            <div class="user-dropdown" id="userDropdown">
+              <a href="perfil.html">
+                <i class="fa-solid fa-id-card"></i>
+                <span>Mis Datos</span>
+              </a>
+
+              <button type="button" data-auth-logout>
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <span>Cerrar sesión</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <section class="hero-panel classes-hero">
+        <div class="hero-copy">
+          <span class="badge">
+            <i class="fa-solid fa-video"></i>
+            Clases del curso
+          </span>
+
+          <h2>
+            AyRPC 2026
+            <span>Clases y recuperación</span>
+          </h2>
+
+          <p>Revisá las clases grabadas de AyRPC 2026, recuperá instancias pendientes y completá las actividades necesarias para validar tu recorrido.</p>
+        </div>
+      </section>
+
+      <section class="classes-layout">
+        <article class="panel">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Lista</p>
+              <h3>Clases del curso</h3>
+            </div>
+          </div>
+
+          <div id="classesList" class="classes-list"></div>
+        </article>
+
+        <article class="panel recovery-panel" id="recoveryPanel">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Clase seleccionada</p>
+              <h3 id="recoveryTitle">Seleccioná una clase</h3>
+            </div>
+          </div>
+
+          <div id="recoveryNote" class="recovery-note neutral">
+            Elegí una clase de la lista para ver su contenido y estado.
+          </div>
+          <!-- AYRPC 2026 · ASISTENCIA EN VIVO -->
+          <section class="ayrpc2026-live-attendance" id="liveAttendancePanel">
+
+            <div class="ayrpc2026-live-head">
+              <div>
+                <p class="eyebrow">Asistencia en vivo</p>
+                <h4>Tu asistencia en esta clase</h4>
+              </div>
+
+              <span
+                id="liveAttendanceStatus"
+                class="class-status neutral"
+              >
+                PENDIENTE
+              </span>
+            </div>
+
+            <p
+              id="liveAttendanceMessage"
+              class="ayrpc2026-live-message"
+            >
+              La asistencia se habilitará durante la transmisión en vivo.
+            </p>
+
+            <form
+              id="liveAttendanceForm"
+              class="ayrpc2026-live-form"
+              hidden
+            >
+              <label for="liveAttendanceCode">
+                Ingresá el código indicado durante la transmisión
+              </label>
+
+              <div class="ayrpc2026-live-code-row">
+                <input
+                  id="liveAttendanceCode"
+                  class="ayrpc2026-live-code"
+                  type="text"
+                  maxlength="6"
+                  autocomplete="off"
+                  autocorrect="off"
+                  spellcheck="false"
+                  aria-label="Código de asistencia"
+                />
+
+                <button
+                  id="liveAttendanceSubmit"
+                  class="btn btn-primary"
+                  type="submit"
+                >
+                  <i class="fa-solid fa-user-check"></i>
+                  Estoy presente
+                </button>
+              </div>
+            </form>
+
+            <div
+              id="liveAttendanceFeedback"
+              class="ayrpc2026-live-feedback"
+              hidden
+            ></div>
+
+            <details class="ayrpc2026-staff-attendance staff-only">
+              <summary>
+                <i class="fa-solid fa-screwdriver-wrench"></i>
+                Administrar asistencia
+              </summary>
+
+              <div class="ayrpc2026-staff-body">
+
+                <div class="ayrpc2026-staff-state">
+                  <span>Estado</span>
+                  <strong id="staffAttendanceState">
+                    Cerrada
+                  </strong>
+                </div>
+
+                <div
+                  id="staffAttendanceCodeBox"
+                  class="ayrpc2026-staff-code"
+                  hidden
+                >
+                  <small>Código activo</small>
+                  <strong id="staffAttendanceCode">
+                    ••••••
+                  </strong>
+                  <span id="staffAttendanceTimer"></span>
+                </div>
+
+                <div class="ayrpc2026-staff-actions">
+
+                  <button
+                    id="staffOpenAttendance"
+                    class="btn btn-primary"
+                    type="button"
+                  >
+                    Habilitar asistencia
+                  </button>
+
+                  <button
+                    id="staffGenerateAttendanceCode"
+                    class="btn btn-outline"
+                    type="button"
+                    disabled
+                  >
+                    Generar código
+                  </button>
+
+                  <button
+                    id="staffHideAttendanceCode"
+                    class="btn btn-outline"
+                    type="button"
+                    disabled
+                  >
+                    Ocultar
+                  </button>
+
+                  <button
+                    id="staffCloseAttendance"
+                    class="btn btn-outline"
+                    type="button"
+                    disabled
+                  >
+                    Cerrar
+                  </button>
+
+                </div>
+
+                <div class="ayrpc2026-staff-state">
+                  <span>Presentes registrados</span>
+                  <strong id="staffAttendanceCount">0</strong>
+                </div>
+
+              </div>
+            </details>
+
+          </section>
+
+          <div id="videoPlayerBox" class="video-player-box">
+            <div id="youtubePlayer"></div>
+          </div>
+
+          <div class="watch-progress-box" id="watchProgressWrap">
+            <div class="progress-info">
+              <span>Tiempo visto válido</span>
+              <strong id="watchProgressText">0%</strong>
+            </div>
+
+            <div class="progress-bar">
+              <span id="watchProgressBar" style="width:0%"></span>
+            </div>
+          </div>
+
+          <div class="recovery-actions">
+            <button id="quizButton" class="btn btn-primary" type="button" disabled>
+              <i class="fa-solid fa-clipboard-question"></i>
+              Responder cuestionario
+            </button>
+          </div>
+
+          <div id="quizBox" class="quiz-box" style="display:none;"></div>
+        </article>
+      </section>
+    </main>
+  </div>
+<script src="js/auth.js?v=20260917-roles-permissions-v1"></script>
+  <script src="js/roles.js?v=20260917-roles-permissions-v1"></script>
+  <script src="js/courses-data.js"></script>
+  <script src="js/main.js?v=20260612-newsletter-api-v1"></script>
+  <script src="js/notifications-local.js?v=20260620-community-notifications-v2"></script>
+  <script src="js/clases-ayrpc-2026.js?v=20260918-layout-v2"></script>
+  <script src="js/pelusita.js?v=20260612-sidebar-dock"></script>  <script src="js/pelusita-dialog.js?v=20260612-guide-compact"></script>
+  <script src="js/sidebar-v2.js?v=20260612-pelusita-dock-v2"></script>
+
+<!-- === AYRPC 2025 RECOVERY DESKTOP SCROLL 20260623 === -->
+<script>
+(function ayrpc2025RecoveryDesktopScroll() {
+  "use strict";
+
+  const DESKTOP_QUERY = "(min-width: 769px)";
+
+  function isDesktop() {
+    return window.matchMedia(DESKTOP_QUERY).matches;
+  }
+
+  function norm(value) {
+    return String(value || "")
+      .replace(/\s+/g, " ")
+      .trim()
+      .toLowerCase();
+  }
+
+  function isRecoveryTrigger(element) {
+    if (!element) return false;
+
+    const clickable = element.closest("button, a, [role='button'], [data-recovery], [data-recuperar], [data-recovery-class], [data-class-recovery]");
+
+    if (!clickable) return false;
+
+    const text = norm(clickable.textContent);
+    const attrs = [
+      clickable.getAttribute("id"),
+      clickable.getAttribute("class"),
+      clickable.getAttribute("data-action"),
+      clickable.getAttribute("data-recovery"),
+      clickable.getAttribute("data-recuperar"),
+      clickable.getAttribute("data-recovery-class"),
+      clickable.getAttribute("data-class-recovery")
+    ].map(norm).join(" ");
+
+    return (
+      text.includes("recuperar") ||
+      attrs.includes("recuperar") ||
+      attrs.includes("recovery")
+    );
+  }
+
+  function findPlayerTarget() {
+    return (
+      document.querySelector("#youtubePlayer") ||
+      document.querySelector("#videoPlayer") ||
+      document.querySelector("#classVideoPlayer") ||
+      document.querySelector("#player") ||
+      document.querySelector(".video-player-box") ||
+      document.querySelector(".class-player") ||
+      document.querySelector(".lesson-player") ||
+      document.querySelector(".player-wrapper") ||
+      document.querySelector("iframe[src*='youtube.com']") ||
+      document.querySelector("iframe[src*='youtu.be']")
+    );
+  }
+
+  function scrollToPlayer() {
+    if (!isDesktop()) return;
+
+    const target = findPlayerTarget();
+
+    if (!target) return;
+
+    const headerOffset = 118;
+    const rect = target.getBoundingClientRect();
+    const top = Math.max(0, window.scrollY + rect.top - headerOffset);
+
+    window.scrollTo({
+      top,
+      behavior: "smooth"
+    });
+
+    target.classList.add("recovery-scroll-focus");
+
+    window.setTimeout(() => {
+      target.classList.remove("recovery-scroll-focus");
+    }, 1400);
+  }
+
+  function scheduleScrollToPlayer() {
+    // Distintos delays porque algunas acciones primero cambian la clase/video y recién después actualizan el reproductor.
+    window.setTimeout(scrollToPlayer, 80);
+    window.setTimeout(scrollToPlayer, 280);
+    window.setTimeout(scrollToPlayer, 650);
+  }
+
+  document.addEventListener("click", function onRecoveryClick(event) {
+    if (!isRecoveryTrigger(event.target)) return;
+
+    scheduleScrollToPlayer();
+  }, true);
+
+  window.ClassroomAyRPC2025RecoveryScroll = {
+    run: scrollToPlayer,
+    schedule: scheduleScrollToPlayer
+  };
+})();
+</script>
+
+</body>
+</html>
