@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
@@ -201,7 +201,12 @@
             </div>
           </div>
 
-          <form id="moderatorForm" class="admin-form">
+          <form id="moderatorForm" class="admin-form roles-create-form">
+            <label>
+              <span>Nombre visible</span>
+              <input id="moderatorName" type="text" placeholder="Ej: Daniela" maxlength="120" />
+            </label>
+
             <label>
               <span>Usuario de Twitch</span>
               <input id="moderatorTwitch" type="text" placeholder="usuario_twitch" required />
@@ -239,19 +244,19 @@
           </div>
 
           <div class="admin-note-box">
-            <p>{ASIGNAR DESCRIPCION}</p>
+            <p>Los roles y permisos se administran desde el backend. Los cambios quedan registrados y los moderadores desactivados pueden reactivarse sin perder su configuración.</p>
           </div>
         </article>
       </section>
     </main>
   </div>
 
-  <script src="js/auth.js?v=20260612-notifications-global-v2"></script>
-  <script src="js/roles.js?v=20260612-notifications-global-v2"></script>
+  <script src="js/auth.js?v=20260917-roles-permissions-v1"></script>
+  <script src="js/roles.js?v=20260917-roles-permissions-v1"></script>
   <script src="js/courses-data.js"></script>
   <script src="js/main.js?v=20260612-newsletter-api-v1"></script>
   <script src="js/notifications-local.js?v=20260620-community-notifications-v2"></script>
-  <script src="js/admin.js"></script>
+  <script src="js/admin.js?v=20260917-roles-api-v1"></script>
   <script src="js/pelusita.js?v=20260612-sidebar-dock"></script>  <script src="js/pelusita-dialog.js?v=20260612-guide-compact"></script>
   <script src="js/sidebar-v2.js?v=20260612-pelusita-dock-v2"></script>
 </body>

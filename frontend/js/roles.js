@@ -1,5 +1,6 @@
-﻿/* ════════════════════════════════════════════════════════
+/* ════════════════════════════════════════════════════════
    AndyAzhTEC Classroom — roles.js
+   Backend-authoritative roles & permissions
 ════════════════════════════════════════════════════════ */
 
 "use strict";
@@ -16,44 +17,8 @@ const CLASSROOM_TEACHER_NAMES = [
   "ARTURO ANDRÉS CORIA",
 ];
 
-const CLASSROOM_STATIC_ROLE_ASSIGNMENTS = [
-  {
-    twitch: "lanonapupi",
-    dni: "24823085",
-    role: "moderator",
-    roleLabel: "Moderador",
-    backendManaged: true,
-    source: "backend",
-  },
-  {
-    twitch: "gabestigarribia",
-    dni: "38481942",
-    role: "moderator",
-    roleLabel: "Moderador",
-    backendManaged: true,
-    source: "backend",
-  },
-  {
-    twitch: "ezequiel_asp",
-    dni: "38505118",
-    role: "moderator",
-    roleLabel: "Moderador",
-    backendManaged: true,
-    source: "backend",
-  },
-  {
-    twitch: "aniii69_",
-    dni: "35341170",
-    role: "moderator",
-    roleLabel: "Moderador",
-    backendManaged: true,
-    source: "backend",
-  },
-];
-
 const ClassroomRoles = {
   storageKey: "andyazh-classroom-session",
-  assignmentsKey: "andyazh-classroom-role-assignments",
 
   normalize(value) {
     return String(value || "")
@@ -65,7 +30,9 @@ const ClassroomRoles = {
   },
 
   normalizeDni(value) {
-    return String(value || "").replace(/\D/g, "").trim();
+    return String(value || "")
+      .replace(/\D/g, "")
+      .trim();
   },
 
   normalizeName(value) {
@@ -76,13 +43,36 @@ const ClassroomRoles = {
       .replace(/[\u0300-\u036f]/g, "");
   },
 
+  getRawSession() {
+    try {
+      const raw = localStorage.getItem(this.storageKey);
+
+      return raw
+        ? JSON.parse(raw)
+        : null;
+    } catch {
+      return null;
+    }
+  },
+
+  save(session) {
+    if (!session) return;
+
+    localStorage.setItem(
+      this.storageKey,
+      JSON.stringify(session)
+    );
+  },
+
   getSessionIdentity(session) {
     const alumno = session?.alumno || {};
 
     return {
       twitch: this.normalize(
         session?.twitch ||
-        alumno["Usuario de Twitch (en caso de no tener, deberá crear uno y usarlo en la cursada)"] ||
+        alumno[
+          "Usuario de Twitch (en caso de no tener, deberá crear uno y usarlo en la cursada)"
+        ] ||
         alumno["Usuario de Twitch"]
       ),
 
@@ -99,68 +89,136 @@ const ClassroomRoles = {
     };
   },
 
-  getAssignments() {
-    let localAssignments = [];
-
-    try {
-      const raw = localStorage.getItem(this.assignmentsKey);
-      const parsed = raw ? JSON.parse(raw) : [];
-      localAssignments = Array.isArray(parsed) ? parsed : [];
-    } catch (error) {
-      localAssignments = [];
-    }
-
-    const staticAssignments =
-      typeof CLASSROOM_STATIC_ROLE_ASSIGNMENTS !== "undefined"
-        ? CLASSROOM_STATIC_ROLE_ASSIGNMENTS
-        : [];
-
-    return [...staticAssignments, ...localAssignments];
-  },
-
-  saveAssignments(assignments) {
-    localStorage.setItem(this.assignmentsKey, JSON.stringify(assignments || []));
-  },
-
   isTeacherSession(session) {
     if (!session) return false;
 
-    const identity = this.getSessionIdentity(session);
+    const role = String(
+      session.role || ""
+    ).trim().toLowerCase();
 
-    const teacherTwitches = CLASSROOM_TEACHER_TWITCH_USERS.map((item) => this.normalize(item));
-    const teacherNames = CLASSROOM_TEACHER_NAMES.map((item) => this.normalizeName(item));
+    const backendRole = String(
+      session.backendRole ||
+      session.exampro?.role ||
+      ""
+    ).trim().toLowerCase();
 
-    return teacherTwitches.includes(identity.twitch) || teacherNames.includes(identity.name);
-  },
+    if (
+      role === "teacher" ||
+      role === "docente" ||
+      backendRole === "docente"
+    ) {
+      return true;
+    }
 
-  getAssignedRole(session) {
-    if (!session) return null;
+    /*
+      Fallback de compatibilidad para la cuenta docente histórica.
+      Los moderadores NO se resuelven aquí.
+    */
+    const identity =
+      this.getSessionIdentity(session);
 
-    const identity = this.getSessionIdentity(session);
+    const teacherTwitches =
+      CLASSROOM_TEACHER_TWITCH_USERS.map(
+        (item) => this.normalize(item)
+      );
 
-    const match = this.getAssignments().find((item) => {
-      const itemTwitch = this.normalize(item.twitch);
-      const itemDni = this.normalizeDni(item.dni);
+    const teacherNames =
+      CLASSROOM_TEACHER_NAMES.map(
+        (item) => this.normalizeName(item)
+      );
 
-      return itemTwitch === identity.twitch && itemDni === identity.dni;
-    });
-
-    return match?.role || null;
+    return (
+      teacherTwitches.includes(identity.twitch) ||
+      teacherNames.includes(identity.name)
+    );
   },
 
   isModeratorSession(session) {
     if (!session) return false;
 
-    const role = String(session.role || "").trim().toLowerCase();
-    const backendRole = String(session.backendRole || session.exampro?.role || "").trim().toLowerCase();
-    const provider = String(session.provider || "").trim().toLowerCase();
+    const role = String(
+      session.role || ""
+    ).trim().toLowerCase();
+
+    const backendRole = String(
+      session.backendRole ||
+      session.exampro?.role ||
+      ""
+    ).trim().toLowerCase();
+
+    const provider = String(
+      session.provider || ""
+    ).trim().toLowerCase();
 
     return (
       role === "moderator" ||
       role === "classroom_moderator" ||
       backendRole === "classroom_moderator" ||
-      provider.includes("moderator") ||
-      this.getAssignedRole(session) === "moderator"
+      provider === "exampro-moderator-login"
+    );
+  },
+
+  getPermissions(session = null) {
+    const target =
+      session ||
+      this.getRawSession();
+
+    if (!target) return {};
+
+    if (this.isTeacherSession(target)) {
+      return {
+        "students.view": true,
+        "students.edit": true,
+        "students.withdraw": true,
+
+        "attendance.view": true,
+        "attendance.token.create": true,
+        "attendance.validate": true,
+        "attendance.edit": true,
+
+        "withdrawals.view": true,
+        "notifications.manage": true,
+        "community.moderate": true,
+        "roles.manage": true,
+      };
+    }
+
+    const permissions =
+      target.permissions;
+
+    if (
+      !permissions ||
+      typeof permissions !== "object" ||
+      Array.isArray(permissions)
+    ) {
+      return {};
+    }
+
+    return {
+      ...permissions,
+    };
+  },
+
+  hasPermission(permission, session = null) {
+    const target =
+      session ||
+      this.getRawSession();
+
+    if (!target) return false;
+
+    if (this.isTeacherSession(target)) {
+      return true;
+    }
+
+    return Boolean(
+      this.getPermissions(target)?.[permission]
+    );
+  },
+
+  currentHasPermission(permission) {
+    return this.hasPermission(
+      permission,
+      this.getRawSession()
     );
   },
 
@@ -170,12 +228,16 @@ const ClassroomRoles = {
     if (this.isTeacherSession(session)) {
       session.role = "teacher";
       session.roleLabel = "Docente";
+
       return session;
     }
 
     if (this.isModeratorSession(session)) {
       session.role = "moderator";
-      session.roleLabel = "Moderador";
+      session.roleLabel =
+        session.roleLabel ||
+        "Moderador";
+
       return session;
     }
 
@@ -185,53 +247,88 @@ const ClassroomRoles = {
     return session;
   },
 
-  save(session) {
-    if (!session) return;
-    localStorage.setItem(this.storageKey, JSON.stringify(session));
-  },
-
-  getRawSession() {
-    try {
-      const raw = localStorage.getItem(this.storageKey);
-      return raw ? JSON.parse(raw) : null;
-    } catch (error) {
-      return null;
-    }
-  },
-
   refreshCurrentSession() {
-    const session = this.apply(this.getRawSession());
+    const session =
+      this.apply(
+        this.getRawSession()
+      );
 
     if (!session) return null;
 
     this.save(session);
+
     return session;
   },
 
   isCurrentTeacher() {
-    return this.isTeacherSession(this.getRawSession());
+    return this.isTeacherSession(
+      this.getRawSession()
+    );
   },
 
   isCurrentModerator() {
-    return this.isModeratorSession(this.getRawSession());
+    return this.isModeratorSession(
+      this.getRawSession()
+    );
   },
 
   isCurrentStaff() {
-    return this.isCurrentTeacher() || this.isCurrentModerator();
+    return (
+      this.isCurrentTeacher() ||
+      this.isCurrentModerator()
+    );
+  },
+
+  /*
+    Compatibilidad temporal.
+
+    Ya NO existe una lista local de asignaciones.
+    El backend es la única fuente de verdad.
+  */
+  getAssignments() {
+    return [];
+  },
+
+  saveAssignments() {
+    console.warn(
+      "[Classroom] saveAssignments está obsoleto. Los roles se administran desde el backend."
+    );
+
+    return false;
+  },
+
+  getAssignedRole() {
+    return null;
   },
 
   paintRole() {
-    const session = this.refreshCurrentSession();
+    const session =
+      this.refreshCurrentSession();
 
     if (!session) return;
 
-    document.body.classList.toggle("role-teacher", session.role === "teacher");
-    document.body.classList.toggle("role-moderator", session.role === "moderator");
-    document.body.classList.toggle("role-student", session.role === "student");
+    document.body.classList.toggle(
+      "role-teacher",
+      session.role === "teacher"
+    );
 
-    document.querySelectorAll("[data-auth-role]").forEach((item) => {
-      item.textContent = session.roleLabel || "Alumno";
-    });
+    document.body.classList.toggle(
+      "role-moderator",
+      session.role === "moderator"
+    );
+
+    document.body.classList.toggle(
+      "role-student",
+      session.role === "student"
+    );
+
+    document
+      .querySelectorAll("[data-auth-role]")
+      .forEach((item) => {
+        item.textContent =
+          session.roleLabel ||
+          "Alumno";
+      });
   },
 
   init() {
@@ -239,118 +336,7 @@ const ClassroomRoles = {
   },
 };
 
-document.addEventListener("DOMContentLoaded", () => {
-  ClassroomRoles.init();
-});
-
-/* === Moderator Dedupe Roles Fix 20260622 === */
-(function moderatorDedupeRolesFix() {
-  "use strict";
-
-  function normTwitch(value) {
-    return String(value || "").trim().toLowerCase().replace(/^@+/, "");
-  }
-
-  function normDni(value) {
-    return String(value || "").replace(/\D/g, "");
-  }
-
-  function dedupe(list) {
-    const seen = new Set();
-
-    return (Array.isArray(list) ? list : [])
-      .map((item) => ({
-        ...item,
-        twitch: normTwitch(item?.twitch),
-        dni: normDni(item?.dni),
-        role: item?.role || "moderator",
-        roleLabel: item?.roleLabel || "Moderador",
-      }))
-      .filter((item) => {
-        const key = `${item.twitch}::${item.dni}`;
-
-        if (!item.twitch || !item.dni || seen.has(key)) return false;
-
-        seen.add(key);
-        return true;
-      });
-  }
-
-  function patchRoles() {
-    const roles = window.ClassroomRoles;
-
-    if (!roles || roles.__moderatorDedupePatched) return;
-
-    roles.__moderatorDedupePatched = true;
-
-    ["getAssignedRoles", "getModeratorAssignments", "getAssignedRoleEntries"].forEach((methodName) => {
-      if (typeof roles[methodName] !== "function") return;
-
-      const original = roles[methodName].bind(roles);
-
-      roles[methodName] = function patchedRoleList(...args) {
-        return dedupe(original(...args));
-      };
-    });
-
-    if (typeof roles.getAssignedRoleForSession === "function") {
-      const originalGetForSession = roles.getAssignedRoleForSession.bind(roles);
-
-      roles.getAssignedRoleForSession = function patchedGetAssignedRoleForSession(session, ...args) {
-        const result = originalGetForSession(session, ...args);
-
-        if (result) {
-          return {
-            ...result,
-            twitch: normTwitch(result.twitch),
-            dni: normDni(result.dni),
-            role: result.role || "moderator",
-            roleLabel: result.roleLabel || "Moderador",
-          };
-        }
-
-        return result;
-      };
-    }
-  }
-
-  function normalizeCurrentSession() {
-    try {
-      const key = "andyazh-classroom-session";
-      const session = JSON.parse(localStorage.getItem(key) || "null");
-
-      if (!session) return;
-
-      const role = String(session.role || "").toLowerCase();
-
-      if (role === "classroom_moderator") {
-        session.role = "moderator";
-        session.roleLabel = session.roleLabel || "Moderador";
-        localStorage.setItem(key, JSON.stringify(session));
-      }
-    } catch {}
-  }
-
-  function init() {
-    normalizeCurrentSession();
-
-    setTimeout(patchRoles, 50);
-    setTimeout(patchRoles, 300);
-    setTimeout(patchRoles, 1000);
-  }
-
-  window.ClassroomModeratorRolesDedupeFix = {
-    patch: patchRoles,
-    dedupe,
-  };
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", init);
-  } else {
-    init();
-  }
-})();
-
-
-
-
+document.addEventListener(
+  "DOMContentLoaded",
+  () => ClassroomRoles.init()
+);
