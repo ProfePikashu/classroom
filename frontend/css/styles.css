@@ -18009,3 +18009,240 @@ html[data-theme="light"] .attendance-table-scroll {
 }
 
 /* === END ROLES PERMISSIONS PANEL 20260917 === */
+
+/* === STUDENT EDIT MODAL 20260917 === */
+
+.student-edit-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 10050;
+  display: grid;
+  place-items: center;
+  padding: 22px;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity .18s ease, visibility .18s ease;
+}
+
+.student-edit-modal.show {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.student-edit-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(2, 6, 23, .80);
+  backdrop-filter: blur(10px);
+}
+
+.student-edit-dialog {
+  position: relative;
+  z-index: 1;
+  width: min(820px, 96vw);
+  max-height: 90vh;
+  overflow: auto;
+  border: 1px solid rgba(34, 211, 238, .28);
+  border-radius: 24px;
+  padding: 24px;
+  background:
+    radial-gradient(circle at top right, rgba(139, 92, 246, .16), transparent 35%),
+    linear-gradient(135deg, rgba(15, 23, 42, .99), rgba(16, 10, 38, .99));
+  box-shadow:
+    0 28px 90px rgba(0,0,0,.50),
+    0 0 40px rgba(34,211,238,.08);
+}
+
+.student-edit-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  border: 1px solid rgba(148,163,184,.25);
+  background: rgba(15,23,42,.82);
+  color: #e5e7eb;
+  cursor: pointer;
+}
+
+.student-edit-form {
+  display: grid;
+  gap: 18px;
+}
+
+.student-edit-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-right: 48px;
+}
+
+.student-edit-head h3 {
+  margin: 0;
+  font-family: Orbitron, sans-serif;
+}
+
+.student-edit-head p {
+  margin: 5px 0 0;
+  color: var(--text-muted, #94a3b8);
+}
+
+.student-edit-avatar {
+  width: 56px;
+  height: 56px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border-radius: 18px;
+  border: 1px solid rgba(125,211,252,.28);
+  background:
+    linear-gradient(
+      135deg,
+      rgba(34,211,238,.20),
+      rgba(168,85,247,.22)
+    );
+  font-size: 21px;
+}
+
+.student-edit-warning {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 12px;
+  padding: 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(245,158,11,.32);
+  background: rgba(245,158,11,.08);
+}
+
+.student-edit-warning > i {
+  margin-top: 2px;
+  color: #fbbf24;
+}
+
+.student-edit-warning strong,
+.student-edit-warning span {
+  display: block;
+}
+
+.student-edit-warning span {
+  margin-top: 4px;
+  color: var(--text-muted, #94a3b8);
+  line-height: 1.5;
+}
+
+.student-edit-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.student-edit-field {
+  display: grid;
+  gap: 7px;
+}
+
+.student-edit-field-wide {
+  grid-column: 1 / -1;
+}
+
+.student-edit-field > span {
+  color: var(--text-muted, #94a3b8);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.student-edit-field input,
+.student-edit-field select {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 13px;
+  border-radius: 12px;
+  border: 1px solid rgba(148,163,184,.24);
+  background: rgba(15,23,42,.72);
+  color: var(--text-main, #e5e7eb);
+  font: inherit;
+  outline: none;
+}
+
+.student-edit-field input:focus,
+.student-edit-field select:focus {
+  border-color: rgba(34,211,238,.58);
+  box-shadow: 0 0 0 4px rgba(34,211,238,.08);
+}
+
+.student-edit-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(148,163,184,.16);
+}
+
+.student-edit-btn {
+  border-color: rgba(34,211,238,.34);
+}
+
+body.student-edit-open {
+  overflow: hidden;
+}
+
+html[data-theme="light"] .student-edit-backdrop {
+  background: rgba(226,232,240,.74);
+}
+
+html[data-theme="light"] .student-edit-dialog {
+  background:
+    radial-gradient(circle at top right, rgba(216,180,254,.24), transparent 35%),
+    linear-gradient(135deg, #ffffff, #f8f5ff);
+  border-color: rgba(196,181,253,.55);
+  box-shadow: 0 26px 80px rgba(148,163,184,.30);
+}
+
+html[data-theme="light"] .student-edit-head h3 {
+  color: #1e293b;
+}
+
+html[data-theme="light"] .student-edit-head p,
+html[data-theme="light"] .student-edit-warning span,
+html[data-theme="light"] .student-edit-field > span {
+  color: #475569;
+}
+
+html[data-theme="light"] .student-edit-field input,
+html[data-theme="light"] .student-edit-field select {
+  background: #ffffff;
+  color: #1e293b;
+  border-color: rgba(196,181,253,.55);
+}
+
+html[data-theme="light"] .student-edit-close {
+  background: #ffffff;
+  color: #475569;
+  border-color: rgba(196,181,253,.45);
+}
+
+@media (max-width: 680px) {
+  .student-edit-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .student-edit-field-wide {
+    grid-column: auto;
+  }
+
+  .student-edit-actions {
+    flex-direction: column-reverse;
+  }
+
+  .student-edit-actions .btn {
+    width: 100%;
+  }
+}
+
+/* === END STUDENT EDIT MODAL 20260917 === */

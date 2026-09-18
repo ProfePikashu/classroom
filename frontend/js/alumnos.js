@@ -13,7 +13,11 @@ const ClassroomStudents = {
       ? "http://127.0.0.1:8000"
       : "https://api.andyazhtec.com",
 
-  limit: 40,
+  limit:
+    window.location.hostname === "localhost" ||
+    window.location.hostname === "127.0.0.1"
+      ? 40
+      : 2000,
   offset: 0,
   total: 0,
   loading: false,
@@ -61,6 +65,12 @@ const ClassroomStudents = {
         const profileButton = event.target.closest("[data-student-profile]");
         if (profileButton) {
           this.openProfileByIndex(Number(profileButton.dataset.studentProfile));
+          return;
+        }
+
+        const editButton = event.target.closest("[data-student-edit]");
+        if (editButton) {
+          this.openEditByIndex(Number(editButton.dataset.studentEdit));
           return;
         }
 
@@ -115,6 +125,14 @@ const ClassroomStudents = {
     return this.sourceLabels[source] || "Supabase";
   },
 
+  canEditStudents() {
+    return (
+      typeof ClassroomRoles !== "undefined" &&
+      typeof ClassroomRoles.currentHasPermission === "function" &&
+      ClassroomRoles.currentHasPermission("students.edit")
+    );
+  },
+
   setLoadingState(isLoading) {
     this.loading = isLoading;
 
@@ -142,7 +160,7 @@ const ClassroomStudents = {
 
     try {
       if (source === "sheet2025") {
-        await this.loadSheetStudents();
+        await this.loadSheetStudents(reset);
       } else if (source === "all") {
         await this.loadAllStudents();
       } else {
@@ -308,13 +326,49 @@ const ClassroomStudents = {
 
     return items;
   },
-  async loadSheetStudents() {
-    const allItems = await this.fetchSupabase2025Students();
-    const items = this.filterLocalStudents(allItems);
+  async loadSheetStudents(reset = false) {
+    const offset = reset ? 0 : this.offset;
 
-    this.students = items;
-    this.total = items.length;
-    this.offset = items.length;
+    if (reset) {
+      this.offset = 0;
+      this.students = [];
+    }
+
+    const data = await this.fetchJson(
+      this.buildSupabase2025Url(
+        offset,
+        this.limit,
+        this.currentSearch
+      ),
+      {
+        cache: "no-store",
+        headers: this.getAuthHeaders(),
+      }
+    );
+
+    if (!data.ok) {
+      throw new Error(
+        data.error ||
+        data.detail ||
+        "No se pudo leer Supabase."
+      );
+    }
+
+    const items = Array.isArray(data.items)
+      ? data.items.map(item =>
+          this.normalizeExamProStudent(item)
+        )
+      : [];
+
+    this.total = Number(
+      data.total || items.length
+    );
+
+    this.students = reset
+      ? items
+      : this.students.concat(items);
+
+    this.offset = this.students.length;
   },
 
   async loadAllStudents() {
@@ -513,12 +567,15 @@ const ClassroomStudents = {
 
     const source = this.getSelectedSource();
 
-    if (source !== "exampro") {
+    if (source === "all") {
       this.loadMoreBtn.style.display = "none";
       return;
     }
 
-    this.loadMoreBtn.style.display = this.offset < this.total ? "inline-flex" : "none";
+    this.loadMoreBtn.style.display =
+      this.offset < this.total
+        ? "inline-flex"
+        : "none";
   },
 
   setStatus(message) {
@@ -572,6 +629,7 @@ const ClassroomStudents = {
     const sourceDetail = this.getStudentSourceDetail(student, source, dni, fichaId);
     const enrollmentStatus = String(student.enrollment_status || student.estado || "").trim().toUpperCase();
     const isWithdrawn = enrollmentStatus === "BAJA";
+    const canEdit = this.canEditStudents();
 
     return `
       <tr>
@@ -603,6 +661,13 @@ const ClassroomStudents = {
               <i class="fa-solid fa-address-card"></i>
               <span>Ficha</span>
             </button>
+
+            ${canEdit ? `
+              <button class="btn btn-outline btn-table student-edit-btn" type="button" data-student-edit="${index}" title="Editar datos">
+                <i class="fa-solid fa-pen-to-square"></i>
+                <span>Editar</span>
+              </button>
+            ` : ""}
 
             <button class="btn btn-outline btn-table danger-btn" type="button" data-student-withdraw="${index}" title="${isWithdrawn ? "Alumno dado de baja" : "Dar de baja"}" ${isWithdrawn ? "disabled" : ""}>
               <i class="fa-solid fa-user-slash"></i>
@@ -1026,6 +1091,430 @@ const ClassroomStudents = {
     }
 
     return fichaId ? `Supabase · ID ${fichaId}` : "Supabase";
+  },
+
+  getEditableStudentId(student) {
+    const value =
+      student?.exampro?.id ||
+      student?.id ||
+      null;
+
+    const id = Number(value);
+
+    return Number.isInteger(id) && id > 0
+      ? id
+      : null;
+  },
+
+  openEditByIndex(index) {
+    if (!this.canEditStudents()) {
+      alert("Tu rol no tiene permiso para editar alumnos.");
+      return;
+    }
+
+    const student =
+      this.renderedStudents?.[index] ||
+      this.students?.[index];
+
+    if (!student) {
+      alert("No se pudo identificar al alumno.");
+      return;
+    }
+
+    const studentId =
+      this.getEditableStudentId(student);
+
+    if (!studentId) {
+      alert("Este registro no tiene un ID editable válido.");
+      return;
+    }
+
+    this.ensureEditModal();
+
+    this.editingStudent = student;
+    this.editingStudentId = studentId;
+
+    const identificationType =
+      String(
+        student.identificacion_tipo ||
+        "dni_ar"
+      ).trim().toLowerCase() === "extranjera"
+        ? "extranjera"
+        : "dni_ar";
+
+    const name =
+      student.full_name ||
+      student.display_name ||
+      "";
+
+    const identification =
+      student.dni ||
+      "";
+
+    const twitch =
+      String(student.twitch || "")
+        .replace(/^@+/, "");
+
+    const email =
+      student.email ||
+      "";
+
+    const phone =
+      student.telefono ||
+      "";
+
+    const courses =
+      student.cursada ||
+      (
+        Array.isArray(student.cursos)
+          ? student.cursos.join(" · ")
+          : ""
+      ) ||
+      "Sin cursada";
+
+    this.editModalBody.innerHTML = `
+      <form class="student-edit-form" data-student-edit-form>
+        <div class="student-edit-head">
+          <div class="student-edit-avatar">
+            <i class="fa-solid fa-user-pen"></i>
+          </div>
+
+          <div>
+            <p class="eyebrow">Edición de alumno</p>
+            <h3>${this.escapeHtml(name || "Alumno")}</h3>
+            <p>${this.escapeHtml(courses)}</p>
+          </div>
+        </div>
+
+        <div class="student-edit-warning">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+          <div>
+            <strong>Modificación de datos reales</strong>
+            <span>
+              Al guardar se actualizarán los datos del alumno en Supabase.
+              Si pertenece a AyRPC 2025, los cambios de DNI y Twitch también
+              se sincronizan con el histórico. La operación queda auditada.
+            </span>
+          </div>
+        </div>
+
+        <div class="student-edit-grid">
+          <label class="student-edit-field student-edit-field-wide">
+            <span>Nombre completo</span>
+            <input
+              name="full_name"
+              type="text"
+              maxlength="255"
+              required
+              value="${this.escapeHtml(name)}"
+            />
+          </label>
+
+          <label class="student-edit-field">
+            <span>Tipo de identificación</span>
+            <select name="identificacion_tipo">
+              <option value="dni_ar" ${identificationType === "dni_ar" ? "selected" : ""}>
+                DNI argentino
+              </option>
+              <option value="extranjera" ${identificationType === "extranjera" ? "selected" : ""}>
+                Identificación extranjera
+              </option>
+            </select>
+          </label>
+
+          <label class="student-edit-field">
+            <span>DNI / Identificación</span>
+            <input
+              name="identificacion"
+              type="text"
+              maxlength="64"
+              required
+              value="${this.escapeHtml(identification)}"
+            />
+          </label>
+
+          <label class="student-edit-field">
+            <span>Usuario de Twitch</span>
+            <input
+              name="twitch"
+              type="text"
+              maxlength="100"
+              required
+              autocomplete="off"
+              value="${this.escapeHtml(twitch)}"
+            />
+          </label>
+
+          <label class="student-edit-field">
+            <span>Correo electrónico</span>
+            <input
+              name="email"
+              type="email"
+              maxlength="255"
+              value="${this.escapeHtml(email)}"
+            />
+          </label>
+
+          <label class="student-edit-field student-edit-field-wide">
+            <span>Teléfono</span>
+            <input
+              name="telefono"
+              type="text"
+              maxlength="50"
+              value="${this.escapeHtml(phone)}"
+            />
+          </label>
+        </div>
+
+        <div class="student-edit-actions">
+          <button
+            class="btn btn-outline"
+            type="button"
+            data-student-edit-close
+          >
+            Cancelar
+          </button>
+
+          <button
+            class="btn btn-primary"
+            type="submit"
+            data-student-edit-submit
+          >
+            <i class="fa-solid fa-floppy-disk"></i>
+            Guardar cambios
+          </button>
+        </div>
+      </form>
+    `;
+
+    this.editModal.classList.add("show");
+    document.body.classList.add("student-edit-open");
+  },
+
+  ensureEditModal() {
+    if (this.editModal) return;
+
+    const modal =
+      document.createElement("div");
+
+    modal.className =
+      "student-edit-modal";
+
+    modal.innerHTML = `
+      <div
+        class="student-edit-backdrop"
+        data-student-edit-close
+      ></div>
+
+      <section
+        class="student-edit-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Editar alumno"
+      >
+        <button
+          class="student-edit-close"
+          type="button"
+          data-student-edit-close
+          aria-label="Cerrar editor"
+        >
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+
+        <div class="student-edit-body"></div>
+      </section>
+    `;
+
+    document.body.appendChild(modal);
+
+    this.editModal = modal;
+    this.editModalBody =
+      modal.querySelector(".student-edit-body");
+
+    modal.addEventListener(
+      "click",
+      (event) => {
+        if (
+          event.target.closest(
+            "[data-student-edit-close]"
+          )
+        ) {
+          this.closeEditModal();
+        }
+      }
+    );
+
+    modal.addEventListener(
+      "submit",
+      async (event) => {
+        const form =
+          event.target.closest(
+            "[data-student-edit-form]"
+          );
+
+        if (!form) return;
+
+        event.preventDefault();
+
+        await this.submitStudentEdit(form);
+      }
+    );
+
+    document.addEventListener(
+      "keydown",
+      (event) => {
+        if (
+          event.key === "Escape" &&
+          this.editModal?.classList.contains("show")
+        ) {
+          this.closeEditModal();
+        }
+      }
+    );
+  },
+
+  closeEditModal() {
+    if (!this.editModal) return;
+
+    this.editModal.classList.remove("show");
+    document.body.classList.remove("student-edit-open");
+
+    this.editingStudent = null;
+    this.editingStudentId = null;
+  },
+
+  async submitStudentEdit(form) {
+    if (!this.canEditStudents()) {
+      alert("Tu rol no tiene permiso para editar alumnos.");
+      return;
+    }
+
+    const studentId =
+      this.editingStudentId;
+
+    if (!studentId) {
+      alert("No se pudo identificar al alumno.");
+      return;
+    }
+
+    const formData =
+      new FormData(form);
+
+    const payload = {
+      full_name:
+        String(
+          formData.get("full_name") || ""
+        ).trim(),
+
+      identificacion_tipo:
+        String(
+          formData.get("identificacion_tipo") ||
+          "dni_ar"
+        ).trim(),
+
+      identificacion:
+        String(
+          formData.get("identificacion") || ""
+        ).trim(),
+
+      twitch:
+        String(
+          formData.get("twitch") || ""
+        )
+          .trim()
+          .replace(/^@+/, ""),
+
+      email:
+        String(
+          formData.get("email") || ""
+        ).trim(),
+
+      telefono:
+        String(
+          formData.get("telefono") || ""
+        ).trim(),
+    };
+
+    const confirmed =
+      window.confirm(
+        "Vas a modificar datos reales del alumno.\n\n" +
+        "Los cambios se guardarán en Supabase y quedarán registrados en auditoría.\n\n" +
+        "Para alumnos AyRPC 2025, los cambios de DNI y Twitch también se sincronizarán con el histórico.\n\n" +
+        "¿Confirmás guardar estos cambios?"
+      );
+
+    if (!confirmed) return;
+
+    const submitButton =
+      form.querySelector(
+        "[data-student-edit-submit]"
+      );
+
+    const originalHtml =
+      submitButton?.innerHTML || "";
+
+    if (submitButton) {
+      submitButton.disabled = true;
+      submitButton.innerHTML =
+        '<i class="fa-solid fa-spinner fa-spin"></i> Guardando...';
+    }
+
+    try {
+      const response =
+        await fetch(
+          `${this.getApiBase()}/api/classroom/students/${encodeURIComponent(studentId)}`,
+          {
+            method: "PATCH",
+            cache: "no-store",
+            headers: {
+              "Content-Type": "application/json",
+              ...this.getAuthHeaders(),
+            },
+            body: JSON.stringify(payload),
+          }
+        );
+
+      const data =
+        await response
+          .json()
+          .catch(() => null);
+
+      if (!response.ok || !data?.ok) {
+        throw new Error(
+          data?.detail ||
+          data?.error ||
+          data?.message ||
+          "No se pudo guardar la modificación."
+        );
+      }
+
+      this.closeEditModal();
+
+      await this.loadStudents(true);
+
+      alert(
+        data.changed
+          ? "Datos del alumno actualizados correctamente."
+          : "No había cambios para guardar."
+      );
+    } catch (error) {
+      alert(
+        "No se pudo guardar: " +
+        (
+          error?.message ||
+          "Error desconocido."
+        )
+      );
+    } finally {
+      if (
+        submitButton &&
+        submitButton.isConnected
+      ) {
+        submitButton.disabled = false;
+        submitButton.innerHTML =
+          originalHtml;
+      }
+    }
   },
 
   openProfileByIndex(index) {
