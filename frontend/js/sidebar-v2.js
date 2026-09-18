@@ -27,7 +27,8 @@
       "curso-ayrpc-2025.html",
       "clases-ayrpc-2025.html",
       "rubricas-ayrpc-2025.html",
-      "curso-ayrpc-2026.html"
+      "curso-ayrpc-2026.html",
+      "clases-ayrpc-2026.html"
     ];
 
     if (coursePages.includes(current)) {
