@@ -17,7 +17,7 @@ const ClassroomStudents = {
     window.location.hostname === "localhost" ||
     window.location.hostname === "127.0.0.1"
       ? 40
-      : 2000,
+      : 1000,
   offset: 0,
   total: 0,
   loading: false,
