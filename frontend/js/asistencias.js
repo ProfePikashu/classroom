@@ -8,15 +8,7 @@ const AdminAsistencias = {
     "ayrpc-2026": "AyRPC 2026"
   },
 
-  clases: [
-    { n: 1, label: "Clase 1" },
-    { n: 2, label: "Clase 2" },
-    { n: 3, label: "Clase 3" },
-    { n: 4, label: "Clase 4" },
-    { n: 5, label: "Clase 5" },
-    { n: 6, label: "Clase 6" },
-    { n: 7, label: "Clase 7" }
-  ],
+  clases: [],
 
   rows: [],
   summary: null,
@@ -226,7 +218,27 @@ const AdminAsistencias = {
       ]);
 
       this.summary = summaryData?.summary || null;
-      this.rows = (studentsData?.items || []).map(row => this.normalizeApiRow(row));
+
+      const rawRows = studentsData?.items || [];
+      const apiClasses = rawRows[0]?.classes;
+
+      if (Array.isArray(apiClasses) && apiClasses.length) {
+        this.clases = apiClasses.map(clase => ({
+          n: Number(clase.class_number),
+          label: clase.title || `Clase ${clase.class_number}`
+        }));
+      } else {
+        const totalClases = curso === "ayrpc-2026" ? 12 : 7;
+        this.clases = Array.from(
+          { length: totalClases },
+          (_, index) => ({
+            n: index + 1,
+            label: `Clase ${index + 1}`
+          })
+        );
+      }
+
+      this.rows = rawRows.map(row => this.normalizeApiRow(row));
 
       this.renderKpis(this.summary, this.rows);
       this.renderTable(this.rows); this.enableTableDragScroll();
