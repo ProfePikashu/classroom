@@ -307,7 +307,7 @@ const AdminAsistencias = {
           <td>${this.escapeHtml(alumno.email || "\u2014")}</td>
           <td>${this.escapeHtml(alumno.telefono || "\u2014")}</td>
           ${classCells}
-          <td><strong>${resumen.validas}/7</strong></td>
+          <td><strong>${resumen.validas}/${this.clases.length}</strong></td>
           <td>${this.badge(resumen.apto ? "APTO" : "NO APTO")}</td>
           <td><button class="btn btn-outline btn-table" type="button" data-attendance-profile="${index}">Ficha</button></td>
         </tr>
@@ -449,7 +449,7 @@ const AdminAsistencias = {
         ${this.profileField("Correo", alumno.email)}
         ${this.profileField("Telefono", alumno.telefono)}
         ${this.profileField("Twitch login", alumno.twitch ? "@" + alumno.twitch : "\\u2014")}
-        ${this.profileField("Clases vÃ¡lidas", resumen.validas + "/7")}
+        ${this.profileField("Clases vÃ¡lidas", resumen.validas + "/" + this.clases.length)}
         ${this.profileField("Apto examen", resumen.apto ? "Si" : "No")}
         ${this.profileField("Participacion examen", alumno.participado || "\\u2014")}
         ${this.profileField("Resultado", alumno.resultado || "\\u2014")}
