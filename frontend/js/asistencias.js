@@ -159,7 +159,7 @@ const AdminAsistencias = {
       full_name: row.full_name_normalized || row.full_name_raw || row.full_name || "Sin nombre",
       dni: row.dni || "-",
       email: row.email || "",
-      telefono: row.phone_display || "",
+      telefono: row.telefono || row.phone_display || "",
       whatsapp: row.whatsapp_number || "",
       twitch: row.twitch_normalized || "",
       curso: row.course_slug || "ayrpc-2025",

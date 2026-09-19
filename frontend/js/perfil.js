@@ -22,7 +22,7 @@ const ClassroomProfile = {
     this.setText("profileName", alumno["Nombre Completo"] || session.displayName || "{ASIGNAR DATO}");
     this.setText("profileDni", session.dni || alumno["DNI"] || "{ASIGNAR DATO}");
     this.setText("profileEmail", alumno["Correo"] || session.email || "{ASIGNAR DATO}");
-    this.setText("profilePhone", alumno["Teléfono (con Código de Área)"] || "{ASIGNAR DATO}");
+    this.setText("profilePhone", session.telefono || alumno.Telefono || alumno["Teléfono (con Código de Área)"] || "{ASIGNAR DATO}");
     this.setText("profileTwitch", session.twitch || alumno["Usuario de Twitch (en caso de no tener, deberá crear uno y usarlo en la cursada)"] || "{ASIGNAR DATO}");
     this.setText("profileObservations", alumno["Observaciones"] || "{ASIGNAR DATO}");
     this.setText("profileApto", alumno["APTO"] || "{ASIGNAR DATO}");

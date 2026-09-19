@@ -255,6 +255,8 @@ const ClassroomAuth = {
       const alumno = {
         DNI: student.dni || cleanDni,
         Correo: student.email || "",
+        Telefono: student.telefono || "",
+        "Teléfono (con Código de Área)": student.telefono || "",
         "Nombre Completo": fullName || cleanTwitch,
         "Usuario de Twitch": student.twitch || cleanTwitch,
         "Usuario de Twitch (en caso de no tener, deberá crear uno y usarlo en la cursada)": student.twitch || cleanTwitch,
@@ -264,6 +266,7 @@ const ClassroomAuth = {
         dni: student.dni || cleanDni,
         twitch: student.twitch || cleanTwitch,
         email: student.email || "",
+        telefono: student.telefono || "",
         displayName: fullName || cleanTwitch,
         role:
           data.role === "alumno"
