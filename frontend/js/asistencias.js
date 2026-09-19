@@ -150,14 +150,14 @@ const AdminAsistencias = {
   normalizeApiRow(row) {
     const clases = this.clases.map(({ n }) => [
       row[`class_${n}_status`] || "SIN DATOS",
-      row[`class_${n}_time`] || "\\u2014"
+      row[`class_${n}_time`] || "-"
     ]);
 
     return {
       legacyRow: row.legacy_row,
       inscripcion: row.inscription_at || "\u2014",
       full_name: row.full_name_normalized || row.full_name_raw || row.full_name || "Sin nombre",
-      dni: row.dni || "\\u2014",
+      dni: row.dni || "-",
       email: row.email || "",
       telefono: row.phone_display || "",
       whatsapp: row.whatsapp_number || "",
@@ -225,7 +225,7 @@ const AdminAsistencias = {
       if (Array.isArray(apiClasses) && apiClasses.length) {
         this.clases = apiClasses.map(clase => ({
           n: Number(clase.class_number),
-          label: clase.title || `Clase ${clase.class_number}`
+          label: `Clase ${clase.class_number}`
         }));
       } else {
         const totalClases = curso === "ayrpc-2026" ? 12 : 7;
@@ -460,12 +460,12 @@ const AdminAsistencias = {
         ${this.profileField("Inscripcion", alumno.inscripcion)}
         ${this.profileField("Correo", alumno.email)}
         ${this.profileField("Telefono", alumno.telefono)}
-        ${this.profileField("Twitch login", alumno.twitch ? "@" + alumno.twitch : "\\u2014")}
+        ${this.profileField("Twitch login", alumno.twitch ? "@" + alumno.twitch : "-")}
         ${this.profileField("Clases vÃ¡lidas", resumen.validas + "/" + this.clases.length)}
         ${this.profileField("Apto examen", resumen.apto ? "Si" : "No")}
-        ${this.profileField("Participacion examen", alumno.participado || "\\u2014")}
-        ${this.profileField("Resultado", alumno.resultado || "\\u2014")}
-        ${this.profileField("Recuperatorio", alumno.recuperatorio || "\\u2014")}
+        ${this.profileField("Participacion examen", alumno.participado || "-")}
+        ${this.profileField("Resultado", alumno.resultado || "-")}
+        ${this.profileField("Recuperatorio", alumno.recuperatorio || "-")}
       </div>
 
       <div class="attendance-profile-actions">
@@ -497,7 +497,7 @@ const AdminAsistencias = {
     return `
       <div class="attendance-profile-field">
         <span>${this.escapeHtml(label)}</span>
-        <strong>${this.escapeHtml(value || "\\u2014")}</strong>
+        <strong>${this.escapeHtml(value || "-")}</strong>
       </div>
     `;
   },
