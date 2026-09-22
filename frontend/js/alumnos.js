@@ -1650,9 +1650,12 @@ const ClassroomStudents = {
   },
 
   formatStatus(value) {
-    const clean = String(value || "").trim().toLowerCase();
+    const clean = String(value || "")
+      .trim()
+      .toUpperCase()
+      .replace(/\s+/g, "_");
 
-    if (!clean || clean === "planilla") {
+    if (!clean || clean === "PLANILLA") {
       return {
         label: "SIN ESTADO",
         className: "muted",
@@ -1660,7 +1663,15 @@ const ClassroomStudents = {
       };
     }
 
-    if (clean.includes("no") || clean.includes("desap")) {
+    if (clean === "APTO") {
+      return {
+        label: "APTO",
+        className: "success",
+        icon: "fa-circle-check",
+      };
+    }
+
+    if (clean === "NO_APTO" || clean.includes("DESAPROBADO")) {
       return {
         label: "NO APTO",
         className: "danger",
@@ -1668,10 +1679,18 @@ const ClassroomStudents = {
       };
     }
 
+    if (clean === "PENDIENTE") {
+      return {
+        label: "PENDIENTE",
+        className: "warning",
+        icon: "fa-clock",
+      };
+    }
+
     return {
-      label: "APTO",
-      className: "success",
-      icon: "fa-circle-check",
+      label: "SIN ESTADO",
+      className: "muted",
+      icon: "fa-minus",
     };
   },
 
