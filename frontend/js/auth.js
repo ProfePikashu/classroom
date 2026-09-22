@@ -43,7 +43,51 @@ const ClassroomAuth = {
 
   isAuthenticated() {
     const session = this.getSession();
-    return Boolean(session && session.dni && session.twitch);
+
+    if (!session?.dni || !session?.twitch) {
+      return false;
+    }
+
+    const token =
+      session.classroomReadToken ||
+      session.exampro?.accessToken ||
+      session.access_token ||
+      session.accessToken ||
+      session.token ||
+      "";
+
+    if (!token) {
+      return false;
+    }
+
+    try {
+      const parts = token.split(".");
+
+      if (parts.length !== 3) {
+        return false;
+      }
+
+      const payloadPart = parts[1]
+        .replace(/-/g, "+")
+        .replace(/_/g, "/");
+
+      const paddedPayload =
+        payloadPart +
+        "=".repeat((4 - (payloadPart.length % 4)) % 4);
+
+      const payload = JSON.parse(atob(paddedPayload));
+
+      if (!payload.exp) {
+        return false;
+      }
+
+      const expiresAt = Number(payload.exp) * 1000;
+      const safetyMargin = 30 * 1000;
+
+      return Date.now() < (expiresAt - safetyMargin);
+    } catch (_) {
+      return false;
+    }
   },
 
   requireAuth() {
