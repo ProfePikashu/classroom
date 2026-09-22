@@ -296,6 +296,18 @@ const ClassroomAuth = {
       const student = data.student || {};
       const fullName = String(student.full_name || "").trim();
 
+      const courses = Array.isArray(student.cursos)
+        ? [...new Set(
+            student.cursos
+              .map(course => String(course || "").trim())
+              .filter(Boolean)
+          )]
+        : [];
+
+      const currentCourse =
+        String(student.cursada || "").trim() ||
+        (courses.length ? courses[courses.length - 1] : "Classroom");
+
       const alumno = {
         DNI: student.dni || cleanDni,
         Correo: student.email || "",
@@ -329,7 +341,8 @@ const ClassroomAuth = {
               ? "Docente"
               : "Alumno"),
         backendRole: data.role || "alumno",
-        course: "AyRPC 2025",
+        course: currentCourse,
+        courses,
         alumno,
         exampro: {
           apiBase: EXAMPRO_API_BASE,
