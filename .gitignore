@@ -19,3 +19,5 @@ __pycache__/
 .ruff_cache/
 Thumbs.db
 .DS_Store
+
+.worktrees/
