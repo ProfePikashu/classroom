@@ -133,6 +133,14 @@ const ClassroomStudents = {
     );
   },
 
+  canWithdrawStudents() {
+    return (
+      typeof ClassroomRoles !== "undefined" &&
+      typeof ClassroomRoles.currentHasPermission === "function" &&
+      ClassroomRoles.currentHasPermission("students.withdraw")
+    );
+  },
+
   setLoadingState(isLoading) {
     this.loading = isLoading;
 
@@ -630,6 +638,7 @@ const ClassroomStudents = {
     const enrollmentStatus = String(student.enrollment_status || student.estado || "").trim().toUpperCase();
     const isWithdrawn = enrollmentStatus === "BAJA";
     const canEdit = this.canEditStudents();
+    const canWithdraw = this.canWithdrawStudents();
 
     return `
       <tr>
@@ -669,10 +678,12 @@ const ClassroomStudents = {
               </button>
             ` : ""}
 
+            ${canWithdraw ? `
             <button class="btn btn-outline btn-table danger-btn" type="button" data-student-withdraw="${index}" title="${isWithdrawn ? "Alumno dado de baja" : "Dar de baja"}" ${isWithdrawn ? "disabled" : ""}>
               <i class="fa-solid fa-user-slash"></i>
               <span>${isWithdrawn ? "Baja" : "Dar baja"}</span>
             </button>
+            ` : ""}
           </div>
         </td>
       </tr>
@@ -955,6 +966,11 @@ const ClassroomStudents = {
   },
 
   async withdrawStudentByIndex(index) {
+    if (!this.canWithdrawStudents()) {
+      alert("No tenés permiso para dar de baja alumnos.");
+      return;
+    }
+
     const student = this.renderedStudents?.[index];
 
     if (!student) {
