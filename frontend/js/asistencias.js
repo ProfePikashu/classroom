@@ -56,6 +56,14 @@ const AdminAsistencias = {
     return token ? { Authorization: `Bearer ${token}` } : {};
   },
 
+  canViewAttendance() {
+    return (
+      typeof ClassroomRoles !== "undefined" &&
+      typeof ClassroomRoles.currentHasPermission === "function" &&
+      ClassroomRoles.currentHasPermission("attendance.view")
+    );
+  },
+
   init() {
     this.courseSelect = document.getElementById("attendanceCourseSelect");
     this.searchInput = document.getElementById("attendanceSearchInput");
@@ -66,6 +74,27 @@ const AdminAsistencias = {
     this.tableWrap = document.getElementById("attendanceTableWrap");
     this.modal = document.getElementById("attendanceStudentModal");
     this.modalBody = document.getElementById("attendanceStudentModalBody");
+
+    if (!this.canViewAttendance()) {
+      if (this.status) {
+        this.status.textContent = "No tenés permiso para ver asistencias.";
+      }
+
+      if (this.kpis) {
+        this.kpis.innerHTML = "";
+      }
+
+      if (this.tableWrap) {
+        this.tableWrap.innerHTML = "";
+      }
+
+      if (this.courseSelect) this.courseSelect.disabled = true;
+      if (this.searchInput) this.searchInput.disabled = true;
+      if (this.statusFilter) this.statusFilter.disabled = true;
+      if (this.refreshBtn) this.refreshBtn.disabled = true;
+
+      return;
+    }
 
     if (this.modal && this.modal.parentElement !== document.body) {
       document.body.appendChild(this.modal);
