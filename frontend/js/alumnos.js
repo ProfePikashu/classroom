@@ -35,7 +35,9 @@ const ClassroomStudents = {
   init() {
     this.cacheDom();
     this.bindEvents();
-    this.initWithdrawalRequestsPanel();
+    if (this.canViewWithdrawalRequests()) {
+      this.initWithdrawalRequestsPanel();
+    }
     this.loadStudents(true);
   },
 
@@ -138,6 +140,14 @@ const ClassroomStudents = {
       typeof ClassroomRoles !== "undefined" &&
       typeof ClassroomRoles.currentHasPermission === "function" &&
       ClassroomRoles.currentHasPermission("students.withdraw")
+    );
+  },
+
+  canViewWithdrawalRequests() {
+    return (
+      typeof ClassroomRoles !== "undefined" &&
+      typeof ClassroomRoles.currentHasPermission === "function" &&
+      ClassroomRoles.currentHasPermission("withdrawals.view")
     );
   },
 
@@ -691,6 +701,8 @@ const ClassroomStudents = {
   },
 
   initWithdrawalRequestsPanel() {
+    if (!this.canViewWithdrawalRequests()) return;
+
     this.ensureWithdrawalRequestsPanel();
     this.bindWithdrawalRequestsPanel();
     this.renderWithdrawalRequestsPanel();
@@ -761,6 +773,11 @@ const ClassroomStudents = {
       const approveButton = event.target.closest("[data-withdrawal-approve]");
       if (!approveButton) return;
 
+      if (!this.canWithdrawStudents()) {
+        alert("No tenés permiso para aprobar bajas.");
+        return;
+      }
+
       const requestId = approveButton.dataset.withdrawalApprove;
       const ok = window.confirm("Confirmas aprobar la baja? El alumno dejara de poder acceder al Classroom.");
 
@@ -784,6 +801,10 @@ const ClassroomStudents = {
   },
 
   async fetchWithdrawalRequests(status = "all") {
+    if (!this.canViewWithdrawalRequests()) {
+      throw new Error("No tenés permiso para ver solicitudes de baja.");
+    }
+
     const url = `${this.getApiBase()}/api/classroom/admin/withdrawal-requests?course=ayrpc-2025&status=${encodeURIComponent(status)}&limit=100`;
 
     const response = await fetch(url, {
@@ -801,6 +822,10 @@ const ClassroomStudents = {
   },
 
   async approveWithdrawalRequest(requestId, notes = "") {
+    if (!this.canWithdrawStudents()) {
+      throw new Error("No tenés permiso para aprobar bajas.");
+    }
+
     const response = await fetch(`${this.getApiBase()}/api/classroom/admin/withdrawal-requests/${encodeURIComponent(requestId)}/approve`, {
       method: "POST",
       cache: "no-store",
@@ -823,11 +848,15 @@ const ClassroomStudents = {
   },
 
   async renderWithdrawalRequestsPanel() {
+    if (!this.canViewWithdrawalRequests()) return;
+
     const panel = this.ensureWithdrawalRequestsPanel();
     const list = panel.querySelector("#adminWithdrawalList");
     const counter = panel.querySelector("#adminWithdrawalCounter");
 
     if (!list || !counter) return;
+
+    const canWithdraw = this.canWithdrawStudents();
 
     try {
       const items = await this.fetchWithdrawalRequests("all");
@@ -871,12 +900,17 @@ const ClassroomStudents = {
               </div>
 
               <div class="admin-data-change-actions">
-                ${item.status === "pending" ? `
+                ${item.status === "pending" ? (canWithdraw ? `
                   <button type="button" class="danger" data-withdrawal-approve="${this.escapeHtml(item.id)}">
                     <i class="fa-solid fa-user-slash"></i>
                     Aprobar baja
                   </button>
                 ` : `
+                  <button type="button" disabled title="Requiere permiso students.withdraw">
+                    <i class="fa-solid fa-eye"></i>
+                    Solo lectura
+                  </button>
+                `) : `
                   <button type="button" disabled>
                     <i class="fa-solid fa-check"></i>
                     Baja aplicada
