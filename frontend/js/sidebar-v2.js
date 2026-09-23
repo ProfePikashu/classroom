@@ -1,6 +1,65 @@
 (() => {
   "use strict";
 
+  const ADMIN_PERMISSION_BY_ROUTE = Object.freeze({
+    "asistencias.html": "attendance.view",
+    "alumnos.html": "students.view",
+    "centro-notificaciones.html": "notifications.manage",
+    "administrar-comunidad.html": "community.moderate",
+  });
+
+  const TEACHER_ONLY_ADMIN_ROUTES = new Set([
+    "admin.html",
+    "rubricas-ayrpc-2025.html",
+  ]);
+
+  function hasPermission(permission) {
+    if (!permission) return true;
+
+    return (
+      typeof ClassroomRoles !== "undefined" &&
+      typeof ClassroomRoles.currentHasPermission === "function" &&
+      ClassroomRoles.currentHasPermission(permission)
+    );
+  }
+
+  function canAccessAdminRoute(route) {
+    if (TEACHER_ONLY_ADMIN_ROUTES.has(route)) {
+      return (
+        typeof ClassroomRoles !== "undefined" &&
+        typeof ClassroomRoles.isCurrentTeacher === "function" &&
+        ClassroomRoles.isCurrentTeacher()
+      );
+    }
+
+    const permission = ADMIN_PERMISSION_BY_ROUTE[route];
+    if (!permission) return false;
+
+    return hasPermission(permission);
+  }
+
+  function filterAdminLinks() {
+    const staff = document.querySelector(".sidebar-v2-staff");
+    const popover = document.getElementById("sidebarAdminPopover");
+
+    if (!staff || !popover) return;
+
+    const links = Array.from(popover.querySelectorAll("a[href]"));
+
+    links.forEach((link) => {
+      const href = String(link.getAttribute("href") || "");
+      const route = href.split("#")[0].split("?")[0].split("/").pop();
+      const allowed = canAccessAdminRoute(route);
+
+      link.style.display = allowed ? "" : "none";
+      link.setAttribute("aria-hidden", allowed ? "false" : "true");
+    });
+
+    const hasVisibleLinks = links.some((link) => link.style.display !== "none");
+
+    staff.style.display = hasVisibleLinks ? "" : "none";
+  }
+
   function currentFile() {
     const file = window.location.pathname.split("/").pop();
     return file || "index.html";
@@ -129,6 +188,7 @@
   }
 
   function init() {
+    filterAdminLinks();
     bindCourseToggle();
     bindAdminPopover();
     setActiveRoute();

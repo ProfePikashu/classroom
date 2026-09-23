@@ -34,6 +34,27 @@ const ClassroomStudents = {
 
   init() {
     this.cacheDom();
+
+    if (!this.canViewStudents()) {
+      if (this.status) {
+        this.status.textContent = "No tenés permiso para ver alumnos.";
+      }
+
+      if (this.grid) {
+        this.grid.innerHTML = "";
+      }
+
+      if (this.refreshBtn) {
+        this.refreshBtn.disabled = true;
+      }
+
+      if (this.loadMoreBtn) {
+        this.loadMoreBtn.hidden = true;
+      }
+
+      return;
+    }
+
     this.bindEvents();
     if (this.canViewWithdrawalRequests()) {
       this.initWithdrawalRequestsPanel();
@@ -125,6 +146,14 @@ const ClassroomStudents = {
 
   getSourceLabel(source = this.getSelectedSource()) {
     return this.sourceLabels[source] || "Supabase";
+  },
+
+  canViewStudents() {
+    return (
+      typeof ClassroomRoles !== "undefined" &&
+      typeof ClassroomRoles.currentHasPermission === "function" &&
+      ClassroomRoles.currentHasPermission("students.view")
+    );
   },
 
   canEditStudents() {
