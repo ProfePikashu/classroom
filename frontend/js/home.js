@@ -6,32 +6,99 @@
 "use strict";
 
 const ClassroomHome = {
-  init() {
+  async init() {
     if (typeof ClassroomAuth === "undefined") return;
 
     const session = ClassroomAuth.getSession();
-
     if (!session) return;
 
-    this.paintStudent(session);
+    await this.refreshProfile(session);
   },
 
-  paintStudent(session) {
-    const alumno = session.alumno || {};
-
-    this.setText("homeStudentName", alumno["Nombre Completo"] || session.displayName || "{ASIGNAR DATO}");
-    this.setText("homeStudentTwitch", session.twitch || "{ASIGNAR DATO}");
-    this.setText("homeStudentApto", alumno["APTO"] || "{ASIGNAR DATO}");
-    this.setText("homeStudentResult", alumno["Resultado"] || "Pendiente / Sin cargar");
+  get apiBase() {
+    return typeof EXAMPRO_API_BASE !== "undefined"
+      ? EXAMPRO_API_BASE
+      : "https://api.andyazhtec.com";
   },
 
-  setText(id, value) {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.textContent = value;
+  getToken(session) {
+    return (
+      session?.classroomReadToken ||
+      session?.exampro?.accessToken ||
+      session?.exampro?.token ||
+      session?.access_token ||
+      session?.token ||
+      session?.accessToken ||
+      ""
+    );
   },
+
+  async fetchProfile(token) {
+    const response = await fetch(
+      `${this.apiBase}/api/classroom/me/profile`,
+      {
+        cache: "no-store",
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+
+    const data = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      throw new Error(
+        data?.detail ||
+        "No se pudo actualizar el perfil del Classroom."
+      );
+    }
+
+    return data;
+  },
+
+  async refreshProfile(session) {
+    const token = this.getToken(session);
+
+    if (!token) return;
+
+    try {
+      const data = await this.fetchProfile(token);
+
+      const student = data?.student || {};
+
+      const updatedSession = {
+        ...session,
+        displayName:
+          student.full_name ||
+          session.displayName ||
+          "",
+        dni:
+          student.dni ||
+          session.dni ||
+          "",
+        email:
+          student.email ||
+          session.email ||
+          "",
+        telefono:
+          student.phone ||
+          session.telefono ||
+          "",
+        twitch:
+          student.twitch ||
+          session.twitch ||
+          ""
+      };
+
+      ClassroomAuth.setSession(updatedSession);
+    } catch (error) {
+      console.warn(
+        "Home: no se pudo refrescar el perfil dinámico.",
+        error
+      );
+    }
+  }
 };
-
 document.addEventListener("DOMContentLoaded", () => {
   ClassroomHome.init();
 });
