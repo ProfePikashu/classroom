@@ -11,7 +11,6 @@ const ClassroomProfile = {
     const session = ClassroomAuth.getSession();
     if (!session) return;
 
-    this.paintSession(session);
     this.paintCoursesLoading();
 
     await this.loadLiveProfile(session);
@@ -35,139 +34,99 @@ const ClassroomProfile = {
     );
   },
 
-  getCourses() {
-    if (
-      typeof CLASSROOM_COURSES !== "undefined" &&
-      Array.isArray(CLASSROOM_COURSES)
-    ) {
-      return CLASSROOM_COURSES.map(course => ({
-        id: String(course.id || "").trim(),
-        title: course.title || course.id
-      })).filter(course => course.id);
-    }
-
-    return [
-      { id: "ayrpc-2025", title: "AyRPC 2025" },
-      { id: "ayrpc-2026", title: "AyRPC 2026" }
-    ];
-  },
-
-  paintSession(session) {
-    const alumno = session.alumno || {};
-
-    this.setText(
-      "profileHeroName",
-      alumno["Nombre Completo"] ||
-      session.displayName ||
-      "{ASIGNAR DATO}"
-    );
-
-    this.setText(
-      "profileName",
-      alumno["Nombre Completo"] ||
-      session.displayName ||
-      "{ASIGNAR DATO}"
-    );
-
-    this.setText(
-      "profileDni",
-      session.dni ||
-      alumno["DNI"] ||
-      "{ASIGNAR DATO}"
-    );
-
-    this.setText(
-      "profileEmail",
-      session.email ||
-      alumno["Correo"] ||
-      "{ASIGNAR DATO}"
-    );
-
-    this.setText(
-      "profilePhone",
-      session.telefono ||
-      alumno.Telefono ||
-      alumno["Teléfono (con Código de Área)"] ||
-      "{ASIGNAR DATO}"
-    );
-
-    this.setText(
-      "profileTwitch",
-      session.twitch ||
-      alumno["Usuario de Twitch"] ||
-      alumno["Usuario de Twitch (en caso de no tener, deberá crear uno y usarlo en la cursada)"] ||
-      "{ASIGNAR DATO}"
-    );
-
-    this.setText(
-      "profileObservations",
-      alumno["Observaciones"] ||
-      "-"
-    );
-  },
-
-  async fetchCourse(course, token) {
+  async fetchProfile(token) {
     const response = await fetch(
-      `${this.apiBase}/api/classroom/me/course-status?course=${encodeURIComponent(course.id)}`,
+      `${this.apiBase}/api/classroom/me/profile`,
       {
         cache: "no-store",
-        headers: token
-          ? { Authorization: `Bearer ${token}` }
-          : {}
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
       }
     );
-
-    if (response.status === 404) {
-      return null;
-    }
 
     const data = await response.json().catch(() => null);
 
     if (!response.ok) {
       throw new Error(
         data?.detail ||
-        `No se pudo cargar ${course.title}.`
+        "No se pudo cargar el perfil."
       );
     }
 
-    return { course, data };
+    return data;
   },
 
   async loadLiveProfile(session) {
     const token = this.getToken(session);
 
     if (!token) {
-      this.paintCoursesError("No hay una sesión válida para consultar las cursadas.");
+      this.paintCoursesError(
+        "No hay una sesión válida para consultar el perfil."
+      );
       return;
     }
 
-    const results = await Promise.allSettled(
-      this.getCourses().map(course =>
-        this.fetchCourse(course, token)
-      )
-    );
+    try {
+      const data = await this.fetchProfile(token);
 
-    const enrollments = results
-      .filter(result => result.status === "fulfilled")
-      .map(result => result.value)
-      .filter(Boolean);
+      const student = data?.student || {};
+      const enrollments = Array.isArray(data?.enrollments)
+        ? data.enrollments
+        : [];
 
-    if (!enrollments.length) {
-      const hadError = results.some(
-        result => result.status === "rejected"
+      this.paintStudent(student, session);
+
+      const updatedSession = {
+        ...session,
+        displayName:
+          student.full_name ||
+          session.displayName ||
+          "",
+        dni:
+          student.dni ||
+          session.dni ||
+          "",
+        email:
+          student.email ||
+          session.email ||
+          "",
+        telefono:
+          student.phone ||
+          session.telefono ||
+          "",
+        twitch:
+          student.twitch ||
+          session.twitch ||
+          ""
+      };
+
+      ClassroomAuth.setSession(updatedSession);
+
+      if (!enrollments.length) {
+        this.paintCoursesError(
+          "No se encontraron cursadas asociadas a este usuario."
+        );
+        return;
+      }
+
+      this.renderCourses(
+        enrollments,
+        updatedSession
+      );
+    } catch (error) {
+      console.warn(
+        "No se pudo cargar el perfil dinámico:",
+        error
       );
 
       this.paintCoursesError(
-        hadError
-          ? "No se pudieron cargar las cursadas en este momento."
-          : "No se encontraron cursadas asociadas a este usuario."
+        "No se pudieron cargar las cursadas en este momento."
       );
-
-      return;
     }
+  },
 
-    const student = enrollments[0].data?.student || {};
-
+  paintStudent(student, session) {
     this.setText(
       "profileHeroName",
       student.full_name ||
@@ -210,48 +169,11 @@ const ClassroomProfile = {
       "{ASIGNAR DATO}"
     );
 
-    const observation = enrollments
-      .map(item => item.data?.academic?.observations)
-      .find(Boolean);
-
     this.setText(
       "profileObservations",
-      observation || "-"
+      student.observations ||
+      "-"
     );
-
-    session.displayName =
-      student.full_name ||
-      session.displayName;
-
-    session.email =
-      student.email ||
-      session.email ||
-      "";
-
-    session.telefono =
-      student.phone ||
-      session.telefono ||
-      "";
-
-    session.courses =
-      enrollments.map(item => item.course.id);
-
-    session.alumno = {
-      ...(session.alumno || {}),
-      DNI: student.dni || session.dni || "",
-      Correo: student.email || session.email || "",
-      Telefono: student.phone || session.telefono || "",
-      "Teléfono (con Código de Área)":
-        student.phone || session.telefono || "",
-      "Nombre Completo":
-        student.full_name || session.displayName || "",
-      "Usuario de Twitch":
-        student.twitch || session.twitch || ""
-    };
-
-    ClassroomAuth.setSession(session);
-
-    this.renderCourses(enrollments, session);
   },
 
   paintCoursesLoading() {
@@ -273,7 +195,9 @@ const ClassroomProfile = {
 
   paintCoursesError(message) {
     const panel =
-      document.querySelector(".profile-grid article.panel:nth-child(2)");
+      document.querySelector(
+        ".profile-grid article.panel:nth-child(2)"
+      );
 
     if (!panel) return;
 
@@ -289,7 +213,9 @@ const ClassroomProfile = {
 
   renderCourses(enrollments, session) {
     const panel =
-      document.querySelector(".profile-grid article.panel:nth-child(2)");
+      document.querySelector(
+        ".profile-grid article.panel:nth-child(2)"
+      );
 
     if (!panel) return;
 
@@ -297,111 +223,137 @@ const ClassroomProfile = {
       session.roleLabel ||
       "Alumno";
 
-    const coursesHtml = enrollments.map(({ course, data }) => {
-      const academic = data?.academic || {};
-      const student = data?.student || {};
-      const attendance = Array.isArray(data?.attendance)
-        ? data.attendance
-        : [];
+    const coursesHtml = enrollments.map(
+      enrollment => {
+        const course =
+          enrollment?.course || {};
 
-      const validClasses =
-        Number(academic.valid_classes || 0);
+        const academic =
+          enrollment?.academic || {};
 
-      const totalClasses =
-        attendance.length || 0;
+        const courseSlug =
+          String(course.slug || "").trim();
 
-      const finalStatus =
-        String(academic.final_status || "").toLowerCase();
+        const courseTitle =
+          /^ayrpc-\d{4}$/i.test(courseSlug) && course.year
+            ? `AyRPC ${course.year}`
+            : course.name ||
+              courseSlug ||
+              "Cursada";
 
-      let examStatus = academic.exam_eligible
-        ? "Apto"
-        : "No apto";
+        const validClasses =
+          Number(
+            academic.valid_classes ?? 0
+          );
 
-      if (
-        course.id === "ayrpc-2026" &&
-        finalStatus === "pending" &&
-        validClasses === 0
-      ) {
-        examStatus = "Pendiente";
+        const totalClasses =
+          Number(
+            academic.total_classes ?? 0
+          );
+
+        const finalStatus =
+          String(
+            academic.final_status || ""
+          ).toLowerCase();
+
+        let examStatus = "No apto";
+
+        if (academic.exam_eligible === true) {
+          examStatus = "Apto";
+        } else if (
+          String(course.status || "").toLowerCase() === "active" &&
+          finalStatus === "pending" &&
+          validClasses === 0
+        ) {
+          examStatus = "Pendiente";
+        }
+
+        const result =
+          this.formatFinalStatus(
+            finalStatus
+          );
+
+        const enrollmentStatus =
+          this.formatEnrollmentStatus(
+            enrollment.status
+          );
+
+        const href = courseSlug
+          ? `curso-${courseSlug}.html`
+          : "courses.html";
+
+        return `
+          <div class="profile-course-block">
+            <div class="panel-header">
+              <div>
+                <p class="eyebrow">Cursada</p>
+                <h3>${this.escapeHtml(courseTitle)}</h3>
+              </div>
+            </div>
+
+            <div class="profile-data-grid">
+              <div>
+                <span>Curso</span>
+                <strong>${this.escapeHtml(courseTitle)}</strong>
+              </div>
+
+              <div>
+                <span>Estado</span>
+                <strong>${this.escapeHtml(enrollmentStatus)}</strong>
+              </div>
+
+              <div>
+                <span>Clases válidas</span>
+                <strong>${validClasses}/${totalClasses}</strong>
+              </div>
+
+              <div>
+                <span>APTO examen</span>
+                <strong>${this.escapeHtml(examStatus)}</strong>
+              </div>
+
+              <div>
+                <span>Resultado</span>
+                <strong>${this.escapeHtml(result)}</strong>
+              </div>
+
+              <div>
+                <span>Rol en Classroom</span>
+                <strong>${this.escapeHtml(role)}</strong>
+              </div>
+            </div>
+
+            <div class="home-actions-row">
+              <a href="${this.escapeHtml(href)}" class="btn btn-primary">
+                <i class="fa-solid fa-magnifying-glass-chart"></i>
+                Ver estado completo
+              </a>
+            </div>
+          </div>
+        `;
       }
-
-      const result =
-        academic.result ||
-        this.formatFinalStatus(finalStatus);
-
-      const enrollmentStatus =
-        this.formatEnrollmentStatus(
-          student.enrollment_status
-        );
-
-      const href =
-        `curso-${course.id}.html`;
-
-      return `
-        <div class="profile-course-block">
-          <div class="panel-header">
-            <div>
-              <p class="eyebrow">Cursada</p>
-              <h3>${this.escapeHtml(course.title)}</h3>
-            </div>
-          </div>
-
-          <div class="profile-data-grid">
-            <div>
-              <span>Curso</span>
-              <strong>${this.escapeHtml(course.title)}</strong>
-            </div>
-
-            <div>
-              <span>Estado</span>
-              <strong>${this.escapeHtml(enrollmentStatus)}</strong>
-            </div>
-
-            <div>
-              <span>Clases válidas</span>
-              <strong>${validClasses}/${totalClasses}</strong>
-            </div>
-
-            <div>
-              <span>APTO examen</span>
-              <strong>${this.escapeHtml(examStatus)}</strong>
-            </div>
-
-            <div>
-              <span>Resultado</span>
-              <strong>${this.escapeHtml(result)}</strong>
-            </div>
-
-            <div>
-              <span>Rol en Classroom</span>
-              <strong>${this.escapeHtml(role)}</strong>
-            </div>
-          </div>
-
-          <div class="home-actions-row">
-            <a href="${this.escapeHtml(href)}" class="btn btn-primary">
-              <i class="fa-solid fa-magnifying-glass-chart"></i>
-              Ver estado completo
-            </a>
-          </div>
-        </div>
-      `;
-    }).join("");
+    ).join("");
 
     panel.innerHTML = coursesHtml;
   },
 
   formatEnrollmentStatus(value) {
-    const status = String(value || "").toLowerCase();
+    const status =
+      String(value || "").toLowerCase();
 
     const labels = {
       active: "Activa",
       completed: "Completada",
+      finished: "Finalizada",
       inactive: "Inactiva",
       withdrawn: "Baja registrada"
     };
 
-    return labels[status] || value || "Sin estado";
+    return (
+      labels[status] ||
+      value ||
+      "Sin estado"
+    );
   },
 
   formatFinalStatus(value) {
@@ -428,10 +380,10 @@ const ClassroomProfile = {
   setText(id, value) {
     const el = document.getElementById(id);
     if (!el) return;
+
     el.textContent = value;
   }
 };
-
 document.addEventListener("DOMContentLoaded", () => {
   ClassroomProfile.init();
 });
