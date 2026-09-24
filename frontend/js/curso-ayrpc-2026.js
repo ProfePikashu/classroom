@@ -1,6 +1,5 @@
-﻿const AYRPC2026_RECUPERATORIO_URL = "exampro.html";
-
 const CursoAyRPC2026Panel = {
+  courseSlug: "ayrpc-2026",
   classes: [
     { n: 1, title: "Presentación e introducción", statusKey: "class_1_status", timeKey: "class_1_time" },
     { n: 2, title: "Componentes de una PC", statusKey: "class_2_status", timeKey: "class_2_time" },
@@ -21,31 +20,20 @@ const CursoAyRPC2026Panel = {
 
     if (!session) return;
 
-    this.paintBaseSession(session);
-
-    const supabaseData = await this.refreshFromSupabase(session);
     const courseStatusData = await this.refreshFromCourseStatus(session);
 
-    const merged = this.mergeStudentData(session, supabaseData, courseStatusData);
+    if (!courseStatusData) {
+      this.paintUnavailable();
+      return;
+    }
 
-    this.saveMergedSession(session, merged);
-    this.paintStudent(merged, supabaseData, courseStatusData);
-    this.paintAttendance(merged);
-    this.paintRecovery(merged, supabaseData, courseStatusData);
-    this.patchPelusita();
+    this.paintCourseState(courseStatusData);
+    this.paintAttendance(courseStatusData);
   },
 
   getSession() {
     if (typeof ClassroomAuth === "undefined") return null;
     return ClassroomAuth.getSession();
-  },
-
-  normalizeDni(value) {
-    return String(value || "").replace(/\D+/g, "");
-  },
-
-  normalizeText(value) {
-    return String(value || "").trim();
   },
 
   getApiBase() {
@@ -142,138 +130,141 @@ const CursoAyRPC2026Panel = {
     return "—";
   },
 
-  paintBaseSession(session) {
-    document.getElementById("ayrpcStudentName").textContent = session.displayName || session.twitch || "Alumno";
-    document.getElementById("ayrpcStudentDni").textContent = session.dni || session.alumno?.DNI || "—";
-    document.getElementById("ayrpcStudentTwitch").textContent = session.twitch ? `@${String(session.twitch).replace(/^@/, "")}` : "—";
-    document.getElementById("ayrpcStudentEmail").textContent = session.email || session.alumno?.Correo || "—";
-  },
-
-  async refreshFromSupabase(session) {
-    const dni = this.normalizeDni(session.dni || session.alumno?.DNI);
-    const twitch = String(session.twitch || session.alumno?.["Usuario de Twitch"] || "").replace(/^@/, "");
-
-    if (!dni || !twitch || typeof EXAMPRO_API_BASE === "undefined") return null;
-
-    try {
-      const response = await fetch(`${EXAMPRO_API_BASE}/api/classroom/student-login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ dni, twitch }),
-      });
-
-      if (!response.ok) return null;
-
-      const data = await response.json();
-      return data?.student || null;
-    } catch (error) {
-      console.warn("No se pudo refrescar Supabase/ExamPro:", error);
-      return null;
-    }
-  },
-
   async refreshFromCourseStatus(session) {
     const token = this.getClassroomToken(session);
 
     if (!token) return null;
 
     try {
-      const response = await fetch(`${this.getApiBase()}/api/classroom/me/course-status?course=ayrpc-2026`, {
-        cache: "no-store",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(
+        `${this.getApiBase()}/api/classroom/me/course-status?course=${this.courseSlug}`,
+        {
+          cache: "no-store",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       const data = await response.json().catch(() => null);
 
       if (!response.ok || !data?.ok) return null;
 
-      const student = data.student || {};
-      const academic = data.academic || {};
       const raw = data.raw || {};
-      const attendance = Array.isArray(data.attendance) ? data.attendance : [];
+      const attendance = Array.isArray(data.attendance)
+        ? data.attendance
+        : [];
 
-      const legacy = {
-        ...raw,
-        DNI: student.dni || raw.dni,
-        Correo: student.email || raw.email,
-        email: student.email || raw.email,
-        "Nombre Completo": student.full_name || raw.full_name_normalized || raw.full_name_raw,
-        full_name: student.full_name || raw.full_name_normalized || raw.full_name_raw,
-        "Usuario de Twitch": student.twitch || raw.twitch_normalized,
-        twitch: student.twitch || raw.twitch_normalized,
-        APTO: academic.apt_calculated || raw.apt_calculated,
-        "Apto": academic.apt_calculated || raw.apt_calculated,
-        apt_examen: academic.apt_calculated || raw.apt_calculated,
-        Resultado: academic.result || raw.result,
-        resultado: academic.result || raw.result,
-        Recuperatorio: academic.recovery || raw.recovery,
-        recuperatorio: academic.recovery || raw.recovery,
+      const courseState = {
+        __courseStatus: data,
       };
 
       this.classes.forEach((item) => {
-        const row = attendance.find((entry) => Number(entry.class_number) === Number(item.n)) || {};
-        legacy[item.statusKey] = row.status || raw[`class_${item.n}_status`] || "";
-        legacy[item.timeKey] = row.time || raw[`class_${item.n}_time`] || "";
+        const row =
+          attendance.find(
+            (entry) => Number(entry.class_number) === Number(item.n)
+          ) || {};
+
+        courseState[item.statusKey] =
+          row.status ||
+          raw[`class_${item.n}_status`] ||
+          "";
+
+        courseState[item.timeKey] =
+          row.time ||
+          raw[`class_${item.n}_time`] ||
+          "";
       });
 
-      legacy.__courseStatus = data;
-
-      return legacy;
+      return courseState;
     } catch (error) {
-      console.warn("No se pudo refrescar estado de cursada desde Classroom:", error);
+      console.warn("No se pudo cargar el estado de cursada:", error);
       return null;
     }
   },
+  paintUnavailable() {
+    const state = document.getElementById("ayrpcCourseState");
+    const detail = document.getElementById("ayrpcCourseStateDetail");
+    const source = document.getElementById("ayrpcDataSource");
 
-  mergeStudentData(session, supabaseData, sheetData) {
-    const alumno = {
-      ...(session.alumno || {}),
-      ...(sheetData || {}),
-    };
-
-    if (supabaseData) {
-      alumno.__supabase = supabaseData;
-      alumno.apt_examen = supabaseData.apt_examen || alumno.apt_examen;
-      alumno.estado = supabaseData.estado || alumno.estado;
-      alumno.email = supabaseData.email || alumno.email;
-      alumno.student_id = supabaseData.id || alumno.student_id;
-    }
-
-    return alumno;
-  },
-
-  saveMergedSession(session, alumno) {
-    session.alumno = alumno;
-    session.dni = session.dni || alumno.DNI || alumno.dni;
-    session.email = session.email || alumno.Correo || alumno.email || "";
-
-    if (typeof ClassroomAuth !== "undefined") {
-      ClassroomAuth.setSession(session);
+    if (state) state.textContent = "No se pudo cargar la cursada";
+    if (detail) detail.textContent = "Recargá la página o intentá nuevamente más tarde.";
+    if (source) {
+      source.textContent = "Sin conexión";
+      source.className = "status-badge";
     }
   },
 
-  paintStudent(alumno, supabaseData, sheetData) {
-    const fullName = this.getValue(alumno, ["Nombre Completo", "full_name", "nombre"], "Alumno");
-    const dni = this.getValue(alumno, ["DNI", "dni"], "—");
-    const twitch = this.getValue(alumno, [
-      "Usuario de Twitch",
-      "Usuario de Twitch (en caso de no tener, deberá crear uno y usarlo en la cursada)",
-      "twitch",
-      "twitch_username"
-    ], "—");
-    const email = this.getValue(alumno, ["Correo", "email"], "—");
+  paintCourseState(alumno) {
+    const data = alumno?.__courseStatus || {};
+    const academic = data.academic || {};
+    const course = data.course || {};
+    const raw = data.raw || {};
 
-    document.getElementById("ayrpcStudentName").textContent = fullName;
-    document.getElementById("ayrpcStudentDni").textContent = dni;
-    document.getElementById("ayrpcStudentTwitch").textContent = String(twitch).startsWith("@") ? twitch : `@${twitch}`;
-    document.getElementById("ayrpcStudentEmail").textContent = email;
+    const state = document.getElementById("ayrpcCourseState");
+    const detail = document.getElementById("ayrpcCourseStateDetail");
+    const source = document.getElementById("ayrpcDataSource");
 
-    const source = supabaseData || sheetData ? "Datos sincronizados" : "Sesión local";
-    document.getElementById("ayrpcDataSource").textContent = source;
+    const courseStatus = this.normalizeStatus(
+      course.status ||
+      raw.course_status ||
+      ""
+    );
+
+    const finalStatus = this.normalizeStatus(
+      academic.final_status ||
+      academic.result ||
+      raw.final_status ||
+      ""
+    );
+
+    let label = "Estado sincronizado";
+
+    if (courseStatus === "FINISHED") {
+      label = "Cursada finalizada";
+    } else if (courseStatus === "ACTIVE") {
+      label = "Cursada activa";
+    } else if (finalStatus) {
+      label = finalStatus.replaceAll("_", " ");
+    }
+
+    const validClasses =
+      academic.valid_classes ??
+      data.valid_classes ??
+      raw.valid_classes;
+
+    const attendancePercent =
+      academic.attendance_percent ??
+      data.attendance_percent ??
+      raw.attendance_percent;
+
+    const parts = [];
+
+    if (validClasses !== undefined && validClasses !== null) {
+      parts.push(`${validClasses} clases válidas`);
+    }
+
+    if (
+      attendancePercent !== undefined &&
+      attendancePercent !== null &&
+      attendancePercent !== ""
+    ) {
+      parts.push(`${attendancePercent}% de asistencia`);
+    }
+
+    if (state) state.textContent = label;
+
+    if (detail) {
+      detail.textContent = parts.length
+        ? parts.join(" · ")
+        : "Tu estado y asistencias se muestran directamente desde Classroom.";
+    }
+
+    if (source) {
+      source.textContent = "Datos sincronizados";
+      source.className = "status-badge active";
+    }
   },
-
   paintAttendance(alumno) {
     const list = document.getElementById("ayrpcClassList");
     const chart = document.getElementById("ayrpcTimeChart");
@@ -339,150 +330,6 @@ const CursoAyRPC2026Panel = {
     return "neutral";
   },
 
-  isAptoExam(alumno, supabaseData, sheetData) {
-    const values = [
-      supabaseData?.apt_examen,
-      alumno?.apt_examen,
-      sheetData?.["Apto Examen"],
-      sheetData?.["APTO EXAMEN"],
-      sheetData?.["Apto"],
-      sheetData?.["APTO"],
-      sheetData?.["Estado Examen"],
-      sheetData?.["ESTADO EXAMEN"],
-    ].map(v => this.normalizeStatus(v));
-
-    return values.some(v =>
-      ["APTO", "APTO_EXAMEN", "SI", "SÍ", "TRUE", "1", "HABILITADO"].includes(v)
-    );
-  },
-
-  hasApprovedExam(alumno, supabaseData, sheetData) {
-    const values = [
-      // Examen regular - columna Y: Resultado
-      alumno?.Resultado,
-      alumno?.RESULTADO,
-      alumno?.resultado,
-      sheetData?.Resultado,
-      sheetData?.RESULTADO,
-      sheetData?.resultado,
-      supabaseData?.Resultado,
-      supabaseData?.RESULTADO,
-      supabaseData?.resultado,
-
-      // Recuperatorio - columna AA: Recuperatorio
-      alumno?.Recuperatorio,
-      alumno?.RECUPERATORIO,
-      alumno?.recuperatorio,
-      sheetData?.Recuperatorio,
-      sheetData?.RECUPERATORIO,
-      sheetData?.recuperatorio,
-      supabaseData?.Recuperatorio,
-      supabaseData?.RECUPERATORIO,
-      supabaseData?.recuperatorio,
-    ];
-
-    return values.some(value => {
-      const v = this.normalizeStatus(value);
-      return ["APROBADO", "APROBADA", "APROBO", "APROBÓ", "SI", "SÍ", "TRUE", "1", "OK"].includes(v);
-    });
-  },
-
-  paintRecovery(alumno, supabaseData, sheetData) {
-    const apto = this.isAptoExam(alumno, supabaseData, sheetData);
-    const aprobado = this.hasApprovedExam(alumno, supabaseData, sheetData);
-
-    const card = document.getElementById("ayrpcRecoveryCard");
-    const badge = document.getElementById("ayrpcRecoveryBadge");
-    const text = document.getElementById("ayrpcRecoveryText");
-    const btn = document.getElementById("ayrpcRecoveryBtn");
-    const examStatus = document.getElementById("ayrpcStudentExamStatus");
-
-    card.classList.remove("is-active", "is-locked", "is-approved");
-
-    if (aprobado) {
-      card.classList.add("is-approved");
-      badge.textContent = "Aprobado";
-      badge.className = "status-badge active";
-      examStatus.textContent = "Aprobado";
-      text.textContent = "Ya figura una evaluación aprobada. No hace falta acceder al recuperatorio.";
-      btn.classList.add("disabled");
-      btn.setAttribute("aria-disabled", "true");
-      btn.href = "exampro.html";
-      return;
-    }
-
-    if (apto) {
-      card.classList.add("is-active");
-      badge.textContent = "Disponible";
-      badge.className = "status-badge active";
-      examStatus.textContent = "Apto";
-      text.textContent = "Figurás como apto para examen y no se detectó una evaluación aprobada. Podés acceder al recuperatorio.";
-      btn.classList.remove("disabled");
-      btn.setAttribute("aria-disabled", "false");
-      btn.href = AYRPC2026_RECUPERATORIO_URL;
-      btn.target = "_blank";
-      btn.rel = "noopener noreferrer";
-      return;
-    }
-
-    card.classList.add("is-locked");
-    badge.textContent = "No habilitado";
-    badge.className = "status-badge";
-    examStatus.textContent = "No apto / revisar";
-    text.textContent = "Por ahora no figurás como apto para examen. Revisá tu asistencia o consultá con el profe.";
-    btn.classList.add("disabled");
-    btn.setAttribute("aria-disabled", "true");
-    btn.href = "clases-ayrpc-2026.html";
-  },
-
-  patchPelusita() {
-    window.addEventListener("load", () => {
-      if (!window.PelusitaClassroom) return;
-
-      const originalOpen = window.PelusitaClassroom.open;
-
-      window.PelusitaClassroom.open = function() {
-        const dlg = document.getElementById("pelusitaDialog");
-        const msg = document.getElementById("pelusitaDialogMsg");
-        const opts = document.getElementById("pelusitaDialogOpts");
-
-        if (!dlg || !msg || !opts) {
-          originalOpen();
-          return;
-        }
-
-        msg.textContent =
-`Soy Pelusita.
-
-En esta pantalla ves tu situación personal de AyRPC 2026: asistencia, tiempos registrados, estado de examen y acceso al recuperatorio si corresponde.`;
-
-        opts.innerHTML = `
-          <button class="pelusita-opt pelusita-opt-primary" data-ayrpc2026-help="clases">📚 Ver clases</button>
-          <button class="pelusita-opt" data-ayrpc2026-help="recu">📝 ¿Cuándo aparece el recuperatorio?</button>
-          <button class="pelusita-opt" data-ayrpc2026-help="cerrar">Cerrar</button>
-        `;
-
-        opts.querySelector('[data-ayrpc2026-help="clases"]')?.addEventListener("click", () => {
-          window.location.href = "clases-ayrpc-2026.html";
-        });
-
-        opts.querySelector('[data-ayrpc2026-help="recu"]')?.addEventListener("click", () => {
-          msg.textContent =
-`El acceso al recuperatorio aparece si figurás como apto para examen y todavía no consta una evaluación aprobada.
-
-Primero se revisan datos de Classroom/Supabase.`;
-          window.PelusitaClassroom.state?.("pelusita-state3");
-        });
-
-        opts.querySelector('[data-ayrpc2026-help="cerrar"]')?.addEventListener("click", () => {
-          window.PelusitaClassroom.close();
-        });
-
-        dlg.classList.add("show");
-        window.PelusitaClassroom.state?.("pelusita-state2");
-      };
-    });
-  }
 };
 
 document.addEventListener("DOMContentLoaded", () => {

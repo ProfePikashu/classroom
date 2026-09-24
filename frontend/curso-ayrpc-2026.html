@@ -215,11 +215,6 @@
               <i class="fa-solid fa-video"></i>
               Ver clases
             </a>
-
-            <a href="exampro.html" class="btn btn-outline">
-              <i class="fa-solid fa-file-circle-check"></i>
-              Ir a ExamPro
-            </a>
           </div>
         </div>
 
@@ -305,70 +300,28 @@
           </div>
         </div>
       </section>
-
-      <section class="ayrpc-student-dashboard">
-        <article class="panel ayrpc-student-card">
-          <div class="panel-header">
-            <div>
-              <p class="eyebrow">Alumno</p>
-              <h3 id="ayrpcStudentName">Cargando datos...</h3>
-            </div>
-
-            <span class="status-badge active" id="ayrpcDataSource">Sincronizando</span>
+      <section class="panel ayrpc-course-status-panel">
+        <div class="panel-header">
+          <div>
+            <p class="eyebrow">Estado de cursada</p>
+            <h3 id="ayrpcCourseState">Cargando estado...</h3>
           </div>
 
-          <div class="ayrpc-student-grid">
-            <div>
-              <span>DNI</span>
-              <strong id="ayrpcStudentDni">—</strong>
-            </div>
+          <span class="status-badge active" id="ayrpcDataSource">Sincronizando</span>
+        </div>
 
-            <div>
-              <span>Twitch</span>
-              <strong id="ayrpcStudentTwitch">—</strong>
-            </div>
+        <p id="ayrpcCourseStateDetail">
+          Consultando tu situación académica desde Classroom.
+        </p>
 
-            <div>
-              <span>Correo</span>
-              <strong id="ayrpcStudentEmail">—</strong>
-            </div>
-
-            <div>
-              <span>Estado examen</span>
-              <strong id="ayrpcStudentExamStatus">Verificando</strong>
-            </div>
-          </div>
-        </article>
-
-        <article class="panel ayrpc-recovery-card" id="ayrpcRecoveryCard">
-          <div class="panel-header">
-            <div>
-              <p class="eyebrow">Evaluación</p>
-              <h3>Recuperatorio</h3>
-            </div>
-
-            <span class="status-badge" id="ayrpcRecoveryBadge">Verificando</span>
-          </div>
-
-          <p id="ayrpcRecoveryText">
-            Estamos revisando tu estado académico para saber si corresponde habilitar el acceso.
-          </p>
-
-          <div class="ayrpc-recovery-actions">
-            <a class="btn btn-primary disabled" id="ayrpcRecoveryBtn" href="#" aria-disabled="true">
-              <i class="fa-solid fa-file-circle-question"></i>
-              Abrir recuperatorio
-            </a>
-
-            <a class="btn btn-outline" href="clases-ayrpc-2026.html">
-              <i class="fa-solid fa-list-check"></i>
-              Revisar clases
-            </a>
-          </div>
-        </article>
+        <div class="hero-actions">
+          <a href="clases-ayrpc-2026.html" class="btn btn-primary">
+            <i class="fa-solid fa-list-check"></i>
+            Revisar clases
+          </a>
+        </div>
       </section>
-
-      <section class="ayrpc-academic-layout">
+<section class="ayrpc-academic-layout">
         <article class="panel ayrpc-attendance-panel">
           <div class="panel-header">
             <div>
@@ -420,7 +373,7 @@
   <script src="js/roles.js?v=20260917-roles-permissions-v1"></script>
   <script src="js/main.js?v=20260612-newsletter-api-v1"></script>
   <script src="js/notifications-local.js?v=20260620-community-notifications-v2"></script>
-  <script src="js/curso-ayrpc-2026.js?v=20260830-ayrpc2026-base-v1"></script>
+  <script src="js/curso-ayrpc-2026.js?v=20260924-course-panel-cleanup-v1"></script>
   <script src="js/pelusita.js?v=20260611b"></script>  <script src="js/pelusita-dialog.js?v=20260612-guide-compact"></script>
   <script src="js/sidebar-v2.js?v=20260923-permissions-v1"></script>
 </body>
