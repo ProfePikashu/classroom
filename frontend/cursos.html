@@ -216,64 +216,19 @@
           </div>
         </article>
 
-        <section class="courses-clean-grid">
-          <article class="course-clean-card course-clean-card-active">
-            <div class="course-clean-top">
-              <div class="course-clean-icon">
-                <i class="fa-solid fa-computer"></i>
-              </div>
-
-              <span class="course-chip complete">Disponible</span>
-            </div>
-
-            <div class="course-clean-body">
-              <h3>AyRPC 2025</h3>
-
-              <p>
-                Panel académico activo para consultar asistencia, tiempos registrados, clases y estado de evaluación.
-              </p>
-            </div>
-
-            <div class="course-clean-actions">
-              <a href="curso-ayrpc-2025.html" class="btn btn-primary">
-                <i class="fa-solid fa-chart-line"></i>
-                Entrar al panel
-              </a>
-
-              <a href="clases-ayrpc-2025.html" class="btn btn-outline">
-                <i class="fa-solid fa-video"></i>
-                Ver clases
-              </a>
-            </div>
-          </article>
-
+        <section class="courses-clean-grid" id="coursesCatalog" aria-live="polite">
           <article class="course-clean-card course-clean-card-soon">
             <div class="course-clean-top">
               <div class="course-clean-icon">
-                <i class="fa-solid fa-microchip"></i>
+                <i class="fa-solid fa-spinner fa-spin"></i>
               </div>
 
-              <span class="course-chip soon">Próximamente</span>
+              <span class="course-chip soon">Cargando</span>
             </div>
 
             <div class="course-clean-body">
-              <h3>AyRPC 2026</h3>
-
-              <p>
-                Nueva edición en preparación. Por ahora dejamos visible la promesa general hasta cerrar el temario.
-              </p>
-            </div>
-
-            <div class="course-clean-actions">
-              <a href="curso-ayrpc-2026.html" class="btn btn-primary">
-                <i class="fa-solid fa-eye"></i>
-                Ver promesa
-              </a>
-
-              <button class="btn btn-outline" type="button" id="coursesAskPelusita">
-                <i class="fa-solid fa-paw"></i>
-                Preguntarle a Pelusita
-              </button>
+              <h3>Cargando cursos...</h3>
+              <p>Consultando el catalogo actual del Classroom.</p>
             </div>
           </article>
         </section>
@@ -283,7 +238,7 @@
 
   <script src="js/auth.js?v=20260917-roles-permissions-v1"></script>
   <script src="js/roles.js?v=20260917-roles-permissions-v1"></script>
-  <script src="js/courses-data.js"></script>
+  <script src="js/cursos.js?v=20260924-dynamic-catalog-v1"></script>
   <script src="js/main.js?v=20260612-newsletter-api-v1"></script>
   <script src="js/notifications-local.js?v=20260620-community-notifications-v2"></script>
   <script src="js/pelusita.js?v=20260612-cursos-clean"></script>  <script src="js/pelusita-dialog.js?v=20260612-guide-compact"></script>
