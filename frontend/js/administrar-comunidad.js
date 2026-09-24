@@ -43,11 +43,12 @@
     );
   }
 
-  function isStaffSession() {
-    const session = readSession();
-    const role = String(session.role || "").toLowerCase();
-
-    return Boolean(session.is_staff) || ["teacher", "docente", "moderador", "moderator", "admin"].includes(role);
+  function canModerateCommunity() {
+    return (
+      typeof ClassroomRoles !== "undefined" &&
+      typeof ClassroomRoles.currentHasPermission === "function" &&
+      ClassroomRoles.currentHasPermission("community.moderate")
+    );
   }
 
   async function communityAdminApi(path, options = {}) {
@@ -379,8 +380,8 @@
   function init() {
     cacheElements();
 
-    if (!isStaffSession()) {
-      setMessage("Esta sección es solo para docentes y moderadores.", true);
+    if (!canModerateCommunity()) {
+      setMessage("No tenés permiso para moderar la comunidad.", true);
       return;
     }
 

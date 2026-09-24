@@ -260,6 +260,79 @@ const ClassroomRoles = {
     return session;
   },
 
+  async refreshPermissionsFromBackend() {
+    const session = this.getRawSession();
+    if (!session) return null;
+
+    const token =
+      session.classroomReadToken ||
+      session.exampro?.accessToken ||
+      session.access_token ||
+      session.accessToken ||
+      session.token ||
+      "";
+
+    if (!token) return session;
+
+    const apiBase =
+      session.exampro?.apiBase ||
+      (
+        window.location.hostname === "localhost" ||
+        window.location.hostname === "127.0.0.1" ||
+        window.location.protocol === "file:"
+          ? "http://127.0.0.1:8000"
+          : "https://api.andyazhtec.com"
+      );
+
+    try {
+      const response = await fetch(
+        `${apiBase}/api/classroom/me/permissions`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        if (response.status === 401 || response.status === 403) {
+          session.permissions = {};
+          this.save(session);
+          this.paintRole();
+        }
+
+        return session;
+      }
+
+      const data = await response.json();
+
+      session.permissions =
+        data?.permissions &&
+        typeof data.permissions === "object"
+          ? data.permissions
+          : {};
+
+      if (data?.roleLabel) {
+        session.roleLabel = data.roleLabel;
+      }
+
+      if (data?.displayName) {
+        session.displayName = data.displayName;
+      }
+
+      this.save(session);
+      this.paintRole();
+
+      return session;
+    } catch (error) {
+      console.warn(
+        "No se pudieron refrescar los permisos Classroom:",
+        error
+      );
+
+      return session;
+    }
+  },
   isCurrentTeacher() {
     return this.isTeacherSession(
       this.getRawSession()
@@ -333,6 +406,7 @@ const ClassroomRoles = {
 
   init() {
     this.paintRole();
+    void this.refreshPermissionsFromBackend();
   },
 };
 

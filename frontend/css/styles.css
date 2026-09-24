@@ -18008,6 +18008,237 @@ html[data-theme="light"] .attendance-table-scroll {
   }
 }
 
+
+/* === COMPACT ROLES MATRIX 20260923 === */
+
+.moderators-list {
+  display: block;
+  min-width: 0;
+}
+
+.roles-matrix-wrap {
+  width: 100%;
+  max-width: 100%;
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--bg-card-strong);
+  scrollbar-gutter: stable;
+}
+
+.roles-matrix {
+  width: 100%;
+  min-width: 1320px;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.82rem;
+}
+
+.roles-matrix th,
+.roles-matrix td {
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  text-align: center;
+  vertical-align: middle;
+}
+
+.roles-matrix th:last-child,
+.roles-matrix td:last-child {
+  border-right: 0;
+}
+
+.roles-matrix tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.roles-matrix thead th {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  padding: 0.55rem 0.4rem;
+  background: var(--bg-card-strong);
+  color: var(--text-soft);
+  font-weight: 800;
+  line-height: 1.15;
+}
+
+.roles-matrix tbody td {
+  height: 54px;
+  padding: 0.35rem 0.4rem;
+  background: rgba(255,255,255,0.015);
+}
+
+.roles-matrix tbody tr:hover td {
+  background: rgba(0,245,255,0.035);
+}
+
+.roles-matrix tbody tr.is-inactive {
+  opacity: 0.58;
+}
+
+.roles-matrix tbody tr.is-inactive:hover {
+  opacity: 0.78;
+}
+
+.roles-matrix-person {
+  position: sticky;
+  left: 0;
+  z-index: 3;
+  width: 230px;
+  min-width: 230px;
+  max-width: 230px;
+  text-align: left !important;
+  background: var(--bg-card-strong) !important;
+}
+
+.roles-matrix thead .roles-matrix-person {
+  z-index: 7;
+  padding-left: 0.75rem;
+}
+
+.role-matrix-identity {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-width: 0;
+}
+
+.role-matrix-person-copy {
+  min-width: 0;
+  flex: 1;
+}
+
+.role-matrix-person-copy input {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  border-bottom: 1px solid transparent;
+  padding: 0.2rem 0.25rem;
+  background: transparent;
+  color: var(--text-main);
+  font: inherit;
+  font-weight: 800;
+  outline: none;
+}
+
+.role-matrix-person-copy input:hover,
+.role-matrix-person-copy input:focus {
+  border-bottom-color: var(--cyan);
+  background: rgba(255,255,255,0.035);
+}
+
+.role-matrix-person-copy small {
+  display: block;
+  overflow: hidden;
+  padding: 0 0.25rem;
+  color: var(--text-muted);
+  font-size: 0.68rem;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.roles-matrix-active {
+  width: 64px;
+  min-width: 64px;
+}
+
+.roles-matrix-permission-head {
+  width: 94px;
+  min-width: 94px;
+  max-width: 110px;
+}
+
+.roles-matrix-permission-head small {
+  display: block;
+  margin-bottom: 0.25rem;
+  color: var(--lilac);
+  font-size: 0.58rem;
+  font-weight: 900;
+  letter-spacing: 0.45px;
+  text-transform: uppercase;
+}
+
+.roles-matrix-permission-head span {
+  display: block;
+  font-size: 0.72rem;
+}
+
+.roles-matrix-permission {
+  width: 94px;
+  min-width: 94px;
+}
+
+.roles-matrix .role-switch--compact {
+  display: inline-block;
+  width: 38px;
+  height: 22px;
+  margin: 0 auto;
+}
+
+.roles-matrix .role-switch--compact .role-switch-ui::after {
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+}
+
+.roles-matrix
+  .role-switch--compact
+  input:checked
+  + .role-switch-ui::after {
+  transform: translateX(16px);
+}
+
+.roles-matrix-save-cell {
+  position: sticky;
+  right: 0;
+  z-index: 3;
+  width: 68px;
+  min-width: 68px;
+  background: var(--bg-card-strong) !important;
+}
+
+.roles-matrix thead .roles-matrix-save-cell {
+  z-index: 7;
+}
+
+.role-matrix-save {
+  width: 38px;
+  height: 34px;
+  min-width: 38px;
+  padding: 0;
+  border-radius: 9px;
+}
+
+.roles-matrix-wrap::-webkit-scrollbar {
+  height: 10px;
+}
+
+.roles-matrix-wrap::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgba(148,163,184,0.35);
+}
+
+@media (max-width: 760px) {
+  .roles-create-form {
+    grid-template-columns: 1fr;
+  }
+
+  .roles-matrix {
+    min-width: 1250px;
+  }
+
+  .roles-matrix-person {
+    width: 190px;
+    min-width: 190px;
+    max-width: 190px;
+  }
+}
+
+/* === END COMPACT ROLES MATRIX 20260923 === */
+
 /* === END ROLES PERMISSIONS PANEL 20260917 === */
 
 /* === STUDENT EDIT MODAL 20260917 === */

@@ -265,92 +265,131 @@ const ClassroomAdmin = {
       return;
     }
 
-    container.innerHTML = this.roles.map((item) => {
-      const permissionGroups = this.permissionCatalog
-        .map((group) => `
-          <section class="role-permission-group">
-            <h4>${this.escapeHtml(group.group)}</h4>
+    const permissions = this.permissionCatalog
+      .flatMap((group) =>
+        group.items.map(([permission, label, description]) => ({
+          permission,
+          label,
+          description,
+          group: group.group,
+        }))
+      )
+      .filter((item) => item.permission !== "roles.manage");
 
-            <div class="role-permission-grid">
-              ${group.items.map(([permission, label, description]) =>
-                this.renderPermission(
-                  permission,
-                  label,
-                  description,
-                  item
-                )
-              ).join("")}
-            </div>
-          </section>
-        `)
-        .join("");
-
-      return `
-        <article
-          class="moderator-card role-manager-card ${item.is_active ? "" : "is-inactive"}"
-          data-role-card="${Number(item.id)}"
+    const permissionHeaders = permissions
+      .map((item) => `
+        <th
+          class="roles-matrix-permission-head"
+          title="${this.escapeHtml(item.description)}"
         >
-          <div class="role-card-header">
-            <div class="role-identity">
-              <div class="role-status-dot ${item.is_active ? "active" : "inactive"}"></div>
+          <small>${this.escapeHtml(item.group)}</small>
+          <span>${this.escapeHtml(item.label)}</span>
+        </th>
+      `)
+      .join("");
 
-              <div>
-                <strong>
-                  ${this.escapeHtml(item.display_name || item.twitch)}
-                </strong>
+    const rows = this.roles
+      .map((item) => {
+        const permissionCells = permissions
+          .map((permissionItem) => {
+            const checked =
+              Boolean(item.permissions?.[permissionItem.permission]);
 
-                <span>@${this.escapeHtml(item.twitch)}</span>
-                <small>DNI ${this.escapeHtml(item.dni)}</small>
+            return `
+              <td
+                class="roles-matrix-permission"
+                title="${this.escapeHtml(permissionItem.description)}"
+              >
+                <label class="role-switch role-switch--compact">
+                  <input
+                    type="checkbox"
+                    data-role-permission="${this.escapeHtml(permissionItem.permission)}"
+                    ${checked ? "checked" : ""}
+                  />
+                  <span class="role-switch-ui"></span>
+                </label>
+              </td>
+            `;
+          })
+          .join("");
+
+        return `
+          <tr
+            class="${item.is_active ? "" : "is-inactive"}"
+            data-role-card="${Number(item.id)}"
+          >
+            <td class="roles-matrix-person">
+              <div class="role-matrix-identity">
+                <div class="role-status-dot ${item.is_active ? "active" : "inactive"}"></div>
+
+                <div class="role-matrix-person-copy">
+                  <input
+                    type="text"
+                    data-role-display-name
+                    value="${this.escapeHtml(item.display_name || "")}"
+                    placeholder="${this.escapeHtml(item.twitch)}"
+                    maxlength="120"
+                    aria-label="Nombre visible de ${this.escapeHtml(item.twitch)}"
+                  />
+
+                  <small>
+                    @${this.escapeHtml(item.twitch)}
+                    · DNI ${this.escapeHtml(item.dni)}
+                  </small>
+                </div>
               </div>
-            </div>
+            </td>
 
-            <label class="role-active-control">
-              <span>Rol activo</span>
-
-              <span class="role-switch">
+            <td class="roles-matrix-active">
+              <label
+                class="role-switch role-switch--compact"
+                title="Activar o desactivar moderador"
+              >
                 <input
                   type="checkbox"
                   data-role-active
                   ${item.is_active ? "checked" : ""}
                 />
                 <span class="role-switch-ui"></span>
-              </span>
-            </label>
-          </div>
+              </label>
+            </td>
 
-          <label class="role-display-name-field">
-            <span>Nombre visible</span>
+            ${permissionCells}
 
-            <input
-              type="text"
-              data-role-display-name
-              value="${this.escapeHtml(item.display_name || "")}"
-              placeholder="Nombre del moderador"
-              maxlength="120"
-            />
-          </label>
+            <td class="roles-matrix-save-cell">
+              <button
+                class="btn btn-primary role-matrix-save"
+                type="button"
+                data-save-role="${Number(item.id)}"
+                title="Guardar cambios"
+                aria-label="Guardar permisos de ${this.escapeHtml(item.display_name || item.twitch)}"
+              >
+                <i class="fa-solid fa-floppy-disk"></i>
+              </button>
+            </td>
+          </tr>
+        `;
+      })
+      .join("");
 
-          <div class="role-permissions">
-            ${permissionGroups}
-          </div>
+    container.innerHTML = `
+      <div class="roles-matrix-wrap">
+        <table class="roles-matrix">
+          <thead>
+            <tr>
+              <th class="roles-matrix-person">Moderador</th>
+              <th class="roles-matrix-active">Activo</th>
+              ${permissionHeaders}
+              <th class="roles-matrix-save-cell">Guardar</th>
+            </tr>
+          </thead>
 
-          <div class="role-card-footer">
-            <small>
-              Los cambios quedan registrados en auditoría.
-            </small>
-
-            <button
-              class="btn btn-primary"
-              type="button"
-              data-save-role="${Number(item.id)}"
-            >
-              <i class="fa-solid fa-floppy-disk"></i>
-              Guardar permisos
-            </button>
-          </div>
-        </article>
-      `;
-    }).join("");
+          <tbody>
+            ${rows}
+          </tbody>
+        </table>
+      </div>
+    `;
 
     container
       .querySelectorAll("[data-save-role]")
@@ -361,7 +400,6 @@ const ClassroomAdmin = {
         );
       });
   },
-
   collectPermissions(card) {
     const permissions = {};
 

@@ -34,8 +34,31 @@ const ClassroomStudents = {
 
   init() {
     this.cacheDom();
+
+    if (!this.canViewStudents()) {
+      if (this.status) {
+        this.status.textContent = "No tenés permiso para ver alumnos.";
+      }
+
+      if (this.grid) {
+        this.grid.innerHTML = "";
+      }
+
+      if (this.refreshBtn) {
+        this.refreshBtn.disabled = true;
+      }
+
+      if (this.loadMoreBtn) {
+        this.loadMoreBtn.hidden = true;
+      }
+
+      return;
+    }
+
     this.bindEvents();
-    this.initWithdrawalRequestsPanel();
+    if (this.canViewWithdrawalRequests()) {
+      this.initWithdrawalRequestsPanel();
+    }
     this.loadStudents(true);
   },
 
@@ -125,11 +148,35 @@ const ClassroomStudents = {
     return this.sourceLabels[source] || "Supabase";
   },
 
+  canViewStudents() {
+    return (
+      typeof ClassroomRoles !== "undefined" &&
+      typeof ClassroomRoles.currentHasPermission === "function" &&
+      ClassroomRoles.currentHasPermission("students.view")
+    );
+  },
+
   canEditStudents() {
     return (
       typeof ClassroomRoles !== "undefined" &&
       typeof ClassroomRoles.currentHasPermission === "function" &&
       ClassroomRoles.currentHasPermission("students.edit")
+    );
+  },
+
+  canWithdrawStudents() {
+    return (
+      typeof ClassroomRoles !== "undefined" &&
+      typeof ClassroomRoles.currentHasPermission === "function" &&
+      ClassroomRoles.currentHasPermission("students.withdraw")
+    );
+  },
+
+  canViewWithdrawalRequests() {
+    return (
+      typeof ClassroomRoles !== "undefined" &&
+      typeof ClassroomRoles.currentHasPermission === "function" &&
+      ClassroomRoles.currentHasPermission("withdrawals.view")
     );
   },
 
@@ -630,6 +677,7 @@ const ClassroomStudents = {
     const enrollmentStatus = String(student.enrollment_status || student.estado || "").trim().toUpperCase();
     const isWithdrawn = enrollmentStatus === "BAJA";
     const canEdit = this.canEditStudents();
+    const canWithdraw = this.canWithdrawStudents();
 
     return `
       <tr>
@@ -669,10 +717,12 @@ const ClassroomStudents = {
               </button>
             ` : ""}
 
+            ${canWithdraw ? `
             <button class="btn btn-outline btn-table danger-btn" type="button" data-student-withdraw="${index}" title="${isWithdrawn ? "Alumno dado de baja" : "Dar de baja"}" ${isWithdrawn ? "disabled" : ""}>
               <i class="fa-solid fa-user-slash"></i>
               <span>${isWithdrawn ? "Baja" : "Dar baja"}</span>
             </button>
+            ` : ""}
           </div>
         </td>
       </tr>
@@ -680,6 +730,8 @@ const ClassroomStudents = {
   },
 
   initWithdrawalRequestsPanel() {
+    if (!this.canViewWithdrawalRequests()) return;
+
     this.ensureWithdrawalRequestsPanel();
     this.bindWithdrawalRequestsPanel();
     this.renderWithdrawalRequestsPanel();
@@ -750,6 +802,11 @@ const ClassroomStudents = {
       const approveButton = event.target.closest("[data-withdrawal-approve]");
       if (!approveButton) return;
 
+      if (!this.canWithdrawStudents()) {
+        alert("No tenés permiso para aprobar bajas.");
+        return;
+      }
+
       const requestId = approveButton.dataset.withdrawalApprove;
       const ok = window.confirm("Confirmas aprobar la baja? El alumno dejara de poder acceder al Classroom.");
 
@@ -773,6 +830,10 @@ const ClassroomStudents = {
   },
 
   async fetchWithdrawalRequests(status = "all") {
+    if (!this.canViewWithdrawalRequests()) {
+      throw new Error("No tenés permiso para ver solicitudes de baja.");
+    }
+
     const url = `${this.getApiBase()}/api/classroom/admin/withdrawal-requests?course=ayrpc-2025&status=${encodeURIComponent(status)}&limit=100`;
 
     const response = await fetch(url, {
@@ -790,6 +851,10 @@ const ClassroomStudents = {
   },
 
   async approveWithdrawalRequest(requestId, notes = "") {
+    if (!this.canWithdrawStudents()) {
+      throw new Error("No tenés permiso para aprobar bajas.");
+    }
+
     const response = await fetch(`${this.getApiBase()}/api/classroom/admin/withdrawal-requests/${encodeURIComponent(requestId)}/approve`, {
       method: "POST",
       cache: "no-store",
@@ -812,11 +877,15 @@ const ClassroomStudents = {
   },
 
   async renderWithdrawalRequestsPanel() {
+    if (!this.canViewWithdrawalRequests()) return;
+
     const panel = this.ensureWithdrawalRequestsPanel();
     const list = panel.querySelector("#adminWithdrawalList");
     const counter = panel.querySelector("#adminWithdrawalCounter");
 
     if (!list || !counter) return;
+
+    const canWithdraw = this.canWithdrawStudents();
 
     try {
       const items = await this.fetchWithdrawalRequests("all");
@@ -860,12 +929,17 @@ const ClassroomStudents = {
               </div>
 
               <div class="admin-data-change-actions">
-                ${item.status === "pending" ? `
+                ${item.status === "pending" ? (canWithdraw ? `
                   <button type="button" class="danger" data-withdrawal-approve="${this.escapeHtml(item.id)}">
                     <i class="fa-solid fa-user-slash"></i>
                     Aprobar baja
                   </button>
                 ` : `
+                  <button type="button" disabled title="Requiere permiso students.withdraw">
+                    <i class="fa-solid fa-eye"></i>
+                    Solo lectura
+                  </button>
+                `) : `
                   <button type="button" disabled>
                     <i class="fa-solid fa-check"></i>
                     Baja aplicada
@@ -955,6 +1029,11 @@ const ClassroomStudents = {
   },
 
   async withdrawStudentByIndex(index) {
+    if (!this.canWithdrawStudents()) {
+      alert("No tenés permiso para dar de baja alumnos.");
+      return;
+    }
+
     const student = this.renderedStudents?.[index];
 
     if (!student) {
@@ -1650,9 +1729,12 @@ const ClassroomStudents = {
   },
 
   formatStatus(value) {
-    const clean = String(value || "").trim().toLowerCase();
+    const clean = String(value || "")
+      .trim()
+      .toUpperCase()
+      .replace(/\s+/g, "_");
 
-    if (!clean || clean === "planilla") {
+    if (!clean || clean === "PLANILLA") {
       return {
         label: "SIN ESTADO",
         className: "muted",
@@ -1660,7 +1742,15 @@ const ClassroomStudents = {
       };
     }
 
-    if (clean.includes("no") || clean.includes("desap")) {
+    if (clean === "APTO") {
+      return {
+        label: "APTO",
+        className: "success",
+        icon: "fa-circle-check",
+      };
+    }
+
+    if (clean === "NO_APTO" || clean.includes("DESAPROBADO")) {
       return {
         label: "NO APTO",
         className: "danger",
@@ -1668,10 +1758,18 @@ const ClassroomStudents = {
       };
     }
 
+    if (clean === "PENDIENTE") {
+      return {
+        label: "PENDIENTE",
+        className: "warning",
+        icon: "fa-clock",
+      };
+    }
+
     return {
-      label: "APTO",
-      className: "success",
-      icon: "fa-circle-check",
+      label: "SIN ESTADO",
+      className: "muted",
+      icon: "fa-minus",
     };
   },
 
