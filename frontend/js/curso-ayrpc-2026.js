@@ -24,6 +24,7 @@ const CursoAyRPC2026Panel = {
 
     if (!courseStatusData) {
       this.paintUnavailable();
+      this.paintAttendance(Object.fromEntries(this.classes.map(item => [item.statusKey, "PENDIENTE"])));
       return;
     }
 
@@ -187,14 +188,32 @@ const CursoAyRPC2026Panel = {
     const detail = document.getElementById("ayrpcCourseStateDetail");
     const source = document.getElementById("ayrpcDataSource");
 
+    // 24/10/2026 00:00 en Argentina (UTC-3).
+    const courseStart = Date.parse("2026-10-24T03:00:00Z");
+    const isUpcoming = Date.now() < courseStart;
+
+    if (isUpcoming) {
+      if (state) state.textContent = "Inicia el 24 de octubre";
+      if (detail) {
+        detail.textContent =
+          "La cursada todavía no comenzó. Por ahora vas a ver tu asistencia y tiempos como pendientes.";
+      }
+      if (source) {
+        source.textContent = "Próximamente";
+        source.className = "status-badge";
+      }
+      return;
+    }
+
     if (state) state.textContent = "No se pudo cargar la cursada";
-    if (detail) detail.textContent = "Recargá la página o intentá nuevamente más tarde.";
+    if (detail) {
+      detail.textContent = "Recargá la página o intentá nuevamente más tarde.";
+    }
     if (source) {
       source.textContent = "Sin conexión";
       source.className = "status-badge";
     }
   },
-
   paintCourseState(alumno) {
     const data = alumno?.__courseStatus || {};
     const academic = data.academic || {};
@@ -220,8 +239,18 @@ const CursoAyRPC2026Panel = {
 
     let label = "Estado sincronizado";
 
-    if (courseStatus === "FINISHED") {
-      label = "Cursada finalizada";
+    if (
+      courseStatus === "UPCOMING" ||
+      courseStatus === "PENDING" ||
+      courseStatus === "NOT_STARTED"
+    ) {
+      label = "Inicia el 24 de octubre";
+    } else if (
+      courseStatus === "FINISHED" ||
+      courseStatus === "CLOSED" ||
+      finalStatus === "PASSED"
+    ) {
+      label = "Finalizado";
     } else if (courseStatus === "ACTIVE") {
       label = "Cursada activa";
     } else if (finalStatus) {

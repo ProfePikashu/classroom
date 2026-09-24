@@ -19,6 +19,7 @@ const CursoAyRPC2025Panel = {
 
     if (!courseStatusData) {
       this.paintUnavailable();
+      this.paintAttendance({});
       return;
     }
 
@@ -215,8 +216,12 @@ const CursoAyRPC2025Panel = {
 
     let label = "Estado sincronizado";
 
-    if (courseStatus === "FINISHED") {
-      label = "Cursada finalizada";
+    if (
+      courseStatus === "FINISHED" ||
+      courseStatus === "CLOSED" ||
+      finalStatus === "PASSED"
+    ) {
+      label = "Finalizado";
     } else if (courseStatus === "ACTIVE") {
       label = "Cursada activa";
     } else if (finalStatus) {
