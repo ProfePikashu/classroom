@@ -822,20 +822,7 @@
           phoneNumberInput.value
         );
 
-      if (
-        !phoneCountryInput.value ||
-        phoneAreaInput.value.length < 2 ||
-        phoneNumberInput.value.length < 5
-      ) {
-
-        alert(
-          "Revisá el teléfono. Necesitamos código de país, código de área y número."
-        );
-
-        return false;
-      }
     }
-
     if (currentStep === 2) {
 
       const twitch =
