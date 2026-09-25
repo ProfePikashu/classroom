@@ -173,6 +173,7 @@ const AyRPC2025Classes = {
 
   async init() {
     await this.loadData();
+    await this.loadCanonicalClassContent();
     this.applyLocalRubrics();
     await this.refreshOfficialAttendance();
     this.renderClasses();
@@ -281,6 +282,72 @@ const AyRPC2025Classes = {
       session?.token ||
       ""
     );
+  },
+
+  async loadCanonicalClassContent() {
+    const session = this.getSession();
+    if (!session) return;
+
+    const token = this.getClassroomToken(session);
+    if (!token) return;
+
+    try {
+      const response = await fetch(
+        `${this.getApiBase()}/api/classroom/courses/ayrpc-2025/classes`,
+        {
+          cache: "no-store",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = await response.json().catch(() => null);
+
+      if (!response.ok || !data?.ok || !Array.isArray(data.classes)) {
+        return;
+      }
+
+      const canonicalByNumber = new Map(
+        data.classes.map(item => [
+          Number(item.class_number),
+          item,
+        ])
+      );
+
+      this.data.classes = this.data.classes.map((item) => {
+        const canonical = canonicalByNumber.get(Number(item.number));
+
+        if (!canonical) return item;
+
+        let videoId = item.video_id || "";
+
+        if (canonical.video_url) {
+          try {
+            const parsed = new URL(canonical.video_url);
+
+            videoId = parsed.hostname.includes("youtu.be")
+              ? parsed.pathname.replace(/^\/+/, "")
+              : parsed.searchParams.get("v") || videoId;
+          } catch (error) {}
+        }
+
+        return {
+          ...item,
+          title: canonical.title || item.title,
+          description: canonical.description || item.description,
+          video_id: videoId,
+          scheduled_at: canonical.scheduled_at || null,
+          duration_seconds: canonical.duration_seconds ?? null,
+          source_status: canonical.status || null,
+        };
+      });
+    } catch (error) {
+      console.warn(
+        "No se pudo cargar contenido canonico AyRPC 2025:",
+        error
+      );
+    }
   },
 
   async refreshOfficialAttendance() {
