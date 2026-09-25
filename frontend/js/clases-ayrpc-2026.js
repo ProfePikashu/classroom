@@ -22,6 +22,7 @@
         item.id,
         {
           classId: item.id,
+          windowId: "",
           open: false,
           code: "",
           expiresAt: 0,
@@ -31,7 +32,10 @@
       ])
     ),
 
-    timer: null
+    role: "alumno",
+    permissions: {},
+    timer: null,
+    attendancePollTimer: null
   };
 
   /*
@@ -67,6 +71,55 @@
     );
   }
 
+  function hasPermission(permission) {
+    return (
+      state.role === "docente" ||
+      Boolean(state.permissions?.[permission])
+    );
+  }
+
+  async function loadStaffAccess() {
+    state.role = "alumno";
+    state.permissions = {};
+
+    const token = getClassroomToken();
+
+    if (!token) return;
+
+    const apiBase =
+      typeof EXAMPRO_API_BASE !== "undefined"
+        ? EXAMPRO_API_BASE
+        : "https://api.andyazhtec.com";
+
+    try {
+      const response = await fetch(
+        `${apiBase}/api/classroom/me/permissions`,
+        {
+          cache: "no-store",
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+
+      if (!response.ok) return;
+
+      const data = await response.json();
+
+      state.role =
+        data?.role || "alumno";
+
+      state.permissions =
+        data?.permissions || {};
+    }
+    catch (error) {
+      console.warn(
+        "No se pudieron cargar permisos de Classroom:",
+        error
+      );
+    }
+  }
+
   function getYouTubeVideoId(url) {
     if (!url) return "";
 
@@ -93,6 +146,7 @@
         item.id,
         {
           classId: item.id,
+          windowId: "",
           open: false,
           code: "",
           expiresAt: 0,
@@ -254,6 +308,133 @@
     });
   }
 
+  async function refreshAttendanceWindowState(item) {
+    if (
+      !item ||
+      !hasPermission("attendance.view")
+    ) {
+      return;
+    }
+
+    const token = getClassroomToken();
+
+    if (!token) return;
+
+    const apiBase =
+      typeof EXAMPRO_API_BASE !== "undefined"
+        ? EXAMPRO_API_BASE
+        : "https://api.andyazhtec.com";
+
+    try {
+      const response = await fetch(
+        `${apiBase}/api/classroom/admin/attendance/window-state?course=ayrpc-2026&class_number=${encodeURIComponent(item.number)}`,
+        {
+          cache: "no-store",
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+
+      if (!response.ok) return;
+
+      const data = await response.json();
+
+      if (
+        !state.selected ||
+        state.selected.id !== item.id
+      ) {
+        return;
+      }
+
+      const attendance =
+        state.attendanceByClass[item.id];
+
+      if (!attendance) return;
+
+      if (!data.window) {
+        attendance.windowId = "";
+        attendance.open = false;
+        attendance.code = "";
+        attendance.expiresAt = 0;
+        attendance.visible = false;
+        attendance.count = 0;
+
+        paintAttendance();
+        return;
+      }
+
+      const backendWindowId =
+        data.window.id || "";
+
+      const backendExpiresAt =
+        data.active_token_expires_at
+          ? Date.parse(data.active_token_expires_at)
+          : 0;
+
+      const sameWindow =
+        attendance.windowId === backendWindowId;
+
+      const keepLocalCode =
+        sameWindow &&
+        Boolean(attendance.code) &&
+        Number.isFinite(backendExpiresAt) &&
+        Math.abs(
+          attendance.expiresAt - backendExpiresAt
+        ) < 1000 &&
+        Date.now() < attendance.expiresAt;
+
+      attendance.windowId =
+        backendWindowId;
+
+      attendance.open = true;
+
+      attendance.count =
+        Number(data.registered_count || 0);
+
+      if (!keepLocalCode) {
+        attendance.code = "";
+        attendance.visible = false;
+
+        attendance.expiresAt =
+          Number.isFinite(backendExpiresAt)
+            ? backendExpiresAt
+            : 0;
+      }
+
+      paintAttendance();
+    }
+    catch (error) {
+      console.warn(
+        "No se pudo recuperar el estado de asistencia:",
+        error
+      );
+    }
+  }
+
+  function startAttendancePolling() {
+    if (state.attendancePollTimer) {
+      window.clearInterval(
+        state.attendancePollTimer
+      );
+    }
+
+    state.attendancePollTimer = null;
+
+    if (!hasPermission("attendance.view")) {
+      return;
+    }
+
+    state.attendancePollTimer =
+      window.setInterval(() => {
+        if (!state.selected) return;
+
+        void refreshAttendanceWindowState(
+          state.selected
+        );
+      }, 15000);
+  }
+
   function selectClass(item) {
     state.selected = item;
 
@@ -284,6 +465,9 @@
 
     paintClassState(status);
     paintAttendance();
+
+    void refreshAttendanceWindowState(item);
+
     paintVideo(item);
     resetRecoveryUI();
   }
@@ -490,63 +674,273 @@
       .join("");
   }
 
-  function openAttendance() {
-    if (!IS_PREVIEW || !state.selected) {
+  async function openAttendance() {
+    if (!state.selected) return;
+
+    if (IS_PREVIEW) {
+      state.attendance.classId =
+        state.selected.id;
+
+      state.attendance.windowId =
+        "preview";
+
+      state.attendance.open = true;
+      state.attendance.code = "";
+      state.attendance.visible = false;
+      state.attendance.expiresAt = 0;
+
+      paintAttendance();
       return;
     }
 
-    state.attendance.classId =
-      state.selected.id;
+    if (!hasPermission("attendance.edit")) {
+      return;
+    }
 
-    state.attendance.open = true;
-    state.attendance.code = "";
-    state.attendance.visible = false;
-    state.attendance.expiresAt = 0;
+    const token = getClassroomToken();
 
-    paintAttendance();
+    if (!token) return;
+
+    try {
+      const response = await fetch(
+        `${EXAMPRO_API_BASE}/api/classroom/admin/attendance/windows/open`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            course_slug: "ayrpc-2026",
+            class_number: state.selected.number,
+            source: "classroom-web"
+          })
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data?.detail ||
+          "No se pudo habilitar la asistencia."
+        );
+      }
+
+      state.attendance.classId =
+        state.selected.id;
+
+      state.attendance.windowId =
+        data?.window?.id || "";
+
+      state.attendance.open = true;
+      state.attendance.code = "";
+      state.attendance.visible = false;
+      state.attendance.expiresAt = 0;
+      state.attendance.count = 0;
+
+      paintAttendance();
+    }
+    catch (error) {
+      console.error(
+        "Error habilitando asistencia:",
+        error
+      );
+
+      window.alert(
+        error?.message ||
+        "No se pudo habilitar la asistencia."
+      );
+    }
   }
 
-  function generateCode() {
+
+  async function generateCode() {
     if (
-      !IS_PREVIEW ||
       !state.selected ||
-      !state.attendance.open
+      !state.attendance?.open
     ) {
       return;
     }
 
-    state.attendance.classId =
-      state.selected.id;
+    if (IS_PREVIEW) {
+      state.attendance.code =
+        randomCode();
 
-    state.attendance.code =
-      randomCode();
+      state.attendance.expiresAt =
+        Date.now() + 30 * 60 * 1000;
 
-    state.attendance.expiresAt =
-      Date.now() + 30 * 60 * 1000;
+      state.attendance.visible = true;
 
-    state.attendance.visible = true;
-
-    startTimer();
-    paintAttendance();
-  }
-
-  function closeAttendance() {
-    if (!IS_PREVIEW) {
+      startTimer();
+      paintAttendance();
       return;
     }
 
-    state.attendance.open = false;
-    state.attendance.code = "";
-    state.attendance.visible = false;
-    state.attendance.expiresAt = 0;
+    if (
+      !hasPermission("attendance.token.create") ||
+      !state.attendance.windowId
+    ) {
+      return;
+    }
 
-    stopTimer();
-    paintAttendance();
+    const token = getClassroomToken();
+
+    if (!token) return;
+
+    try {
+      const response = await fetch(
+        `${EXAMPRO_API_BASE}/api/classroom/admin/attendance/windows/${state.attendance.windowId}/token`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            expires_minutes: 30
+          })
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data?.detail ||
+          "No se pudo generar el código."
+        );
+      }
+
+      state.attendance.code =
+        data.code || "";
+
+      state.attendance.expiresAt =
+        Date.parse(data.expires_at);
+
+      if (!Number.isFinite(state.attendance.expiresAt)) {
+        state.attendance.expiresAt =
+          Date.now() + 30 * 60 * 1000;
+      }
+
+      state.attendance.visible = true;
+
+      startTimer();
+      paintAttendance();
+    }
+    catch (error) {
+      console.error(
+        "Error generando código:",
+        error
+      );
+
+      window.alert(
+        error?.message ||
+        "No se pudo generar el código."
+      );
+    }
+  }
+
+
+  async function closeAttendance() {
+    if (!state.attendance?.open) {
+      return;
+    }
+
+    if (IS_PREVIEW) {
+      state.attendance.open = false;
+      state.attendance.windowId = "";
+      state.attendance.code = "";
+      state.attendance.visible = false;
+      state.attendance.expiresAt = 0;
+
+      stopTimer();
+      paintAttendance();
+      return;
+    }
+
+    if (
+      !hasPermission("attendance.edit") ||
+      !state.attendance.windowId
+    ) {
+      return;
+    }
+
+    const token = getClassroomToken();
+
+    if (!token) return;
+
+    try {
+      const response = await fetch(
+        `${EXAMPRO_API_BASE}/api/classroom/admin/attendance/windows/${state.attendance.windowId}/close`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            source: "classroom-web"
+          })
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data?.detail ||
+          "No se pudo cerrar la asistencia."
+        );
+      }
+
+      state.attendance.open = false;
+      state.attendance.windowId = "";
+      state.attendance.code = "";
+      state.attendance.visible = false;
+      state.attendance.expiresAt = 0;
+
+      stopTimer();
+      paintAttendance();
+    }
+    catch (error) {
+      console.error(
+        "Error cerrando asistencia:",
+        error
+      );
+
+      window.alert(
+        error?.message ||
+        "No se pudo cerrar la asistencia."
+      );
+    }
   }
 
   function paintStaff() {
     const staffState =
       $("staffAttendanceState");
+
+    if (!staffState) return;
+
+    const panel =
+      staffState.closest("details");
+
+    const canEdit =
+      IS_PREVIEW ||
+      hasPermission("attendance.edit");
+
+    const canGenerate =
+      IS_PREVIEW ||
+      hasPermission("attendance.token.create");
+
+    const canManage =
+      canEdit || canGenerate;
+
+    if (panel) {
+      panel.hidden = !canManage;
+    }
+
+    if (!canManage) return;
 
     const codeBox =
       $("staffAttendanceCodeBox");
@@ -569,20 +963,27 @@
     const closeBtn =
       $("staffCloseAttendance");
 
-    if (!staffState) return;
-
     const selected =
       state.selected;
 
+    const attendance =
+      selected
+        ? state.attendance
+        : null;
+
     const isThisClassOpen =
-      selected &&
-      state.attendance.open &&
-      state.attendance.classId === selected.id;
+      Boolean(
+        selected &&
+        attendance?.open &&
+        attendance.classId === selected.id
+      );
 
     const codeActive =
-      isThisClassOpen &&
-      state.attendance.code &&
-      Date.now() < state.attendance.expiresAt;
+      Boolean(
+        isThisClassOpen &&
+        attendance?.code &&
+        Date.now() < attendance.expiresAt
+      );
 
     staffState.textContent =
       codeActive
@@ -593,31 +994,31 @@
 
     if (count) {
       count.textContent =
-        String(state.attendance.count);
+        String(attendance?.count || 0);
     }
 
     if (openBtn) {
       openBtn.disabled =
-        !IS_PREVIEW ||
+        !canEdit ||
         !selected ||
         isThisClassOpen;
     }
 
     if (generateBtn) {
       generateBtn.disabled =
-        !IS_PREVIEW ||
+        !canGenerate ||
         !isThisClassOpen;
     }
 
     if (hideBtn) {
       hideBtn.disabled =
-        !IS_PREVIEW ||
+        !canGenerate ||
         !codeActive;
     }
 
     if (closeBtn) {
       closeBtn.disabled =
-        !IS_PREVIEW ||
+        !canEdit ||
         !isThisClassOpen;
     }
 
@@ -625,11 +1026,11 @@
       codeBox &&
       code &&
       codeActive &&
-      state.attendance.visible
+      attendance.visible
     ) {
       codeBox.hidden = false;
       code.textContent =
-        state.attendance.code;
+        attendance.code;
     }
     else if (codeBox) {
       codeBox.hidden = true;
@@ -758,71 +1159,106 @@
 
     form.addEventListener(
       "submit",
-      event => {
+      async event => {
 
         event.preventDefault();
 
-        if (!feedback) return;
+        if (!feedback || !state.selected) return;
+
+        const code =
+          input.value
+            .toUpperCase()
+            .replace(/[^A-Z2-9]/g, "")
+            .replace(/[IO01]/g, "")
+            .slice(0, 6);
 
         feedback.hidden = false;
 
-        if (!IS_PREVIEW) {
-          feedback.className =
-            "ayrpc2026-live-feedback warn";
-
-          feedback.textContent =
-            "La asistencia todavía no está conectada al backend.";
-
-          return;
-        }
-
-        if (
-          !state.attendance.code ||
-          Date.now() >= state.attendance.expiresAt
-        ) {
-          feedback.className =
-            "ayrpc2026-live-feedback warn";
-
-          feedback.textContent =
-            "La asistencia ya no se encuentra disponible.";
-
-          return;
-        }
-
-        if (
-          input.value !== state.attendance.code
-        ) {
+        if (code.length !== 6) {
           feedback.className =
             "ayrpc2026-live-feedback bad";
 
           feedback.textContent =
-            "No se pudo validar. Revisá las indicaciones dadas durante la transmisión.";
+            "Ingresá el código completo de 6 caracteres.";
 
           return;
         }
 
-        if (!state.selected) return;
+        const token = getClassroomToken();
 
-        state.statuses[state.selected.id] =
-          "PRESENTE";
+        if (!token) {
+          feedback.className =
+            "ayrpc2026-live-feedback bad";
 
-        state.attendance.count += 1;
+          feedback.textContent =
+            "Tu sesión venció. Volvé a iniciar sesión.";
+
+          return;
+        }
 
         feedback.className =
-          "ayrpc2026-live-feedback ok";
+          "ayrpc2026-live-feedback warn";
 
         feedback.textContent =
-          "Vista previa: presente validado correctamente.";
+          "Validando asistencia...";
 
-        input.value = "";
+        try {
+          const response = await fetch(
+            `${EXAMPRO_API_BASE}/api/classroom/attendance/check-in`,
+            {
+              method: "POST",
+              headers: {
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json"
+              },
+              body: JSON.stringify({
+                course_slug: "ayrpc-2026",
+                class_number: state.selected.number,
+                code
+              })
+            }
+          );
 
-        renderClasses();
-        paintClassState("PRESENTE");
-        paintAttendance();
+          const data = await response.json();
+
+          if (!response.ok) {
+            throw new Error(
+              data?.detail ||
+              "No se pudo validar la asistencia."
+            );
+          }
+
+          feedback.className =
+            data.registered
+              ? "ayrpc2026-live-feedback ok"
+              : data.result === "LIVE_PRESENCE_NOT_VERIFIED"
+                ? "ayrpc2026-live-feedback warn"
+                : "ayrpc2026-live-feedback bad";
+
+          feedback.textContent =
+            data.message ||
+            "No se pudo validar la asistencia.";
+
+          if (data.registered) {
+            input.value = "";
+          }
+        }
+        catch (error) {
+          console.error(
+            "Error validando asistencia:",
+            error
+          );
+
+          feedback.className =
+            "ayrpc2026-live-feedback bad";
+
+          feedback.textContent =
+            error?.message ||
+            "No se pudo validar la asistencia.";
+        }
       }
     );
   }
-
   function bindStaff() {
     $("staffOpenAttendance")
       ?.addEventListener(
@@ -840,7 +1276,7 @@
       ?.addEventListener(
         "click",
         () => {
-          if (!IS_PREVIEW) return;
+          if (!IS_PREVIEW && !hasPermission("attendance.token.create")) return;
 
           state.attendance.visible = false;
           paintStaff();
@@ -859,12 +1295,15 @@
     bindStaff();
 
     try {
+      await loadStaffAccess();
       await loadCanonicalClasses();
       renderClasses();
 
       if (CLASSES.length) {
         selectClass(CLASSES[0]);
       }
+
+      startAttendancePolling();
     } catch (error) {
       console.error("No se pudieron cargar las clases AyRPC 2026:", error);
 
