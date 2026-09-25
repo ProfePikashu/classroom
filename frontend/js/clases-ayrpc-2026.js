@@ -9,105 +9,7 @@
     new URLSearchParams(window.location.search)
       .get("attendance-preview") === "1";
 
-  const CLASSES = [
-    {
-      id: "clase-1",
-      number: 1,
-      title: "Presentación e introducción",
-      description: "Presentación del curso, modalidad de trabajo, herramientas y recorrido general.",
-      statusLabel: "PRIMERA CLASE",
-      videoId: ""
-    },
-    {
-      id: "clase-2",
-      number: 2,
-      title: "Componentes de una PC",
-      description: "Reconocimiento de componentes, funciones, formatos y conceptos fundamentales de hardware.",
-      statusLabel: "SEGUNDA CLASE",
-      videoId: ""
-    },
-    {
-      id: "clase-3",
-      number: 3,
-      title: "Compatibilidad y armado",
-      description: "Compatibilidad entre componentes, selección de hardware y proceso de armado.",
-      statusLabel: "TERCERA CLASE",
-      videoId: ""
-    },
-    {
-      id: "clase-4",
-      number: 4,
-      title: "Sistemas operativos",
-      description: "Instalación, medios booteables, particionado y configuración inicial.",
-      statusLabel: "CUARTA CLASE",
-      videoId: ""
-    },
-    {
-      id: "clase-5",
-      number: 5,
-      title: "BIOS / UEFI",
-      description: "BIOS, UEFI, Legacy, Secure Boot, CSM y conceptos de configuración y diagnóstico.",
-      statusLabel: "QUINTA CLASE",
-      videoId: ""
-    },
-    {
-      id: "clase-6",
-      number: 6,
-      title: "Drivers y herramientas",
-      description: "Drivers, utilidades de diagnóstico y herramientas habituales del técnico.",
-      statusLabel: "SEXTA CLASE",
-      videoId: ""
-    },
-    {
-      id: "clase-7",
-      number: 7,
-      title: "Microsoldadura I",
-      description: "Herramientas, seguridad, mediciones y fundamentos de microsoldadura.",
-      statusLabel: "SÉPTIMA CLASE",
-      videoId: ""
-    },
-    {
-      id: "clase-8",
-      number: 8,
-      title: "Microsoldadura II",
-      description: "Diagnóstico e intervención práctica sobre placas y componentes.",
-      statusLabel: "OCTAVA CLASE",
-      videoId: ""
-    },
-    {
-      id: "clase-9",
-      number: 9,
-      title: "Diagnóstico",
-      description: "Metodologías para localizar fallas y resolver problemas de hardware y software.",
-      statusLabel: "NOVENA CLASE",
-      videoId: ""
-    },
-    {
-      id: "clase-10",
-      number: 10,
-      title: "Redes",
-      description: "Fundamentos de redes, conectividad, direccionamiento y diagnóstico básico.",
-      statusLabel: "DÉCIMA CLASE",
-      videoId: ""
-    },
-    {
-      id: "clase-11",
-      number: 11,
-      title: "Introducción a ciberseguridad",
-      description: "Riesgos, buenas prácticas y fundamentos de seguridad informática.",
-      statusLabel: "CLASE 11",
-      videoId: ""
-    },
-    {
-      id: "clase-12",
-      number: 12,
-      title: "Malware y protección",
-      description: "Tipos de malware, detección, limpieza, prevención y cierre del curso.",
-      statusLabel: "ÚLTIMA CLASE",
-      videoId: ""
-    }
-  ];
-
+  let CLASSES = [];
   const state = {
     selected: null,
 
@@ -146,6 +48,103 @@
   });
 
   const $ = id => document.getElementById(id);
+
+
+  function getClassroomToken() {
+    const session =
+      typeof ClassroomAuth !== "undefined"
+        ? ClassroomAuth.getSession()
+        : null;
+
+    return (
+      session?.classroomReadToken ||
+      session?.exampro?.accessToken ||
+      session?.exampro?.access_token ||
+      session?.accessToken ||
+      session?.access_token ||
+      session?.token ||
+      ""
+    );
+  }
+
+  function getYouTubeVideoId(url) {
+    if (!url) return "";
+
+    try {
+      const parsed = new URL(url);
+
+      if (parsed.hostname.includes("youtu.be")) {
+        return parsed.pathname.replace(/^\/+/, "");
+      }
+
+      return parsed.searchParams.get("v") || "";
+    } catch {
+      return "";
+    }
+  }
+
+  function resetClassState() {
+    state.statuses = Object.fromEntries(
+      CLASSES.map(item => [item.id, "PENDIENTE"])
+    );
+
+    state.attendanceByClass = Object.fromEntries(
+      CLASSES.map(item => [
+        item.id,
+        {
+          classId: item.id,
+          open: false,
+          code: "",
+          expiresAt: 0,
+          visible: false,
+          count: 0
+        }
+      ])
+    );
+  }
+
+  async function loadCanonicalClasses() {
+    const token = getClassroomToken();
+
+    if (!token) {
+      throw new Error("No hay token de Classroom.");
+    }
+
+    const apiBase =
+      typeof EXAMPRO_API_BASE !== "undefined"
+        ? EXAMPRO_API_BASE
+        : "https://api.andyazhtec.com";
+
+    const response = await fetch(
+      `${apiBase}/api/classroom/courses/ayrpc-2026/classes`,
+      {
+        cache: "no-store",
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+
+    const data = await response.json().catch(() => null);
+
+    if (!response.ok || !data?.ok || !Array.isArray(data.classes)) {
+      throw new Error("No se pudieron cargar las clases.");
+    }
+
+    CLASSES = data.classes.map(item => ({
+      id: String(item.id),
+      number: Number(item.class_number),
+      title: item.title || `Clase ${item.class_number}`,
+      description: item.description || "",
+      statusLabel: `CLASE ${item.class_number}`,
+      videoId: getYouTubeVideoId(item.video_url),
+      scheduledAt: item.scheduled_at || null,
+      durationSeconds: item.duration_seconds ?? null,
+      sourceStatus: item.status || "pending"
+    }));
+
+    resetClassState();
+  }
 
   function statusClass(status) {
     if (status === "PRESENTE" || status === "RECUPERADA") {
@@ -855,13 +854,26 @@
       );
   }
 
-  function init() {
-    renderClasses();
+  async function init() {
     bindAttendanceForm();
     bindStaff();
 
-    if (CLASSES.length) {
-      selectClass(CLASSES[0]);
+    try {
+      await loadCanonicalClasses();
+      renderClasses();
+
+      if (CLASSES.length) {
+        selectClass(CLASSES[0]);
+      }
+    } catch (error) {
+      console.error("No se pudieron cargar las clases AyRPC 2026:", error);
+
+      const container = $("classesList");
+
+      if (container) {
+        container.innerHTML =
+          '<p class="muted">No se pudieron cargar las clases.</p>';
+      }
     }
   }
 
