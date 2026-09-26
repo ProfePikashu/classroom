@@ -248,16 +248,141 @@
                 </select>
               </label>
 
-              <label>
-                <span>Audiencia</span>
-                <select id="notificationAudience" required>
-                  <option value="all" selected>Todos los usuarios</option>
-                  <option value="students">Alumnos</option>
-                  <option value="staff">Docentes y moderadores</option>
-                  <option value="course-ayrpc-2025">AyRPC 2025</option>
-                  <option value="course-ayrpc-2026">AyRPC 2026</option>
-                </select>
-              </label>
+              <div class="notification-audience-builder full">
+  <select id="notificationAudience" hidden>
+    <option value="all">Todos en la base</option>
+    <option value="course-ayrpc-2025">AyRPC 2025</option>
+    <option value="course-ayrpc-2026">AyRPC 2026</option>
+    <option value="staff">Staff</option>
+    <option value="specific_user">Solo a</option>
+  </select>
+
+  <div class="notification-section-heading">
+    <div>
+      <span class="notification-section-kicker">Audiencia</span>
+      <strong>¿Quiénes van a recibir esta comunicación?</strong>
+    </div>
+    <small>Después vamos a mostrar la cantidad real desde Supabase.</small>
+  </div>
+
+  <div class="notification-audience-grid">
+
+    <label class="notification-audience-card">
+      <input
+        type="radio"
+        name="notificationAudienceVisual"
+        value="all"
+        checked
+      />
+      <span class="notification-audience-icon">
+        <i class="fa-solid fa-database"></i>
+      </span>
+      <span>
+        <strong>Todos en la base</strong>
+        <small>Todos los usuarios disponibles.</small>
+      </span>
+    </label>
+
+    <label class="notification-audience-card">
+      <input
+        type="radio"
+        name="notificationAudienceVisual"
+        value="course-ayrpc-2025"
+      />
+      <span class="notification-audience-icon">
+        <i class="fa-solid fa-graduation-cap"></i>
+      </span>
+      <span>
+        <strong>AyRPC 2025</strong>
+        <small>Excluye a quienes también estén inscriptos en 2026.</small>
+      </span>
+    </label>
+
+    <label class="notification-audience-card">
+      <input
+        type="radio"
+        name="notificationAudienceVisual"
+        value="course-ayrpc-2026"
+      />
+      <span class="notification-audience-icon">
+        <i class="fa-solid fa-laptop-code"></i>
+      </span>
+      <span>
+        <strong>AyRPC 2026</strong>
+        <small>Inscriptos activos en la edición 2026.</small>
+      </span>
+    </label>
+
+    <label class="notification-audience-card">
+      <input
+        type="radio"
+        name="notificationAudienceVisual"
+        value="staff"
+      />
+      <span class="notification-audience-icon">
+        <i class="fa-solid fa-user-shield"></i>
+      </span>
+      <span>
+        <strong>Staff</strong>
+        <small>Docentes y moderadores.</small>
+      </span>
+    </label>
+
+    <label class="notification-audience-card is-specific">
+      <input
+        type="radio"
+        name="notificationAudienceVisual"
+        value="specific_user"
+      />
+      <span class="notification-audience-icon">
+        <i class="fa-solid fa-user-plus"></i>
+      </span>
+      <span>
+        <strong>Solo a...</strong>
+        <small>Elegí personas específicas de la base.</small>
+      </span>
+    </label>
+
+  </div>
+
+  <div id="notificationSpecificAudience" class="notification-specific-audience" hidden>
+    <label>
+      <span>Buscar persona</span>
+      <div class="notification-person-search">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input
+          id="notificationPersonSearch"
+          type="search"
+          autocomplete="off"
+          placeholder="Nombre, DNI, Twitch o email..."
+        />
+      </div>
+    </label>
+
+    <div
+      id="notificationPersonSearchResults"
+      class="notification-person-results"
+      hidden
+    ></div>
+
+    <div class="notification-selected-people">
+      <div class="notification-selected-people-head">
+        <strong>Seleccionados</strong>
+        <span id="notificationSelectedPeopleCount">0</span>
+      </div>
+
+      <div id="notificationSelectedPeopleList" class="notification-selected-people-list">
+        <span class="notification-selected-empty">
+          Todavía no seleccionaste a nadie.
+        </span>
+      </div>
+    </div>
+
+    <p class="notification-prototype-note">
+      Autocompletado visual. Después los resultados van a salir de la base real.
+    </p>
+  </div>
+</div>
 
               <label class="full">
                 <span>Mensaje</span>
@@ -270,75 +395,295 @@
               </label>
             </div>
 
-            <div class="notification-admin-actions notification-admin-actions-with-mail">
-              <div class="notification-admin-mail-note notification-admin-mail-toggle">
-                <i class="fa-solid fa-envelope-circle-check"></i>
-                <div>
-                  <strong>Enviar por correo</strong>
-                  <div class="notification-mail-radio-group" role="radiogroup" aria-label="Enviar por correo">
-                    <label>
-                      <input type="radio" name="notificationSendEmail" value="true">
-                      Sí
-                    </label>
-                    <label>
-                      <input type="radio" name="notificationSendEmail" value="false" checked>
-                      No
-                    </label>
-                  </div>
-                </div>
+            <!-- === Canales + editor visual de correo 20260926 === -->
+          <section class="notification-channel-section">
+            <div class="notification-section-heading">
+              <div>
+                <span class="notification-section-kicker">Canales de salida</span>
+                <strong>¿Dónde querés publicar esta comunicación?</strong>
+              </div>
+              <small>Podés elegir uno, dos o los tres.</small>
+            </div>
+
+            <div class="notification-channel-grid">
+              <label class="notification-channel-card">
+                <input id="notificationChannelNotice" type="checkbox" checked />
+                <span class="notification-channel-icon">
+                  <i class="fa-solid fa-bullhorn"></i>
+                </span>
+                <span>
+                  <strong>Avisos</strong>
+                  <small>Aparece en Inicio / novedades.</small>
+                </span>
+              </label>
+
+              <label class="notification-channel-card">
+                <input id="notificationChannelBell" type="checkbox" checked />
+                <span class="notification-channel-icon">
+                  <i class="fa-solid fa-bell"></i>
+                </span>
+                <span>
+                  <strong>Notificaciones</strong>
+                  <small>Aparece en la campanita.</small>
+                </span>
+              </label>
+
+              <label class="notification-channel-card is-mail">
+                <input id="notificationChannelMail" type="checkbox" />
+                <span class="notification-channel-icon">
+                  <i class="fa-solid fa-envelope"></i>
+                </span>
+                <span>
+                  <strong>Mail</strong>
+                  <small>Destinatarios + editor + preview.</small>
+                </span>
+              </label>
+            </div>
+          </section>
+
+          <section id="notificationMailComposer" class="notification-mail-composer" hidden>
+            <div class="notification-mail-composer-head">
+              <div>
+                <span class="notification-section-kicker">Canal Mail</span>
+                <h4>Destinatarios y contenido del correo</h4>
+                <p>
+                  Elegí los destinatarios y personalizá el correo desde la vista previa.
+                </p>
               </div>
 
-              <div class="notification-academic-mail-preview is-disabled" id="notificationAcademicMailPreview" hidden>
-                <div class="notification-academic-mail-preview-head">
+              <span class="notification-mail-live-badge">
+                PREVIEW
+              </span>
+            </div>
+
+            <div class="notification-mail-workspace">
+
+                            <div class="notification-mail-recipients">
+
+                <div class="notification-mail-subhead">
                   <div>
-                    <strong>Audiencia de correo académico</strong>
-                    <p>Calculá destinatarios desde la planilla antes de guardar o enviar.</p>
+                    <span class="notification-section-kicker">Destinatarios del mail</span>
+                    <strong>¿A quiénes querés enviar el correo?</strong>
+                    <small>
+                      Esta selección es independiente de Avisos y Notificaciones.
+                    </small>
                   </div>
-                  <span class="notification-academic-mail-preview-badge">DRY-RUN</span>
+
+                  <strong id="notificationMailAudienceCount">...</strong>
                 </div>
 
-                <div class="notification-academic-mail-preview-grid">
-                  <label>
-                    <span>Fuente de correo</span>
-                    <select id="notificationAcademicMailSource">
-                      <option value="sheet-ayrpc-2025">Planilla AyRPC 2025</option>
-                    </select>
+                <div class="notification-audience-grid notification-mail-audience-grid">
+
+                  <label class="notification-audience-card">
+                    <input
+                      type="radio"
+                      name="notificationMailAudienceVisual"
+                      value="all"
+                      checked
+                    />
+                    <span class="notification-audience-icon">
+                      <i class="fa-solid fa-database"></i>
+                    </span>
+                    <span>
+                      <strong>Todos en la base</strong>
+                      <small>Todos los usuarios con correo válido.</small>
+                    </span>
                   </label>
 
-                  <label>
-                    <span>Segmento</span>
-                    <select id="notificationAcademicMailSegment">
-                      <option value="pending-recovery-2025">Pendientes de recuperatorio</option>
-                      <option value="todos" disabled>Todos los alumnos (pendiente)</option>
-                    </select>
+                  <label class="notification-audience-card">
+                    <input
+                      type="radio"
+                      name="notificationMailAudienceVisual"
+                      value="course-ayrpc-2025"
+                    />
+                    <span class="notification-audience-icon">
+                      <i class="fa-solid fa-graduation-cap"></i>
+                    </span>
+                    <span>
+                      <strong>AyRPC 2025</strong>
+                      <small>Sin quienes también estén inscriptos en 2026.</small>
+                    </span>
                   </label>
 
-                  <button class="btn btn-secondary" type="button" id="notificationAcademicMailPreviewBtn">
-                    <i class="fa-solid fa-magnifying-glass-chart"></i>
-                    Calcular destinatarios
-                  </button>
+                  <label class="notification-audience-card">
+                    <input
+                      type="radio"
+                      name="notificationMailAudienceVisual"
+                      value="course-ayrpc-2026"
+                    />
+                    <span class="notification-audience-icon">
+                      <i class="fa-solid fa-laptop-code"></i>
+                    </span>
+                    <span>
+                      <strong>AyRPC 2026</strong>
+                      <small>Inscriptos activos en la edición 2026.</small>
+                    </span>
+                  </label>
 
-                  <button class="btn btn-primary" type="button" id="notificationAcademicMailSendTestBtn" disabled>
-                    <i class="fa-solid fa-paper-plane"></i>
-                    Enviar prueba
-                  </button>
+                  <label class="notification-audience-card">
+                    <input
+                      type="radio"
+                      name="notificationMailAudienceVisual"
+                      value="staff"
+                    />
+                    <span class="notification-audience-icon">
+                      <i class="fa-solid fa-user-shield"></i>
+                    </span>
+                    <span>
+                      <strong>Staff</strong>
+                      <small>Docentes y moderadores.</small>
+                    </span>
+                  </label>
 
-                  <button class="btn btn-secondary" type="button" id="notificationAcademicMailEmailPreviewBtn">
-                    <i class="fa-solid fa-envelope-open-text"></i>
-                    Vista previa del correo
-                  </button>
+                  <label class="notification-audience-card is-specific">
+                    <input
+                      type="radio"
+                      name="notificationMailAudienceVisual"
+                      value="specific_user"
+                    />
+                    <span class="notification-audience-icon">
+                      <i class="fa-solid fa-user-plus"></i>
+                    </span>
+                    <span>
+                      <strong>Solo a...</strong>
+                      <small>Elegí destinatarios específicos.</small>
+                    </span>
+                  </label>
+
                 </div>
 
-                <div class="notification-academic-mail-preview-result" id="notificationAcademicMailPreviewResult">
-                  Todavía no se calcularon destinatarios.
+                <div
+                  id="notificationMailSpecificAudience"
+                  class="notification-specific-audience"
+                  hidden
+                >
+                  <label>
+                    <span>Buscar persona</span>
+
+                    <div class="notification-person-search">
+                      <i class="fa-solid fa-magnifying-glass"></i>
+
+                      <input
+                        id="notificationMailPersonSearch"
+                        type="search"
+                        autocomplete="off"
+                        placeholder="Nombre, DNI, Twitch o email..."
+                      />
+                    </div>
+                  </label>
+
+                  <div
+                    id="notificationMailPersonSearchResults"
+                    class="notification-person-results"
+                    hidden
+                  ></div>
+
+                  <div class="notification-selected-people">
+                    <div class="notification-selected-people-head">
+                      <strong>Seleccionados para Mail</strong>
+                      <span id="notificationMailSelectedPeopleCount">0</span>
+                    </div>
+
+                    <div
+                      id="notificationMailSelectedPeopleList"
+                      class="notification-selected-people-list"
+                    >
+                      <span class="notification-selected-empty">
+                        Todavía no seleccionaste a nadie.
+                      </span>
+                    </div>
+                  </div>
                 </div>
+
               </div>
-              <button class="btn btn-primary" type="submit">
-                <i class="fa-solid fa-paper-plane"></i>
-                Guardar notificación
+
+            <div class="notification-mail-preview-launch">
+              <div>
+                <span class="notification-section-kicker">Contenido del correo</span>
+                <strong>Personalizá y revisá el mail antes de enviarlo</strong>
+                <p>
+                  Asunto, etiqueta, saludo, cuerpo, botón, enlace, destacados y pie.
+                </p>
+              </div>
+
+              <div
+                class="notification-mail-recipient-preview"
+                id="notificationMailRecipientPreview"
+              >
+                <div class="notification-mail-recipient-preview-head">
+                  <div>
+                    <span class="notification-section-kicker">
+                      Preview exacto
+                    </span>
+
+                    <strong id="notificationMailRecipientSelectionCount">
+                      Calculando destinatarios...
+                    </strong>
+
+                    <small>
+                      Esta lista será la que se congele al crear la comunicación.
+                    </small>
+                  </div>
+
+                  <div class="notification-mail-recipient-actions">
+                    <button
+                      type="button"
+                      class="btn btn-secondary btn-small"
+                      id="notificationMailRecipientsAll"
+                    >
+                      Todos
+                    </button>
+
+                    <button
+                      type="button"
+                      class="btn btn-secondary btn-small"
+                      id="notificationMailRecipientsNone"
+                    >
+                      Ninguno
+                    </button>
+                  </div>
+                </div>
+
+                <div
+                  class="notification-mail-recipient-stats"
+                  id="notificationMailRecipientStats"
+                >
+                  Esperando audiencia...
+                </div>
+
+                <div
+                  class="notification-mail-recipient-list"
+                  id="notificationMailRecipientList"
+                ></div>
+              </div>
+              <button
+                class="btn btn-secondary"
+                type="button"
+                id="notificationAcademicMailEmailPreviewBtn"
+              >
+                <i class="fa-solid fa-envelope-open-text"></i>
+                Vista previa y personalizar correo
               </button>
             </div>
-          </form>
+          </section>
+
+          <div class="notification-admin-actions notification-prototype-actions">
+            <button
+              class="btn btn-primary"
+              id="notificationPrototypeSave"
+              type="button"
+              disabled
+              title="Esperando audiencia exacta..."
+            >
+              <i class="fa-solid fa-paper-plane"></i>
+              Guardar comunicación
+            </button>
+
+            <span>
+              Esperando que termine de calcularse la audiencia exacta.
+            </span>
+          </div>
+        </form>
         </article>
 
         <article class="panel notifications-center-list-panel">
@@ -410,7 +755,7 @@
       }
 
       const script = document.createElement("script");
-      script.src = "js/centro-notificaciones.js?v=20260923-permissions-v1";
+      script.src = "js/centro-notificaciones.js?v=20260926-segment-create-v2";
       document.body.appendChild(script);
     })();
   </script>

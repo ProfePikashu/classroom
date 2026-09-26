@@ -56,7 +56,55 @@
 (function initNotificationCenterAdmin() {
   "use strict";
 
-  const STORAGE_KEY = "andyazh-classroom-notifications-v2";
+  function notificationActorKey() {
+    try {
+      const session = JSON.parse(
+        localStorage.getItem("andyazh-classroom-session") || "{}"
+      );
+
+      const dni = String(
+        session.dni ||
+        session?.alumno?.dni ||
+        session?.student?.dni ||
+        ""
+      ).replace(/\D/g, "");
+
+      if (dni) return `dni-${dni}`;
+
+      const twitch = String(
+        session.twitch ||
+        session?.alumno?.twitch ||
+        session?.alumno?.twitch_username ||
+        session?.student?.twitch ||
+        ""
+      )
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9@._-]+/g, "_")
+        .slice(0, 120);
+
+      if (twitch) return `twitch-${twitch}`;
+
+      const email = String(
+        session.email ||
+        session?.alumno?.email ||
+        session?.student?.email ||
+        ""
+      )
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9@._-]+/g, "_")
+        .slice(0, 120);
+
+      if (email) return `email-${email}`;
+    } catch {}
+
+    return "guest";
+  }
+
+  const STORAGE_KEY =
+    `andyazh-classroom-notifications-v3:${notificationActorKey()}`;
+
 
   const els = {
     form: document.getElementById("notificationAdminForm"),
@@ -512,7 +560,55 @@
 (function centroNotificacionesBackendBridge() {
   "use strict";
 
-  const STORAGE_KEY = "andyazh-classroom-notifications-v2";
+  function notificationActorKey() {
+    try {
+      const session = JSON.parse(
+        localStorage.getItem("andyazh-classroom-session") || "{}"
+      );
+
+      const dni = String(
+        session.dni ||
+        session?.alumno?.dni ||
+        session?.student?.dni ||
+        ""
+      ).replace(/\D/g, "");
+
+      if (dni) return `dni-${dni}`;
+
+      const twitch = String(
+        session.twitch ||
+        session?.alumno?.twitch ||
+        session?.alumno?.twitch_username ||
+        session?.student?.twitch ||
+        ""
+      )
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9@._-]+/g, "_")
+        .slice(0, 120);
+
+      if (twitch) return `twitch-${twitch}`;
+
+      const email = String(
+        session.email ||
+        session?.alumno?.email ||
+        session?.student?.email ||
+        ""
+      )
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9@._-]+/g, "_")
+        .slice(0, 120);
+
+      if (email) return `email-${email}`;
+    } catch {}
+
+    return "guest";
+  }
+
+  const STORAGE_KEY =
+    `andyazh-classroom-notifications-v3:${notificationActorKey()}`;
+
 
   function getBackendApi() {
     return window.ClassroomBackendNotifications || null;
@@ -2446,202 +2542,385 @@ if (!items.length) {
   button.addEventListener("click", calculateAcademicMailAudience);
 })();
 
-/* === Centro notificaciones: enviar prueba mail personal-tests 20260628 === */
-(function initAcademicMailSendTestButton() {
+/* === Centro notificaciones: envio E2E staff seleccionado 20260926 === */
+(function initSelectedStaffMailTest() {
   "use strict";
 
-  const sendButton = document.getElementById("notificationAcademicMailSendTestBtn");
-  const previewButton = document.getElementById("notificationAcademicMailPreviewBtn");
-  const resultBox = document.getElementById("notificationAcademicMailPreviewResult");
-  const sourceSelect = document.getElementById("notificationAcademicMailSource");
-  const segmentSelect = document.getElementById("notificationAcademicMailSegment");
+  const sendButton =
+    document.getElementById("notificationAcademicMailSendTestBtn");
 
-  if (!sendButton || !resultBox || !sourceSelect) return;
+  const resultBox =
+    document.getElementById("notificationAcademicMailPreviewResult");
 
-  function getApiBase() {
-    const configured =
+  if (!sendButton || !resultBox) return;
+
+  sendButton.innerHTML =
+    '<i class="fa-solid fa-paper-plane"></i> Enviar prueba staff';
+
+  function apiBase() {
+    const configured = String(
       window.CLASSROOM_API_BASE ||
       window.EXAMPRO_API_BASE ||
-      localStorage.getItem("andyazh-api-base") ||
-      "";
+      ""
+    ).replace(/\/+$/, "");
 
-    if (configured) {
-      return String(configured).replace(/\/+$/, "");
-    }
-
-    const host = window.location.hostname;
-
-    if (host === "localhost" || host === "127.0.0.1") {
-      return "http://127.0.0.1:8000";
+    if (
+      configured &&
+      !/localhost|127\.0\.0\.1/i.test(configured)
+    ) {
+      return configured;
     }
 
     return "https://api.andyazhtec.com";
   }
 
-  function getSessionToken() {
+  function token() {
     try {
-      const raw = localStorage.getItem("andyazh-classroom-session");
-      if (!raw) return "";
-      const session = JSON.parse(raw);
-      return session?.token || session?.access_token || session?.jwt || session?.auth_token || "";
+      const session = JSON.parse(
+        localStorage.getItem(
+          "andyazh-classroom-session"
+        ) || "{}"
+      );
+
+      return (
+        session.token ||
+        session.access_token ||
+        session.jwt ||
+        session.auth_token ||
+        session?.exampro?.access_token ||
+        ""
+      );
     } catch (_) {
       return "";
     }
   }
 
-  function isEmailSendEnabled() {
-    return document.querySelector('input[name="notificationSendEmail"]:checked')?.value === "true";
+  function dni(value) {
+    return String(value || "")
+      .replace(/\D/g, "");
   }
 
-  function getLastPreview() {
-    return window.ClassroomAcademicMailAudienceLastPreview || null;
-  }
+  function currentSelection() {
+    const api =
+      window.ClassroomNotificationAudiences;
 
-  function isPersonalTestsPreviewReady() {
-    const last = getLastPreview();
-    const summary = last?.summary || {};
+    const data =
+      api?.getMail?.() || {};
 
-    return Boolean(
-      isEmailSendEnabled() &&
-      sourceSelect.value === "personal-tests" &&
-      (segmentSelect?.value || "pending-recovery-2025") === "pending-recovery-2025" &&
-      last?.source === "personal-tests" &&
-      last?.segment === "pending-recovery-2025" &&
-      Number(summary.pendingRecovery || summary.validBase || summary.eligible || summary.total || 0) > 0
+    const selectedDnis = [
+      ...new Set(
+        (
+          api?.getMailSelectedDnis?.() || []
+        )
+          .map(dni)
+          .filter(Boolean)
+      )
+    ];
+
+    const items =
+      Array.isArray(data.items)
+        ? data.items
+        : [];
+
+    const byDni = new Map(
+      items.map(item => [
+        dni(item.user_dni),
+        item
+      ])
     );
-  }
 
-  function syncSendButtonState() {
-    sendButton.disabled = !isPersonalTestsPreviewReady();
-    sendButton.title = sendButton.disabled
-      ? "Disponible solo despues de calcular Pruebas personales."
-      : "Enviar correo de prueba a pruebasPersonales.";
+    const selected =
+      selectedDnis
+        .map(value => byDni.get(value))
+        .filter(Boolean);
+
+    return {
+      selectedDnis,
+      selected
+    };
   }
 
   function appendStatus(message, kind = "info") {
-    const previous = resultBox.querySelector(".academic-mail-send-test-status");
+    const previous =
+      resultBox.querySelector(
+        ".academic-mail-send-test-status"
+      );
+
     if (previous) previous.remove();
 
-    const box = document.createElement("div");
-    box.className = `academic-mail-send-test-status ${kind === "error" ? "is-error" : kind === "success" ? "is-success" : ""}`;
+    const box =
+      document.createElement("div");
+
+    box.className =
+      "academic-mail-send-test-status " +
+      (
+        kind === "error"
+          ? "is-error"
+          : kind === "success"
+            ? "is-success"
+            : ""
+      );
+
     box.innerHTML = message;
     resultBox.appendChild(box);
   }
 
-  async function sendPersonalTestsMail() {
-    if (!isPersonalTestsPreviewReady()) {
-      appendStatus(
-        "<strong>No se envio.</strong><br>Primero calcula destinatarios con la fuente <strong>Pruebas personales</strong>.",
-        "error"
-      );
-      syncSendButtonState();
-      return;
-    }
+  function ready() {
+    const mailEnabled =
+      document.querySelector(
+        'input[name="notificationSendEmail"]:checked'
+      )?.value === "true";
 
-    const token = getSessionToken();
+    const {
+      selectedDnis,
+      selected
+    } = currentSelection();
 
-    if (!token) {
-      appendStatus("<strong>No se envio.</strong><br>No encontre token de sesion del Classroom.", "error");
-      return;
-    }
-
-    const confirmation = window.confirm(
-      "Esto enviara un correo real SOLO a la hoja pruebasPersonales. Continuar?"
+    return Boolean(
+      mailEnabled &&
+      selectedDnis.length > 0 &&
+      selectedDnis.length <= 10 &&
+      selected.length === selectedDnis.length &&
+      selected.every(item =>
+        String(
+          item.user_role || ""
+        ).toLowerCase() ===
+          "classroom_moderator" &&
+        /\S+@\S+\.\S+/.test(
+          String(item.user_email || "")
+        )
+      )
     );
+  }
 
-    if (!confirmation) {
-      return;
+  function sync() {
+    sendButton.disabled = !ready();
+
+    sendButton.title =
+      ready()
+        ? "Enviar prueba real solamente a los moderadores seleccionados."
+        : "Seleccion? moderadores con email v?lido y activ? Mail.";
+  }
+
+  async function request(path, options = {}) {
+    const accessToken = token();
+
+    if (!accessToken) {
+      throw new Error(
+        "No encontre una sesion Classroom valida."
+      );
     }
 
-    sendButton.disabled = true;
-    const originalText = sendButton.innerHTML;
-    sendButton.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Enviando...';
-
-    appendStatus("<strong>Enviando prueba...</strong><br>Se esta enviando solo a pruebasPersonales.", "info");
-
-    try {
-      const response = await fetch(`${getApiBase()}/api/classroom/notifications/email-test-send`, {
-        method: "POST",
+    const response = await fetch(
+      `${apiBase()}${path}`,
+      {
+        ...options,
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          ...(options.headers || {}),
+          Authorization:
+            `Bearer ${accessToken}`,
         },
-        body: JSON.stringify({
-          source: "personal-tests",
-          subject: "[PRUEBA] AyRPC - Recuperatorio disponible en Classroom",
-          title: "Recuperatorio aun disponible",
-          badge_text: "Ingresa al recuperatorio antes de que cierre",
-          cta_label: "Ingresar al recuperatorio",
-          cta_url: "https://classroom.andyazhtec.com/curso-ayrpc-2025.html",
-        }),
-      });
-
-      const data = await response.json().catch(() => ({}));
-
-      if (!response.ok || !data.ok) {
-        throw new Error(data?.detail || data?.error || `HTTP ${response.status}`);
       }
+    );
+
+    const data =
+      await response.json()
+        .catch(() => ({}));
+
+    if (!response.ok) {
+      throw new Error(
+        data.detail ||
+        data.error ||
+        `HTTP ${response.status}`
+      );
+    }
+
+    return data;
+  }
+
+  async function sendSelectedStaffMail() {
+    const {
+      selectedDnis,
+      selected
+    } = currentSelection();
+
+    if (!ready()) {
+      appendStatus(
+        "<strong>No se envio.</strong><br>" +
+        "Seleccion? ?nicamente moderadores con email v?lido.",
+        "error"
+      );
+      return;
+    }
+
+    const names =
+      selected
+        .map(item =>
+          item.user_name ||
+          item.user_twitch ||
+          item.user_email
+        )
+        .join(", ");
+
+    if (
+      !window.confirm(
+        `Se enviar? correo REAL a ${selectedDnis.length} moderador(es):\n\n${names}\n\n?Continuar?`
+      )
+    ) {
+      return;
+    }
+
+    const title =
+      document.getElementById(
+        "notificationTitle"
+      )?.value.trim() ||
+      "[PRUEBA] AndyAzhTEC Classroom";
+
+    const body =
+      document.getElementById(
+        "notificationBody"
+      )?.value.trim() ||
+      "Prueba interna del sistema de notificaciones de Classroom.";
+
+    const type =
+      document.getElementById(
+        "notificationType"
+      )?.value ||
+      "announcement";
+
+    const severity =
+      document.getElementById(
+        "notificationSeverity"
+      )?.value ||
+      null;
+
+    const linkUrl =
+      document.getElementById(
+        "notificationLink"
+      )?.value.trim() ||
+      "https://classroom.andyazhtec.com/";
+
+    sendButton.disabled = true;
+
+    const original =
+      sendButton.innerHTML;
+
+    sendButton.innerHTML =
+      '<i class="fa-solid fa-spinner fa-spin"></i> Enviando...';
+
+    try {
+      const created = await request(
+        "/api/classroom/notifications/admin/test-create",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            group: "moderator-tests",
+            selected_dnis: selectedDnis,
+            title,
+            body,
+            type,
+            severity,
+            link_url: linkUrl,
+          }),
+        }
+      );
+
+      const notificationId =
+        created?.notification?.id;
+
+      if (!notificationId) {
+        throw new Error(
+          "El backend no devolvio notification_id."
+        );
+      }
+
+      const preview = await request(
+        `/api/classroom/notifications/${notificationId}/admin/email-test-preview`
+      );
+
+      const expected =
+        selectedDnis.length;
+
+      if (
+        Number(
+          preview?.summary?.email_destinations
+        ) !== expected ||
+        Number(
+          preview?.summary?.valid
+        ) !== expected
+      ) {
+        throw new Error(
+          "El preview de correo no coincide con la seleccion."
+        );
+      }
+
+      const sent = await request(
+        `/api/classroom/notifications/${notificationId}/admin/email-test-send`,
+        {
+          method: "POST",
+          body: JSON.stringify({
+            confirmation:
+              "SEND_E2E_TEST",
+            expected_email_count:
+              expected,
+            allow_resend: false,
+          }),
+        }
+      );
 
       appendStatus(
         `<strong>Prueba enviada.</strong><br>` +
-        `Intentados: <strong>${data.attempted ?? "-"}</strong> - ` +
-        `Enviados: <strong>${data.sent ?? "-"}</strong> - ` +
-        `Omitidos: <strong>${data.skipped ?? "-"}</strong> - ` +
-        `Fallidos: <strong>${data.failed ?? "-"}</strong>`,
+        `Intentados: <strong>${sent.attempted ?? 0}</strong> ? ` +
+        `Aceptados SMTP: <strong>${sent.accepted ?? 0}</strong> ? ` +
+        `Diferidos: <strong>${sent.deferred ?? 0}</strong> ? ` +
+        `Fallidos: <strong>${sent.failed ?? 0}</strong>`,
         "success"
       );
 
-      window.ClassroomAcademicMailLastSendTest = {
-        ok: true,
-        sentAt: new Date().toISOString(),
-        data,
+      window.ClassroomStaffMailLastTest = {
+        notificationId,
+        preview,
+        sent,
       };
-    } catch (error) {
-      console.error("[Centro] Error enviando prueba de correo", error);
 
-      appendStatus(
-        `<strong>No se pudo enviar la prueba.</strong><br>${String(error?.message || error)}`,
-        "error"
+    } catch (error) {
+      console.error(
+        "[Centro] Staff mail E2E:",
+        error
       );
 
-      window.ClassroomAcademicMailLastSendTest = {
-        ok: false,
-        sentAt: new Date().toISOString(),
-        error: String(error?.message || error),
-      };
+      appendStatus(
+        `<strong>No se pudo enviar.</strong><br>` +
+        String(
+          error?.message || error
+        ),
+        "error"
+      );
     } finally {
-      sendButton.innerHTML = originalText;
-      syncSendButtonState();
+      sendButton.innerHTML =
+        original;
+
+      sync();
     }
   }
 
-  sendButton.addEventListener("click", sendPersonalTestsMail);
+  sendButton.addEventListener(
+    "click",
+    sendSelectedStaffMail
+  );
 
-  sourceSelect.addEventListener("change", () => {
-    window.ClassroomAcademicMailAudienceLastPreview = null;
-    syncSendButtonState();
-  });
+  document.addEventListener(
+    "change",
+    () => setTimeout(sync, 50)
+  );
 
-  segmentSelect?.addEventListener("change", () => {
-    window.ClassroomAcademicMailAudienceLastPreview = null;
-    syncSendButtonState();
-  });
+  document.addEventListener(
+    "click",
+    () => setTimeout(sync, 100)
+  );
 
-  document
-    .querySelectorAll('input[name="notificationSendEmail"]')
-    .forEach((radio) => {
-      radio.addEventListener("change", syncSendButtonState);
-    });
-
-  previewButton?.addEventListener("click", () => {
-    window.setTimeout(syncSendButtonState, 600);
-    window.setTimeout(syncSendButtonState, 1800);
-    window.setTimeout(syncSendButtonState, 3200);
-  });
-
-  syncSendButtonState();
-
-  window.ClassroomAcademicMailSendTestSync = syncSendButtonState;
+  sync();
 })();
 
 /* ============================================================
@@ -3377,4 +3656,2069 @@ if (!items.length) {
     currentHtml: "",
     currentData: null
   };
+})();
+
+
+/* === Notification Center visual mail prototype 20260926 === */
+(function () {
+  "use strict";
+
+  const form = document.getElementById("notificationAdminForm");
+  const mailToggle = document.getElementById("notificationChannelMail");
+  const mailPanel = document.getElementById("notificationMailComposer");
+  const previewButton =
+    document.getElementById("notificationAcademicMailEmailPreviewBtn");
+
+  if (!form || !mailToggle || !mailPanel) return;
+
+  /*
+   * Seguridad del prototipo:
+   * todavía no permitimos guardar ni enviar.
+   */
+  form.addEventListener(
+    "submit",
+    function (event) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+    },
+    true
+  );
+
+  function syncMailPanel() {
+    mailPanel.hidden = !mailToggle.checked;
+  }
+
+  function syncRecipientCount() {
+    const checks = [
+      ...document.querySelectorAll(
+        ".notification-mail-recipient-check"
+      ),
+    ];
+
+    const selected =
+      checks.filter((checkbox) => checkbox.checked).length;
+
+    const counter =
+      document.getElementById("notificationMailSelectedCount");
+
+    if (counter) {
+      counter.textContent = String(selected);
+    }
+  }
+
+  mailToggle.addEventListener(
+    "change",
+    syncMailPanel
+  );
+
+  document
+    .querySelectorAll(".notification-mail-recipient-check")
+    .forEach((checkbox) => {
+      checkbox.addEventListener(
+        "change",
+        syncRecipientCount
+      );
+    });
+
+  document
+    .getElementById("notificationMailSelectAll")
+    ?.addEventListener("click", function () {
+      document
+        .querySelectorAll(".notification-mail-recipient-check")
+        .forEach((checkbox) => {
+          checkbox.checked = true;
+        });
+
+      syncRecipientCount();
+    });
+
+  document
+    .getElementById("notificationMailSelectNone")
+    ?.addEventListener("click", function () {
+      document
+        .querySelectorAll(".notification-mail-recipient-check")
+        .forEach((checkbox) => {
+          checkbox.checked = false;
+        });
+
+      syncRecipientCount();
+    });
+
+  if (previewButton) {
+    previewButton.onclick = function (event) {
+      event.preventDefault();
+
+      if (
+        window.ClassroomMailPreviewModal &&
+        typeof window.ClassroomMailPreviewModal.open === "function"
+      ) {
+        window.ClassroomMailPreviewModal.open();
+        return;
+      }
+
+      console.error(
+        "[Centro] ClassroomMailPreviewModal no esta disponible."
+      );
+    };
+  }
+
+  syncMailPanel();
+  syncRecipientCount();
+})();
+
+
+/* === Notification Audience REAL backend 20260926 === */
+(function initNotificationAudienceBackendReal() {
+  "use strict";
+
+  function getApiBase() {
+    const configured =
+      window.CLASSROOM_API_BASE ||
+      window.EXAMPRO_API_BASE ||
+      localStorage.getItem("andyazh-api-base") ||
+      "";
+
+    if (configured) {
+      return String(configured).replace(/\/+$/, "");
+    }
+
+    return "https://api.andyazhtec.com";
+  }
+
+  function getSession() {
+    try {
+      return (
+        window.ClassroomAuth?.getSession?.() ||
+        JSON.parse(
+          localStorage.getItem("andyazh-classroom-session") ||
+          "null"
+        ) ||
+        {}
+      );
+    } catch (_) {
+      return {};
+    }
+  }
+
+  function getToken() {
+    const session = getSession();
+
+    return (
+      session?.classroomReadToken ||
+      session?.exampro?.accessToken ||
+      session?.exampro?.access_token ||
+      session?.exampro?.token ||
+      session?.accessToken ||
+      session?.access_token ||
+      session?.token ||
+      session?.student_token ||
+      session?.exampro_token ||
+      session?.jwt ||
+      ""
+    );
+  }
+
+  async function apiFetch(path, options = {}) {
+    const token = getToken();
+
+    if (!token) {
+      throw new Error(
+        "No hay una sesión Classroom válida."
+      );
+    }
+
+    const response = await fetch(
+      `${getApiBase()}${path}`,
+      {
+        cache: "no-store",
+        ...options,
+        headers: {
+          "Content-Type": "application/json",
+          ...(options.headers || {}),
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    const data = await response
+      .json()
+      .catch(() => ({}));
+
+    if (!response.ok) {
+      throw new Error(
+        data?.detail ||
+        data?.message ||
+        `Error backend ${response.status}`
+      );
+    }
+
+    return data;
+  }
+
+  function escapeHtml(value) {
+    return String(value ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  function roleLabel(value) {
+    const role = String(value || "")
+      .trim()
+      .toLowerCase();
+
+    if (
+      role === "classroom_moderator" ||
+      role === "moderator"
+    ) {
+      return "Moderador";
+    }
+
+    if (
+      role === "docente" ||
+      role === "teacher"
+    ) {
+      return "Docente";
+    }
+
+    return "Alumno";
+  }
+
+  const configs = [
+    {
+      key: "general",
+      radioName: "notificationAudienceVisual",
+      hiddenSelect: document.getElementById(
+        "notificationAudience"
+      ),
+      panel: document.getElementById(
+        "notificationSpecificAudience"
+      ),
+      search: document.getElementById(
+        "notificationPersonSearch"
+      ),
+      results: document.getElementById(
+        "notificationPersonSearchResults"
+      ),
+      selectedCount: document.getElementById(
+        "notificationSelectedPeopleCount"
+      ),
+      selectedList: document.getElementById(
+        "notificationSelectedPeopleList"
+      ),
+      audienceCount: document.getElementById(
+        "notificationAudienceCount"
+      ),
+      mailMode: false,
+    },
+
+    {
+      key: "mail",
+      radioName: "notificationMailAudienceVisual",
+      hiddenSelect: null,
+      panel: document.getElementById(
+        "notificationMailSpecificAudience"
+      ),
+      search: document.getElementById(
+        "notificationMailPersonSearch"
+      ),
+      results: document.getElementById(
+        "notificationMailPersonSearchResults"
+      ),
+      selectedCount: document.getElementById(
+        "notificationMailSelectedPeopleCount"
+      ),
+      selectedList: document.getElementById(
+        "notificationMailSelectedPeopleList"
+      ),
+      audienceCount: document.getElementById(
+        "notificationMailAudienceCount"
+      ),
+      mailMode: true,
+    },
+  ];
+
+  const states = new Map();
+
+  function getRadios(config) {
+    return [
+      ...document.querySelectorAll(
+        `input[name="${config.radioName}"]`
+      )
+    ];
+  }
+
+  function getActiveAudience(config) {
+    return (
+      getRadios(config).find(
+        radio => radio.checked
+      )?.value ||
+      "all"
+    );
+  }
+
+  function createState(config) {
+    return {
+      config,
+      selected: new Map(),
+      searchItems: new Map(),
+      lastResolved: null,
+      lastError: null,
+      searchTimer: null,
+      resolveSerial: 0,
+      searchSerial: 0,
+    };
+  }
+
+  function getSelectedDnis(state) {
+    return [
+      ...state.selected.keys()
+    ];
+  }
+
+  function updateHiddenAudience(state) {
+    const audience =
+      getActiveAudience(state.config);
+
+    if (state.config.hiddenSelect) {
+      state.config.hiddenSelect.value = audience;
+
+      state.config.hiddenSelect.dispatchEvent(
+        new Event(
+          "change",
+          { bubbles: true }
+        )
+      );
+    }
+  }
+
+  function renderSelected(state) {
+    const {
+      selectedList,
+      selectedCount,
+    } = state.config;
+
+    const people = [
+      ...state.selected.values()
+    ];
+
+    if (selectedCount) {
+      selectedCount.textContent =
+        String(people.length);
+    }
+
+    if (!selectedList) return;
+
+    if (!people.length) {
+      selectedList.innerHTML = `
+        <span class="notification-selected-empty">
+          Todavía no seleccionaste a nadie.
+        </span>
+      `;
+      return;
+    }
+
+    selectedList.innerHTML = people
+      .map(person => `
+        <span class="notification-person-chip">
+          <span>
+            ${escapeHtml(person.full_name)}
+          </span>
+
+          <button
+            type="button"
+            data-remove-person="${escapeHtml(person.dni)}"
+            aria-label="Quitar ${escapeHtml(person.full_name)}"
+          >
+            ×
+          </button>
+        </span>
+      `)
+      .join("");
+  }
+
+  function renderAudienceCount(
+    state,
+    summary = null,
+    loading = false
+  ) {
+    const el = state.config.audienceCount;
+
+    if (!el) return;
+
+    if (loading) {
+      el.textContent = "...";
+      return;
+    }
+
+    if (!summary) {
+      el.textContent = "0";
+      return;
+    }
+
+    if (state.config.mailMode) {
+      el.textContent =
+        `${summary.with_email || 0} con mail`;
+      return;
+    }
+
+    el.textContent =
+      String(summary.total || 0);
+  }
+
+  async function resolveAudience(state) {
+    const audience =
+      getActiveAudience(state.config);
+
+    const selectedDnis =
+      audience === "specific_user"
+        ? getSelectedDnis(state)
+        : [];
+
+    if (
+      audience === "specific_user" &&
+      !selectedDnis.length
+    ) {
+      state.lastResolved = {
+        ok: true,
+        audience,
+        summary: {
+          total: 0,
+          with_email: 0,
+          without_email: 0,
+          with_twitch: 0,
+          with_dni: 0,
+        },
+        items: [],
+      };
+
+      renderAudienceCount(
+        state,
+        state.lastResolved.summary
+      );
+
+      return state.lastResolved;
+    }
+
+    const serial =
+      ++state.resolveSerial;
+
+    renderAudienceCount(
+      state,
+      null,
+      true
+    );
+
+    try {
+      const data = await apiFetch(
+        "/api/classroom/notifications/admin/audience-resolve",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            audience,
+            selected_dnis: selectedDnis,
+          }),
+        }
+      );
+
+      if (serial !== state.resolveSerial) {
+        return null;
+      }
+
+      state.lastResolved = data;
+      state.lastError = null;
+
+      renderAudienceCount(
+        state,
+        data.summary || {}
+      );
+
+      return data;
+
+    } catch (error) {
+      if (serial !== state.resolveSerial) {
+        return null;
+      }
+
+      state.lastResolved = null;
+      state.lastError = error;
+
+      if (state.config.audienceCount) {
+        state.config.audienceCount.textContent =
+          "Error";
+      }
+
+      console.error(
+        `[Centro] Error resolviendo audiencia ${state.config.key}:`,
+        error
+      );
+
+      return null;
+    }
+  }
+
+  function renderSearchResults(
+    state,
+    items
+  ) {
+    const box = state.config.results;
+
+    if (!box) return;
+
+    if (!items.length) {
+      box.innerHTML = `
+        <div class="notification-selected-empty">
+          No encontramos coincidencias.
+        </div>
+      `;
+
+      box.hidden = false;
+      return;
+    }
+
+    state.searchItems.clear();
+
+    items.forEach(person => {
+      if (person?.dni) {
+        state.searchItems.set(
+          String(person.dni),
+          person
+        );
+      }
+    });
+
+    box.innerHTML = items
+      .map(person => {
+        const alreadySelected =
+          state.selected.has(
+            String(person.dni)
+          );
+
+        const details = [
+          person.dni
+            ? `DNI ${person.dni}`
+            : "",
+          person.twitch
+            ? `@${person.twitch}`
+            : "",
+          person.email || "",
+          roleLabel(person.role),
+        ]
+          .filter(Boolean)
+          .join(" · ");
+
+        return `
+          <div class="notification-person-result">
+            <span>
+              <strong>
+                ${escapeHtml(
+                  person.full_name ||
+                  person.twitch ||
+                  "Usuario"
+                )}
+              </strong>
+
+              <small>
+                ${escapeHtml(details)}
+              </small>
+            </span>
+
+            <button
+              type="button"
+              data-add-person="${escapeHtml(person.dni)}"
+              ${alreadySelected ? "disabled" : ""}
+            >
+              <i class="fa-solid ${
+                alreadySelected
+                  ? "fa-check"
+                  : "fa-plus"
+              }"></i>
+
+              ${
+                alreadySelected
+                  ? "Agregado"
+                  : "Agregar"
+              }
+            </button>
+          </div>
+        `;
+      })
+      .join("");
+
+    box.hidden = false;
+  }
+
+  async function searchPeople(state) {
+    const search =
+      state.config.search;
+
+    const box =
+      state.config.results;
+
+    if (!search || !box) return;
+
+    const query =
+      String(search.value || "")
+        .trim();
+
+    if (query.length < 2) {
+      box.hidden = true;
+      box.innerHTML = "";
+      return;
+    }
+
+    const serial =
+      ++state.searchSerial;
+
+    box.hidden = false;
+    box.innerHTML = `
+      <div class="notification-selected-empty">
+        Buscando en la base...
+      </div>
+    `;
+
+    try {
+      const data = await apiFetch(
+        `/api/classroom/notifications/admin/people-search?q=${encodeURIComponent(query)}&limit=20`
+      );
+
+      if (serial !== state.searchSerial) {
+        return;
+      }
+
+      renderSearchResults(
+        state,
+        Array.isArray(data.items)
+          ? data.items
+          : []
+      );
+
+    } catch (error) {
+      if (serial !== state.searchSerial) {
+        return;
+      }
+
+      box.innerHTML = `
+        <div class="notification-selected-empty">
+          ${escapeHtml(
+            error.message ||
+            "No se pudo buscar."
+          )}
+        </div>
+      `;
+
+      box.hidden = false;
+
+      console.error(
+        "[Centro] Error buscando personas:",
+        error
+      );
+    }
+  }
+
+  function syncAudienceUi(state) {
+    const audience =
+      getActiveAudience(state.config);
+
+    updateHiddenAudience(state);
+
+    if (state.config.panel) {
+      state.config.panel.hidden =
+        audience !== "specific_user";
+    }
+
+    resolveAudience(state);
+  }
+
+  function bindState(state) {
+    const config =
+      state.config;
+
+    const radios =
+      getRadios(config);
+
+    if (!radios.length) return false;
+
+    radios.forEach(radio => {
+      radio.addEventListener(
+        "change",
+        () => syncAudienceUi(state)
+      );
+    });
+
+    if (config.search) {
+      config.search.addEventListener(
+        "input",
+        () => {
+          clearTimeout(
+            state.searchTimer
+          );
+
+          state.searchTimer =
+            setTimeout(
+              () => searchPeople(state),
+              250
+            );
+        }
+      );
+    }
+
+    if (config.results) {
+      config.results.addEventListener(
+        "click",
+        event => {
+          const button =
+            event.target.closest(
+              "[data-add-person]"
+            );
+
+          if (!button) return;
+
+          const dni =
+            String(
+              button.dataset.addPerson ||
+              ""
+            );
+
+          const person =
+            state.searchItems.get(dni);
+
+          if (!person) return;
+
+          state.selected.set(
+            dni,
+            person
+          );
+
+          renderSelected(state);
+          renderSearchResults(
+            state,
+            [...state.searchItems.values()]
+          );
+
+          resolveAudience(state);
+        }
+      );
+    }
+
+    if (config.selectedList) {
+      config.selectedList.addEventListener(
+        "click",
+        event => {
+          const button =
+            event.target.closest(
+              "[data-remove-person]"
+            );
+
+          if (!button) return;
+
+          const dni =
+            String(
+              button.dataset.removePerson ||
+              ""
+            );
+
+          state.selected.delete(dni);
+
+          renderSelected(state);
+
+          if (
+            config.search &&
+            config.search.value.trim().length >= 2
+          ) {
+            renderSearchResults(
+              state,
+              [...state.searchItems.values()]
+            );
+          }
+
+          resolveAudience(state);
+        }
+      );
+    }
+
+    renderSelected(state);
+    syncAudienceUi(state);
+
+    return true;
+  }
+
+  function init() {
+    configs.forEach(config => {
+      const state =
+        createState(config);
+
+      states.set(
+        config.key,
+        state
+      );
+
+      bindState(state);
+    });
+  }
+
+  window.ClassroomNotificationAudiences = {
+    refresh: async function refresh() {
+      const jobs = [
+        ...states.values()
+      ].map(resolveAudience);
+
+      return Promise.all(jobs);
+    },
+
+    getGeneral: function getGeneral() {
+      return states.get("general")
+        ?.lastResolved || null;
+    },
+
+    getMail: function getMail() {
+      return states.get("mail")
+        ?.lastResolved || null;
+    },
+
+    getGeneralSelectedDnis:
+      function getGeneralSelectedDnis() {
+        const state =
+          states.get("general");
+
+        return state
+          ? getSelectedDnis(state)
+          : [];
+      },
+
+    getMailSelectedDnis:
+      function getMailSelectedDnis() {
+        const state =
+          states.get("mail");
+
+        return state
+          ? getSelectedDnis(state)
+          : [];
+      },
+  };
+
+  if (
+    document.readyState === "loading"
+  ) {
+    document.addEventListener(
+      "DOMContentLoaded",
+      init
+    );
+  } else {
+    init();
+  }
+})();
+
+
+/* === Notification Mail Exact Recipients 20260926 === */
+(function initNotificationMailExactRecipients() {
+  "use strict";
+
+  const selectionCount =
+    document.getElementById(
+      "notificationMailRecipientSelectionCount"
+    );
+
+  const stats =
+    document.getElementById(
+      "notificationMailRecipientStats"
+    );
+
+  const list =
+    document.getElementById(
+      "notificationMailRecipientList"
+    );
+
+  const selectAllButton =
+    document.getElementById(
+      "notificationMailRecipientsAll"
+    );
+
+  const selectNoneButton =
+    document.getElementById(
+      "notificationMailRecipientsNone"
+    );
+
+  if (
+    !selectionCount ||
+    !stats ||
+    !list
+  ) {
+    return;
+  }
+
+  const state = {
+    signature: "",
+    audience: "",
+    items: [],
+    selected: new Set(),
+    lastData: null,
+  };
+
+  function escapeHtml(value) {
+    return String(value ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  function normalizeDni(value) {
+    return String(value || "")
+      .replace(/\D/g, "");
+  }
+
+  function hasValidEmail(item) {
+    const email =
+      String(
+        item?.user_email ||
+        ""
+      ).trim();
+
+    return /\S+@\S+\.\S+/.test(email);
+  }
+
+  function normalizeItems(data) {
+    const seen = new Set();
+
+    return (
+      Array.isArray(data?.items)
+        ? data.items
+        : []
+    )
+      .map(item => ({
+        ...item,
+        user_dni: normalizeDni(
+          item?.user_dni
+        ),
+        user_name:
+          String(
+            item?.user_name ||
+            "Usuario"
+          ).trim(),
+        user_email:
+          String(
+            item?.user_email ||
+            ""
+          ).trim().toLowerCase(),
+        user_twitch:
+          String(
+            item?.user_twitch ||
+            ""
+          ).trim(),
+      }))
+      .filter(item => {
+        if (
+          !item.user_dni ||
+          seen.has(item.user_dni)
+        ) {
+          return false;
+        }
+
+        seen.add(item.user_dni);
+        return true;
+      });
+  }
+
+  function buildSignature(data, items) {
+    return JSON.stringify([
+      data?.audience || "",
+      items.map(item => [
+        item.user_dni,
+        item.user_email,
+      ]),
+    ]);
+  }
+
+  function getSelectedItems() {
+    return state.items.filter(
+      item =>
+        state.selected.has(
+          item.user_dni
+        ) &&
+        hasValidEmail(item)
+    );
+  }
+
+  function render() {
+    const total =
+      state.items.length;
+
+    const withEmail =
+      state.items.filter(
+        hasValidEmail
+      ).length;
+
+    const withoutEmail =
+      total - withEmail;
+
+    const selected =
+      getSelectedItems();
+
+    selectionCount.textContent =
+      `${selected.length} de ${withEmail} correos seleccionados`;
+
+    stats.textContent =
+      `${total} personas en la audiencia · ` +
+      `${withEmail} con correo válido · ` +
+      `${withoutEmail} sin correo`;
+
+    if (!state.items.length) {
+      list.innerHTML = `
+        <div class="notification-mail-recipient-empty">
+          No hay destinatarios para esta audiencia.
+        </div>
+      `;
+
+      return;
+    }
+
+    list.innerHTML =
+      state.items
+        .map(item => {
+          const valid =
+            hasValidEmail(item);
+
+          const checked =
+            valid &&
+            state.selected.has(
+              item.user_dni
+            );
+
+          const details = [
+            item.user_dni
+              ? `DNI ${item.user_dni}`
+              : "",
+            item.user_twitch
+              ? `@${item.user_twitch}`
+              : "",
+            valid
+              ? item.user_email
+              : "SIN CORREO VÁLIDO",
+          ]
+            .filter(Boolean)
+            .join(" · ");
+
+          return `
+            <label
+              class="notification-mail-recipient-row ${
+                valid
+                  ? ""
+                  : "is-disabled"
+              }"
+            >
+              <input
+                type="checkbox"
+                data-mail-recipient-dni="${escapeHtml(
+                  item.user_dni
+                )}"
+                ${
+                  checked
+                    ? "checked"
+                    : ""
+                }
+                ${
+                  valid
+                    ? ""
+                    : "disabled"
+                }
+              />
+
+              <span class="notification-mail-recipient-person">
+                <strong>
+                  ${escapeHtml(
+                    item.user_name
+                  )}
+                </strong>
+
+                <small>
+                  ${escapeHtml(
+                    details
+                  )}
+                </small>
+              </span>
+            </label>
+          `;
+        })
+        .join("");
+  }
+
+  function resetSelectionForAudience(items) {
+    state.selected.clear();
+
+    items.forEach(item => {
+      if (hasValidEmail(item)) {
+        state.selected.add(
+          item.user_dni
+        );
+      }
+    });
+  }
+
+  function syncFromAudience() {
+    const api =
+      window.ClassroomNotificationAudiences;
+
+    const data =
+      api?.getMail?.();
+
+    if (
+      !data ||
+      !Array.isArray(data.items)
+    ) {
+      return;
+    }
+
+    const items =
+      normalizeItems(data);
+
+    const signature =
+      buildSignature(
+        data,
+        items
+      );
+
+    if (
+      signature ===
+      state.signature
+    ) {
+      return;
+    }
+
+    state.signature =
+      signature;
+
+    state.audience =
+      String(
+        data.audience ||
+        ""
+      );
+
+    state.items =
+      items;
+
+    state.lastData =
+      data;
+
+    resetSelectionForAudience(
+      items
+    );
+
+    render();
+  }
+
+  list.addEventListener(
+    "change",
+    event => {
+      const checkbox =
+        event.target.closest(
+          "[data-mail-recipient-dni]"
+        );
+
+      if (!checkbox) {
+        return;
+      }
+
+      const dni =
+        normalizeDni(
+          checkbox.dataset
+            .mailRecipientDni
+        );
+
+      if (!dni) {
+        return;
+      }
+
+      if (checkbox.checked) {
+        state.selected.add(dni);
+      } else {
+        state.selected.delete(dni);
+      }
+
+      render();
+    }
+  );
+
+  selectAllButton?.addEventListener(
+    "click",
+    () => {
+      state.selected.clear();
+
+      state.items.forEach(item => {
+        if (hasValidEmail(item)) {
+          state.selected.add(
+            item.user_dni
+          );
+        }
+      });
+
+      render();
+    }
+  );
+
+  selectNoneButton?.addEventListener(
+    "click",
+    () => {
+      state.selected.clear();
+      render();
+    }
+  );
+
+  window.ClassroomNotificationMailRecipients = {
+    refresh:
+      syncFromAudience,
+
+    getSelectedDnis:
+      function getSelectedDnis() {
+        return getSelectedItems()
+          .map(
+            item =>
+              item.user_dni
+          );
+      },
+
+    getSelectedItems:
+      function getSelectedItemsPublic() {
+        return [
+          ...getSelectedItems()
+        ];
+      },
+
+    getAudience:
+      function getAudience() {
+        return state.audience;
+      },
+
+    getExpectedAudienceCount:
+      function getExpectedAudienceCount() {
+        return Number(
+          state.lastData
+            ?.summary
+            ?.total ||
+          state.items.length ||
+          0
+        );
+      },
+
+    getExpectedRecipientCount:
+      function getExpectedRecipientCount() {
+        return getSelectedItems()
+          .length;
+      },
+
+    getSummary:
+      function getSummary() {
+        return {
+          total:
+            state.items.length,
+
+          with_email:
+            state.items.filter(
+              hasValidEmail
+            ).length,
+
+          without_email:
+            state.items.filter(
+              item =>
+                !hasValidEmail(item)
+            ).length,
+
+          selected:
+            getSelectedItems()
+              .length,
+        };
+      },
+  };
+
+  const timer =
+    window.setInterval(
+      syncFromAudience,
+      400
+    );
+
+  window.addEventListener(
+    "beforeunload",
+    () => {
+      clearInterval(timer);
+    },
+    { once: true }
+  );
+
+  syncFromAudience();
+})();
+
+/* === Notification Segment Create Button 20260926 V2 === */
+(function initNotificationSegmentCreateButtonV2() {
+  "use strict";
+
+  const button =
+    document.getElementById("notificationPrototypeSave");
+
+  if (!button) return;
+
+  const status =
+    button
+      .closest(".notification-prototype-actions")
+      ?.querySelector("span");
+
+  let busy = false;
+  let created = false;
+  let lastResult = null;
+
+  function value(id, fallback = "") {
+    return String(
+      document.getElementById(id)?.value ||
+      fallback
+    ).trim();
+  }
+
+  function checked(id) {
+    return Boolean(
+      document.getElementById(id)?.checked
+    );
+  }
+
+  function isLocal() {
+    const host =
+      String(location.hostname || "")
+        .trim()
+        .toLowerCase();
+
+    return (
+      host === "localhost" ||
+      host === "127.0.0.1" ||
+      host === ""
+    );
+  }
+
+  function normalizeDni(value) {
+    return String(value || "")
+      .replace(/\D/g, "");
+  }
+
+  function normalizeRole(value) {
+    const role =
+      String(value || "")
+        .trim()
+        .toLowerCase();
+
+    if (role === "teacher") return "docente";
+    if (role === "moderator") return "classroom_moderator";
+    if (role === "student") return "alumno";
+
+    return role;
+  }
+
+  function audienceApi() {
+    return (
+      window.ClassroomNotificationAudiences ||
+      null
+    );
+  }
+
+  function mailApi() {
+    return (
+      window.ClassroomNotificationMailRecipients ||
+      null
+    );
+  }
+
+  function getGeneralResolved() {
+    const data =
+      audienceApi()?.getGeneral?.();
+
+    if (
+      !data ||
+      !Array.isArray(data.items)
+    ) {
+      throw new Error(
+        "La audiencia general todavía no terminó de calcularse."
+      );
+    }
+
+    return data;
+  }
+
+  function uniqueDnis(items) {
+    const seen = new Set();
+    const result = [];
+
+    for (const item of items || []) {
+      const dni = normalizeDni(
+        item?.user_dni ??
+        item?.dni ??
+        item
+      );
+
+      if (!dni || seen.has(dni)) {
+        continue;
+      }
+
+      seen.add(dni);
+      result.push(dni);
+    }
+
+    return result;
+  }
+
+  function getGeneralSnapshot() {
+    const data =
+      getGeneralResolved();
+
+    const items =
+      [...data.items];
+
+    const selectedDnis =
+      uniqueDnis(items);
+
+    return {
+      data,
+      items,
+
+      sourceAudience:
+        String(
+          data.audience ||
+          document.getElementById(
+            "notificationAudience"
+          )?.value ||
+          ""
+        ).trim(),
+
+      selectedDnis,
+
+      expectedAudienceCount:
+        Number(
+          data?.summary?.total ??
+          items.length
+        ),
+
+      expectedRecipientCount:
+        selectedDnis.length,
+    };
+  }
+
+  function getMailDraft() {
+    return {
+      subject:
+        value("notificationMailSubject"),
+
+      badge:
+        value("notificationMailBadge"),
+
+      title:
+        value("notificationMailTitle"),
+
+      body:
+        value("notificationMailBody"),
+
+      secondary:
+        value("notificationMailSecondary"),
+
+      cta:
+        value("notificationMailCta"),
+
+      link:
+        value("notificationMailLink"),
+    };
+  }
+
+  function getMailSummary() {
+    const api = mailApi();
+
+    return {
+      audience:
+        String(
+          api?.getAudience?.() || ""
+        ).trim(),
+
+      audience_count:
+        Number(
+          api?.getExpectedAudienceCount?.() ||
+          0
+        ),
+
+      selected_count:
+        Number(
+          api?.getExpectedRecipientCount?.() ||
+          0
+        ),
+    };
+  }
+
+  function buildPayload() {
+    const snap =
+      getGeneralSnapshot();
+
+    const title =
+      value("notificationTitle");
+
+    const body =
+      value("notificationBody");
+
+    if (title.length < 3) {
+      throw new Error(
+        "El título debe tener al menos 3 caracteres."
+      );
+    }
+
+    if (!body) {
+      throw new Error(
+        "El mensaje es obligatorio."
+      );
+    }
+
+    if (!snap.sourceAudience) {
+      throw new Error(
+        "No pude determinar la audiencia."
+      );
+    }
+
+    if (
+      snap.expectedAudienceCount <= 0 ||
+      snap.expectedRecipientCount <= 0
+    ) {
+      throw new Error(
+        "La audiencia no tiene destinatarios."
+      );
+    }
+
+    return {
+      title,
+      body,
+      description: body,
+
+      type:
+        value(
+          "notificationType",
+          "announcement"
+        ),
+
+      severity:
+        value("notificationSeverity") ||
+        null,
+
+      link_url:
+        value("notificationLink") ||
+        null,
+
+      link:
+        value("notificationLink") ||
+        null,
+
+      source_audience:
+        snap.sourceAudience,
+
+      selected_dnis:
+        snap.selectedDnis,
+
+      expected_audience_count:
+        snap.expectedAudienceCount,
+
+      expected_recipient_count:
+        snap.expectedRecipientCount,
+
+      send_email: false,
+      email_required: false,
+
+      context: {
+        created_from:
+          "notification-center",
+
+        recipient_snapshot_source:
+          "general-audience",
+
+        channels: {
+          notice:
+            checked(
+              "notificationChannelNotice"
+            ),
+
+          bell:
+            checked(
+              "notificationChannelBell"
+            ),
+
+          mail_requested:
+            checked(
+              "notificationChannelMail"
+            ),
+
+          mail_send_enabled:
+            false,
+        },
+
+        mail_preview:
+          getMailSummary(),
+
+        mail_draft:
+          getMailDraft(),
+      },
+    };
+  }
+
+  function isStaff(item) {
+    const role =
+      normalizeRole(
+        item?.user_role ??
+        item?.role
+      );
+
+    return (
+      role === "docente" ||
+      role === "classroom_moderator"
+    );
+  }
+
+  function localSafetyError(
+    payload,
+    people
+  ) {
+    if (!isLocal()) {
+      return "";
+    }
+
+    const audience =
+      String(
+        payload.source_audience || ""
+      ).toLowerCase();
+
+    if (
+      ![
+        "staff",
+        "specific",
+        "specific_user"
+      ].includes(audience)
+    ) {
+      return (
+        "PRUEBA BLOQUEADA: en localhost sólo se permite Staff o Solo a..."
+      );
+    }
+
+    const invalid =
+      people.filter(
+        person => !isStaff(person)
+      );
+
+    if (invalid.length) {
+      return (
+        `PRUEBA BLOQUEADA: ${invalid.length} destinatario(s) no son staff.`
+      );
+    }
+
+    if (
+      payload.expected_recipient_count > 10
+    ) {
+      return (
+        "PRUEBA BLOQUEADA: máximo 10 miembros de staff."
+      );
+    }
+
+    return "";
+  }
+
+  function getSession() {
+    try {
+      return (
+        window.ClassroomAuth
+          ?.getSession?.() ||
+        JSON.parse(
+          localStorage.getItem(
+            "andyazh-classroom-session"
+          ) || "null"
+        ) ||
+        {}
+      );
+    } catch (_) {
+      return {};
+    }
+  }
+
+  function getToken() {
+    const session =
+      getSession();
+
+    return (
+      session?.classroomReadToken ||
+      session?.exampro?.accessToken ||
+      session?.exampro?.access_token ||
+      session?.exampro?.token ||
+      session?.accessToken ||
+      session?.access_token ||
+      session?.token ||
+      session?.student_token ||
+      session?.exampro_token ||
+      session?.jwt ||
+      ""
+    );
+  }
+
+  function apiBase() {
+    if (isLocal()) {
+      return "https://api.andyazhtec.com";
+    }
+
+    return String(
+      window.CLASSROOM_API_BASE ||
+      window.EXAMPRO_API_BASE ||
+      "https://api.andyazhtec.com"
+    ).replace(/\/+$/, "");
+  }
+
+  function backendError(
+    data,
+    statusCode
+  ) {
+    const detail =
+      data?.detail;
+
+    if (
+      typeof detail === "string"
+    ) {
+      return detail;
+    }
+
+    if (
+      detail &&
+      typeof detail === "object"
+    ) {
+      return (
+        detail.message ||
+        detail.code ||
+        JSON.stringify(detail)
+      );
+    }
+
+    return (
+      data?.message ||
+      `Error backend ${statusCode}`
+    );
+  }
+
+  function syncButton() {
+    if (busy || created) {
+      return;
+    }
+
+    let snap;
+
+    try {
+      snap =
+        getGeneralSnapshot();
+    } catch (_) {
+      button.disabled = true;
+      button.title =
+        "Esperando audiencia exacta...";
+
+      if (status) {
+        status.textContent =
+          "Esperando audiencia exacta.";
+      }
+
+      return;
+    }
+
+    const pseudoPayload = {
+      source_audience:
+        snap.sourceAudience,
+
+      expected_recipient_count:
+        snap.expectedRecipientCount,
+    };
+
+    const safety =
+      localSafetyError(
+        pseudoPayload,
+        snap.items
+      );
+
+    if (safety) {
+      button.disabled = true;
+      button.title = safety;
+
+      if (status) {
+        status.textContent =
+          safety;
+      }
+
+      return;
+    }
+
+    button.disabled =
+      !snap.expectedRecipientCount;
+
+    button.title =
+      "Crear snapshot exacto. Mail real apagado.";
+
+    if (status) {
+      status.textContent =
+        `${snap.expectedRecipientCount} destinatarios listos · ` +
+        `audiencia ${snap.expectedAudienceCount} · ` +
+        `mail real apagado.`;
+    }
+  }
+
+  async function createSnapshot() {
+    if (busy || created) {
+      return;
+    }
+
+    let payload;
+    let people;
+
+    try {
+      payload =
+        buildPayload();
+
+      people =
+        getGeneralSnapshot().items;
+    } catch (error) {
+      alert(error.message);
+      return;
+    }
+
+    if (
+      !payload.context.channels.bell
+    ) {
+      alert(
+        "Para esta prueba dejá activada la campanita."
+      );
+      return;
+    }
+
+    const safety =
+      localSafetyError(
+        payload,
+        people
+      );
+
+    if (safety) {
+      alert(safety);
+      return;
+    }
+
+    const names =
+      isLocal()
+        ? people
+            .slice(0, 10)
+            .map(item => {
+              const name =
+                item?.user_name ||
+                item?.full_name ||
+                item?.user_twitch ||
+                "Usuario";
+
+              return (
+                `${name} (` +
+                `${normalizeRole(
+                  item?.user_role ??
+                  item?.role
+                )})`
+              );
+            })
+            .join("\n")
+        : "";
+
+    const ok =
+      confirm(
+        `${isLocal()
+          ? "PRUEBA REAL EN PRODUCCIÓN"
+          : "CREAR COMUNICACIÓN"}\n\n` +
+
+        `Audiencia: ${payload.source_audience}\n` +
+        `Destinatarios: ${payload.expected_recipient_count}\n` +
+        `Correo: APAGADO\n` +
+        `Campanita: SÍ\n\n` +
+
+        (names
+          ? `${names}\n\n`
+          : "") +
+
+        "¿Continuar?"
+      );
+
+    if (!ok) {
+      return;
+    }
+
+    const token =
+      getToken();
+
+    if (!token) {
+      alert(
+        "No encontré una sesión Classroom autenticada."
+      );
+      return;
+    }
+
+    busy = true;
+    button.disabled = true;
+
+    try {
+      const response =
+        await fetch(
+          `${apiBase()}/api/classroom/notifications/admin/segment-create`,
+          {
+            method: "POST",
+            cache: "no-store",
+
+            headers: {
+              "Content-Type":
+                "application/json",
+
+              Authorization:
+                `Bearer ${token}`,
+            },
+
+            body:
+              JSON.stringify(payload),
+          }
+        );
+
+      const data =
+        await response
+          .json()
+          .catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(
+          backendError(
+            data,
+            response.status
+          )
+        );
+      }
+
+      lastResult = {
+        ok:
+          Boolean(data?.ok),
+
+        notification_id:
+          data?.item?.id || null,
+
+        source_audience:
+          data?.snapshot?.source_audience ||
+          payload.source_audience,
+
+        audience_count:
+          Number(
+            data?.snapshot?.audience_count ??
+            payload.expected_audience_count
+          ),
+
+        recipient_count:
+          Number(
+            data?.snapshot?.recipient_count ??
+            payload.expected_recipient_count
+          ),
+
+        mail_sent:
+          false,
+      };
+
+      created = true;
+
+      button.innerHTML =
+        '<i class="fa-solid fa-check"></i> Comunicación creada';
+
+      if (status) {
+        status.textContent =
+          `Snapshot creado · ` +
+          `${lastResult.recipient_count} destinatarios · ` +
+          `mail NO enviado.`;
+      }
+
+      console.log(
+        "[Centro] segment-create OK",
+        lastResult
+      );
+
+      alert(
+        "Comunicación creada correctamente.\n\n" +
+        `Destinatarios: ${lastResult.recipient_count}\n` +
+        "Correo enviado: NO"
+      );
+
+    } catch (error) {
+      console.error(
+        "[Centro] segment-create ERROR",
+        error
+      );
+
+      alert(
+        error?.message ||
+        "No se pudo crear la comunicación."
+      );
+
+      button.disabled = false;
+
+    } finally {
+      busy = false;
+    }
+  }
+
+  button.addEventListener(
+    "click",
+    event => {
+      event.preventDefault();
+      event.stopPropagation();
+      createSnapshot();
+    }
+  );
+
+  window.ClassroomNotificationSegmentCreate = {
+    buildPayload,
+
+    inspect() {
+      const payload =
+        buildPayload();
+
+      return {
+        source_audience:
+          payload.source_audience,
+
+        audience_count:
+          payload.expected_audience_count,
+
+        recipient_count:
+          payload.expected_recipient_count,
+
+        bell:
+          payload.context.channels.bell,
+
+        notice:
+          payload.context.channels.notice,
+
+        mail_requested:
+          payload.context.channels.mail_requested,
+
+        send_email:
+          payload.send_email,
+
+        email_required:
+          payload.email_required,
+
+        local_safety_error:
+          localSafetyError(
+            payload,
+            getGeneralSnapshot().items
+          ) || null,
+      };
+    },
+
+    getLastResult() {
+      return lastResult
+        ? { ...lastResult }
+        : null;
+    },
+  };
+
+  setInterval(
+    syncButton,
+    500
+  );
+
+  syncButton();
 })();

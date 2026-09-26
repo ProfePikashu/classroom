@@ -1,4 +1,4 @@
-﻿/* ════════════════════════════════════════════════════════
+/* ════════════════════════════════════════════════════════
    AndyAzhTEC Classroom — main.js
    Tema claro/oscuro + navegación + submenu cursos + sonidos UI
 ════════════════════════════════════════════════════════ */
@@ -387,9 +387,55 @@ function normalizeApiNotification(item) {
   };
 }
 
-const CLASSROOM_NEWS_STORAGE_KEY = "andyazh-classroom-news-mock";
-const CLASSROOM_NEWS_READ_KEY = "andyazh-classroom-news-read-mock";
-const CLASSROOM_NOTIFICATION_PREFS_KEY = "andyazh-classroom-notification-prefs-mock";
+function getClassroomStorageActorKey() {
+  const session = getClassroomSessionSafe() || {};
+
+  const dni = String(
+    session.dni ||
+    session?.alumno?.dni ||
+    session?.student?.dni ||
+    ""
+  ).replace(/\D/g, "");
+
+  if (dni) return `dni-${dni}`;
+
+  const clean = (value) =>
+    String(value || "")
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9@._-]+/g, "_")
+      .slice(0, 120);
+
+  const twitch = clean(
+    session.twitch ||
+    session?.alumno?.twitch ||
+    session?.alumno?.twitch_username ||
+    session?.student?.twitch
+  );
+
+  if (twitch) return `twitch-${twitch}`;
+
+  const email = clean(
+    session.email ||
+    session?.alumno?.email ||
+    session?.student?.email
+  );
+
+  if (email) return `email-${email}`;
+
+  return "guest";
+}
+
+const CLASSROOM_STORAGE_ACTOR_KEY = getClassroomStorageActorKey();
+
+const CLASSROOM_NEWS_STORAGE_KEY =
+  `andyazh-classroom-news-mock:${CLASSROOM_STORAGE_ACTOR_KEY}`;
+
+const CLASSROOM_NEWS_READ_KEY =
+  `andyazh-classroom-news-read-mock:${CLASSROOM_STORAGE_ACTOR_KEY}`;
+
+const CLASSROOM_NOTIFICATION_PREFS_KEY =
+  `andyazh-classroom-notification-prefs-v3:${CLASSROOM_STORAGE_ACTOR_KEY}`;
 
 function getClassroomSessionSafe() {
   try {

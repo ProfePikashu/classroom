@@ -1,11 +1,102 @@
-﻿
+/* === User-scoped notification storage 20260925 === */
+(function classroomNotificationStorageScope() {
+  "use strict";
+
+  const SESSION_KEY = "andyazh-classroom-session";
+
+  const LEGACY_KEYS = [
+    "andyazh-classroom-notifications-v2",
+    "andyazh-classroom-notification-prefs-mock",
+    "andyazh-classroom-notification-dismissed-supabase-v1",
+  ];
+
+  function safeJson(value, fallback) {
+    try {
+      return JSON.parse(value) || fallback;
+    } catch {
+      return fallback;
+    }
+  }
+
+  function cleanPart(value) {
+    return String(value || "")
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9@._-]+/g, "_")
+      .slice(0, 120);
+  }
+
+  function actorKey() {
+    const session = safeJson(localStorage.getItem(SESSION_KEY), {});
+
+    const dni = String(
+      session.dni ||
+      session?.alumno?.dni ||
+      session?.student?.dni ||
+      ""
+    ).replace(/\D/g, "");
+
+    if (dni) return `dni-${dni}`;
+
+    const twitch = cleanPart(
+      session.twitch ||
+      session?.alumno?.twitch ||
+      session?.alumno?.twitch_username ||
+      session?.student?.twitch ||
+      ""
+    );
+
+    if (twitch) return `twitch-${twitch}`;
+
+    const email = cleanPart(
+      session.email ||
+      session?.alumno?.email ||
+      session?.student?.email ||
+      ""
+    );
+
+    if (email) return `email-${email}`;
+
+    return "guest";
+  }
+
+  function key(kind = "items") {
+    const suffix = actorKey();
+
+    if (kind === "prefs") {
+      return `andyazh-classroom-notification-prefs-v3:${suffix}`;
+    }
+
+    if (kind === "dismissed") {
+      return `andyazh-classroom-notification-dismissed-v2:${suffix}`;
+    }
+
+    return `andyazh-classroom-notifications-v3:${suffix}`;
+  }
+
+  function purgeLegacyGlobalStores() {
+    LEGACY_KEYS.forEach((legacyKey) => {
+      localStorage.removeItem(legacyKey);
+    });
+  }
+
+  window.ClassroomNotificationStorage = {
+    key,
+    actorKey,
+    purgeLegacyGlobalStores,
+  };
+
+  purgeLegacyGlobalStores();
+})();
+
+
 (() => {
   "use strict";
 
   window.ClassroomUseLocalNotifications = true;
 
-  const NOTIFICATIONS_KEY = "andyazh-classroom-notifications-v2";
-  const PREFS_KEY = "andyazh-classroom-notification-prefs-mock";
+  const NOTIFICATIONS_KEY = window.ClassroomNotificationStorage.key("items");
+  const PREFS_KEY = window.ClassroomNotificationStorage.key("prefs");
   const MAX_ITEMS = 80;
 
   const DEFAULT_PREFS = {
@@ -203,7 +294,22 @@ if (item.id !== id) return item;
     render();
   }
 
-  function markAllRead() {
+  async function markAllRead() {
+    const backend = window.ClassroomBackendNotifications;
+
+    if (backend?.markAllRead) {
+      try {
+        await backend.markAllRead();
+        return;
+      } catch (error) {
+        console.warn(
+          "[Classroom] No se pudo marcar todo como leído en backend:",
+          error
+        );
+        return;
+      }
+    }
+
     const items = loadItems().map((item) => ({ ...item, read: true }));
     saveItems(items);
     render();
@@ -234,9 +340,32 @@ if (item.id !== id) return item;
   }
 
 
-  function clearAll() {
-    const ok = window.confirm("¿Eliminar todas las notificaciones? Esta acción no se puede deshacer.");
+  async function clearAll() {
+    const ok = window.confirm(
+      "¿Eliminar todas las notificaciones? Esta acción no se puede deshacer."
+    );
+
     if (!ok) return;
+
+    const backend = window.ClassroomBackendNotifications;
+
+    if (backend?.dismissAll) {
+      try {
+        await backend.dismissAll();
+
+        clearLegacyNotificationStores();
+        saveItems([]);
+        render();
+
+        return;
+      } catch (error) {
+        console.warn(
+          "[Classroom] No se pudieron descartar todas las notificaciones en backend:",
+          error
+        );
+        return;
+      }
+    }
 
     clearLegacyNotificationStores();
     saveItems([]);
@@ -244,6 +373,7 @@ if (item.id !== id) return item;
 
     setTimeout(render, 120);
   }
+
 
   function seedDemo() {
     createNotification({
@@ -640,7 +770,7 @@ const icon = TYPE_ICONS[item.type] || TYPE_ICONS.system;
 (function notificationCenterBellRenderBridge() {
   "use strict";
 
-  const STORAGE_KEY = "andyazh-classroom-notifications-v2";
+  const STORAGE_KEY = window.ClassroomNotificationStorage.key("items");
 
   function safeJson(value, fallback) {
     try {
@@ -795,7 +925,7 @@ const id = item.id;
 (function unifiedBellRenderer() {
   "use strict";
 
-  const STORAGE_KEY = "andyazh-classroom-notifications-v2";
+  const STORAGE_KEY = window.ClassroomNotificationStorage.key("items");
 
   function safeJson(value, fallback) {
     try {
@@ -1052,7 +1182,7 @@ const unreadClass = item.read ? "" : "is-unread";
   "use strict";
 
   const SESSION_KEY = "andyazh-classroom-session";
-  const STORAGE_KEY = "andyazh-classroom-notifications-v2";
+  const STORAGE_KEY = window.ClassroomNotificationStorage.key("items");
 
   function getApiBase() {
     const host = window.location.hostname;
@@ -1300,6 +1430,23 @@ const unreadClass = item.read ? "" : "is-unread";
     await syncNotificationsFromBackend();
   }
 
+  async function markAllBackendNotificationsRead() {
+    await apiFetch("/api/classroom/notifications/read-all", {
+      method: "POST",
+    });
+
+    return syncNotificationsFromBackend();
+  }
+
+  async function dismissAllBackendNotifications() {
+    await apiFetch("/api/classroom/notifications/dismiss-all", {
+      method: "POST",
+    });
+
+    return syncNotificationsFromBackend();
+  }
+
+
   function isSupabaseNotification(id) {
     const item = loadLocalItems().find((entry) => String(entry.id) === String(id));
     return item?.source === "supabase";
@@ -1361,6 +1508,8 @@ const unreadClass = item.read ? "" : "is-unread";
     markRead: markBackendNotificationRead,
     markUnread: markBackendNotificationUnread,
     dismiss: dismissBackendNotification,
+    markAllRead: markAllBackendNotificationsRead,
+    dismissAll: dismissAllBackendNotifications,
   };
 
   if (document.readyState === "loading") {
@@ -1374,7 +1523,7 @@ const unreadClass = item.read ? "" : "is-unread";
 (function bellBadgeAutoRefresh() {
   "use strict";
 
-  const STORAGE_KEY = "andyazh-classroom-notifications-v2";
+  const STORAGE_KEY = window.ClassroomNotificationStorage.key("items");
   const POLL_MS = 20000;
 
   let pollTimer = null;
@@ -1749,8 +1898,8 @@ const unreadClass = item.read ? "" : "is-unread";
 (function supabaseNotificationDismissTombstoneFix() {
   "use strict";
 
-  const STORAGE_KEY = "andyazh-classroom-notifications-v2";
-  const TOMBSTONE_KEY = "andyazh-classroom-notification-dismissed-supabase-v1";
+  const STORAGE_KEY = window.ClassroomNotificationStorage.key("items");
+  const TOMBSTONE_KEY = window.ClassroomNotificationStorage.key("dismissed");
 
   function safeJson(value, fallback) {
     try {
@@ -1932,7 +2081,7 @@ if (String(item.id) !== String(id)) return item;
 (function notificationLinkStableButtonAndOnlineBadgeFix() {
   "use strict";
 
-  const STORAGE_KEY = "andyazh-classroom-notifications-v2";
+  const STORAGE_KEY = window.ClassroomNotificationStorage.key("items");
 
   let enhanceScheduled = false;
 
@@ -2273,7 +2422,7 @@ if (String(item.id) !== String(id)) return item;
 (function homeAvisosStableFinalRenderer() {
   "use strict";
 
-  const STORAGE_KEY = "andyazh-classroom-notifications-v2";
+  const STORAGE_KEY = window.ClassroomNotificationStorage.key("items");
   const SHELL_ID = "homeAvisosStableShell";
   let lastStableAvisosHtml = "";
 
@@ -2722,7 +2871,7 @@ if (String(item.id) !== String(id)) return item;
 (function notificationPrefsModalOverride() {
   "use strict";
 
-  const PREFS_KEY = "andyazh-classroom-notification-prefs-mock";
+  const PREFS_KEY = window.ClassroomNotificationStorage.key("prefs");
 
   const DEFAULT_MATRIX_PREFS = {
     homeNews: true,
