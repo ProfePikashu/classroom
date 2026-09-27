@@ -4950,7 +4950,7 @@ if (!items.length) {
   syncFromAudience();
 })();
 
-/* === Notification Segment Create Button 20260926 V2 === */
+/* === Notification Segment Create Button 20260927 V3 MULTICHANNEL === */
 (function initNotificationSegmentCreateButtonV2() {
   "use strict";
 
@@ -5160,7 +5160,7 @@ if (!items.length) {
 
     if (title.length < 3) {
       throw new Error(
-        "El título debe tener al menos 3 caracteres."
+        "El t?tulo debe tener al menos 3 caracteres."
       );
     }
 
@@ -5185,6 +5185,111 @@ if (!items.length) {
       );
     }
 
+    const notice =
+      checked(
+        "notificationChannelNotice"
+      );
+
+    const bell =
+      checked(
+        "notificationChannelBell"
+      );
+
+    const mailRequested =
+      checked(
+        "notificationChannelMail"
+      );
+
+    if (
+      !notice &&
+      !bell &&
+      !mailRequested
+    ) {
+      throw new Error(
+        "Eleg? al menos un canal: Avisos, Notificaciones o Mail."
+      );
+    }
+
+    const mail =
+      mailApi();
+
+    const mailAudience =
+      mailRequested
+        ? String(
+            mail?.getAudience?.() || ""
+          ).trim()
+        : "";
+
+    const mailSelectedDnis =
+      mailRequested
+        ? uniqueDnis(
+            mail?.getSelectedDnis?.() ||
+            []
+          )
+        : [];
+
+    const expectedMailAudienceCount =
+      mailRequested
+        ? Number(
+            mail
+              ?.getExpectedAudienceCount?.() ||
+            0
+          )
+        : 0;
+
+    const expectedMailRecipientCount =
+      mailRequested
+        ? Number(
+            mail
+              ?.getExpectedRecipientCount?.() ||
+            0
+          )
+        : 0;
+
+    if (mailRequested) {
+      if (!mail) {
+        throw new Error(
+          "La selecci?n de Mail todav?a no est? disponible."
+        );
+      }
+
+      if (
+        mailAudience !==
+        snap.sourceAudience
+      ) {
+        throw new Error(
+          "La audiencia de Mail no coincide con la audiencia general."
+        );
+      }
+
+      if (
+        expectedMailAudienceCount !==
+        snap.expectedAudienceCount
+      ) {
+        throw new Error(
+          "La audiencia de Mail cambi?. Esper? un instante y volv? a intentar."
+        );
+      }
+
+      if (
+        !mailSelectedDnis.length ||
+        expectedMailRecipientCount <= 0
+      ) {
+        throw new Error(
+          "Mail est? activado. Seleccion? al menos un destinatario de correo."
+        );
+      }
+
+      if (
+        mailSelectedDnis.length !==
+        expectedMailRecipientCount
+      ) {
+        throw new Error(
+          "La selecci?n de Mail no coincide con el contador actual."
+        );
+      }
+    }
+
     return {
       title,
       body,
@@ -5197,16 +5302,19 @@ if (!items.length) {
         ),
 
       severity:
-        value("notificationSeverity") ||
-        null,
+        value(
+          "notificationSeverity"
+        ) || null,
 
       link_url:
-        value("notificationLink") ||
-        null,
+        value(
+          "notificationLink"
+        ) || null,
 
       link:
-        value("notificationLink") ||
-        null,
+        value(
+          "notificationLink"
+        ) || null,
 
       source_audience:
         snap.sourceAudience,
@@ -5220,8 +5328,20 @@ if (!items.length) {
       expected_recipient_count:
         snap.expectedRecipientCount,
 
-      send_email: false,
-      email_required: false,
+      mail_selected_dnis:
+        mailSelectedDnis,
+
+      expected_mail_audience_count:
+        expectedMailAudienceCount,
+
+      expected_mail_recipient_count:
+        expectedMailRecipientCount,
+
+      send_email:
+        mailRequested,
+
+      email_required:
+        false,
 
       context: {
         created_from:
@@ -5231,23 +5351,14 @@ if (!items.length) {
           "general-audience",
 
         channels: {
-          notice:
-            checked(
-              "notificationChannelNotice"
-            ),
-
-          bell:
-            checked(
-              "notificationChannelBell"
-            ),
+          notice,
+          bell,
 
           mail_requested:
-            checked(
-              "notificationChannelMail"
-            ),
+            mailRequested,
 
           mail_send_enabled:
-            false,
+            mailRequested,
         },
 
         mail_preview:
@@ -5402,36 +5513,34 @@ if (!items.length) {
       return;
     }
 
-    let snap;
+    let payload;
+    let people;
 
     try {
-      snap =
-        getGeneralSnapshot();
-    } catch (_) {
+      payload =
+        buildPayload();
+
+      people =
+        getGeneralSnapshot().items;
+    } catch (error) {
       button.disabled = true;
+
       button.title =
-        "Esperando audiencia exacta...";
+        error?.message ||
+        "Esperando configuraci?n...";
 
       if (status) {
         status.textContent =
-          "Esperando audiencia exacta.";
+          button.title;
       }
 
       return;
     }
 
-    const pseudoPayload = {
-      source_audience:
-        snap.sourceAudience,
-
-      expected_recipient_count:
-        snap.expectedRecipientCount,
-    };
-
     const safety =
       localSafetyError(
-        pseudoPayload,
-        snap.items
+        payload,
+        people
       );
 
     if (safety) {
@@ -5446,17 +5555,29 @@ if (!items.length) {
       return;
     }
 
-    button.disabled =
-      !snap.expectedRecipientCount;
+    const inAppCount =
+      (
+        payload.context.channels.notice ||
+        payload.context.channels.bell
+      )
+        ? payload.expected_recipient_count
+        : 0;
+
+    const mailCount =
+      payload.context.channels.mail_requested
+        ? payload.expected_mail_recipient_count
+        : 0;
+
+    button.disabled = false;
 
     button.title =
-      "Crear snapshot exacto. Mail real apagado.";
+      "Guardar comunicaci?n con los canales seleccionados.";
 
     if (status) {
       status.textContent =
-        `${snap.expectedRecipientCount} destinatarios listos · ` +
-        `audiencia ${snap.expectedAudienceCount} · ` +
-        `mail real apagado.`;
+        `In-app: ${inAppCount} ? ` +
+        `Mail: ${mailCount} ? ` +
+        `Audiencia: ${payload.expected_audience_count}`;
     }
   }
 
@@ -5467,6 +5588,7 @@ if (!items.length) {
 
     let payload;
     let people;
+    let notificationId = null;
 
     try {
       payload =
@@ -5475,16 +5597,11 @@ if (!items.length) {
       people =
         getGeneralSnapshot().items;
     } catch (error) {
-      alert(error.message);
-      return;
-    }
-
-    if (
-      !payload.context.channels.bell
-    ) {
       alert(
-        "Para esta prueba dejá activada la campanita."
+        error?.message ||
+        "No pude preparar la comunicaci?n."
       );
+
       return;
     }
 
@@ -5499,44 +5616,58 @@ if (!items.length) {
       return;
     }
 
-    const names =
-      isLocal()
-        ? people
-            .slice(0, 10)
-            .map(item => {
-              const name =
-                item?.user_name ||
-                item?.full_name ||
-                item?.user_twitch ||
-                "Usuario";
+    const mailPeople =
+      payload.context.channels.mail_requested
+        ? (
+            mailApi()
+              ?.getSelectedItems?.() ||
+            []
+          )
+        : [];
 
-              return (
-                `${name} (` +
-                `${normalizeRole(
-                  item?.user_role ??
-                  item?.role
-                )})`
-              );
-            })
-            .join("\n")
-        : "";
+    const mailNames =
+      mailPeople
+        .map(item =>
+          item?.user_name ||
+          item?.full_name ||
+          item?.user_twitch ||
+          item?.user_email ||
+          "Usuario"
+        )
+        .join("\n");
+
+    const inAppCount =
+      (
+        payload.context.channels.notice ||
+        payload.context.channels.bell
+      )
+        ? payload.expected_recipient_count
+        : 0;
 
     const ok =
       confirm(
-        `${isLocal()
-          ? "PRUEBA REAL EN PRODUCCIÓN"
-          : "CREAR COMUNICACIÓN"}\n\n` +
+        "CREAR COMUNICACI?N\n\n" +
 
         `Audiencia: ${payload.source_audience}\n` +
-        `Destinatarios: ${payload.expected_recipient_count}\n` +
-        `Correo: APAGADO\n` +
-        `Campanita: SÍ\n\n` +
+        `Avisos: ${payload.context.channels.notice ? "S?" : "NO"}\n` +
+        `Campanita: ${payload.context.channels.bell ? "S?" : "NO"}\n` +
+        `Destinatarios in-app: ${inAppCount}\n` +
+        `Mail: ${payload.context.channels.mail_requested ? "S?" : "NO"}\n` +
+        `Destinatarios Mail: ${payload.expected_mail_recipient_count}\n\n` +
 
-        (names
-          ? `${names}\n\n`
-          : "") +
+        (
+          mailNames
+            ? `Mail seleccionado:\n${mailNames}\n\n`
+            : ""
+        ) +
 
-        "¿Continuar?"
+        (
+          payload.context.channels.mail_requested
+            ? "El correo se enviar? de forma REAL.\n\n"
+            : ""
+        ) +
+
+        "?Continuar?"
       );
 
     if (!ok) {
@@ -5548,13 +5679,25 @@ if (!items.length) {
 
     if (!token) {
       alert(
-        "No encontré una sesión Classroom autenticada."
+        "No encontr? una sesi?n Classroom autenticada."
       );
+
       return;
     }
 
     busy = true;
     button.disabled = true;
+
+    const originalHtml =
+      button.innerHTML;
+
+    button.innerHTML =
+      '<i class="fa-solid fa-spinner fa-spin"></i> Guardando...';
+
+    if (status) {
+      status.textContent =
+        "Creando comunicaci?n...";
+    }
 
     try {
       const response =
@@ -5591,68 +5734,262 @@ if (!items.length) {
         );
       }
 
+      notificationId =
+        data?.item?.id ||
+        null;
+
+      if (!notificationId) {
+        throw new Error(
+          "El backend cre? la comunicaci?n pero no devolvi? notification_id."
+        );
+      }
+
+      let mailResult =
+        null;
+
+      if (
+        payload.context.channels
+          .mail_requested
+      ) {
+        if (status) {
+          status.textContent =
+            "Snapshot creado. Validando Mail...";
+        }
+
+        const previewResponse =
+          await fetch(
+            `${apiBase()}/api/classroom/notifications/${notificationId}/admin/email-snapshot-preview`,
+            {
+              method: "GET",
+              cache: "no-store",
+
+              headers: {
+                Authorization:
+                  `Bearer ${token}`,
+              },
+            }
+          );
+
+        const preview =
+          await previewResponse
+            .json()
+            .catch(() => ({}));
+
+        if (!previewResponse.ok) {
+          throw new Error(
+            "Comunicaci?n creada, pero fall? el preview de Mail: " +
+            backendError(
+              preview,
+              previewResponse.status
+            )
+          );
+        }
+
+        const expected =
+          payload
+            .expected_mail_recipient_count;
+
+        if (
+          Number(
+            preview?.summary
+              ?.email_destinations
+          ) !== expected ||
+          Number(
+            preview?.summary
+              ?.valid
+          ) !== expected
+        ) {
+          throw new Error(
+            "Comunicaci?n creada, pero el snapshot de Mail no coincide con la selecci?n."
+          );
+        }
+
+        if (status) {
+          status.textContent =
+            `Enviando ${expected} correo(s)...`;
+        }
+
+        const sendResponse =
+          await fetch(
+            `${apiBase()}/api/classroom/notifications/${notificationId}/admin/email-send`,
+            {
+              method: "POST",
+              cache: "no-store",
+
+              headers: {
+                "Content-Type":
+                  "application/json",
+
+                Authorization:
+                  `Bearer ${token}`,
+              },
+
+              body:
+                JSON.stringify({
+                  confirmation:
+                    "SEND_NOTIFICATION_EMAIL",
+
+                  expected_email_count:
+                    expected,
+
+                  allow_resend:
+                    false,
+                }),
+            }
+          );
+
+        mailResult =
+          await sendResponse
+            .json()
+            .catch(() => ({}));
+
+        if (!sendResponse.ok) {
+          throw new Error(
+            "Comunicaci?n creada, pero el env?o de Mail fall?: " +
+            backendError(
+              mailResult,
+              sendResponse.status
+            )
+          );
+        }
+
+        if (
+          !mailResult?.ok ||
+          Number(mailResult?.failed || 0) > 0
+        ) {
+          throw new Error(
+            "Comunicaci?n creada, pero uno o m?s correos no fueron aceptados."
+          );
+        }
+      }
+
       lastResult = {
         ok:
-          Boolean(data?.ok),
+          true,
 
         notification_id:
-          data?.item?.id || null,
+          notificationId,
 
         source_audience:
-          data?.snapshot?.source_audience ||
+          data?.snapshot
+            ?.source_audience ||
           payload.source_audience,
 
         audience_count:
           Number(
-            data?.snapshot?.audience_count ??
-            payload.expected_audience_count
+            data?.snapshot
+              ?.audience_count ??
+            payload
+              .expected_audience_count
           ),
 
         recipient_count:
           Number(
-            data?.snapshot?.recipient_count ??
-            payload.expected_recipient_count
+            data?.snapshot
+              ?.recipient_count ??
+            0
+          ),
+
+        email_recipient_count:
+          Number(
+            data?.snapshot
+              ?.email_recipient_count ??
+            0
           ),
 
         mail_sent:
-          false,
+          Boolean(mailResult),
+
+        mail_result:
+          mailResult,
       };
 
       created = true;
 
       button.innerHTML =
-        '<i class="fa-solid fa-check"></i> Comunicación creada';
+        '<i class="fa-solid fa-check"></i> Comunicaci?n creada';
+
+      button.disabled = true;
 
       if (status) {
         status.textContent =
-          `Snapshot creado · ` +
-          `${lastResult.recipient_count} destinatarios · ` +
-          `mail NO enviado.`;
+          `Guardada ? ` +
+          `in-app ${lastResult.recipient_count} ? ` +
+          `Mail ${lastResult.email_recipient_count}` +
+          (
+            mailResult
+              ? ` ? SES acept? ${mailResult.accepted ?? 0}`
+              : ""
+          );
       }
 
       console.log(
-        "[Centro] segment-create OK",
+        "[Centro] comunicaci?n multicanal OK",
         lastResult
       );
 
+      window.dispatchEvent(
+        new CustomEvent(
+          "classroom:notifications-updated",
+          {
+            detail: {
+              source:
+                "segment-create",
+              id:
+                notificationId,
+            },
+          }
+        )
+      );
+
       alert(
-        "Comunicación creada correctamente.\n\n" +
-        `Destinatarios: ${lastResult.recipient_count}\n` +
-        "Correo enviado: NO"
+        "Comunicaci?n creada correctamente.\n\n" +
+        `Avisos: ${payload.context.channels.notice ? "S?" : "NO"}\n` +
+        `Campanita: ${payload.context.channels.bell ? "S?" : "NO"}\n` +
+        `In-app: ${lastResult.recipient_count}\n` +
+        `Mail: ${lastResult.email_recipient_count}` +
+        (
+          mailResult
+            ? `\nAceptados por SES: ${mailResult.accepted ?? 0}`
+            : ""
+        )
       );
 
     } catch (error) {
       console.error(
-        "[Centro] segment-create ERROR",
+        "[Centro] comunicaci?n multicanal ERROR",
         error
       );
 
+      if (notificationId) {
+        created = true;
+
+        button.innerHTML =
+          '<i class="fa-solid fa-triangle-exclamation"></i> Comunicaci?n guardada';
+
+        button.disabled = true;
+
+        if (status) {
+          status.textContent =
+            "La comunicaci?n qued? guardada, pero Mail no se complet?.";
+        }
+      } else {
+        button.innerHTML =
+          originalHtml;
+
+        button.disabled =
+          false;
+
+        if (status) {
+          status.textContent =
+            "No se cre? la comunicaci?n.";
+        }
+      }
+
       alert(
         error?.message ||
-        "No se pudo crear la comunicación."
+        "No se pudo completar la comunicaci?n."
       );
-
-      button.disabled = false;
 
     } finally {
       busy = false;
