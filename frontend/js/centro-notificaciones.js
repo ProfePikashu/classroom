@@ -1405,6 +1405,55 @@ if (!items.length) {
 (function initClassroomMailLogsModal() {
   "use strict";
 
+  function escapeHtml(value) {
+    return String(value ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  function formatDate(value) {
+    if (!value) return "Sin fecha";
+
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) return String(value);
+
+    return date.toLocaleString("es-AR", {
+      dateStyle: "short",
+      timeStyle: "medium",
+    });
+  }
+
+  function audienceLabel(value) {
+    const raw = String(value || "").toLowerCase();
+
+    if (raw === "all") return "Todos en la base";
+    if (raw === "staff") return "Staff";
+    if (raw === "specific_user") return "Destinatarios específicos";
+    if (raw === "course-ayrpc-2025") return "AyRPC 2025";
+    if (raw === "course-ayrpc-2026") return "AyRPC 2026";
+
+    return value || "Sin audiencia";
+  }
+
+  function statusLabel(value) {
+    const map = {
+      accepted: "Aceptado SMTP",
+      sent: "Enviado",
+      pending: "Pendiente",
+      deferred: "Diferido",
+      failed: "Fallido",
+      mailbox_full: "Casilla llena",
+      invalid_address: "Dirección inválida",
+      skipped: "Omitido",
+    };
+
+    return map[value] || value || "Desconocido";
+  }
+
   function ensureModal() {
     let modal = document.getElementById("classroomMailLogsModal");
     if (modal) return modal;
@@ -1412,15 +1461,19 @@ if (!items.length) {
     modal = document.createElement("div");
     modal.id = "classroomMailLogsModal";
     modal.style.cssText = `
-      position:fixed; inset:0; z-index:99999;
+      position:fixed;
+      inset:0;
+      z-index:99999;
       background:rgba(0,0,0,.72);
-      display:none; align-items:center; justify-content:center;
+      display:none;
+      align-items:center;
+      justify-content:center;
       padding:20px;
     `;
 
     modal.innerHTML = `
       <div style="
-        width:min(980px,96vw);
+        width:min(1100px,96vw);
         max-height:90vh;
         overflow:auto;
         background:#111827;
@@ -1430,47 +1483,326 @@ if (!items.length) {
         padding:22px;
         color:#f9fafb;
       ">
-        <div style="display:flex;justify-content:space-between;gap:16px;align-items:center;margin-bottom:18px;">
+        <div style="
+          display:flex;
+          justify-content:space-between;
+          gap:16px;
+          align-items:center;
+          margin-bottom:18px;
+        ">
           <div>
-            <h2 style="margin:0 0 4px;font-size:22px;">Historial y logs de envíos</h2>
+            <h2 style="margin:0 0 4px;font-size:22px;">
+              Historial y logs de envíos
+            </h2>
             <div style="color:#9ca3af;font-size:14px;">
-              Estado de los correos enviados desde el Centro de Notificaciones.
+              Resultados registrados por Classroom y el servidor SMTP.
             </div>
           </div>
 
-          <button id="classroomMailLogsClose" type="button" style="
-            border:0;background:#374151;color:white;border-radius:10px;
-            padding:10px 14px;cursor:pointer;
-          ">Cerrar</button>
+          <button
+            id="classroomMailLogsClose"
+            type="button"
+            style="
+              border:0;
+              background:#374151;
+              color:white;
+              border-radius:10px;
+              padding:10px 14px;
+              cursor:pointer;
+            "
+          >
+            Cerrar
+          </button>
         </div>
 
-        <div id="classroomMailLogsContent">
-          <div style="padding:30px;text-align:center;color:#9ca3af;">
-            Todavía no hay envíos para mostrar.
-          </div>
-        </div>
+        <div id="classroomMailLogsContent"></div>
       </div>
     `;
 
     document.body.appendChild(modal);
 
-    modal.querySelector("#classroomMailLogsClose")
+    modal
+      .querySelector("#classroomMailLogsClose")
       ?.addEventListener("click", close);
 
     return modal;
   }
 
+  function renderEmpty() {
+    const content = document.getElementById("classroomMailLogsContent");
+
+    content.innerHTML = `
+      <div style="
+        border:1px dashed #4b5563;
+        border-radius:14px;
+        padding:30px;
+        text-align:center;
+        color:#9ca3af;
+      ">
+        Todavía no hay envíos registrados.
+      </div>
+    `;
+  }
+
+  function render(items) {
+    const content = document.getElementById("classroomMailLogsContent");
+
+    if (!Array.isArray(items) || !items.length) {
+      renderEmpty();
+      return;
+    }
+
+    content.innerHTML = items.map((send, index) => {
+      const s = send.summary || {};
+
+      const rows = (send.items || []).map((item) => `
+        <tr>
+          <td style="padding:9px;border-bottom:1px solid #374151;">
+            ${escapeHtml(item.email || "Sin email")}
+          </td>
+
+          <td style="padding:9px;border-bottom:1px solid #374151;">
+            ${escapeHtml(statusLabel(item.status))}
+          </td>
+
+          <td style="padding:9px;border-bottom:1px solid #374151;">
+            ${escapeHtml(item.smtp_code ?? "-")}
+          </td>
+
+          <td style="
+            padding:9px;
+            border-bottom:1px solid #374151;
+            color:#9ca3af;
+            font-size:12px;
+          ">
+            ${escapeHtml(
+              item.error ||
+              item.smtp_response ||
+              item.provider ||
+              "-"
+            )}
+          </td>
+        </tr>
+      `).join("");
+
+      return `
+        <details
+          ${index === 0 ? "open" : ""}
+          style="
+            margin-bottom:14px;
+            border:1px solid #374151;
+            border-radius:14px;
+            background:#0f172a;
+            overflow:hidden;
+          "
+        >
+          <summary style="
+            cursor:pointer;
+            padding:16px;
+            list-style:none;
+          ">
+            <div style="
+              display:flex;
+              justify-content:space-between;
+              align-items:flex-start;
+              gap:16px;
+              flex-wrap:wrap;
+            ">
+              <div>
+                <strong style="font-size:16px;">
+                  ${escapeHtml(send.title || "Sin asunto")}
+                </strong>
+
+                <div style="
+                  color:#9ca3af;
+                  font-size:13px;
+                  margin-top:5px;
+                ">
+                  ${escapeHtml(formatDate(send.created_at))}
+                  ·
+                  ${escapeHtml(audienceLabel(send.audience))}
+                </div>
+              </div>
+
+              <div style="
+                display:flex;
+                gap:7px;
+                flex-wrap:wrap;
+                font-size:12px;
+              ">
+                <span style="
+                  padding:5px 8px;
+                  border-radius:8px;
+                  background:#1f2937;
+                ">
+                  Total: ${Number(s.total || 0)}
+                </span>
+
+                <span style="
+                  padding:5px 8px;
+                  border-radius:8px;
+                  background:#064e3b;
+                ">
+                  Aceptados: ${Number(s.accepted || 0)}
+                </span>
+
+                <span style="
+                  padding:5px 8px;
+                  border-radius:8px;
+                  background:#7f1d1d;
+                ">
+                  Fallidos: ${Number(s.failed || 0)}
+                </span>
+
+                <span style="
+                  padding:5px 8px;
+                  border-radius:8px;
+                  background:#78350f;
+                ">
+                  Diferidos: ${Number(s.deferred || 0)}
+                </span>
+              </div>
+            </div>
+          </summary>
+
+          <div style="padding:0 16px 16px;">
+            <div style="
+              display:flex;
+              gap:12px;
+              flex-wrap:wrap;
+              margin-bottom:12px;
+              color:#d1d5db;
+              font-size:13px;
+            ">
+              <span>Casilla llena: <strong>${Number(s.mailbox_full || 0)}</strong></span>
+              <span>Dirección inválida: <strong>${Number(s.invalid_address || 0)}</strong></span>
+              <span>Pendientes: <strong>${Number(s.pending || 0)}</strong></span>
+              <span>Omitidos: <strong>${Number(s.skipped || 0)}</strong></span>
+            </div>
+
+            <div style="
+              overflow-x:auto;
+              border:1px solid #374151;
+              border-radius:10px;
+            ">
+              <table style="
+                width:100%;
+                min-width:720px;
+                border-collapse:collapse;
+                font-size:13px;
+              ">
+                <thead>
+                  <tr style="background:#1f2937;text-align:left;">
+                    <th style="padding:9px;">Destinatario</th>
+                    <th style="padding:9px;">Estado</th>
+                    <th style="padding:9px;">SMTP</th>
+                    <th style="padding:9px;">Detalle</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  ${rows}
+                </tbody>
+              </table>
+            </div>
+
+            <div style="
+              margin-top:10px;
+              color:#6b7280;
+              font-size:12px;
+            ">
+              Entrega final, rebotes posteriores y quejas se incorporarán
+              cuando conectemos los eventos de Cloudflare.
+            </div>
+          </div>
+        </details>
+      `;
+    }).join("");
+  }
+
+  async function load() {
+    const content = document.getElementById("classroomMailLogsContent");
+
+    content.innerHTML = `
+      <div style="
+        padding:30px;
+        text-align:center;
+        color:#9ca3af;
+      ">
+        Cargando logs...
+      </div>
+    `;
+
+    try {
+      const api = window.ClassroomBackendNotifications;
+
+      if (
+        !api ||
+        typeof api.getApiBase !== "function" ||
+        typeof api.ensureBackendToken !== "function"
+      ) {
+        throw new Error(
+          "El bridge del backend todavía no está disponible."
+        );
+      }
+
+      const token = await api.ensureBackendToken();
+
+      const response = await fetch(
+        `${api.getApiBase()}/api/classroom/notifications/admin/mail-logs?limit=50`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(
+          data.detail || `Error backend ${response.status}`
+        );
+      }
+
+      render(data.items || []);
+    } catch (error) {
+      console.error("[Mail Logs]", error);
+
+      content.innerHTML = `
+        <div style="
+          border:1px solid #7f1d1d;
+          background:#450a0a;
+          border-radius:12px;
+          padding:18px;
+          color:#fecaca;
+        ">
+          No se pudieron cargar los logs:
+          ${escapeHtml(error.message || error)}
+        </div>
+      `;
+    }
+  }
+
   function open() {
     const modal = ensureModal();
     modal.style.display = "flex";
+    load();
   }
 
   function close() {
     const modal = document.getElementById("classroomMailLogsModal");
-    if (modal) modal.style.display = "none";
+
+    if (modal) {
+      modal.style.display = "none";
+    }
   }
 
-  window.ClassroomMailLogsModal = { open, close };
+  window.ClassroomMailLogsModal = {
+    open,
+    close,
+    load,
+  };
 })();
 
 /* === HIDE CENTER EMAIL CARD 20260622 === */
