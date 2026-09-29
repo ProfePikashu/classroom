@@ -3167,7 +3167,7 @@ if (!items.length) {
       body: "Hay un nuevo aviso disponible en el Classroom. Ingresá para revisar la información completa.",
       highlight: "Este mensaje corresponde a una comunicación general del curso.",
       buttonText: "Ingresar a Classroom",
-      buttonUrl: "https://profepikashu.github.io/classroom/",
+      buttonUrl: "https://classroom.andyazhtec.com/",
       footer: "Prof. Arturo Coria<br>AndyAzhTEC Classroom"
     },
     community: {
@@ -3182,7 +3182,7 @@ if (!items.length) {
       body: "Hay nueva actividad en la Comunidad del Classroom. Podés ingresar para ver el hilo, responder o seguir la conversación.",
       highlight: "La comunidad centraliza consultas, aportes y recomendaciones del curso.",
       buttonText: "Ir a Comunidad",
-      buttonUrl: "https://profepikashu.github.io/classroom/comunidad.html",
+      buttonUrl: "https://classroom.andyazhtec.com/comunidad.html",
       footer: "Prof. Arturo Coria<br>AndyAzhTEC Classroom"
     },
     academic: {
@@ -3197,7 +3197,7 @@ if (!items.length) {
       body: "Hay una novedad académica disponible en el Classroom. Ingresá para revisar la información completa y verificar el detalle correspondiente.",
       highlight: "Este aviso puede estar relacionado con notas, devoluciones, recuperatorios o cambios importantes del curso.",
       buttonText: "Ingresar a Classroom",
-      buttonUrl: "https://profepikashu.github.io/classroom/",
+      buttonUrl: "https://classroom.andyazhtec.com/",
       footer: "Prof. Arturo Coria<br>Armado y Reparación de PC — AyRPC 2025<br>AndyAzhTEC Classroom"
     },
     recovery_corrected: {
@@ -3212,7 +3212,7 @@ if (!items.length) {
       body: "La corrección de tu recuperatorio correspondiente al curso <strong>Armado y Reparación de PC - 2025</strong> ya se encuentra disponible. Para visualizarla, deberás ingresar primero a <strong>Classroom</strong> y, desde allí, acceder al apartado de <strong>ExamPro</strong> siguiendo las indicaciones de la plataforma.",
       highlight: "Desde <strong>ExamPro</strong> podrás ver punto a punto la devolución de tu evaluación.",
       buttonText: "Ingresar a Classroom",
-      buttonUrl: "https://profepikashu.github.io/classroom/",
+      buttonUrl: "https://classroom.andyazhtec.com/",
       footer: "Prof. Arturo Coria<br>Armado y Reparación de PC — AyRPC 2025<br>AndyAzhTEC Classroom"
     },
     recovery_available: {
@@ -3227,7 +3227,7 @@ if (!items.length) {
       body: "Aún figura en el sistema que te encontrás <strong>APTO/A</strong> para rendir el recuperatorio del examen de <strong>AyRPC 2025</strong>, pero todavía no aparece registrada la aprobación de esta última instancia.",
       highlight: "El recuperatorio estará disponible hasta la fecha indicada. Luego de esa fecha, ya no será posible rendirlo.",
       buttonText: "Ingresar al recuperatorio",
-      buttonUrl: "https://profepikashu.github.io/classroom/curso-ayrpc-2025.html",
+      buttonUrl: "https://classroom.andyazhtec.com/curso-ayrpc-2025.html",
       footer: "Prof. Arturo Coria<br>Armado y Reparación de PC — AyRPC 2025<br>AndyAzhTEC Classroom"
     },
     system: {
@@ -3242,7 +3242,7 @@ if (!items.length) {
       body: "Hay una actualización o aviso interno del sistema Classroom.",
       highlight: "Este mensaje corresponde a una comunicación técnica o administrativa del sistema.",
       buttonText: "Ingresar a Classroom",
-      buttonUrl: "https://profepikashu.github.io/classroom/",
+      buttonUrl: "https://classroom.andyazhtec.com/",
       footer: "Prof. Arturo Coria<br>AndyAzhTEC Classroom"
     }
   };
@@ -3315,6 +3315,40 @@ if (!items.length) {
 
   function getCurrentSeverity() {
     return String(qs("#notificationSeverity")?.value || "").trim();
+  }
+
+  function currentDraftSourceKey() {
+    return JSON.stringify({
+      title:
+        String(
+          qs("#notificationTitle")?.value ||
+          ""
+        ).trim(),
+
+      body:
+        String(
+          qs("#notificationBody")?.value ||
+          ""
+        ).trim(),
+
+      type:
+        String(
+          qs("#notificationType")?.value ||
+          ""
+        ).trim(),
+
+      severity:
+        String(
+          qs("#notificationSeverity")?.value ||
+          ""
+        ).trim(),
+
+      link:
+        String(
+          qs("#notificationLink")?.value ||
+          ""
+        ).trim(),
+    });
   }
 
   function inferPresetKey() {
@@ -3639,6 +3673,8 @@ if (!items.length) {
     qs("#mailPreviewSave")?.addEventListener("click", () => {
       savedDraft = {
         ...getPreviewData(),
+        sourceKey:
+          currentDraftSourceKey(),
       };
 
       renderPreview();
@@ -3802,7 +3838,7 @@ if (!items.length) {
 
   function renderMailHtml(data) {
     const accent = ACCENTS[data.accent] || ACCENTS.warning;
-    const buttonUrl = data.buttonUrl || "https://profepikashu.github.io/classroom/";
+    const buttonUrl = data.buttonUrl || "https://classroom.andyazhtec.com/";
     const safeUrl = escapeHtml(buttonUrl);
 
     return `<!doctype html>
@@ -3833,7 +3869,7 @@ if (!items.length) {
                   </td>
                   <td align="right" style="vertical-align:middle;width:76px;">
                     <div style="width:64px;height:64px;border-radius:18px;background:rgba(15,23,42,.78);border:1px solid rgba(147,197,253,.5);text-align:center;">
-                      <img src="https://profepikashu.github.io/classroom/media/icons/classroomicoclaro.png" alt="Classroom" width="44" height="44" style="display:block;margin:10px auto;border:0;outline:none;text-decoration:none;">
+                      <img src="https://classroom.andyazhtec.com/media/icons/classroomicoclaro.png" alt="Classroom" width="44" height="44" style="display:block;margin:10px auto;border:0;outline:none;text-decoration:none;">
                     </div>
                   </td>
                 </tr>
@@ -3912,9 +3948,15 @@ if (!items.length) {
   function openModal() {
     createModal();
 
-    if (savedDraft) {
+    if (
+      savedDraft &&
+      savedDraft.sourceKey ===
+        currentDraftSourceKey()
+    ) {
       applyDraft(savedDraft);
     } else {
+      savedDraft = null;
+
       const presetKey =
         inferPresetKey();
 
@@ -5623,8 +5665,48 @@ if (!items.length) {
       ?.querySelector("span");
 
   let busy = false;
-  let created = false;
+  let createdFingerprint = "";
   let lastResult = null;
+
+  const defaultButtonHtml =
+    button.innerHTML;
+
+  function payloadFingerprint(payload) {
+    return JSON.stringify({
+      title:
+        payload?.title || "",
+
+      body:
+        payload?.body || "",
+
+      type:
+        payload?.type || "",
+
+      severity:
+        payload?.severity || "",
+
+      link_url:
+        payload?.link_url || "",
+
+      source_audience:
+        payload?.source_audience || "",
+
+      selected_dnis:
+        payload?.selected_dnis || [],
+
+      mail_selected_dnis:
+        payload?.mail_selected_dnis || [],
+
+      mail_external_emails:
+        payload?.mail_external_emails || [],
+
+      channels:
+        payload?.context?.channels || {},
+
+      mail_draft:
+        payload?.context?.mail_draft || {},
+    });
+  }
 
   function value(id, fallback = "") {
     return String(
@@ -5870,7 +5952,7 @@ if (!items.length) {
 
     if (title.length < 3) {
       throw new Error(
-        "El t?tulo debe tener al menos 3 caracteres."
+        "El título debe tener al menos 3 caracteres."
       );
     }
 
@@ -5907,7 +5989,7 @@ if (!items.length) {
       !mailRequested
     ) {
       throw new Error(
-        "Eleg? al menos un canal: Avisos, Notificaciones o Mail."
+        "Elegí al menos un canal: Avisos, Notificaciones o Mail."
       );
     }
 
@@ -5972,7 +6054,7 @@ if (!items.length) {
     if (mailRequested) {
       if (!mail) {
         throw new Error(
-          "La selecci?n de Mail todav?a no est? disponible."
+          "La selección de Mail todav?a no est? disponible."
         );
       }
 
@@ -5990,7 +6072,7 @@ if (!items.length) {
         snap.expectedAudienceCount
       ) {
         throw new Error(
-          "La audiencia de Mail cambi?. Esper? un instante y volv? a intentar."
+          "La audiencia de Mail cambió. Esperá un instante y volvé a intentar."
         );
       }
 
@@ -6241,7 +6323,7 @@ if (!items.length) {
   }
 
   function syncButton() {
-    if (busy || created) {
+    if (busy) {
       return;
     }
 
@@ -6254,12 +6336,30 @@ if (!items.length) {
 
       people =
         getGeneralSnapshot().items;
+
+      const fingerprint =
+        payloadFingerprint(payload);
+
+      if (
+        createdFingerprint &&
+        fingerprint ===
+          createdFingerprint
+      ) {
+        button.disabled = true;
+        button.title =
+          "Esta comunicación ya fue creada. Modificá algún dato para crear otra.";
+        return;
+      }
+
+      button.innerHTML =
+        defaultButtonHtml;
+
     } catch (error) {
       button.disabled = true;
 
       button.title =
         error?.message ||
-        "Esperando configuraci?n...";
+        "Esperando configuración...";
 
       if (status) {
         status.textContent =
@@ -6303,7 +6403,7 @@ if (!items.length) {
     button.disabled = false;
 
     button.title =
-      "Guardar comunicaci?n con los canales seleccionados.";
+      "Guardar comunicación con los canales seleccionados.";
 
     if (status) {
       status.textContent =
@@ -6314,7 +6414,7 @@ if (!items.length) {
   }
 
   async function createSnapshot() {
-    if (busy || created) {
+    if (busy) {
       return;
     }
 
@@ -6328,10 +6428,26 @@ if (!items.length) {
 
       people =
         getGeneralSnapshot().items;
+
+      const fingerprint =
+        payloadFingerprint(payload);
+
+      if (
+        createdFingerprint &&
+        fingerprint ===
+          createdFingerprint
+      ) {
+        alert(
+          "Esta misma comunicación ya fue creada. Modificá algún dato o destinatario antes de volver a enviarla."
+        );
+
+        return;
+      }
+
     } catch (error) {
       alert(
         error?.message ||
-        "No pude preparar la comunicaci?n."
+        "No pude preparar la comunicación."
       );
 
       return;
@@ -6395,11 +6511,11 @@ if (!items.length) {
 
         (
           payload.context.channels.mail_requested
-            ? "El correo se enviar? de forma REAL.\n\n"
+            ? "El correo se enviará de forma REAL.\n\n"
             : ""
         ) +
 
-        "?Continuar?"
+        "¿Continuar?"
       );
 
     if (!ok) {
@@ -6411,7 +6527,7 @@ if (!items.length) {
 
     if (!token) {
       alert(
-        "No encontr? una sesi?n Classroom autenticada."
+        "No encontré una sesi?n Classroom autenticada."
       );
 
       return;
@@ -6428,7 +6544,7 @@ if (!items.length) {
 
     if (status) {
       status.textContent =
-        "Creando comunicaci?n...";
+        "Creando comunicación...";
     }
 
     try {
@@ -6472,7 +6588,7 @@ if (!items.length) {
 
       if (!notificationId) {
         throw new Error(
-          "El backend cre? la comunicaci?n pero no devolvi? notification_id."
+          "El backend creó la comunicación pero no devolvi? notification_id."
         );
       }
 
@@ -6636,7 +6752,7 @@ if (!items.length) {
           mailResult,
       };
 
-      created = true;
+      createdFingerprint = payloadFingerprint(payload);
 
       button.innerHTML =
         '<i class="fa-solid fa-check"></i> Comunicación creada';
@@ -6645,7 +6761,7 @@ if (!items.length) {
 
       if (status) {
         status.textContent =
-          `Guardada ? ` +
+          `Guardada · ` +
           `in-app ${lastResult.recipient_count} ? ` +
           `Mail ${lastResult.email_recipient_count}` +
           (
@@ -6656,7 +6772,7 @@ if (!items.length) {
       }
 
       console.log(
-        "[Centro] comunicaci?n multicanal OK",
+        "[Centro] comunicación multicanal OK",
         lastResult
       );
 
@@ -6689,21 +6805,21 @@ if (!items.length) {
 
     } catch (error) {
       console.error(
-        "[Centro] comunicaci?n multicanal ERROR",
+        "[Centro] comunicación multicanal ERROR",
         error
       );
 
       if (notificationId) {
-        created = true;
+        createdFingerprint = payloadFingerprint(payload);
 
         button.innerHTML =
-          '<i class="fa-solid fa-triangle-exclamation"></i> Comunicaci?n guardada';
+          '<i class="fa-solid fa-triangle-exclamation"></i> Comunicación guardada';
 
         button.disabled = true;
 
         if (status) {
           status.textContent =
-            "La comunicaci?n qued? guardada, pero Mail no se complet?.";
+            "La comunicación quedó guardada, pero Mail no se completó.";
         }
       } else {
         button.innerHTML =
@@ -6714,13 +6830,13 @@ if (!items.length) {
 
         if (status) {
           status.textContent =
-            "No se cre? la comunicaci?n.";
+            "No se creó la comunicación.";
         }
       }
 
       alert(
         error?.message ||
-        "No se pudo completar la comunicaci?n."
+        "No se pudo completar la comunicación."
       );
 
     } finally {
