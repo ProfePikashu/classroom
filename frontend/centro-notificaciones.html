@@ -593,6 +593,67 @@
                       </span>
                     </div>
                   </div>
+
+                  <div
+                    id="notificationMailExternalRecipients"
+                    style="
+                      margin-top:18px;
+                      padding-top:18px;
+                      border-top:1px solid rgba(148,163,184,.22);
+                    "
+                  >
+                    <label>
+                      <span>Agregar correo externo</span>
+
+                      <div
+                        style="
+                          display:flex;
+                          gap:8px;
+                          align-items:center;
+                          margin-top:7px;
+                        "
+                      >
+                        <div
+                          class="notification-person-search"
+                          style="flex:1;"
+                        >
+                          <i class="fa-solid fa-envelope"></i>
+
+                          <input
+                            id="notificationMailExternalEmail"
+                            type="email"
+                            autocomplete="off"
+                            placeholder="ejemplo@outlook.com"
+                          />
+                        </div>
+
+                        <button
+                          type="button"
+                          class="btn btn-secondary btn-small"
+                          id="notificationMailExternalAdd"
+                        >
+                          <i class="fa-solid fa-plus"></i>
+                          Agregar
+                        </button>
+                      </div>
+                    </label>
+
+                    <small
+                      style="
+                        display:block;
+                        margin-top:7px;
+                        color:#94a3b8;
+                      "
+                    >
+                      No crea usuarios en Classroom. Solo se usa como destinatario de este correo.
+                    </small>
+
+                    <div
+                      id="notificationMailExternalList"
+                      class="notification-selected-people-list"
+                      style="margin-top:10px;"
+                    ></div>
+                  </div>
                 </div>
 
               </div>
@@ -755,7 +816,7 @@
       }
 
       const script = document.createElement("script");
-      script.src = "js/centro-notificaciones.js?v=20260929-mail-logs-live";
+      script.src = "js/centro-notificaciones.js?v=20260929-external-mail";
       document.body.appendChild(script);
     })();
   </script>

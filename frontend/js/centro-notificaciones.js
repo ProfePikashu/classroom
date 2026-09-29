@@ -4735,7 +4735,7 @@ if (!items.length) {
 })();
 
 
-/* === Notification Mail Exact Recipients 20260926 === */
+/* === Notification Mail Exact Recipients 20260929 + EXTERNAL === */
 (function initNotificationMailExactRecipients() {
   "use strict";
 
@@ -4764,6 +4764,21 @@ if (!items.length) {
       "notificationMailRecipientsNone"
     );
 
+  const externalInput =
+    document.getElementById(
+      "notificationMailExternalEmail"
+    );
+
+  const externalAddButton =
+    document.getElementById(
+      "notificationMailExternalAdd"
+    );
+
+  const externalList =
+    document.getElementById(
+      "notificationMailExternalList"
+    );
+
   if (
     !selectionCount ||
     !stats ||
@@ -4777,6 +4792,7 @@ if (!items.length) {
     audience: "",
     items: [],
     selected: new Set(),
+    externalEmails: new Set(),
     lastData: null,
   };
 
@@ -4794,14 +4810,51 @@ if (!items.length) {
       .replace(/\D/g, "");
   }
 
-  function hasValidEmail(item) {
-    const email =
-      String(
-        item?.user_email ||
-        ""
-      ).trim();
+  function normalizeEmail(value) {
+    return String(value || "")
+      .trim()
+      .toLowerCase();
+  }
 
-    return /\S+@\S+\.\S+/.test(email);
+  function isValidEmail(value) {
+    const email = normalizeEmail(value);
+
+    if (
+      !email ||
+      email.length > 254 ||
+      email.split("@").length !== 2 ||
+      /\s/.test(email)
+    ) {
+      return false;
+    }
+
+    const [local, domain] =
+      email.split("@");
+
+    return Boolean(
+      local &&
+      domain &&
+      domain.includes(".") &&
+      !domain.startsWith(".") &&
+      !domain.endsWith(".")
+    );
+  }
+
+  function hasValidEmail(item) {
+    return isValidEmail(
+      item?.user_email || ""
+    );
+  }
+
+  function isSpecificAudience() {
+    return [
+      "specific",
+      "specific_user",
+    ].includes(
+      String(state.audience || "")
+        .trim()
+        .toLowerCase()
+    );
   }
 
   function normalizeItems(data) {
@@ -4814,19 +4867,23 @@ if (!items.length) {
     )
       .map(item => ({
         ...item,
-        user_dni: normalizeDni(
-          item?.user_dni
-        ),
+
+        user_dni:
+          normalizeDni(
+            item?.user_dni
+          ),
+
         user_name:
           String(
             item?.user_name ||
             "Usuario"
           ).trim(),
+
         user_email:
-          String(
-            item?.user_email ||
-            ""
-          ).trim().toLowerCase(),
+          normalizeEmail(
+            item?.user_email
+          ),
+
         user_twitch:
           String(
             item?.user_twitch ||
@@ -4846,9 +4903,13 @@ if (!items.length) {
       });
   }
 
-  function buildSignature(data, items) {
+  function buildSignature(
+    data,
+    items
+  ) {
     return JSON.stringify([
       data?.audience || "",
+
       items.map(item => [
         item.user_dni,
         item.user_email,
@@ -4856,7 +4917,7 @@ if (!items.length) {
     ]);
   }
 
-  function getSelectedItems() {
+  function getSelectedClassroomItems() {
     return state.items.filter(
       item =>
         state.selected.has(
@@ -4864,6 +4925,92 @@ if (!items.length) {
         ) &&
         hasValidEmail(item)
     );
+  }
+
+  function getExternalEmails() {
+    if (!isSpecificAudience()) {
+      return [];
+    }
+
+    return [
+      ...state.externalEmails
+    ];
+  }
+
+  function getSelectedItems() {
+    const classroom =
+      getSelectedClassroomItems();
+
+    const external =
+      getExternalEmails()
+        .map(email => ({
+          user_dni:
+            `external:${email}`,
+
+          user_name:
+            email,
+
+          user_email:
+            email,
+
+          user_twitch:
+            "",
+
+          user_role:
+            "external",
+
+          external:
+            true,
+        }));
+
+    return [
+      ...classroom,
+      ...external,
+    ];
+  }
+
+  function renderExternal() {
+    if (!externalList) {
+      return;
+    }
+
+    if (!isSpecificAudience()) {
+      externalList.innerHTML = "";
+      return;
+    }
+
+    const emails =
+      getExternalEmails();
+
+    if (!emails.length) {
+      externalList.innerHTML = `
+        <span class="notification-selected-empty">
+          No agregaste correos externos.
+        </span>
+      `;
+
+      return;
+    }
+
+    externalList.innerHTML =
+      emails
+        .map(email => `
+          <span class="notification-person-chip">
+            <span>
+              <i class="fa-solid fa-envelope"></i>
+              ${escapeHtml(email)}
+            </span>
+
+            <button
+              type="button"
+              data-remove-external-email="${escapeHtml(email)}"
+              aria-label="Quitar ${escapeHtml(email)}"
+            >
+              ×
+            </button>
+          </span>
+        `)
+        .join("");
   }
 
   function render() {
@@ -4878,98 +5025,117 @@ if (!items.length) {
     const withoutEmail =
       total - withEmail;
 
-    const selected =
-      getSelectedItems();
+    const classroomSelected =
+      getSelectedClassroomItems();
+
+    const externalEmails =
+      getExternalEmails();
+
+    const selectedTotal =
+      classroomSelected.length +
+      externalEmails.length;
 
     selectionCount.textContent =
-      `${selected.length} de ${withEmail} correos seleccionados`;
+      `${selectedTotal} correo(s) seleccionados · ` +
+      `${classroomSelected.length} Classroom · ` +
+      `${externalEmails.length} externos`;
 
     stats.textContent =
       `${total} personas en la audiencia · ` +
       `${withEmail} con correo válido · ` +
-      `${withoutEmail} sin correo`;
+      `${withoutEmail} sin correo` +
+      (
+        externalEmails.length
+          ? ` · ${externalEmails.length} externos`
+          : ""
+      );
 
     if (!state.items.length) {
       list.innerHTML = `
         <div class="notification-mail-recipient-empty">
-          No hay destinatarios para esta audiencia.
+          No hay usuarios Classroom seleccionados.
+          Podés agregar un correo externo si usás "Solo a...".
         </div>
       `;
+    } else {
+      list.innerHTML =
+        state.items
+          .map(item => {
+            const valid =
+              hasValidEmail(item);
 
-      return;
-    }
+            const checked =
+              valid &&
+              state.selected.has(
+                item.user_dni
+              );
 
-    list.innerHTML =
-      state.items
-        .map(item => {
-          const valid =
-            hasValidEmail(item);
-
-          const checked =
-            valid &&
-            state.selected.has(
+            const details = [
               item.user_dni
-            );
+                ? `DNI ${item.user_dni}`
+                : "",
 
-          const details = [
-            item.user_dni
-              ? `DNI ${item.user_dni}`
-              : "",
-            item.user_twitch
-              ? `@${item.user_twitch}`
-              : "",
-            valid
-              ? item.user_email
-              : "SIN CORREO VÁLIDO",
-          ]
-            .filter(Boolean)
-            .join(" · ");
+              item.user_twitch
+                ? `@${item.user_twitch}`
+                : "",
 
-          return `
-            <label
-              class="notification-mail-recipient-row ${
-                valid
-                  ? ""
-                  : "is-disabled"
-              }"
-            >
-              <input
-                type="checkbox"
-                data-mail-recipient-dni="${escapeHtml(
-                  item.user_dni
-                )}"
-                ${
-                  checked
-                    ? "checked"
-                    : ""
-                }
-                ${
+              valid
+                ? item.user_email
+                : "SIN CORREO VÁLIDO",
+            ]
+              .filter(Boolean)
+              .join(" · ");
+
+            return `
+              <label
+                class="notification-mail-recipient-row ${
                   valid
                     ? ""
-                    : "disabled"
-                }
-              />
+                    : "is-disabled"
+                }"
+              >
+                <input
+                  type="checkbox"
+                  data-mail-recipient-dni="${escapeHtml(
+                    item.user_dni
+                  )}"
+                  ${
+                    checked
+                      ? "checked"
+                      : ""
+                  }
+                  ${
+                    valid
+                      ? ""
+                      : "disabled"
+                  }
+                />
 
-              <span class="notification-mail-recipient-person">
-                <strong>
-                  ${escapeHtml(
-                    item.user_name
-                  )}
-                </strong>
+                <span class="notification-mail-recipient-person">
+                  <strong>
+                    ${escapeHtml(
+                      item.user_name
+                    )}
+                  </strong>
 
-                <small>
-                  ${escapeHtml(
-                    details
-                  )}
-                </small>
-              </span>
-            </label>
-          `;
-        })
-        .join("");
+                  <small>
+                    ${escapeHtml(
+                      details
+                    )}
+                  </small>
+                </span>
+              </label>
+            `;
+          })
+          .join("");
+    }
+
+    renderExternal();
   }
 
-  function resetSelectionForAudience(items) {
+  function resetSelectionForAudience(
+    items
+  ) {
     state.selected.clear();
 
     items.forEach(item => {
@@ -5004,9 +5170,17 @@ if (!items.length) {
         items
       );
 
+    const nextAudience =
+      String(
+        data.audience ||
+        ""
+      );
+
     if (
       signature ===
-      state.signature
+        state.signature &&
+      nextAudience ===
+        state.audience
     ) {
       return;
     }
@@ -5014,11 +5188,21 @@ if (!items.length) {
     state.signature =
       signature;
 
+    if (
+      ![
+        "specific",
+        "specific_user",
+      ].includes(
+        nextAudience
+          .trim()
+          .toLowerCase()
+      )
+    ) {
+      state.externalEmails.clear();
+    }
+
     state.audience =
-      String(
-        data.audience ||
-        ""
-      );
+      nextAudience;
 
     state.items =
       items;
@@ -5029,6 +5213,76 @@ if (!items.length) {
     resetSelectionForAudience(
       items
     );
+
+    render();
+  }
+
+  function addExternalEmail() {
+    if (!isSpecificAudience()) {
+      alert(
+        'Los correos externos solo se pueden agregar usando "Solo a...".'
+      );
+
+      return;
+    }
+
+    const email =
+      normalizeEmail(
+        externalInput?.value
+      );
+
+    if (!isValidEmail(email)) {
+      alert(
+        "Ingresá un correo electrónico válido."
+      );
+
+      externalInput?.focus();
+      return;
+    }
+
+    const duplicateClassroom =
+      getSelectedClassroomItems()
+        .some(item =>
+          normalizeEmail(
+            item.user_email
+          ) === email
+        );
+
+    if (duplicateClassroom) {
+      alert(
+        "Ese correo ya está seleccionado como usuario de Classroom."
+      );
+
+      return;
+    }
+
+    if (
+      state.externalEmails.has(email)
+    ) {
+      alert(
+        "Ese correo externo ya fue agregado."
+      );
+
+      return;
+    }
+
+    if (
+      state.externalEmails.size >= 20
+    ) {
+      alert(
+        "Podés agregar hasta 20 correos externos por envío."
+      );
+
+      return;
+    }
+
+    state.externalEmails.add(
+      email
+    );
+
+    if (externalInput) {
+      externalInput.value = "";
+    }
 
     render();
   }
@@ -5065,95 +5319,154 @@ if (!items.length) {
     }
   );
 
-  selectAllButton?.addEventListener(
-    "click",
-    () => {
-      state.selected.clear();
+  externalAddButton
+    ?.addEventListener(
+      "click",
+      addExternalEmail
+    );
 
-      state.items.forEach(item => {
-        if (hasValidEmail(item)) {
-          state.selected.add(
-            item.user_dni
-          );
+  externalInput
+    ?.addEventListener(
+      "keydown",
+      event => {
+        if (event.key !== "Enter") {
+          return;
         }
-      });
 
-      render();
-    }
-  );
+        event.preventDefault();
+        addExternalEmail();
+      }
+    );
 
-  selectNoneButton?.addEventListener(
-    "click",
-    () => {
-      state.selected.clear();
-      render();
-    }
-  );
+  externalList
+    ?.addEventListener(
+      "click",
+      event => {
+        const button =
+          event.target.closest(
+            "[data-remove-external-email]"
+          );
+
+        if (!button) {
+          return;
+        }
+
+        const email =
+          normalizeEmail(
+            button.dataset
+              .removeExternalEmail
+          );
+
+        state.externalEmails.delete(
+          email
+        );
+
+        render();
+      }
+    );
+
+  selectAllButton
+    ?.addEventListener(
+      "click",
+      () => {
+        state.selected.clear();
+
+        state.items.forEach(
+          item => {
+            if (
+              hasValidEmail(item)
+            ) {
+              state.selected.add(
+                item.user_dni
+              );
+            }
+          }
+        );
+
+        render();
+      }
+    );
+
+  selectNoneButton
+    ?.addEventListener(
+      "click",
+      () => {
+        state.selected.clear();
+        state.externalEmails.clear();
+        render();
+      }
+    );
 
   window.ClassroomNotificationMailRecipients = {
     refresh:
       syncFromAudience,
 
-    getSelectedDnis:
-      function getSelectedDnis() {
-        return getSelectedItems()
-          .map(
-            item =>
-              item.user_dni
-          );
-      },
-
-    getSelectedItems:
-      function getSelectedItemsPublic() {
-        return [
-          ...getSelectedItems()
-        ];
-      },
-
-    getAudience:
-      function getAudience() {
-        return state.audience;
-      },
-
-    getExpectedAudienceCount:
-      function getExpectedAudienceCount() {
-        return Number(
-          state.lastData
-            ?.summary
-            ?.total ||
-          state.items.length ||
-          0
+    getSelectedDnis() {
+      return getSelectedClassroomItems()
+        .map(
+          item =>
+            item.user_dni
         );
-      },
+    },
 
-    getExpectedRecipientCount:
-      function getExpectedRecipientCount() {
-        return getSelectedItems()
-          .length;
-      },
+    getExternalEmails() {
+      return getExternalEmails();
+    },
 
-    getSummary:
-      function getSummary() {
-        return {
-          total:
-            state.items.length,
+    getSelectedItems() {
+      return [
+        ...getSelectedItems()
+      ];
+    },
 
-          with_email:
-            state.items.filter(
-              hasValidEmail
-            ).length,
+    getAudience() {
+      return state.audience;
+    },
 
-          without_email:
-            state.items.filter(
-              item =>
-                !hasValidEmail(item)
-            ).length,
+    getExpectedAudienceCount() {
+      return Number(
+        state.lastData
+          ?.summary
+          ?.total ??
+        state.items.length ??
+        0
+      );
+    },
 
-          selected:
-            getSelectedItems()
-              .length,
-        };
-      },
+    getExpectedRecipientCount() {
+      return getSelectedItems()
+        .length;
+    },
+
+    getSummary() {
+      return {
+        total:
+          state.items.length,
+
+        with_email:
+          state.items.filter(
+            hasValidEmail
+          ).length,
+
+        without_email:
+          state.items.filter(
+            item =>
+              !hasValidEmail(item)
+          ).length,
+
+        selected_classroom:
+          getSelectedClassroomItems()
+            .length,
+
+        external:
+          getExternalEmails()
+            .length,
+
+        selected:
+          getSelectedItems()
+            .length,
+      };
+    },
   };
 
   const timer =
@@ -5399,15 +5712,6 @@ if (!items.length) {
       );
     }
 
-    if (
-      snap.expectedAudienceCount <= 0 ||
-      snap.expectedRecipientCount <= 0
-    ) {
-      throw new Error(
-        "La audiencia no tiene destinatarios."
-      );
-    }
-
     const notice =
       checked(
         "notificationChannelNotice"
@@ -5433,6 +5737,18 @@ if (!items.length) {
       );
     }
 
+    if (
+      (notice || bell) &&
+      (
+        snap.expectedAudienceCount <= 0 ||
+        snap.expectedRecipientCount <= 0
+      )
+    ) {
+      throw new Error(
+        "La audiencia in-app no tiene destinatarios."
+      );
+    }
+
     const mail =
       mailApi();
 
@@ -5449,6 +5765,16 @@ if (!items.length) {
             mail?.getSelectedDnis?.() ||
             []
           )
+        : [];
+
+    const mailExternalEmails =
+      mailRequested
+        ? [
+            ...(
+              mail?.getExternalEmails?.() ||
+              []
+            )
+          ]
         : [];
 
     const expectedMailAudienceCount =
@@ -5495,20 +5821,26 @@ if (!items.length) {
       }
 
       if (
-        !mailSelectedDnis.length ||
+        (
+          !mailSelectedDnis.length &&
+          !mailExternalEmails.length
+        ) ||
         expectedMailRecipientCount <= 0
       ) {
         throw new Error(
-          "Mail est? activado. Seleccion? al menos un destinatario de correo."
+          "Mail está activado. Seleccioná o agregá al menos un destinatario."
         );
       }
 
       if (
-        mailSelectedDnis.length !==
+        (
+          mailSelectedDnis.length +
+          mailExternalEmails.length
+        ) !==
         expectedMailRecipientCount
       ) {
         throw new Error(
-          "La selecci?n de Mail no coincide con el contador actual."
+          "La selección de Mail no coincide con el contador actual."
         );
       }
     }
@@ -5553,6 +5885,9 @@ if (!items.length) {
 
       mail_selected_dnis:
         mailSelectedDnis,
+
+      mail_external_emails:
+        mailExternalEmails,
 
       expected_mail_audience_count:
         expectedMailAudienceCount,
