@@ -5537,13 +5537,13 @@ if (!items.length) {
 
     const ok =
       confirm(
-        "CREAR COMUNICACI?N\n\n" +
+        "CREAR COMUNICACIÓN\n\n" +
 
         `Audiencia: ${payload.source_audience}\n` +
-        `Avisos: ${payload.context.channels.notice ? "S?" : "NO"}\n` +
-        `Campanita: ${payload.context.channels.bell ? "S?" : "NO"}\n` +
+        `Avisos: ${payload.context.channels.notice ? "SÍ" : "NO"}\n` +
+        `Campanita: ${payload.context.channels.bell ? "SÍ" : "NO"}\n` +
         `Destinatarios in-app: ${inAppCount}\n` +
-        `Mail: ${payload.context.channels.mail_requested ? "S?" : "NO"}\n` +
+        `Mail: ${payload.context.channels.mail_requested ? "SÍ" : "NO"}\n` +
         `Destinatarios Mail: ${payload.expected_mail_recipient_count}\n\n` +
 
         (
@@ -5668,7 +5668,7 @@ if (!items.length) {
 
         if (!previewResponse.ok) {
           throw new Error(
-            "Comunicaci?n creada, pero fall? el preview de Mail: " +
+            "Comunicación creada, pero falló el preview de Mail: " +
             backendError(
               preview,
               previewResponse.status
@@ -5691,7 +5691,7 @@ if (!items.length) {
           ) !== expected
         ) {
           throw new Error(
-            "Comunicaci?n creada, pero el snapshot de Mail no coincide con la selecci?n."
+            "Comunicación creada, pero el snapshot de Mail no coincide con la selección."
           );
         }
 
@@ -5736,7 +5736,7 @@ if (!items.length) {
 
         if (!sendResponse.ok) {
           throw new Error(
-            "Comunicaci?n creada, pero el env?o de Mail fall?: " +
+            "Comunicación creada, pero el envío de Mail falló: " +
             backendError(
               mailResult,
               sendResponse.status
@@ -5749,7 +5749,7 @@ if (!items.length) {
           Number(mailResult?.failed || 0) > 0
         ) {
           throw new Error(
-            "Comunicaci?n creada, pero uno o m?s correos no fueron aceptados."
+            "Comunicación creada, pero uno o más correos no fueron aceptados."
           );
         }
       }
@@ -5798,7 +5798,7 @@ if (!items.length) {
       created = true;
 
       button.innerHTML =
-        '<i class="fa-solid fa-check"></i> Comunicaci?n creada';
+        '<i class="fa-solid fa-check"></i> Comunicación creada';
 
       button.disabled = true;
 
@@ -5809,7 +5809,7 @@ if (!items.length) {
           `Mail ${lastResult.email_recipient_count}` +
           (
             mailResult
-              ? ` ? SES acept? ${mailResult.accepted ?? 0}`
+              ? `  · SMTP aceptó ${mailResult.accepted ?? 0}`
               : ""
           );
       }
@@ -5834,14 +5834,14 @@ if (!items.length) {
       );
 
       alert(
-        "Comunicaci?n creada correctamente.\n\n" +
-        `Avisos: ${payload.context.channels.notice ? "S?" : "NO"}\n` +
-        `Campanita: ${payload.context.channels.bell ? "S?" : "NO"}\n` +
+        "Comunicación creada correctamente.\n\n" +
+        `Avisos: ${payload.context.channels.notice ? "SÍ" : "NO"}\n` +
+        `Campanita: ${payload.context.channels.bell ? "SÍ" : "NO"}\n` +
         `In-app: ${lastResult.recipient_count}\n` +
         `Mail: ${lastResult.email_recipient_count}` +
         (
           mailResult
-            ? `\nAceptados por SES: ${mailResult.accepted ?? 0}`
+            ? `\nAceptados por SMTP: ${mailResult.accepted ?? 0}`
             : ""
         )
       );
