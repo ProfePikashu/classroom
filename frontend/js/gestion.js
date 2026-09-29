@@ -158,23 +158,33 @@ const ClassroomGestion = {
         headers: this.getAuthHeaders(),
       });
 
-      const data = await response.json().catch(() => null);
-
-      if (!response.ok || !data?.ok) {
+      if (!response.ok) {
+        const data = await response.json().catch(() => null);
         const message = data?.detail || data?.error || "No se pudo generar el certificado.";
         if (certTab && !certTab.closed) certTab.close();
         alert("Error: " + message);
         return;
       }
 
-      if (data.url) {
-        this.markLinkedInRecommendationReady(dni, data.url);
-        if (certTab && !certTab.closed) {
-          certTab.location.href = data.url;
-        } else {
-          window.location.href = data.url;
-        }
+      const blob = await response.blob();
+
+      if (!blob || blob.type !== "application/pdf") {
+        if (certTab && !certTab.closed) certTab.close();
+        alert("Error: el servidor no devolvio un PDF valido.");
+        return;
       }
+
+      const pdfUrl = URL.createObjectURL(blob);
+
+      this.markLinkedInRecommendationReady(dni, "generated");
+
+      if (certTab && !certTab.closed) {
+        certTab.location.href = pdfUrl;
+      } else {
+        window.location.href = pdfUrl;
+      }
+
+      setTimeout(() => URL.revokeObjectURL(pdfUrl), 300000);
     } catch (error) {
       if (certTab && !certTab.closed) certTab.close();
       alert("No se pudo generar el certificado.");
