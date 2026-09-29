@@ -3290,6 +3290,8 @@ if (!items.length) {
     }
   };
 
+  let savedDraft = null;
+
   function qs(selector) {
     return document.querySelector(selector);
   }
@@ -3607,8 +3609,14 @@ if (!items.length) {
         <footer class="mail-preview-footer">
           <span id="mailPreviewHint">Esto todavía no envía mails: solo arma y previsualiza el formato.</span>
           <div class="mail-preview-actions">
-            <button type="button" class="mail-preview-btn" id="mailPreviewReload">Actualizar vista previa</button>
-            <button type="button" class="mail-preview-btn primary" id="mailPreviewUseCurrentMessage">Usar mensaje actual</button>
+            <button
+              type="button"
+              class="mail-preview-btn primary"
+              id="mailPreviewSave"
+            >
+              <i class="fa-solid fa-floppy-disk"></i>
+              Guardar cambios
+            </button>
           </div>
         </footer>
       </section>
@@ -3627,10 +3635,23 @@ if (!items.length) {
     });
 
     qs("#mailPreviewAccent")?.addEventListener("change", renderPreview);
-    qs("#mailPreviewReload")?.addEventListener("click", renderPreview);
-    qs("#mailPreviewUseCurrentMessage")?.addEventListener("click", () => {
-      hydrateFromNotificationForm();
+
+    qs("#mailPreviewSave")?.addEventListener("click", () => {
+      savedDraft = {
+        ...getPreviewData(),
+      };
+
       renderPreview();
+
+      const hint =
+        qs("#mailPreviewHint");
+
+      if (hint) {
+        hint.textContent =
+          "Cambios guardados para este envío.";
+      }
+
+      closeModal();
     });
 
     qs("#mailPreviewForm")?.addEventListener("input", renderPreview);
@@ -3643,6 +3664,74 @@ if (!items.length) {
 
   function getValue(id) {
     return qs(id)?.value ?? "";
+  }
+
+  function applyDraft(data) {
+    if (!data) return;
+
+    setValue(
+      "#mailPreviewPreset",
+      data.preset ||
+      inferPresetKey()
+    );
+
+    setValue(
+      "#mailPreviewAccent",
+      data.accent ||
+      severityToAccent()
+    );
+
+    setValue(
+      "#mailPreviewSubject",
+      data.subject
+    );
+
+    setValue(
+      "#mailPreviewMainTitle",
+      data.title
+    );
+
+    setValue(
+      "#mailPreviewCourse",
+      data.course
+    );
+
+    setValue(
+      "#mailPreviewTag",
+      data.tag
+    );
+
+    setValue(
+      "#mailPreviewGreeting",
+      data.greeting
+    );
+
+    setValue(
+      "#mailPreviewBody",
+      data.body
+    );
+
+    setValue(
+      "#mailPreviewHighlight",
+      data.highlight
+    );
+
+    setValue(
+      "#mailPreviewButtonText",
+      data.buttonText
+    );
+
+    setValue(
+      "#mailPreviewButtonUrl",
+      data.buttonUrl
+    );
+
+    setValue(
+      "#mailPreviewFooter",
+      data.footer
+    );
+
+    renderPreview();
   }
 
   function loadPreset(key, forcePresetValues = false) {
@@ -3691,7 +3780,13 @@ if (!items.length) {
 
   function getPreviewData() {
     return {
-      accent: getValue("#mailPreviewAccent") || "warning",
+      preset:
+        getValue("#mailPreviewPreset") ||
+        inferPresetKey(),
+
+      accent:
+        getValue("#mailPreviewAccent") ||
+        "warning",
       subject: getValue("#mailPreviewSubject"),
       title: getValue("#mailPreviewMainTitle"),
       course: getValue("#mailPreviewCourse"),
@@ -3817,10 +3912,30 @@ if (!items.length) {
   function openModal() {
     createModal();
 
-    const presetKey = inferPresetKey();
-    loadPreset(presetKey, false);
+    if (savedDraft) {
+      applyDraft(savedDraft);
+    } else {
+      const presetKey =
+        inferPresetKey();
 
-    qs("#mailPreviewModal")?.classList.add("is-open");
+      loadPreset(
+        presetKey,
+        false
+      );
+    }
+
+    const hint =
+      qs("#mailPreviewHint");
+
+    if (hint) {
+      hint.textContent =
+        savedDraft
+          ? "Configuración guardada para este envío."
+          : "Editá el correo y presioná Guardar cambios.";
+    }
+
+    qs("#mailPreviewModal")
+      ?.classList.add("is-open");
   }
 
   function closeModal() {
@@ -3876,6 +3991,13 @@ if (!items.length) {
     open: openModal,
     close: closeModal,
     render: renderPreview,
+
+    getSavedDraft() {
+      return savedDraft
+        ? { ...savedDraft }
+        : null;
+    },
+
     currentHtml: "",
     currentData: null
   };
@@ -5637,27 +5759,79 @@ if (!items.length) {
   }
 
   function getMailDraft() {
+    const saved =
+      window
+        .ClassroomMailPreviewModal
+        ?.getSavedDraft?.() ||
+      {};
+
     return {
       subject:
-        value("notificationMailSubject"),
+        String(
+          saved.subject ||
+          value("notificationMailSubject")
+        ).trim(),
 
       badge:
-        value("notificationMailBadge"),
+        String(
+          saved.tag ||
+          value("notificationMailBadge")
+        ).trim(),
 
       title:
-        value("notificationMailTitle"),
+        String(
+          saved.title ||
+          value("notificationMailTitle")
+        ).trim(),
 
       body:
-        value("notificationMailBody"),
+        String(
+          saved.body ||
+          value("notificationMailBody")
+        ).trim(),
 
       secondary:
-        value("notificationMailSecondary"),
+        String(
+          saved.highlight ||
+          value("notificationMailSecondary")
+        ).trim(),
 
       cta:
-        value("notificationMailCta"),
+        String(
+          saved.buttonText ||
+          value("notificationMailCta")
+        ).trim(),
 
       link:
-        value("notificationMailLink"),
+        String(
+          saved.buttonUrl ||
+          value("notificationMailLink")
+        ).trim(),
+
+      preset:
+        String(
+          saved.preset || ""
+        ).trim(),
+
+      accent:
+        String(
+          saved.accent || ""
+        ).trim(),
+
+      course:
+        String(
+          saved.course || ""
+        ).trim(),
+
+      greeting:
+        String(
+          saved.greeting || ""
+        ).trim(),
+
+      footer:
+        String(
+          saved.footer || ""
+        ).trim(),
     };
   }
 
