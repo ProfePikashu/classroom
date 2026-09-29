@@ -21,3 +21,24 @@ Thumbs.db
 .DS_Store
 
 .worktrees/
+
+# === SECRETS / ENVIRONMENT ===
+.env
+.env.*
+!.env.example
+
+*.pem
+*.key
+*.p12
+*.pfx
+
+credentials.json
+service-account*.json
+secrets.*
+*.secret
+
+# Local credential/config variants
+.env.local
+.env.production.local
+.env.development.local
+.env.test.local
