@@ -234,6 +234,11 @@
       const card = document.createElement("article");
       card.className = "class-row-card";
 
+      // Pelusita v2: metadata semantica para tutoriales.
+      card.dataset.pelusitaClassCard = "true";
+      card.dataset.pelusitaRecoverable = String(recoverable);
+      card.dataset.pelusitaClassId = item.id;
+
       card.innerHTML = `
         <div class="class-thumb-wrap">
 
@@ -277,6 +282,7 @@
           <button
             class="btn ${recoverable ? "btn-primary" : "btn-outline"}"
             type="button"
+            data-pelusita-action="${recoverable ? "recover-class" : "view-class"}"
           >
             <i class="fa-solid ${recoverable ? "fa-rotate-right" : "fa-play"}"></i>
 
