@@ -757,6 +757,159 @@ const id = item.id;
   }
 })();
 
+/* === Notification Channel Preference Runtime 20260930 === */
+(function notificationChannelPreferenceRuntime() {
+  "use strict";
+
+  const CATEGORY_KEYS = [
+    "announcements",
+    "community",
+    "attendance",
+    "evaluations",
+    "recoveries",
+    "classes",
+    "deadlines",
+    "system",
+  ];
+
+  function defaultMatrix() {
+    return Object.fromEntries(
+      CATEGORY_KEYS.map((key) => [
+        key,
+        {
+          home: true,
+          bell: true,
+          email: true,
+        },
+      ])
+    );
+  }
+
+  let matrix = defaultMatrix();
+
+  function normalize(value) {
+    const next = defaultMatrix();
+
+    if (!value || typeof value !== "object" || Array.isArray(value)) {
+      return next;
+    }
+
+    CATEGORY_KEYS.forEach((key) => {
+      const row = value[key];
+
+      if (!row || typeof row !== "object" || Array.isArray(row)) {
+        return;
+      }
+
+      ["home", "bell", "email"].forEach((channel) => {
+        if (typeof row[channel] === "boolean") {
+          next[key][channel] = row[channel];
+        }
+      });
+    });
+
+    return next;
+  }
+
+  function categoryOf(item) {
+    const topic = String(
+      item?.topic
+      || item?.category
+      || item?.notification_topic
+      || ""
+    ).trim().toLowerCase();
+
+    const type = String(
+      item?.type
+      || item?.notification_type
+      || ""
+    ).trim().toLowerCase();
+
+    const value = topic || type;
+
+    if (
+      value === "news"
+      || value === "announcement"
+      || value === "announcements"
+      || value === "course_news"
+    ) return "announcements";
+
+    if (
+      value === "community"
+      || value.startsWith("community_")
+    ) return "community";
+
+    if (
+      value === "attendance"
+      || value.startsWith("attendance_")
+    ) return "attendance";
+
+    if (
+      value === "evaluations"
+      || value === "evaluation"
+      || value === "academic"
+      || value.startsWith("evaluation_")
+    ) return "evaluations";
+
+    if (
+      value === "recoveries"
+      || value === "recovery"
+      || value.startsWith("recovery_")
+    ) return "recoveries";
+
+    if (
+      value === "classes"
+      || value === "class"
+      || value === "materials"
+      || value.startsWith("class_")
+    ) return "classes";
+
+    if (
+      value === "deadlines"
+      || value === "deadline"
+      || value.startsWith("deadline_")
+    ) return "deadlines";
+
+    return "system";
+  }
+
+  function allows(item, channel) {
+    const category = categoryOf(item);
+    return matrix?.[category]?.[channel] !== false;
+  }
+
+  function set(value) {
+    matrix = normalize(value);
+
+    window.dispatchEvent(
+      new CustomEvent("classroom:notification-preferences-updated", {
+        detail: {
+          channel_preferences: get(),
+        },
+      })
+    );
+
+    return get();
+  }
+
+  function get() {
+    return JSON.parse(JSON.stringify(matrix));
+  }
+
+  window.ClassroomNotificationChannelPrefs = {
+    get,
+    set,
+    normalize,
+    categoryOf,
+    allowsBell(item) {
+      return allows(item, "bell");
+    },
+    allowsHome(item) {
+      return allows(item, "home");
+    },
+  };
+})();
+
 /* === Unified Bell Renderer 20260621 === */
 (function unifiedBellRenderer() {
   "use strict";
@@ -926,7 +1079,11 @@ const id = item.id;
     const list = findList();
     if (!list) return;
 
-    const items = loadItems();
+    const prefApi = window.ClassroomNotificationChannelPrefs;
+
+    const items = loadItems().filter((item) =>
+      !prefApi || prefApi.allowsBell(item)
+    );
 
     updateDot(items);
 
@@ -996,6 +1153,11 @@ const unreadClass = item.read ? "" : "is-unread";
   }, true);
 
   window.addEventListener("classroom:notifications-updated", scheduleRender);
+
+  window.addEventListener(
+    "classroom:notification-preferences-updated",
+    scheduleRender
+  );
 
   window.addEventListener("storage", (event) => {
     if (event.key === STORAGE_KEY) scheduleRender();
@@ -1410,7 +1572,26 @@ const unreadClass = item.read ? "" : "is-unread";
   }
 
   function updateBellBadge() {
-    const count = unreadCount();
+    const prefApi = window.ClassroomNotificationChannelPrefs;
+
+    const rawItems = safeJson(
+      localStorage.getItem(STORAGE_KEY),
+      []
+    );
+
+    const visibleItems = Array.isArray(rawItems)
+      ? rawItems.filter((item) =>
+          !prefApi || prefApi.allowsBell(item)
+        )
+      : [];
+
+    const count = visibleItems.filter(
+      (item) =>
+        item &&
+        !isDismissed(item) &&
+        isUnread(item)
+    ).length;
+
     const targets = findBadgeTargets();
 
     targets.forEach((dot) => {
@@ -1477,6 +1658,14 @@ const unreadClass = item.read ? "" : "is-unread";
       setTimeout(updateBellBadge, 10);
       setTimeout(updateBellBadge, 120);
     });
+
+    window.addEventListener(
+      "classroom:notification-preferences-updated",
+      () => {
+        setTimeout(updateBellBadge, 10);
+        setTimeout(updateBellBadge, 120);
+      }
+    );
 
     window.addEventListener("storage", (event) => {
       if (event.key === STORAGE_KEY) {
@@ -2351,7 +2540,12 @@ if (String(item.id) !== String(id)) return item;
 
   function shouldShowInHome(item) {
     if (!item || isDismissed(item)) return false;
-    if (normalizeType(item) === "community") return false;
+
+    const prefApi = window.ClassroomNotificationChannelPrefs;
+
+    if (prefApi && !prefApi.allowsHome(item)) {
+      return false;
+    }
 
     return Boolean(item.title || getBody(item));
   }
@@ -2534,6 +2728,11 @@ if (String(item.id) !== String(id)) return item;
     schedule();
 
     window.addEventListener("classroom:notifications-updated", schedule);
+
+    window.addEventListener(
+      "classroom:notification-preferences-updated",
+      schedule
+    );
 
     window.addEventListener("storage", (event) => {
       if (event.key === STORAGE_KEY) schedule();
@@ -3502,8 +3701,11 @@ if (String(item.id) !== String(id)) return item;
         await apiRequest("GET");
 
       prefs = normalizeMatrix(
-        data.channel_preferences
+        data?.preferences?.channel_preferences
+        ?? data?.channel_preferences
       );
+
+      window.ClassroomNotificationChannelPrefs?.set(prefs);
 
       loaded = true;
 
@@ -3546,6 +3748,9 @@ if (String(item.id) !== String(id)) return item;
     }
 
     prefs = cloneMatrix(next);
+
+    window.ClassroomNotificationChannelPrefs?.set(prefs);
+
     saving = true;
 
     syncStatus = "Guardando...";
@@ -3571,8 +3776,12 @@ if (String(item.id) !== String(id)) return item;
       );
 
       prefs = normalizeMatrix(
-        data.channel_preferences || prefs
+        data?.preferences?.channel_preferences
+        ?? data?.channel_preferences
+        ?? prefs
       );
+
+      window.ClassroomNotificationChannelPrefs?.set(prefs);
 
       loaded = true;
       saving = false;
@@ -3585,6 +3794,8 @@ if (String(item.id) !== String(id)) return item;
       return true;
     } catch (error) {
       prefs = cloneMatrix(previous);
+
+      window.ClassroomNotificationChannelPrefs?.set(prefs);
 
       loaded = true;
       saving = false;
@@ -3862,5 +4073,24 @@ if (String(item.id) !== String(id)) return item;
     close: closeModal,
     loadPrefs,
     savePrefs,
+    getPrefs() {
+      return cloneMatrix(prefs);
+    },
   };
+
+  function preloadNotificationPreferences() {
+    setTimeout(() => {
+      loadPrefs().catch(() => {});
+    }, 700);
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener(
+      "DOMContentLoaded",
+      preloadNotificationPreferences,
+      { once: true }
+    );
+  } else {
+    preloadNotificationPreferences();
+  }
 })();
