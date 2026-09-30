@@ -228,12 +228,22 @@
                 <input id="notificationTitle" type="text" maxlength="90" placeholder="Ejemplo: Se cargaron las notas" required />
               </label>
 
+              <input
+                type="hidden"
+                id="notificationType"
+                value="announcement"
+              />
+
               <label>
-                <span>Tipo</span>
-                <select id="notificationType" required>
+                <span>Categoría</span>
+                <select id="notificationTopic" required>
+                  <option value="news" selected>Novedades y avisos</option>
                   <option value="community">Comunidad</option>
-                  <option value="announcement" selected>Aviso común</option>
-                  <option value="academic">Académica / crítica</option>
+                  <option value="attendance">Asistencias</option>
+                  <option value="evaluations">Evaluaciones</option>
+                  <option value="recoveries">Recuperatorios</option>
+                  <option value="classes">Clases y materiales</option>
+                  <option value="deadlines">Fechas límite y alertas</option>
                   <option value="system">Sistema</option>
                 </select>
               </label>
@@ -773,17 +783,6 @@
             </select>
           </div>
 
-          <div class="notification-admin-bulk">
-            <button type="button" id="notificationMarkAllRead">
-              <i class="fa-solid fa-check-double"></i>
-              Marcar todas leídas
-            </button>
-
-            <button type="button" id="notificationClearAllAdmin" class="danger">
-              <i class="fa-solid fa-broom"></i>
-              Limpiar todas
-            </button>
-          </div>
 
           <div id="notificationAdminList" class="notification-admin-list"></div>
         </article>
@@ -816,7 +815,7 @@
       }
 
       const script = document.createElement("script");
-      script.src = "js/centro-notificaciones.js?v=20260929-notification-audit-1";
+      script.src = "js/centro-notificaciones.js?v=20260929-clean-composer";
       document.body.appendChild(script);
     })();
   </script>

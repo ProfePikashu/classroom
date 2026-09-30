@@ -375,17 +375,6 @@ if (item.id !== id) return item;
   }
 
 
-  function seedDemo() {
-    createNotification({
-      type: "demo",
-      title: "Notificación demo",
-      body: "La campanita está funcionando. Después esto puede venir desde Comunidad, Avisos o el backend.",
-      link: "comunidad.html",
-      source: "demo",
-      respectPrefs: false,
-    });
-  }
-
   function ensureWidget() {
     const themeToggle = document.getElementById("themeToggle");
     if (!themeToggle) return null;
@@ -422,15 +411,10 @@ if (item.id !== id) return item;
             Marcar leídas
           </button>
 
-          <button class="notifications-read-all" id="notificationsSeedDemo" type="button">
-            <i class="fa-solid fa-flask"></i>
-            Demo
-          </button>
-
-          <a class="notifications-read-all notifications-settings-link" id="notificationsSettingsLink" href="perfil.html#notificationPrefsCard">
+          <button class="notifications-read-all notifications-settings-link" id="notificationsSettingsLink" type="button">
             <i class="fa-solid fa-gear"></i>
             Configurar
-          </a>
+          </button>
 
           <button class="notifications-clear-all-icon" id="notificationsClearAll" type="button" title="Limpiar todas las notificaciones" aria-label="Limpiar todas las notificaciones">
             <i class="fa-solid fa-broom"></i>
@@ -447,7 +431,6 @@ if (item.id !== id) return item;
     const toggle = widget.querySelector("#notificationsToggle");
     const panel = widget.querySelector("#notificationsPanel");
     const readAll = widget.querySelector("#notificationsReadAll");
-    const seed = widget.querySelector("#notificationsSeedDemo");
     const clear = widget.querySelector("#notificationsClearAll");
     const settings = widget.querySelector("#notificationsSettingsLink");
 
@@ -466,7 +449,6 @@ if (item.id !== id) return item;
     });
 
     readAll?.addEventListener("click", markAllRead);
-    seed?.addEventListener("click", seedDemo);
     clear?.addEventListener("click", clearAll);
 
     settings?.addEventListener("click", () => {
@@ -561,148 +543,6 @@ const icon = TYPE_ICONS[item.type] || TYPE_ICONS.system;
     });
   }
 
-  function renderPrefsCard() {
-    if (currentFile() !== "perfil.html") return;
-
-    const main = document.querySelector(".main-content");
-    if (!main) return;
-
-    const oldCard = document.getElementById("notificationPrefsCard");
-    if (oldCard) oldCard.remove();
-
-    const prefs = loadPrefs();
-    const card = document.createElement("section");
-
-    card.id = "notificationPrefsCard";
-    card.className = "notification-prefs-card panel notification-prefs-card-v2";
-
-    card.innerHTML = `
-      <div class="notification-prefs-header">
-        <div>
-          <p class="eyebrow">Preferencias</p>
-          <h2>Notificaciones</h2>
-          <p>Configurá qué querés recibir dentro del Classroom y qué quedará preparado para correo cuando conectemos el backend.</p>
-        </div>
-      </div>
-
-      <div class="notification-prefs-sections">
-        <section class="notification-pref-section">
-          <div class="notification-pref-section-head">
-            <i class="fa-solid fa-comments"></i>
-            <div>
-              <h3>Comunidad</h3>
-              <p>Actividad interna de hilos, respuestas y estados.</p>
-            </div>
-          </div>
-
-          <div class="notification-prefs-list">
-            ${prefRow("bell", "Campanita interna", "Activa o desactiva las notificaciones dentro del Classroom.", prefs.bell)}
-            ${prefRow("community", "Comunidad", "Recibir actividad general de la sección Comunidad.", prefs.community)}
-            ${prefRow("communityNewPosts", "Nuevos hilos", "Avisar cuando se crea una consulta, aporte o recomendación.", prefs.communityNewPosts)}
-            ${prefRow("communityReplies", "Respuestas en hilos", "Avisar cuando alguien responde un hilo.", prefs.communityReplies)}
-            ${prefRow("communityStatus", "Hilos resueltos/reabiertos", "Avisar cuando un hilo cambia de estado.", prefs.communityStatus)}
-          </div>
-        </section>
-
-        <section class="notification-pref-section">
-          <div class="notification-pref-section-head">
-            <i class="fa-solid fa-envelope"></i>
-            <div>
-              <h3>Correo</h3>
-              <p>Preferencias preparadas para cuando conectemos envío real por backend.</p>
-            </div>
-          </div>
-
-          <div class="notification-prefs-list">
-            ${prefRow("emailCommunity", "Resumen o actividad de Comunidad", "Recibir por correo respuestas, menciones o actividad importante de Comunidad.", prefs.emailCommunity, "pendiente")}
-            ${prefRow("emailAnnouncements", "Avisos oficiales", "Recibir por correo comunicados importantes del curso.", prefs.emailAnnouncements, "pendiente")}
-            ${prefRow("boletín", "Boletín del curso", "Recibir resúmenes generales, novedades y recordatorios.", prefs.boletín, "pendiente")}
-          </div>
-        </section>
-
-        <section class="notification-pref-section">
-          <div class="notification-pref-section-head">
-            <i class="fa-solid fa-bullhorn"></i>
-            <div>
-              <h3>Novedades</h3>
-              <p>Información general que puede aparecer como aviso o novedad dentro del Classroom.</p>
-            </div>
-          </div>
-
-          <div class="notification-prefs-list">
-            ${prefRow("announcements", "Avisos oficiales", "Fechas, habilitaciones, cambios importantes o comunicados del curso.", prefs.announcements)}
-            ${prefRow("courseNews", "Siguientes cursos", "Novedades sobre nuevas cursadas, próximas aperturas o contenidos futuros.", prefs.courseNews)}
-            ${prefRow("attendance", "Correcciones y estado académico", "Actualizaciones de asistencia, revisiones, recuperatorios o correcciones.", prefs.attendance)}
-          </div>
-        </section>
-      </div>
-    `;
-
-    const profileGrid = document.querySelector(".profile-grid");
-    if (profileGrid) {
-      profileGrid.insertAdjacentElement("afterend", card);
-    } else {
-      main.appendChild(card);
-    }
-
-    card.querySelectorAll("[data-notification-pref]").forEach((input) => {
-      input.addEventListener("change", () => {
-        const current = loadPrefs();
-        current[input.dataset.notificationPref] = input.checked;
-        savePrefs(current);
-
-        render();
-
-        if (input.dataset.notificationPref !== "bell") {
-          createNotification({
-            type: "system",
-            title: "Preferencias actualizadas",
-            body: "Se guardó tu configuración de notificaciones en este navegador.",
-            source: "preferences",
-            respectPrefs: false,
-          });
-        }
-      });
-    });
-  }
-
-  function prefRow(key, title, description, checked, tag = "") {
-    const tagHtml = tag ? `<span class="notification-pref-tag">${escapeHtml(tag)}</span>` : "";
-
-    return `
-      <label class="notification-pref-row">
-        <span>
-          <strong>${escapeHtml(title)} ${tagHtml}</strong>
-          <p>${escapeHtml(description)}</p>
-        </span>
-
-        <input type="checkbox" data-notification-pref="${escapeHtml(key)}" ${checked ? "checked" : ""} />
-      </label>
-    `;
-  }
-
-  function scrollToPrefsFromHash() {
-    if (window.location.hash !== "#notificationPrefsCard") return;
-
-    setTimeout(() => {
-      const card = document.getElementById("notificationPrefsCard");
-
-      if (!card) return;
-
-      card.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
-
-      card.classList.add("notification-prefs-highlight");
-
-      setTimeout(() => {
-        card.classList.remove("notification-prefs-highlight");
-      }, 1600);
-    }, 220);
-  }
-
-
   /* === Delegated notification actions 20260621 === */
   function initDelegatedNotificationActions() {
     if (window.__classroomNotificationDelegatedActionsReady) return;
@@ -734,17 +574,14 @@ const icon = TYPE_ICONS[item.type] || TYPE_ICONS.system;
     savePrefs(loadPrefs());
     ensureWidget();
     render();
-    renderPrefsCard();
-    scrollToPrefsFromHash();
 
     window.addEventListener("classroom:community-notification", (event) => {
       createNotification(event.detail || {});
     });
 
     window.addEventListener("storage", (event) => {
-      if ([NOTIFICATIONS_KEY, PREFS_KEY].includes(event.key)) {
+      if (event.key === NOTIFICATIONS_KEY) {
         render();
-        renderPrefsCard();
       }
     });
   }
@@ -756,7 +593,6 @@ const icon = TYPE_ICONS[item.type] || TYPE_ICONS.system;
     toggleRead,
     deleteNotification,
     clearAll,
-    seedDemo,
     loadItems,
     saveItems,
     loadPrefs,
@@ -2867,34 +2703,219 @@ if (String(item.id) !== String(id)) return item;
   }
 })();
 
-/* === Notification Preferences Modal Override 20260628 === */
-(function notificationPrefsModalOverride() {
+/* === Notification Preferences Modal Backend V2 20260930 === */
+(function notificationPrefsModalBackendV2() {
   "use strict";
 
-  const PREFS_KEY = window.ClassroomNotificationStorage.key("prefs");
+  const CATEGORIES = [
+    {
+      key: "announcements",
+      label: "Novedades y avisos",
+      icon: "fa-bullhorn",
+      critical: false,
+    },
+    {
+      key: "community",
+      label: "Comunidad",
+      icon: "fa-comments",
+      critical: false,
+    },
+    {
+      key: "attendance",
+      label: "Asistencias",
+      icon: "fa-user-check",
+      critical: true,
+    },
+    {
+      key: "evaluations",
+      label: "Evaluaciones",
+      icon: "fa-file-circle-check",
+      critical: true,
+    },
+    {
+      key: "recoveries",
+      label: "Recuperatorios",
+      icon: "fa-rotate-left",
+      critical: true,
+    },
+    {
+      key: "classes",
+      label: "Clases y materiales",
+      icon: "fa-person-chalkboard",
+      critical: false,
+    },
+    {
+      key: "deadlines",
+      label: "Fechas límite y alertas",
+      icon: "fa-triangle-exclamation",
+      critical: true,
+    },
+    {
+      key: "system",
+      label: "Sistema",
+      icon: "fa-gear",
+      critical: false,
+    },
+  ];
 
-  const DEFAULT_MATRIX_PREFS = {
-    homeNews: true,
-    homeCommunity: true,
-    homeEvaluations: true,
-    homeClasses: true,
-    homeAlerts: true,
+  const CHANNELS = [
+    {
+      key: "home",
+      label: "Inicio",
+    },
+    {
+      key: "bell",
+      label: "Campanita",
+    },
+    {
+      key: "email",
+      label: "Correo",
+    },
+  ];
 
-    bellNews: true,
-    bellCommunity: true,
-    bellEvaluations: true,
-    bellClasses: true,
-    bellAlerts: true,
+  let prefs = defaultMatrix();
+  let loaded = false;
+  let saving = false;
 
-    emailNews: false,
-    emailCommunity: false,
-    emailEvaluations: true,
-    emailClasses: false,
-    emailAlerts: true
+  let syncStatus =
+    "Sincronizando con tu cuenta...";
+
+  let notice = {
+    kind: "",
+    text: "",
   };
 
+  let pendingCritical = null;
+
+
+  function defaultMatrix() {
+    return Object.fromEntries(
+      CATEGORIES.map((category) => [
+        category.key,
+        {
+          home: true,
+          bell: true,
+          email: true,
+        },
+      ])
+    );
+  }
+
+
+  function cloneMatrix(value) {
+    return Object.fromEntries(
+      CATEGORIES.map((category) => [
+        category.key,
+        {
+          home: Boolean(
+            value?.[category.key]?.home
+          ),
+          bell: Boolean(
+            value?.[category.key]?.bell
+          ),
+          email: Boolean(
+            value?.[category.key]?.email
+          ),
+        },
+      ])
+    );
+  }
+
+
+  function normalizeMatrix(value) {
+    const result = defaultMatrix();
+
+    if (
+      !value ||
+      typeof value !== "object" ||
+      Array.isArray(value)
+    ) {
+      return result;
+    }
+
+    CATEGORIES.forEach((category) => {
+      const source = value[category.key];
+
+      if (
+        !source ||
+        typeof source !== "object"
+      ) {
+        return;
+      }
+
+      CHANNELS.forEach((channel) => {
+        if (
+          typeof source[channel.key] ===
+          "boolean"
+        ) {
+          result[category.key][channel.key] =
+            source[channel.key];
+        }
+      });
+    });
+
+    return result;
+  }
+
+
+  function getCategory(key) {
+    return CATEGORIES.find(
+      (category) => category.key === key
+    );
+  }
+
+
+  function getChannel(key) {
+    return CHANNELS.find(
+      (channel) => channel.key === key
+    );
+  }
+
+
+  function stateInfo() {
+    const risky = CATEGORIES
+      .filter((category) => category.critical)
+      .some((category) => {
+        const row = prefs[category.key];
+
+        return (
+          !row.home &&
+          !row.bell &&
+          !row.email
+        );
+      });
+
+    if (risky) {
+      return {
+        key: "risk",
+        label: "Riesgo",
+      };
+    }
+
+    const recommended = CATEGORIES.every(
+      (category) =>
+        CHANNELS.every(
+          (channel) =>
+            prefs[category.key][channel.key]
+        )
+    );
+
+    if (recommended) {
+      return {
+        key: "recommended",
+        label: "Recomendado",
+      };
+    }
+
+    return {
+      key: "personalized",
+      label: "Personalizado",
+    };
+  }
+
+
   function escapeHtml(value) {
-    return String(value || "")
+    return String(value ?? "")
       .replaceAll("&", "&amp;")
       .replaceAll("<", "&lt;")
       .replaceAll(">", "&gt;")
@@ -2902,92 +2923,196 @@ if (String(item.id) !== String(id)) return item;
       .replaceAll("'", "&#039;");
   }
 
-  function loadPrefs() {
-    try {
-      const saved = JSON.parse(localStorage.getItem(PREFS_KEY) || "{}");
-      return { ...DEFAULT_MATRIX_PREFS, ...saved };
-    } catch {
-      return { ...DEFAULT_MATRIX_PREFS };
-    }
-  }
 
-  function savePrefs(prefs) {
-    const current = loadPrefs();
-    const next = { ...current, ...(prefs || {}) };
-    localStorage.setItem(PREFS_KEY, JSON.stringify(next));
-    return next;
-  }
-
-  function prefSwitch(key, checked, label) {
+  function prefSwitch(
+    category,
+    channel,
+    checked
+  ) {
     return `
-      <label class="notification-pref-toggle" title="${escapeHtml(label)}">
-        <span class="notification-pref-toggle-label">${escapeHtml(label)}</span>
-        <input type="checkbox" data-notification-modal-pref="${escapeHtml(key)}" ${checked ? "checked" : ""}>
+      <label
+        class="notification-pref-toggle"
+        title="${escapeHtml(channel.label)}"
+      >
+        <span class="notification-pref-toggle-label">
+          ${escapeHtml(channel.label)}
+        </span>
+
+        <input
+          type="checkbox"
+          data-notification-category="${escapeHtml(category.key)}"
+          data-notification-channel="${escapeHtml(channel.key)}"
+          ${checked ? "checked" : ""}
+          ${(!loaded || saving) ? "disabled" : ""}
+        >
+
         <span class="notification-pref-toggle-ui"></span>
       </label>
     `;
   }
 
-  function row(id, icon, title, description, prefs) {
-    const map = {
-      news: ["homeNews", "bellNews", "emailNews"],
-      community: ["homeCommunity", "bellCommunity", "emailCommunity"],
-      evaluations: ["homeEvaluations", "bellEvaluations", "emailEvaluations"],
-      classes: ["homeClasses", "bellClasses", "emailClasses"],
-      alerts: ["homeAlerts", "bellAlerts", "emailAlerts"]
-    };
 
-    const keys = map[id];
+  function row(category) {
+    const values = prefs[category.key];
+
+    const badge = category.critical
+      ? `
+        <small
+          style="
+            display:inline-flex;
+            margin-left:7px;
+            padding:2px 6px;
+            border-radius:999px;
+            font-size:9px;
+            font-weight:800;
+            color:#fbbf24;
+            background:rgba(245,158,11,.12);
+          "
+        >
+          Importante
+        </small>
+      `
+      : "";
 
     return `
       <div class="notification-pref-matrix-row">
         <div class="notification-pref-topic">
-          <i class="fa-solid ${escapeHtml(icon)}"></i>
+          <i class="fa-solid ${escapeHtml(category.icon)}"></i>
+
           <span>
-            <strong>${escapeHtml(title)}</strong>
-            <small>${escapeHtml(description)}</small>
+            <strong>
+              ${escapeHtml(category.label)}
+              ${badge}
+            </strong>
           </span>
         </div>
 
-        ${prefSwitch(keys[0], prefs[keys[0]], "Inicio")}
-        ${prefSwitch(keys[1], prefs[keys[1]], "Campanita")}
-        ${prefSwitch(keys[2], prefs[keys[2]], "Correo")}
+        ${prefSwitch(
+          category,
+          CHANNELS[0],
+          values.home
+        )}
+
+        ${prefSwitch(
+          category,
+          CHANNELS[1],
+          values.bell
+        )}
+
+        ${prefSwitch(
+          category,
+          CHANNELS[2],
+          values.email
+        )}
       </div>
     `;
   }
 
+
   function closeModal() {
-    const modal = document.getElementById("notificationPrefsModal");
+    const modal = document.getElementById(
+      "notificationPrefsModal"
+    );
+
     if (!modal) return;
 
     modal.classList.remove("open");
-    modal.setAttribute("aria-hidden", "true");
-    document.body.classList.remove("notification-prefs-modal-open");
+
+    modal.setAttribute(
+      "aria-hidden",
+      "true"
+    );
+
+    document.body.classList.remove(
+      "notification-prefs-modal-open"
+    );
+
+    pendingCritical = null;
   }
 
-  function buildModal() {
-    const previous = document.getElementById("notificationPrefsModal");
-    if (previous) previous.remove();
 
-    const prefs = loadPrefs();
-    const modal = document.createElement("div");
+  function buildModal() {
+    let modal = document.getElementById(
+      "notificationPrefsModal"
+    );
+
+    if (modal) {
+      return modal;
+    }
+
+    modal = document.createElement("div");
 
     modal.id = "notificationPrefsModal";
-    modal.className = "notification-prefs-modal-backdrop";
-    modal.setAttribute("aria-hidden", "true");
+
+    modal.className =
+      "notification-prefs-modal-backdrop";
+
+    modal.setAttribute(
+      "aria-hidden",
+      "true"
+    );
 
     modal.innerHTML = `
-      <section class="notification-prefs-modal" role="dialog" aria-modal="true" aria-labelledby="notificationPrefsModalTitle">
+      <section
+        class="notification-prefs-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="notificationPrefsModalTitle"
+        style="
+          max-height:min(90vh,840px);
+          overflow:auto;
+        "
+      >
         <div class="notification-prefs-modal-head">
           <div>
-            <p class="eyebrow">Classroom</p>
-            <h2 id="notificationPrefsModalTitle">Preferencias de notificación</h2>
-            <p>Elegí qué querés recibir y por dónde. Por ahora se guarda localmente; después lo conectamos al backend y al correo del dominio.</p>
+            <p class="eyebrow">CLASSROOM</p>
+
+            <h2 id="notificationPrefsModalTitle">
+              Preferencias de notificación
+            </h2>
+
+            <p>
+              Elegí por dónde querés recibir cada tipo de aviso.
+              Tus preferencias se guardan en tu cuenta.
+            </p>
           </div>
 
-          <button class="notification-prefs-modal-close" type="button" data-notification-prefs-close aria-label="Cerrar preferencias">
+          <button
+            class="notification-prefs-modal-close"
+            type="button"
+            data-notification-prefs-close
+            aria-label="Cerrar preferencias"
+          >
             <i class="fa-solid fa-xmark"></i>
           </button>
+        </div>
+
+        <div
+          style="
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:12px;
+            flex-wrap:wrap;
+            margin-bottom:12px;
+          "
+        >
+          <strong
+            id="notificationPrefsState"
+            style="
+              display:inline-flex;
+              padding:6px 10px;
+              border-radius:999px;
+              font-size:12px;
+              background:rgba(139,92,246,.13);
+            "
+          >
+            Recomendado
+          </strong>
+
+          <small id="notificationPrefsModalStatus">
+            Sincronizando con tu cuenta...
+          </small>
         </div>
 
         <div class="notification-pref-matrix">
@@ -2998,84 +3123,744 @@ if (String(item.id) !== String(id)) return item;
             <span>Correo</span>
           </div>
 
-          ${row("news", "fa-bullhorn", "Novedades y avisos", "Comunicados generales del curso o plataforma.", prefs)}
-          ${row("community", "fa-comments", "Comunidad", "Hilos, respuestas y actividad técnica.", prefs)}
-          ${row("evaluations", "fa-file-circle-check", "Evaluaciones", "Notas, devoluciones, recuperatorios y correcciones.", prefs)}
-          ${row("classes", "fa-person-chalkboard", "Clases", "Materiales, clases disponibles y seguimiento académico.", prefs)}
-          ${row("alerts", "fa-triangle-exclamation", "Alertas", "Fechas límite, cambios urgentes o avisos críticos.", prefs)}
+          <div id="notificationPrefsRows"></div>
         </div>
 
-        <div class="notification-prefs-modal-foot">
-          <small id="notificationPrefsModalStatus">Guardado local en este navegador.</small>
+        <div
+          id="notificationPrefsNotice"
+          hidden
+          style="
+            margin-top:14px;
+            padding:12px 14px;
+            border-radius:12px;
+            border:1px solid rgba(245,158,11,.30);
+            background:rgba(245,158,11,.08);
+            font-size:13px;
+            line-height:1.45;
+          "
+        ></div>
 
-          <button class="btn btn-primary" type="button" data-notification-prefs-close>
-            <i class="fa-solid fa-check"></i>
-            Listo
-          </button>
+        <div
+          id="notificationPrefsCriticalWarning"
+          hidden
+          style="
+            margin-top:14px;
+            padding:14px;
+            border-radius:12px;
+            border:1px solid rgba(239,68,68,.38);
+            background:rgba(127,29,29,.18);
+          "
+        >
+          <strong
+            id="notificationPrefsCriticalTitle"
+          ></strong>
+
+          <p
+            id="notificationPrefsCriticalText"
+            style="
+              margin:7px 0 0;
+              font-size:13px;
+              line-height:1.45;
+            "
+          ></p>
+
+          <div
+            style="
+              display:flex;
+              gap:8px;
+              flex-wrap:wrap;
+              margin-top:12px;
+            "
+          >
+            <button
+              class="btn"
+              type="button"
+              id="notificationPrefsCriticalCancel"
+            >
+              Cancelar
+            </button>
+
+            <button
+              class="btn btn-primary"
+              type="button"
+              id="notificationPrefsCriticalConfirm"
+            >
+              Desactivar de todos modos
+            </button>
+          </div>
+        </div>
+
+        <div
+          class="notification-prefs-modal-foot"
+          style="
+            gap:10px;
+            flex-wrap:wrap;
+          "
+        >
+          <small>
+            Tus preferencias se guardan en tu cuenta.
+          </small>
+
+          <div
+            style="
+              display:flex;
+              gap:8px;
+              flex-wrap:wrap;
+            "
+          >
+            <button
+              class="btn"
+              type="button"
+              id="notificationPrefsRestore"
+            >
+              Restaurar recomendadas
+            </button>
+
+            <button
+              class="btn btn-primary"
+              type="button"
+              data-notification-prefs-close
+            >
+              <i class="fa-solid fa-check"></i>
+              Listo
+            </button>
+          </div>
         </div>
       </section>
     `;
 
     document.body.appendChild(modal);
 
-    modal.addEventListener("click", (event) => {
-      if (event.target === modal || event.target.closest("[data-notification-prefs-close]")) {
-        event.preventDefault();
-        closeModal();
-      }
-    });
+    if (!document.getElementById("notificationPrefsCompactStyles")) {
+      const style = document.createElement("style");
 
-    modal.querySelectorAll("[data-notification-modal-pref]").forEach((input) => {
-      input.addEventListener("change", () => {
-        savePrefs({ [input.dataset.notificationModalPref]: input.checked });
+      style.id = "notificationPrefsCompactStyles";
 
-        const status = modal.querySelector("#notificationPrefsModalStatus");
-        if (status) {
-          status.textContent = `Guardado local: ${new Date().toLocaleTimeString("es-AR", {
-            hour: "2-digit",
-            minute: "2-digit"
-          })}`;
+      style.textContent = `
+        #notificationPrefsModal .notification-prefs-modal {
+          width: min(860px, 96vw) !important;
+          max-height: 96vh !important;
+          padding: 14px 18px !important;
         }
-      });
-    });
+
+        #notificationPrefsModal .notification-prefs-modal-head {
+          margin-bottom: 8px !important;
+          padding-bottom: 8px !important;
+        }
+
+        #notificationPrefsModal .notification-prefs-modal-head h2 {
+          margin: 2px 0 4px !important;
+          font-size: 24px !important;
+          line-height: 1.1 !important;
+        }
+
+        #notificationPrefsModal .notification-prefs-modal-head p {
+          margin: 0 !important;
+          font-size: 13px !important;
+          line-height: 1.25 !important;
+        }
+
+        #notificationPrefsModal .notification-pref-matrix-head {
+          min-height: auto !important;
+          padding: 7px 12px !important;
+        }
+
+        #notificationPrefsModal .notification-pref-matrix-row {
+          min-height: 44px !important;
+          padding: 5px 12px !important;
+        }
+
+        #notificationPrefsModal .notification-pref-topic {
+          gap: 9px !important;
+        }
+
+        #notificationPrefsModal .notification-pref-topic i {
+          width: 26px !important;
+          min-width: 26px !important;
+          height: 26px !important;
+          font-size: 13px !important;
+        }
+
+        #notificationPrefsModal .notification-pref-topic strong {
+          font-size: 13px !important;
+          line-height: 1.15 !important;
+        }
+
+        #notificationPrefsModal .notification-pref-toggle {
+          transform: scale(.9);
+          transform-origin: center;
+        }
+
+        #notificationPrefsModal .notification-prefs-modal-foot {
+          margin-top: 8px !important;
+          padding-top: 9px !important;
+          padding-bottom: 0 !important;
+        }
+
+        #notificationPrefsModal #notificationPrefsState {
+          padding: 4px 9px !important;
+          font-size: 11px !important;
+        }
+
+        @media (max-height: 800px) and (min-width: 701px) {
+          #notificationPrefsModal .notification-pref-matrix-row {
+            min-height: 40px !important;
+            padding-top: 3px !important;
+            padding-bottom: 3px !important;
+          }
+
+          #notificationPrefsModal .notification-prefs-modal-head p {
+            display: none;
+          }
+        }
+      `;
+
+      document.head.appendChild(style);
+    }
+
+    modal.addEventListener(
+      "click",
+      handleModalClick
+    );
+
+    modal.addEventListener(
+      "change",
+      handlePreferenceChange
+    );
 
     return modal;
   }
+
+
+  function renderModal() {
+    const modal = buildModal();
+
+    const rows = modal.querySelector(
+      "#notificationPrefsRows"
+    );
+
+    if (rows) {
+      rows.innerHTML =
+        CATEGORIES.map(row).join("");
+    }
+
+    const state = stateInfo();
+
+    const stateElement = modal.querySelector(
+      "#notificationPrefsState"
+    );
+
+    if (stateElement) {
+      stateElement.textContent =
+        state.label;
+
+      stateElement.dataset.state =
+        state.key;
+
+      stateElement.style.background =
+        state.key === "risk"
+          ? "rgba(239,68,68,.14)"
+          : "rgba(139,92,246,.13)";
+    }
+
+    const status = modal.querySelector(
+      "#notificationPrefsModalStatus"
+    );
+
+    if (status) {
+      status.textContent = syncStatus;
+    }
+
+    const noticeElement = modal.querySelector(
+      "#notificationPrefsNotice"
+    );
+
+    if (noticeElement) {
+      noticeElement.hidden = !notice.text;
+      noticeElement.textContent =
+        notice.text;
+
+      noticeElement.style.borderColor =
+        notice.kind === "error"
+          ? "rgba(239,68,68,.38)"
+          : "rgba(245,158,11,.30)";
+
+      noticeElement.style.background =
+        notice.kind === "error"
+          ? "rgba(239,68,68,.10)"
+          : "rgba(245,158,11,.08)";
+    }
+
+    const warning = modal.querySelector(
+      "#notificationPrefsCriticalWarning"
+    );
+
+    if (warning) {
+      warning.hidden = !pendingCritical;
+
+      if (pendingCritical) {
+        const category = getCategory(
+          pendingCritical.category
+        );
+
+        const title = modal.querySelector(
+          "#notificationPrefsCriticalTitle"
+        );
+
+        const text = modal.querySelector(
+          "#notificationPrefsCriticalText"
+        );
+
+        if (title) {
+          title.textContent =
+            `Vas a desactivar todos los avisos de ${category?.label || "esta categoría"}.`;
+        }
+
+        if (text) {
+          text.textContent =
+            "No recibirás estos avisos en Inicio, en la campanita ni por correo. Podés volver a activarlos cuando quieras.";
+        }
+      }
+    }
+  }
+
+
+  async function apiRequest(
+    method,
+    payload = null
+  ) {
+    const api =
+      window.ClassroomBackendNotifications;
+
+    if (
+      !api ||
+      typeof api.getApiBase !== "function" ||
+      typeof api.ensureBackendToken !== "function"
+    ) {
+      throw new Error(
+        "El backend de Classroom todavía no está disponible."
+      );
+    }
+
+    const token =
+      await api.ensureBackendToken();
+
+    const options = {
+      method,
+      headers: {
+        Authorization:
+          `Bearer ${token}`,
+      },
+    };
+
+    if (payload !== null) {
+      options.headers["Content-Type"] =
+        "application/json";
+
+      options.body =
+        JSON.stringify(payload);
+    }
+
+    const response = await fetch(
+      `${api.getApiBase()}/api/classroom/notification-preferences`,
+      options
+    );
+
+    const data =
+      await response
+        .json()
+        .catch(() => ({}));
+
+    if (!response.ok) {
+      throw new Error(
+        data.detail ||
+        `Error backend ${response.status}`
+      );
+    }
+
+    return data;
+  }
+
+
+  async function loadPrefs() {
+    loaded = false;
+    saving = false;
+    pendingCritical = null;
+
+    notice = {
+      kind: "",
+      text: "",
+    };
+
+    syncStatus =
+      "Sincronizando con tu cuenta...";
+
+    renderModal();
+
+    try {
+      const data =
+        await apiRequest("GET");
+
+      prefs = normalizeMatrix(
+        data.channel_preferences
+      );
+
+      loaded = true;
+
+      syncStatus =
+        "Preferencias sincronizadas con tu cuenta.";
+
+      renderModal();
+
+      return cloneMatrix(prefs);
+    } catch (error) {
+      console.error(
+        "[Classroom] Preferencias:",
+        error
+      );
+
+      syncStatus =
+        "No se pudieron sincronizar las preferencias.";
+
+      notice = {
+        kind: "error",
+        text:
+          error.message ||
+          "No se pudieron cargar tus preferencias.",
+      };
+
+      renderModal();
+
+      return null;
+    }
+  }
+
+
+  async function savePrefs(
+    next,
+    previous,
+    successNotice = ""
+  ) {
+    if (saving) {
+      return false;
+    }
+
+    prefs = cloneMatrix(next);
+    saving = true;
+
+    syncStatus = "Guardando...";
+
+    notice = successNotice
+      ? {
+          kind: "warning",
+          text: successNotice,
+        }
+      : {
+          kind: "",
+          text: "",
+        };
+
+    renderModal();
+
+    try {
+      const data = await apiRequest(
+        "POST",
+        {
+          channel_preferences: prefs,
+        }
+      );
+
+      prefs = normalizeMatrix(
+        data.channel_preferences || prefs
+      );
+
+      loaded = true;
+      saving = false;
+
+      syncStatus =
+        "Preferencias sincronizadas con tu cuenta.";
+
+      renderModal();
+
+      return true;
+    } catch (error) {
+      prefs = cloneMatrix(previous);
+
+      loaded = true;
+      saving = false;
+
+      syncStatus =
+        "No se pudo guardar el cambio.";
+
+      notice = {
+        kind: "error",
+        text:
+          error.message ||
+          "No se pudo guardar esta preferencia.",
+      };
+
+      renderModal();
+
+      return false;
+    }
+  }
+
+
+  async function handlePreferenceChange(
+    event
+  ) {
+    const input = event.target.closest(
+      "[data-notification-category][data-notification-channel]"
+    );
+
+    if (
+      !input ||
+      !loaded ||
+      saving
+    ) {
+      return;
+    }
+
+    const categoryKey =
+      input.dataset.notificationCategory;
+
+    const channelKey =
+      input.dataset.notificationChannel;
+
+    const category =
+      getCategory(categoryKey);
+
+    const channel =
+      getChannel(channelKey);
+
+    if (!category || !channel) {
+      return;
+    }
+
+    const previous =
+      cloneMatrix(prefs);
+
+    const next =
+      cloneMatrix(prefs);
+
+    next[categoryKey][channelKey] =
+      input.checked;
+
+    if (
+      category.critical &&
+      input.checked === false
+    ) {
+      const remaining =
+        CHANNELS.filter(
+          (item) =>
+            next[categoryKey][item.key]
+        );
+
+      if (remaining.length === 0) {
+        pendingCritical = {
+          category: categoryKey,
+          channel: channelKey,
+          previous,
+        };
+
+        renderModal();
+        return;
+      }
+
+      const remainingLabels =
+        remaining
+          .map((item) => item.label)
+          .join(", ");
+
+      await savePrefs(
+        next,
+        previous,
+        `Importante: desactivaste ${channel.label} para ${category.label}. Todavía recibirás estos avisos por ${remainingLabels}.`
+      );
+
+      return;
+    }
+
+    await savePrefs(
+      next,
+      previous
+    );
+  }
+
+
+  async function confirmCriticalDisable() {
+    if (
+      !pendingCritical ||
+      saving
+    ) {
+      return;
+    }
+
+    const pending =
+      pendingCritical;
+
+    const previous =
+      cloneMatrix(
+        pending.previous
+      );
+
+    const next =
+      cloneMatrix(
+        previous
+      );
+
+    next[pending.category][pending.channel] =
+      false;
+
+    const category =
+      getCategory(
+        pending.category
+      );
+
+    pendingCritical = null;
+
+    await savePrefs(
+      next,
+      previous,
+      `Desactivaste todos los canales para ${category?.label || "esta categoría"}. No recibirás estos avisos hasta que vuelvas a activar al menos un canal.`
+    );
+  }
+
+
+  async function restoreRecommended() {
+    if (
+      !loaded ||
+      saving
+    ) {
+      return;
+    }
+
+    const previous =
+      cloneMatrix(prefs);
+
+    pendingCritical = null;
+
+    await savePrefs(
+      defaultMatrix(),
+      previous
+    );
+  }
+
+
+  function handleModalClick(event) {
+    const modal = event.currentTarget;
+
+    if (
+      event.target === modal ||
+      event.target.closest(
+        "[data-notification-prefs-close]"
+      )
+    ) {
+      event.preventDefault();
+      closeModal();
+      return;
+    }
+
+    if (
+      event.target.closest(
+        "#notificationPrefsRestore"
+      )
+    ) {
+      event.preventDefault();
+      restoreRecommended();
+      return;
+    }
+
+    if (
+      event.target.closest(
+        "#notificationPrefsCriticalCancel"
+      )
+    ) {
+      event.preventDefault();
+
+      pendingCritical = null;
+      renderModal();
+      return;
+    }
+
+    if (
+      event.target.closest(
+        "#notificationPrefsCriticalConfirm"
+      )
+    ) {
+      event.preventDefault();
+      confirmCriticalDisable();
+    }
+  }
+
 
   function openModal() {
     const modal = buildModal();
 
     modal.classList.add("open");
-    modal.setAttribute("aria-hidden", "false");
-    document.body.classList.add("notification-prefs-modal-open");
+
+    modal.setAttribute(
+      "aria-hidden",
+      "false"
+    );
+
+    document.body.classList.add(
+      "notification-prefs-modal-open"
+    );
+
+    loadPrefs();
   }
 
-  document.addEventListener("click", (event) => {
-    const settings = event.target.closest("#notificationsSettingsLink");
 
-    if (!settings) return;
+  document.addEventListener(
+    "click",
+    (event) => {
+      const settings = event.target.closest(
+        "#notificationsSettingsLink"
+      );
 
-    event.preventDefault();
-    event.stopPropagation();
+      if (!settings) return;
 
-    const widget = document.getElementById("notificationsWidget");
-    const panel = document.getElementById("notificationsPanel");
+      event.preventDefault();
+      event.stopPropagation();
 
-    widget?.classList.remove("open");
-    panel?.setAttribute("aria-hidden", "true");
+      const widget =
+        document.getElementById(
+          "notificationsWidget"
+        );
 
-    openModal();
-  }, true);
+      const panel =
+        document.getElementById(
+          "notificationsPanel"
+        );
 
-  document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape") closeModal();
-  });
+      widget?.classList.remove("open");
+
+      panel?.setAttribute(
+        "aria-hidden",
+        "true"
+      );
+
+      openModal();
+    },
+    true
+  );
+
+
+  document.addEventListener(
+    "keydown",
+    (event) => {
+      if (event.key === "Escape") {
+        closeModal();
+      }
+    }
+  );
+
 
   window.ClassroomNotificationPrefsModal = {
     open: openModal,
     close: closeModal,
     loadPrefs,
-    savePrefs
+    savePrefs,
   };
 })();
-

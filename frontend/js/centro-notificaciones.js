@@ -240,11 +240,19 @@
 
   function resetForm() {
     els.form.reset();
+
     els.editId.value = "";
     els.type.value = "announcement";
     els.severity.value = "warning";
     els.audience.value = "all";
-    els.formTitle.textContent = "Nueva notificación";
+    els.formTitle.textContent =
+      "Nueva notificación";
+
+    window.dispatchEvent(
+      new CustomEvent(
+        "classroom:notification-composer-reset"
+      )
+    );
   }
 
   function fillForm(item) {
@@ -252,6 +260,31 @@
     els.title.value = item.title || "";
     els.body.value = item.body || "";
     els.type.value = item.type || "announcement";
+
+    const topicEl =
+      document.getElementById("notificationTopic");
+
+    if (topicEl) {
+      topicEl.value =
+        item.topic ||
+        (
+          item.type === "community"
+            ? "community"
+            : item.type === "academic"
+              ? "evaluations"
+              : item.type === "system"
+                ? "system"
+                : "news"
+        );
+
+      topicEl.dispatchEvent(
+        new Event(
+          "change",
+          { bubbles: true }
+        )
+      );
+    }
+
     els.severity.value = normalizeSeverity(item.type, item.severity);
     els.audience.value = item.audience || item.audience_type || "all";
     els.link.value = item.link || item.link_url || "";
@@ -502,7 +535,6 @@
   }
 
   function bindEvents() {
-    els.form?.addEventListener("submit", upsertNotification);
     els.reset?.addEventListener("click", resetForm);
     els.preview?.addEventListener("click", previewDemo);
     els.search?.addEventListener("input", render);
@@ -867,8 +899,43 @@
     set('[name="title"], #notificationTitle', item.title || "");
     set('[name="body"], [name="description"], #notificationBody', item.body || item.description || "");
     set('[name="type"], #notificationType', item.type || "announcement");
+
+    set(
+      '[name="topic"], #notificationTopic',
+      item.topic ||
+        (
+          item.type === "community"
+            ? "community"
+            : item.type === "academic"
+              ? "evaluations"
+              : item.type === "system"
+                ? "system"
+                : "news"
+        )
+    );
+
     set('[name="severity"], #notificationSeverity', item.severity || "");
-    set('[name="audience"], [name="audience_type"], #notificationAudience', audienceValue);
+    set(
+      '[name="audience"], [name="audience_type"], #notificationAudience',
+      audienceValue
+    );
+
+    const audienceRadio =
+      document.querySelector(
+        `input[name="notificationAudienceVisual"][value="${CSS.escape(audienceValue)}"]`
+      );
+
+    if (audienceRadio) {
+      audienceRadio.checked = true;
+
+      audienceRadio.dispatchEvent(
+        new Event(
+          "change",
+          { bubbles: true }
+        )
+      );
+    }
+
     set('[name="course"], #notificationCourse', item.course || "");
     set('[name="link"], [name="link_url"], #notificationLink', item.link_url || item.link || "");
 
@@ -1290,23 +1357,6 @@ if (!items.length) {
     }
   }
 
-  function hijackForm() {
-    const form = document.querySelector("#notificationAdminForm, [data-notification-admin-form]");
-    if (!form || form.dataset.backendBridgeAttached === "1") return;
-
-    form.dataset.backendBridgeAttached = "1";
-
-    form.addEventListener("submit", (event) => {
-      event.preventDefault();
-      event.stopImmediatePropagation();
-
-      saveNotificationToBackend().catch((error) => {
-        console.error("[Centro Notificaciones] Error guardando en backend:", error);
-        alert(error.message || "No se pudo guardar la notificación.");
-      });
-    }, true);
-  }
-
   function hijackButtons() {
     document.addEventListener("click", (event) => {
       const editButton = event.target.closest("[data-backend-notification-edit]");
@@ -1327,7 +1377,6 @@ if (!items.length) {
       if (deleteButton) {
         event.preventDefault();
         event.stopPropagation();
-        event.stopImmediatePropagation();
 
         const id = deleteButton.getAttribute("data-backend-notification-delete");
 
@@ -1376,7 +1425,6 @@ if (!items.length) {
   }
 
   function init() {
-    hijackForm();
     hijackButtons();
     addBackendBadge();
 
@@ -2276,877 +2324,6 @@ if (!items.length) {
 
 
 /* ============================================================
-   CENTRO_DELETE_BACKEND_DOMINANTE_20260625
-   Fuerza el borrado real por backend para botones de Centro.
-   Evita que la lógica legacy/localStorage deje la notificación viva.
-============================================================ */
-(function patchCentroDeleteBackendDominante() {
-  function getSessionToken() {
-    try {
-      const raw = localStorage.getItem("andyazh-classroom-session");
-      if (!raw) return "";
-      const session = JSON.parse(raw);
-      return session?.token || session?.access_token || session?.jwt || "";
-    } catch (_) {
-      return "";
-    }
-  }
-
-  function getApiBase() {
-    const base =
-      window.ClassroomBackend?.baseUrl ||
-      window.ClassroomBackend?.apiBase ||
-      window.CLASSROOM_API_BASE ||
-      window.EXAMPRO_API_BASE ||
-      "http://127.0.0.1:8000";
-
-    return String(base).replace(/\/+$/, "");
-  }
-
-  function getNotificationIdFromButton(btn) {
-    if (!btn) return "";
-
-    return (
-      btn.dataset.adminNotificationDelete ||
-      btn.dataset.notificationDelete ||
-      btn.dataset.deleteNotification ||
-      btn.dataset.deleteId ||
-      btn.dataset.id ||
-      btn.getAttribute("data-admin-notification-delete") ||
-      btn.getAttribute("data-notification-delete") ||
-      btn.getAttribute("data-delete-notification") ||
-      btn.getAttribute("data-delete-id") ||
-      ""
-    ).trim();
-  }
-
-  function looksLikeDeleteButton(target) {
-    const btn = target?.closest?.("button, a");
-    if (!btn) return null;
-
-    const text = (btn.textContent || "").trim().toLowerCase();
-
-    const hasDeleteDataset =
-      btn.hasAttribute("data-admin-notification-delete") ||
-      btn.hasAttribute("data-notification-delete") ||
-      btn.hasAttribute("data-delete-notification") ||
-      btn.hasAttribute("data-delete-id");
-
-    const isInsideNotificationCenter =
-      Boolean(
-        btn.closest("#notificationAdminList") ||
-        btn.closest("#notificationsAdminList") ||
-        btn.closest("#notificationList") ||
-        btn.closest(".notification-center") ||
-        btn.closest(".notifications-admin") ||
-        btn.closest(".notification-card")
-      );
-
-    if ((hasDeleteDataset || text === "borrar" || text.includes("borrar")) && isInsideNotificationCenter) {
-      return btn;
-    }
-
-    return null;
-  }
-
-  async function deleteNotificationBackendDominante(id, btn) {
-    if (!id) {
-      console.warn("[Centro] No encontré ID de notificación para borrar.");
-      return;
-    }
-
-    const ok = window.confirm("¿Borrar esta notificación para todos?");
-    if (!ok) return;
-
-    const oldText = btn?.textContent;
-
-    try {
-      if (btn) {
-        btn.disabled = true;
-        btn.textContent = "Borrando...";
-      }
-
-      const token = getSessionToken();
-      const headers = {};
-
-      if (token) {
-        headers.Authorization = `Bearer ${token}`;
-      }
-
-      const response = await fetch(`${getApiBase()}/api/classroom/notifications/${encodeURIComponent(id)}`, {
-        method: "DELETE",
-        headers,
-      });
-
-      let data = null;
-      try {
-        data = await response.json();
-      } catch (_) {}
-
-      if (!response.ok) {
-        throw new Error(data?.detail || data?.message || `HTTP ${response.status}`);
-      }
-
-      document
-        .querySelectorAll(`[data-admin-notification-delete="${CSS.escape(id)}"], [data-notification-delete="${CSS.escape(id)}"], [data-delete-notification="${CSS.escape(id)}"], [data-delete-id="${CSS.escape(id)}"]`)
-        .forEach((el) => {
-          const card = el.closest("article, .notification-card, .notification-item, li, tr");
-          if (card) card.remove();
-        });
-
-      if (Array.isArray(window.ClassroomNotificationsAdminItems)) {
-        window.ClassroomNotificationsAdminItems = window.ClassroomNotificationsAdminItems.filter((item) => String(item.id) !== String(id));
-      }
-
-      if (Array.isArray(window.ClassroomNotificationsItems)) {
-        window.ClassroomNotificationsItems = window.ClassroomNotificationsItems.filter((item) => String(item.id) !== String(id));
-      }
-
-      window.dispatchEvent(new CustomEvent("classroom-notification-deleted", {
-        detail: {
-          deletedId: id,
-          id,
-          source: "centro-delete-backend-dominante",
-          backend: data || null,
-        },
-      }));
-
-      window.dispatchEvent(new CustomEvent("classroom-notifications-changed", {
-        detail: {
-          action: "delete",
-          deletedId: id,
-          id,
-          source: "centro-delete-backend-dominante",
-        },
-      }));
-
-      if (window.ClassroomNotificationsAdmin?.load) {
-        await window.ClassroomNotificationsAdmin.load();
-      } else if (window.ClassroomNotificationCenter?.load) {
-        await window.ClassroomNotificationCenter.load();
-      }
-
-      console.log("[Centro] Notificación borrada desde backend:", id, data);
-    } catch (error) {
-      console.error("[Centro] No pude borrar notificación desde backend:", error);
-      alert(error.message || "No pude borrar la notificación.");
-    } finally {
-      if (btn) {
-        btn.disabled = false;
-        btn.textContent = oldText || "Borrar";
-      }
-    }
-  }
-
-  document.addEventListener(
-    "click",
-    function onCentroDeleteClick(event) {
-      const btn = looksLikeDeleteButton(event.target);
-      if (!btn) return;
-
-      const id = getNotificationIdFromButton(btn);
-      if (!id) return;
-
-      event.preventDefault();
-      event.stopPropagation();
-      event.stopImmediatePropagation();
-
-      deleteNotificationBackendDominante(id, btn);
-    },
-    true
-  );
-
-  console.log("[Centro] Patch delete backend dominante activo.");
-})();
-
-/* === Centro notificaciones: mostrar audiencia academica solo si correo = SI 20260628 === */
-(function initAcademicMailPreviewToggle() {
-  "use strict";
-
-  const preview = document.getElementById("notificationAcademicMailPreview");
-  const form = document.getElementById("notificationAdminForm");
-
-  if (!preview) return;
-
-  const controls = [
-    document.getElementById("notificationAcademicMailSource"),
-    document.getElementById("notificationAcademicMailSegment"),
-    document.getElementById("notificationAcademicMailPreviewBtn"),
-  ].filter(Boolean);
-
-  function isSendEmailEnabled() {
-    return document.querySelector('input[name="notificationSendEmail"]:checked')?.value === "true";
-  }
-
-  function syncAcademicMailPreviewVisibility() {
-    const enabled = isSendEmailEnabled();
-
-    preview.hidden = !enabled;
-    preview.classList.toggle("is-disabled", !enabled);
-
-    controls.forEach((control) => {
-      control.disabled = !enabled;
-    });
-  }
-
-  document
-    .querySelectorAll('input[name="notificationSendEmail"]')
-    .forEach((radio) => {
-      radio.addEventListener("change", syncAcademicMailPreviewVisibility);
-    });
-
-  if (form) {
-    form.addEventListener("reset", () => {
-      window.setTimeout(syncAcademicMailPreviewVisibility, 0);
-    });
-  }
-
-  syncAcademicMailPreviewVisibility();
-
-  window.ClassroomAcademicMailPreviewSync = syncAcademicMailPreviewVisibility;
-})();
-
-/* === Centro notificaciones: dry-run audiencia academica Supabase 2025 20260704 === */
-(function initAcademicMailAudienceDryRun() {
-  "use strict";
-
-  const button = document.getElementById("notificationAcademicMailPreviewBtn");
-  const resultBox = document.getElementById("notificationAcademicMailPreviewResult");
-  const sourceSelect = document.getElementById("notificationAcademicMailSource");
-  const segmentSelect = document.getElementById("notificationAcademicMailSegment");
-
-  if (!button || !resultBox) return;
-
-  function clean(value) {
-    return String(value ?? "").trim();
-  }
-
-  function normalize(value) {
-    return clean(value)
-      .toUpperCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/\s+/g, " ");
-  }
-
-  function isValidEmail(item) {
-    const email = clean(item.Correo || item.email);
-    return /\S+@\S+\.\S+/.test(email);
-  }
-
-  function isValidDni(item) {
-    const dni = clean(item.DNI || item.dni).replace(/\D+/g, "");
-    return dni.length >= 7;
-  }
-
-  function getRawApto(item) {
-    return normalize(item.APTO || item.apt_examen || item.estado);
-  }
-
-  function getRawResultado(item) {
-    return normalize(item.Resultado || item.exam_status || "");
-  }
-
-  function getRawRecuperatorio(item) {
-    return normalize(item.Recuperatorio || item.recovery_status || "");
-  }
-
-  function isApto(item) {
-    const apto = getRawApto(item);
-    return apto === "SI" || apto === "APTO";
-  }
-
-  function isPendingRecovery2025(item) {
-    const resultado = getRawResultado(item);
-    const recuperatorio = getRawRecuperatorio(item);
-
-    return (
-      isValidDni(item) &&
-      isValidEmail(item) &&
-      isApto(item) &&
-      resultado !== "APROBADO" &&
-      recuperatorio !== "APROBADO" &&
-      recuperatorio !== "DESAPROBADO"
-    );
-  }
-
-  function countItems(items, predicate) {
-    return items.filter(predicate).length;
-  }
-
-  function renderLoading() {
-    resultBox.classList.remove("is-ready", "is-error");
-    resultBox.classList.add("is-loading");
-    resultBox.innerHTML = `
-      <strong>Calculando audiencia...</strong>
-      <span>Consultando Supabase AyRPC 2025 en modo dry-run. No se envía ningún correo.</span>
-    `;
-  }
-
-  function renderError(error) {
-    resultBox.classList.remove("is-ready", "is-loading");
-    resultBox.classList.add("is-error");
-    resultBox.innerHTML = `
-      <strong>No se pudo calcular la audiencia.</strong>
-      <span>${String(error?.message || error || "Error desconocido")}</span>
-    `;
-  }
-
-  function renderResult(summary) {
-    resultBox.classList.remove("is-loading", "is-error");
-    resultBox.classList.add("is-ready");
-
-    resultBox.innerHTML = `
-      <div class="academic-mail-summary-head">
-        <strong>${summary.pendingRecovery} destinatarios potenciales</strong>
-        <span>Dry-run: no se envió ningún correo.</span>
-      </div>
-
-      <div class="academic-mail-summary-grid">
-        <span>Total Supabase <strong>${summary.total}</strong></span>
-        <span>Base válida <strong>${summary.validBase}</strong></span>
-        <span>APTO = SI <strong>${summary.aptos}</strong></span>
-        <span>Excluidos por examen aprobado <strong>${summary.approvedExam}</strong></span>
-        <span>Excluidos por recuperatorio cerrado <strong>${summary.closedRecovery}</strong></span>
-        <span>Sin DNI/email válido <strong>${summary.invalidContact}</strong></span>
-      </div>
-
-      <p class="academic-mail-summary-rule">
-        Regla usada: APTO = SI, Resultado distinto de APROBADO, Recuperatorio distinto de APROBADO/DESAPROBADO, con DNI y correo válidos.
-      </p>
-    `;
-  }
-
-  function getApiBase() {
-    const configured =
-      window.CLASSROOM_API_BASE ||
-      window.EXAMPRO_API_BASE ||
-      localStorage.getItem("andyazh-api-base") ||
-      "";
-
-    if (configured) {
-      return String(configured).replace(/\/+$/, "");
-    }
-
-    const host = window.location.hostname;
-
-    if (host === "localhost" || host === "127.0.0.1") {
-      return "http://127.0.0.1:8000";
-    }
-
-    return "https://api.andyazhtec.com";
-  }
-
-  function getClassroomToken() {
-    const session =
-      window.ClassroomAuth?.getSession?.() ||
-      JSON.parse(localStorage.getItem("andyazh-classroom-session") || "null");
-
-    return (
-      session?.classroomReadToken ||
-      session?.exampro?.accessToken ||
-      session?.exampro?.access_token ||
-      session?.accessToken ||
-      session?.access_token ||
-      session?.token ||
-      ""
-    );
-  }
-
-  async function fetchSupabase2025Items(source) {
-    if (source === "personal-tests") {
-      throw new Error("Pruebas personales esta deshabilitado hasta migrar esa fuente a Supabase.");
-    }
-
-    if (source !== "sheet-ayrpc-2025") {
-      throw new Error("Fuente academica no implementada.");
-    }
-
-    const token = getClassroomToken();
-
-    if (!token) {
-      throw new Error("No hay sesion Classroom valida para calcular la audiencia.");
-    }
-
-    const url = `${getApiBase()}/api/classroom/admin/attendance/students?course=ayrpc-2025&limit=2000&offset=0`;
-
-    const response = await fetch(url, {
-      cache: "no-store",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    const data = await response.json().catch(() => null);
-
-    if (!response.ok || !data?.ok) {
-      throw new Error(data?.detail || data?.error || data?.message || "Supabase no respondio correctamente.");
-    }
-
-    const rows = Array.isArray(data.items) ? data.items : [];
-
-    return rows.map((row) => ({
-      ...row,
-      DNI: row.dni,
-      Correo: row.email,
-      APTO: row.apt_calculated,
-      Resultado: row.result,
-      Recuperatorio: row.recovery,
-    }));
-  }
-
-  function buildPendingRecoverySummary(items) {
-    const validBaseItems = items.filter((item) => isValidDni(item) && isValidEmail(item));
-    const aptoItems = validBaseItems.filter(isApto);
-
-    return {
-      total: items.length,
-      validBase: validBaseItems.length,
-      invalidContact: items.length - validBaseItems.length,
-      aptos: aptoItems.length,
-      approvedExam: countItems(aptoItems, (item) => getRawResultado(item) === "APROBADO"),
-      closedRecovery: countItems(aptoItems, (item) => {
-        const rec = getRawRecuperatorio(item);
-        return rec === "APROBADO" || rec === "DESAPROBADO";
-      }),
-      pendingRecovery: countItems(items, isPendingRecovery2025),
-    };
-  }
-
-  function buildPersonalTestsSummary(items) {
-    const validEmailItems = items.filter(isValidEmail);
-
-    return {
-      total: items.length,
-      validBase: validEmailItems.length,
-      invalidContact: items.length - validEmailItems.length,
-      aptos: validEmailItems.length,
-      approvedExam: 0,
-      closedRecovery: 0,
-      pendingRecovery: validEmailItems.length,
-    };
-  }
-
-  async function calculateAcademicMailAudience() {
-    const source = sourceSelect?.value || "sheet-ayrpc-2025";
-    const segment = segmentSelect?.value || "pending-recovery-2025";
-
-    const allowedSources = ["sheet-ayrpc-2025"];
-
-    if (!allowedSources.includes(source) || segment !== "pending-recovery-2025") {
-      renderError("Esta combinación de fuente/segmento todavía no está implementada.");
-      return;
-    }
-
-    renderLoading();
-
-    try {
-      const items = await fetchSupabase2025Items(source);
-      const summary = source === "personal-tests"
-        ? buildPersonalTestsSummary(items)
-        : buildPendingRecoverySummary(items);
-
-      renderResult(summary);
-
-      window.ClassroomAcademicMailAudienceLastPreview = {
-        source,
-        segment,
-        summary,
-        calculatedAt: new Date().toISOString(),
-        dryRun: true,
-        sendsMail: false,
-      };
-    } catch (error) {
-      console.error("[Centro] Error calculando audiencia academica", error);
-      renderError(error);
-    }
-  }
-
-  button.addEventListener("click", calculateAcademicMailAudience);
-})();
-
-/* === Centro notificaciones: envio E2E staff seleccionado 20260926 === */
-(function initSelectedStaffMailTest() {
-  "use strict";
-
-  const sendButton =
-    document.getElementById("notificationAcademicMailSendTestBtn");
-
-  const resultBox =
-    document.getElementById("notificationAcademicMailPreviewResult");
-
-  if (!sendButton || !resultBox) return;
-
-  sendButton.innerHTML =
-    '<i class="fa-solid fa-paper-plane"></i> Enviar prueba staff';
-
-  function apiBase() {
-    const configured = String(
-      window.CLASSROOM_API_BASE ||
-      window.EXAMPRO_API_BASE ||
-      ""
-    ).replace(/\/+$/, "");
-
-    if (
-      configured &&
-      !/localhost|127\.0\.0\.1/i.test(configured)
-    ) {
-      return configured;
-    }
-
-    return "https://api.andyazhtec.com";
-  }
-
-  function token() {
-    try {
-      const session = JSON.parse(
-        localStorage.getItem(
-          "andyazh-classroom-session"
-        ) || "{}"
-      );
-
-      return (
-        session.token ||
-        session.access_token ||
-        session.jwt ||
-        session.auth_token ||
-        session?.exampro?.access_token ||
-        ""
-      );
-    } catch (_) {
-      return "";
-    }
-  }
-
-  function dni(value) {
-    return String(value || "")
-      .replace(/\D/g, "");
-  }
-
-  function currentSelection() {
-    const api =
-      window.ClassroomNotificationAudiences;
-
-    const data =
-      api?.getMail?.() || {};
-
-    const selectedDnis = [
-      ...new Set(
-        (
-          api?.getMailSelectedDnis?.() || []
-        )
-          .map(dni)
-          .filter(Boolean)
-      )
-    ];
-
-    const items =
-      Array.isArray(data.items)
-        ? data.items
-        : [];
-
-    const byDni = new Map(
-      items.map(item => [
-        dni(item.user_dni),
-        item
-      ])
-    );
-
-    const selected =
-      selectedDnis
-        .map(value => byDni.get(value))
-        .filter(Boolean);
-
-    return {
-      selectedDnis,
-      selected
-    };
-  }
-
-  function appendStatus(message, kind = "info") {
-    const previous =
-      resultBox.querySelector(
-        ".academic-mail-send-test-status"
-      );
-
-    if (previous) previous.remove();
-
-    const box =
-      document.createElement("div");
-
-    box.className =
-      "academic-mail-send-test-status " +
-      (
-        kind === "error"
-          ? "is-error"
-          : kind === "success"
-            ? "is-success"
-            : ""
-      );
-
-    box.innerHTML = message;
-    resultBox.appendChild(box);
-  }
-
-  function ready() {
-    const mailEnabled =
-      document.querySelector(
-        'input[name="notificationSendEmail"]:checked'
-      )?.value === "true";
-
-    const {
-      selectedDnis,
-      selected
-    } = currentSelection();
-
-    return Boolean(
-      mailEnabled &&
-      selectedDnis.length > 0 &&
-      selectedDnis.length <= 10 &&
-      selected.length === selectedDnis.length &&
-      selected.every(item =>
-        String(
-          item.user_role || ""
-        ).toLowerCase() ===
-          "classroom_moderator" &&
-        /\S+@\S+\.\S+/.test(
-          String(item.user_email || "")
-        )
-      )
-    );
-  }
-
-  function sync() {
-    sendButton.disabled = !ready();
-
-    sendButton.title =
-      ready()
-        ? "Enviar prueba real solamente a los moderadores seleccionados."
-        : "Seleccion? moderadores con email v?lido y activ? Mail.";
-  }
-
-  async function request(path, options = {}) {
-    const accessToken = token();
-
-    if (!accessToken) {
-      throw new Error(
-        "No encontre una sesion Classroom valida."
-      );
-    }
-
-    const response = await fetch(
-      `${apiBase()}${path}`,
-      {
-        ...options,
-        headers: {
-          "Content-Type": "application/json",
-          ...(options.headers || {}),
-          Authorization:
-            `Bearer ${accessToken}`,
-        },
-      }
-    );
-
-    const data =
-      await response.json()
-        .catch(() => ({}));
-
-    if (!response.ok) {
-      throw new Error(
-        data.detail ||
-        data.error ||
-        `HTTP ${response.status}`
-      );
-    }
-
-    return data;
-  }
-
-  async function sendSelectedStaffMail() {
-    const {
-      selectedDnis,
-      selected
-    } = currentSelection();
-
-    if (!ready()) {
-      appendStatus(
-        "<strong>No se envio.</strong><br>" +
-        "Seleccion? ?nicamente moderadores con email v?lido.",
-        "error"
-      );
-      return;
-    }
-
-    const names =
-      selected
-        .map(item =>
-          item.user_name ||
-          item.user_twitch ||
-          item.user_email
-        )
-        .join(", ");
-
-    if (
-      !window.confirm(
-        `Se enviar? correo REAL a ${selectedDnis.length} moderador(es):\n\n${names}\n\n?Continuar?`
-      )
-    ) {
-      return;
-    }
-
-    const title =
-      document.getElementById(
-        "notificationTitle"
-      )?.value.trim() ||
-      "[PRUEBA] AndyAzhTEC Classroom";
-
-    const body =
-      document.getElementById(
-        "notificationBody"
-      )?.value.trim() ||
-      "Prueba interna del sistema de notificaciones de Classroom.";
-
-    const type =
-      document.getElementById(
-        "notificationType"
-      )?.value ||
-      "announcement";
-
-    const severity =
-      document.getElementById(
-        "notificationSeverity"
-      )?.value ||
-      null;
-
-    const linkUrl =
-      document.getElementById(
-        "notificationLink"
-      )?.value.trim() ||
-      "https://classroom.andyazhtec.com/";
-
-    sendButton.disabled = true;
-
-    const original =
-      sendButton.innerHTML;
-
-    sendButton.innerHTML =
-      '<i class="fa-solid fa-spinner fa-spin"></i> Enviando...';
-
-    try {
-      const created = await request(
-        "/api/classroom/notifications/admin/test-create",
-        {
-          method: "POST",
-          body: JSON.stringify({
-            group: "moderator-tests",
-            selected_dnis: selectedDnis,
-            title,
-            body,
-            type,
-            severity,
-            link_url: linkUrl,
-          }),
-        }
-      );
-
-      const notificationId =
-        created?.notification?.id;
-
-      if (!notificationId) {
-        throw new Error(
-          "El backend no devolvio notification_id."
-        );
-      }
-
-      const preview = await request(
-        `/api/classroom/notifications/${notificationId}/admin/email-test-preview`
-      );
-
-      const expected =
-        selectedDnis.length;
-
-      if (
-        Number(
-          preview?.summary?.email_destinations
-        ) !== expected ||
-        Number(
-          preview?.summary?.valid
-        ) !== expected
-      ) {
-        throw new Error(
-          "El preview de correo no coincide con la seleccion."
-        );
-      }
-
-      const sent = await request(
-        `/api/classroom/notifications/${notificationId}/admin/email-test-send`,
-        {
-          method: "POST",
-          body: JSON.stringify({
-            confirmation:
-              "SEND_E2E_TEST",
-            expected_email_count:
-              expected,
-            allow_resend: false,
-          }),
-        }
-      );
-
-      appendStatus(
-        `<strong>Prueba enviada.</strong><br>` +
-        `Intentados: <strong>${sent.attempted ?? 0}</strong> ? ` +
-        `Aceptados SMTP: <strong>${sent.accepted ?? 0}</strong> ? ` +
-        `Diferidos: <strong>${sent.deferred ?? 0}</strong> ? ` +
-        `Fallidos: <strong>${sent.failed ?? 0}</strong>`,
-        "success"
-      );
-
-      window.ClassroomStaffMailLastTest = {
-        notificationId,
-        preview,
-        sent,
-      };
-
-    } catch (error) {
-      console.error(
-        "[Centro] Staff mail E2E:",
-        error
-      );
-
-      appendStatus(
-        `<strong>No se pudo enviar.</strong><br>` +
-        String(
-          error?.message || error
-        ),
-        "error"
-      );
-    } finally {
-      sendButton.innerHTML =
-        original;
-
-      sync();
-    }
-  }
-
-  sendButton.addEventListener(
-    "click",
-    sendSelectedStaffMail
-  );
-
-  document.addEventListener(
-    "change",
-    () => setTimeout(sync, 50)
-  );
-
-  document.addEventListener(
-    "click",
-    () => setTimeout(sync, 100)
-  );
-
-  sync();
-})();
-
-/* ============================================================
    AndyAzhTEC Classroom - Modal de vista previa de correo
    Etapa 1: estructura editable + preview HTML, sin envío real.
    ============================================================ */
@@ -3334,6 +2511,12 @@ if (!items.length) {
       type:
         String(
           qs("#notificationType")?.value ||
+          ""
+        ).trim(),
+
+      topic:
+        String(
+          qs("#notificationTopic")?.value ||
           ""
         ).trim(),
 
@@ -4021,13 +3204,31 @@ if (!items.length) {
     button.addEventListener("click", openModal);
   }
 
-  document.addEventListener("DOMContentLoaded", () => {
+  function initPreviewModal() {
     createModal();
     bindStaticPreviewButton();
 
     setTimeout(bindStaticPreviewButton, 300);
     setTimeout(bindStaticPreviewButton, 1000);
-  });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener(
+      "DOMContentLoaded",
+      initPreviewModal,
+      { once: true }
+    );
+  } else {
+    initPreviewModal();
+  }
+
+  window.addEventListener(
+    "classroom:notification-composer-reset",
+    () => {
+      savedDraft = null;
+      closeModal();
+    }
+  );
 
   window.ClassroomMailPreviewModal = {
     open: openModal,
@@ -4046,51 +3247,49 @@ if (!items.length) {
 })();
 
 
-/* === Notification Center visual mail prototype 20260926 === */
-(function () {
+/* === Notification Composer Shell 20260929 === */
+(function initNotificationComposerShell() {
   "use strict";
 
-  const form = document.getElementById("notificationAdminForm");
-  const mailToggle = document.getElementById("notificationChannelMail");
-  const mailPanel = document.getElementById("notificationMailComposer");
-  const previewButton =
-    document.getElementById("notificationAcademicMailEmailPreviewBtn");
+  const form =
+    document.getElementById(
+      "notificationAdminForm"
+    );
 
-  if (!form || !mailToggle || !mailPanel) return;
+  const mailToggle =
+    document.getElementById(
+      "notificationChannelMail"
+    );
+
+  const mailPanel =
+    document.getElementById(
+      "notificationMailComposer"
+    );
+
+  if (
+    !form ||
+    !mailToggle ||
+    !mailPanel
+  ) {
+    return;
+  }
 
   /*
-   * Seguridad del prototipo:
-   * todavía no permitimos guardar ni enviar.
+   * El composer moderno se guarda exclusivamente
+   * mediante notificationPrototypeSave / segment-create.
+   * Enter dentro del <form> no debe disparar
+   * ningún flujo legacy.
    */
   form.addEventListener(
     "submit",
-    function (event) {
+    event => {
       event.preventDefault();
-      event.stopImmediatePropagation();
-    },
-    true
+    }
   );
 
   function syncMailPanel() {
-    mailPanel.hidden = !mailToggle.checked;
-  }
-
-  function syncRecipientCount() {
-    const checks = [
-      ...document.querySelectorAll(
-        ".notification-mail-recipient-check"
-      ),
-    ];
-
-    const selected =
-      checks.filter((checkbox) => checkbox.checked).length;
-
-    const counter =
-      document.getElementById("notificationMailSelectedCount");
-
-    if (counter) {
-      counter.textContent = String(selected);
-    }
+    mailPanel.hidden =
+      !mailToggle.checked;
   }
 
   mailToggle.addEventListener(
@@ -4098,61 +3297,18 @@ if (!items.length) {
     syncMailPanel
   );
 
-  document
-    .querySelectorAll(".notification-mail-recipient-check")
-    .forEach((checkbox) => {
-      checkbox.addEventListener(
-        "change",
-        syncRecipientCount
+  form.addEventListener(
+    "reset",
+    () => {
+      setTimeout(
+        syncMailPanel,
+        0
       );
-    });
-
-  document
-    .getElementById("notificationMailSelectAll")
-    ?.addEventListener("click", function () {
-      document
-        .querySelectorAll(".notification-mail-recipient-check")
-        .forEach((checkbox) => {
-          checkbox.checked = true;
-        });
-
-      syncRecipientCount();
-    });
-
-  document
-    .getElementById("notificationMailSelectNone")
-    ?.addEventListener("click", function () {
-      document
-        .querySelectorAll(".notification-mail-recipient-check")
-        .forEach((checkbox) => {
-          checkbox.checked = false;
-        });
-
-      syncRecipientCount();
-    });
-
-  if (previewButton) {
-    previewButton.onclick = function (event) {
-      event.preventDefault();
-
-      if (
-        window.ClassroomMailPreviewModal &&
-        typeof window.ClassroomMailPreviewModal.open === "function"
-      ) {
-        window.ClassroomMailPreviewModal.open();
-        return;
-      }
-
-      console.error(
-        "[Centro] ClassroomMailPreviewModal no esta disponible."
-      );
-    };
-  }
+    }
+  );
 
   syncMailPanel();
-  syncRecipientCount();
 })();
-
 
 /* === Notification Audience REAL backend 20260926 === */
 (function initNotificationAudienceBackendReal() {
@@ -4845,6 +4001,40 @@ if (!items.length) {
       bindState(state);
     });
   }
+
+  function resetAudienceStates() {
+    states.forEach(state => {
+      state.selected.clear();
+      state.searchItems.clear();
+      state.lastResolved = null;
+      state.lastError = null;
+
+      const radios =
+        getRadios(state.config);
+
+      radios.forEach(radio => {
+        radio.checked =
+          radio.value === "all";
+      });
+
+      if (state.config.search) {
+        state.config.search.value = "";
+      }
+
+      if (state.config.results) {
+        state.config.results.innerHTML = "";
+        state.config.results.hidden = true;
+      }
+
+      renderSelected(state);
+      syncAudienceUi(state);
+    });
+  }
+
+  window.addEventListener(
+    "classroom:notification-composer-reset",
+    resetAudienceStates
+  );
 
   window.ClassroomNotificationAudiences = {
     refresh: async function refresh() {
@@ -5650,7 +4840,73 @@ if (!items.length) {
   syncFromAudience();
 })();
 
-/* === Notification Segment Create Button 20260927 V3 MULTICHANNEL === */
+function notificationTypeForTopic(topic) {
+    const clean =
+      String(topic || "")
+        .trim()
+        .toLowerCase();
+
+    if (clean === "community") {
+      return "community";
+    }
+
+    if (
+      clean === "attendance" ||
+      clean === "evaluations" ||
+      clean === "recoveries" ||
+      clean === "classes"
+    ) {
+      return "academic";
+    }
+
+    if (clean === "system") {
+      return "system";
+    }
+
+    return "announcement";
+  }
+
+  document.addEventListener(
+    "change",
+    event => {
+      if (
+        event.target?.id !==
+        "notificationTopic"
+      ) {
+        return;
+      }
+
+      const typeEl =
+        document.getElementById(
+          "notificationType"
+        );
+
+      if (!typeEl) {
+        return;
+      }
+
+      const nextType =
+        notificationTypeForTopic(
+          event.target.value
+        );
+
+      if (typeEl.value === nextType) {
+        return;
+      }
+
+      typeEl.value = nextType;
+
+      typeEl.dispatchEvent(
+        new Event(
+          "change",
+          { bubbles: true }
+        )
+      );
+    }
+  );
+
+
+  /* === Notification Segment Create Button 20260927 V3 MULTICHANNEL === */
 (function initNotificationSegmentCreateButtonV2() {
   "use strict";
 
@@ -6058,9 +5314,18 @@ if (!items.length) {
         );
       }
 
+      /*
+       * Si Avisos o Campanita también están activos,
+       * Mail debe corresponder a la misma audiencia general.
+       *
+       * En Mail-only, la selección de correo es independiente:
+       * puede contener usuarios Classroom y correos externos
+       * aunque la audiencia in-app esté vacía.
+       */
       if (
+        (notice || bell) &&
         mailAudience !==
-        snap.sourceAudience
+          snap.sourceAudience
       ) {
         throw new Error(
           "La audiencia de Mail no coincide con la audiencia general."
@@ -6068,8 +5333,9 @@ if (!items.length) {
       }
 
       if (
+        (notice || bell) &&
         expectedMailAudienceCount !==
-        snap.expectedAudienceCount
+          snap.expectedAudienceCount
       ) {
         throw new Error(
           "La audiencia de Mail cambió. Esperá un instante y volvé a intentar."
@@ -6110,6 +5376,12 @@ if (!items.length) {
         value(
           "notificationType",
           "announcement"
+        ),
+
+      topic:
+        value(
+          "notificationTopic",
+          "news"
         ),
 
       severity:
@@ -6850,6 +6122,23 @@ if (!items.length) {
       event.preventDefault();
       event.stopPropagation();
       createSnapshot();
+    }
+  );
+
+  window.addEventListener(
+    "classroom:notification-composer-reset",
+    () => {
+      busy = false;
+      createdFingerprint = "";
+      lastResult = null;
+
+      button.innerHTML =
+        defaultButtonHtml;
+
+      setTimeout(
+        syncButton,
+        0
+      );
     }
   );
 
