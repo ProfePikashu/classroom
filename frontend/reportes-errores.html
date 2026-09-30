@@ -4,18 +4,18 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <title>Rúbricas AyRPC 2025 — AndyAzhTEC Classroom</title>
+  <title>Reportes de errores — AndyAzhTEC Classroom</title>
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
-  <script src="https://cdn.jsdelivr.net/npm/js-yaml@4/dist/js-yaml.min.js"></script>
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600;700;800&display=swap" rel="stylesheet" />
 
-  <link rel="stylesheet" href="css/styles.css?v=20260621-linkedin-recomendacion" />
+  <link rel="stylesheet" href="css/styles.css?v=20260923-roles-matrix-v1" />
   <link rel="icon" href="favicon.ico" type="image/x-icon" />
   <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
+  <link rel="stylesheet" href="css/bug-reports-admin.css?v=20260930-v1" />
 </head>
 
 <body>
@@ -161,22 +161,30 @@
     <main class="main-content">
       <header class="topbar">
         <div>
-          <p class="eyebrow">
-            <i class="fa-solid fa-list-check"></i>
-            AyRPC 2025
+          <p class="eyebrow" style="color:#ff626f;">
+            <i class="fa-solid fa-bug"></i>
+            Control de errores
           </p>
 
-          <h1>Rúbricas</h1>
+          <h1>Reportes de errores</h1>
         </div>
 
         <div class="topbar-actions">
-          <button class="theme-toggle theme-toggle-icon" id="themeToggle" type="button" aria-label="Cambiar tema">
+          <button
+            class="theme-toggle theme-toggle-icon"
+            id="themeToggle"
+            type="button"
+            aria-label="Cambiar tema"
+          >
             <i class="fa-solid fa-moon"></i>
           </button>
 
-
           <div class="user-menu" id="userMenu">
-            <button class="user-pill user-menu-toggle" id="userMenuToggle" type="button" aria-label="Abrir menú de usuario">
+            <button
+              class="user-pill user-menu-toggle"
+              id="userMenuToggle"
+              type="button"
+            >
               <div class="user-avatar">
                 <i class="fa-solid fa-user-astronaut"></i>
               </div>
@@ -204,92 +212,92 @@
         </div>
       </header>
 
-      <section class="hero-panel rubrics-hero">
-        <div class="hero-copy">
-          <span class="badge">
-            <i class="fa-solid fa-user-shield"></i>
-            Panel docente
-          </span>
-
-          <h2>
-            Constructor básico
-            <span>Cuestionarios de recuperación</span>
-          </h2>
-
-          <p>{ASIGNAR DESCRIPCION}</p>
-        </div>
-      </section>
-
-      <section id="teacherDenied" class="panel teacher-denied" style="display:none;">
+      <section
+        id="bugReportsDenied"
+        class="panel teacher-denied"
+        style="display:none;"
+      >
         <h3>Acceso restringido</h3>
-        <p>Esta sección está disponible solo para usuario docente.</p>
+        <p>Esta sección está disponible únicamente para el rol docente.</p>
       </section>
 
-      <section id="rubricsApp" class="rubrics-layout" style="display:none;">
-        <article class="panel">
-          <div class="panel-header">
-            <div>
-              <p class="eyebrow">Clase</p>
-              <h3>Seleccionar recuperación</h3>
-            </div>
-          </div>
+      <section
+        id="bugReportsApp"
+        class="bug-admin-page"
+        style="display:none;"
+      >
+        <div class="bug-admin-summary">
+          <article class="bug-stat danger">
+            <strong id="bugCountPending">0</strong>
+            <span>Pendientes</span>
+          </article>
 
-          <div class="rubric-form-grid">
-            <label>
-              <span>Clase</span>
-              <select id="rubricClassSelect"></select>
-            </label>
+          <article class="bug-stat">
+            <strong id="bugCountProgress">0</strong>
+            <span>En proceso</span>
+          </article>
 
-            <label>
-              <span>Título del cuestionario</span>
-              <input id="rubricQuizTitle" type="text" placeholder="{ASIGNAR TITULO}" />
-            </label>
+          <article class="bug-stat">
+            <strong id="bugCountSolved">0</strong>
+            <span>Solucionados</span>
+          </article>
 
-            <label>
-              <span>Mínimo de aprobación</span>
-              <input id="rubricMinScore" type="number" min="1" max="100" value="70" />
-            </label>
-          </div>
-
-          <div class="rubric-actions">
-            <button class="btn btn-outline" id="btnAddQuestion" type="button">
-              <i class="fa-solid fa-plus"></i>
-              Agregar pregunta
-            </button>
-
-            <button class="btn btn-primary" id="btnSaveRubric" type="button">
-              <i class="fa-solid fa-floppy-disk"></i>
-              Guardar rúbrica
-            </button>
-
-            <button class="btn btn-outline danger-btn" id="btnResetRubric" type="button">
-              <i class="fa-solid fa-rotate-left"></i>
-              Reset local
-            </button>
-          </div>
-        </article>
+          <article class="bug-stat">
+            <strong id="bugCountTotal">0</strong>
+            <span>Total</span>
+          </article>
+        </div>
 
         <article class="panel">
           <div class="panel-header">
             <div>
-              <p class="eyebrow">Preguntas</p>
-              <h3>Constructor</h3>
+              <p class="eyebrow" style="color:#ff626f;">
+                <i class="fa-solid fa-filter"></i>
+                Filtros
+              </p>
+
+              <h3>Bandeja de reportes</h3>
             </div>
           </div>
 
-          <div id="rubricQuestions" class="rubric-questions"></div>
-        </article>
+          <div class="bug-admin-toolbar">
+            <select id="bugFilterStatus">
+              <option value="">Todos los estados</option>
+              <option value="PENDIENTE">Pendientes</option>
+              <option value="EN_PROCESO">En proceso</option>
+              <option value="SOLUCIONADO">Solucionados</option>
+            </select>
 
-        <article class="panel">
-          <div class="panel-header">
-            <div>
-              <p class="eyebrow">Vista previa</p>
-              <h3>Cuestionario</h3>
-            </div>
+            <select id="bugFilterType">
+              <option value="">Todos los tipos</option>
+              <option value="FUNCIONAL">Funcionales</option>
+              <option value="ESTETICO">Estéticos</option>
+            </select>
+
+            <select id="bugFilterPriority">
+              <option value="">Todas las prioridades</option>
+              <option value="ALTA">Alta</option>
+              <option value="MEDIA">Media</option>
+              <option value="BAJA">Baja</option>
+            </select>
+
+            <button
+              id="bugRefresh"
+              class="btn btn-outline"
+              type="button"
+            >
+              <i class="fa-solid fa-rotate"></i>
+              Actualizar
+            </button>
           </div>
-
-          <div id="rubricPreview" class="rubric-preview"></div>
         </article>
+
+        <div id="bugReportsError"></div>
+
+        <section
+          id="bugReportsList"
+          class="bug-admin-list"
+        ></section>
       </section>
     </main>
   </div>
@@ -298,7 +306,7 @@
   <script src="js/roles.js?v=20260917-roles-permissions-v1"></script>
   <script src="js/main.js?v=20260612-newsletter-api-v1"></script>
   <script src="js/notifications-local.js?v=20260930-notification-preferences-v2"></script>
-  <script src="js/rubricas-ayrpc-2025.js"></script>
+  <script src="js/bug-reports-admin.js?v=20260930-v1"></script>
   <script src="js/pelusita.js?v=20260612-sidebar-dock"></script>  <script src="js/pelusita-dialog.js?v=20260612-guide-compact"></script>
   <script src="js/sidebar-v2.js?v=20260923-permissions-v1"></script>
 </body>

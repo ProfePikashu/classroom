@@ -1,0 +1,264 @@
+
+.bug-reporter-button {
+  position: fixed;
+  right: 24px;
+  bottom: 22px;
+  z-index: 9800;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,.16);
+  background: rgba(18, 22, 34, .94);
+  color: #f4f6fb;
+  box-shadow:
+    0 12px 30px rgba(0,0,0,.34),
+    0 0 0 1px rgba(255,255,255,.04) inset;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  font-size: 21px;
+  transition:
+    transform .18s ease,
+    box-shadow .18s ease,
+    background .18s ease;
+}
+
+.bug-reporter-button:hover {
+  transform: translateY(-2px) scale(1.04);
+  background: rgba(30, 36, 52, .98);
+  box-shadow:
+    0 16px 36px rgba(0,0,0,.4),
+    0 0 20px rgba(140, 120, 255, .18);
+}
+
+.bug-reporter-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 12000;
+  display: none;
+}
+
+.bug-reporter-modal.show {
+  display: block;
+}
+
+.bug-reporter-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(5, 8, 15, .72);
+  backdrop-filter: blur(8px);
+}
+
+.bug-reporter-dialog {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(680px, calc(100vw - 32px));
+  max-height: calc(100vh - 40px);
+  overflow: auto;
+  transform: translate(-50%, -50%);
+  border-radius: 22px;
+  border: 1px solid rgba(255,255,255,.12);
+  background:
+    linear-gradient(
+      180deg,
+      rgba(23, 27, 40, .98),
+      rgba(15, 18, 29, .98)
+    );
+  box-shadow:
+    0 30px 80px rgba(0,0,0,.5);
+  padding: 28px;
+  color: #eef1f8;
+}
+
+.bug-reporter-close {
+  position: absolute;
+  right: 16px;
+  top: 16px;
+  width: 38px;
+  height: 38px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255,255,255,.07);
+  color: inherit;
+  cursor: pointer;
+}
+
+.bug-reporter-header {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  padding-right: 42px;
+  margin-bottom: 24px;
+}
+
+.bug-reporter-header h2 {
+  margin: 2px 0 6px;
+}
+
+.bug-reporter-header p {
+  margin: 0;
+  opacity: .8;
+}
+
+.bug-reporter-icon {
+  flex: 0 0 auto;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  background: rgba(129, 111, 255, .16);
+  border: 1px solid rgba(151, 135, 255, .26);
+  font-size: 20px;
+}
+
+.bug-reporter-form {
+  display: grid;
+  gap: 18px;
+}
+
+.bug-reporter-form fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+
+.bug-reporter-form legend,
+.bug-field-title,
+.bug-field > span {
+  display: block;
+  font-weight: 700;
+  margin-bottom: 9px;
+}
+
+.bug-type-grid,
+.bug-priority-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.bug-type-grid {
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+}
+
+.bug-priority-grid {
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+}
+
+.bug-choice,
+.bug-priority-grid label {
+  cursor: pointer;
+}
+
+.bug-choice input,
+.bug-priority-grid input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.bug-choice > span,
+.bug-priority {
+  min-height: 90px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  justify-content: center;
+  padding: 14px;
+  border-radius: 15px;
+  border: 1px solid rgba(255,255,255,.11);
+  background: rgba(255,255,255,.045);
+  transition:
+    border-color .16s ease,
+    background .16s ease,
+    transform .16s ease;
+}
+
+.bug-choice input:checked + span,
+.bug-priority-grid input:checked + span {
+  border-color: rgba(145, 124, 255, .78);
+  background: rgba(126, 103, 255, .14);
+  transform: translateY(-1px);
+}
+
+.bug-choice small,
+.bug-priority small {
+  opacity: .7;
+  line-height: 1.3;
+}
+
+.bug-field textarea {
+  width: 100%;
+  resize: vertical;
+  min-height: 92px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.045);
+  color: inherit;
+  padding: 13px 14px;
+  outline: none;
+  font: inherit;
+}
+
+.bug-field textarea:focus {
+  border-color: rgba(145, 124, 255, .78);
+  box-shadow:
+    0 0 0 3px rgba(129, 107, 255, .1);
+}
+
+.bug-reporter-message {
+  min-height: 20px;
+  font-size: .94rem;
+}
+
+.bug-reporter-message.error {
+  color: #ff8585;
+}
+
+.bug-reporter-message.success {
+  color: #74e5a3;
+}
+
+.bug-reporter-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+body.bug-reporter-open {
+  overflow: hidden;
+}
+
+@media (max-width: 640px) {
+  .bug-reporter-button {
+    right: 16px;
+    bottom: 16px;
+  }
+
+  .bug-reporter-dialog {
+    width: calc(100vw - 20px);
+    max-height: calc(100vh - 20px);
+    padding: 22px 18px;
+  }
+
+  .bug-type-grid,
+  .bug-priority-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .bug-choice > span,
+  .bug-priority {
+    min-height: auto;
+  }
+
+  .bug-reporter-actions {
+    flex-direction: column-reverse;
+  }
+
+  .bug-reporter-actions .btn {
+    width: 100%;
+  }
+}

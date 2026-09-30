@@ -10,6 +10,7 @@
 
   const TEACHER_ONLY_ADMIN_ROUTES = new Set([
     "admin.html",
+    "reportes-errores.html",
     "rubricas-ayrpc-2025.html",
   ]);
 

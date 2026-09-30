@@ -1,0 +1,280 @@
+
+.sidebar-v2-admin-popover .sidebar-bug-reports-link {
+  color: #ff626f !important;
+  background:
+    linear-gradient(
+      90deg,
+      rgba(255, 45, 70, .12),
+      rgba(255, 45, 70, .035)
+    );
+  border: 1px solid rgba(255, 70, 90, .28);
+}
+
+.sidebar-v2-admin-popover .sidebar-bug-reports-link:hover,
+.sidebar-v2-admin-popover .sidebar-bug-reports-link.active {
+  color: #ff8a94 !important;
+  background: rgba(255, 50, 72, .17);
+  border-color: rgba(255, 80, 100, .58);
+  box-shadow:
+    0 0 16px rgba(255, 45, 70, .12);
+}
+
+.bug-admin-page {
+  display: grid;
+  gap: 18px;
+}
+
+.bug-admin-summary {
+  display: grid;
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.bug-stat {
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,.09);
+  background: rgba(255,255,255,.035);
+  padding: 16px;
+}
+
+.bug-stat strong {
+  display: block;
+  font-size: 1.7rem;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+
+.bug-stat span {
+  opacity: .72;
+  font-size: .9rem;
+}
+
+.bug-stat.danger {
+  border-color: rgba(255, 65, 85, .28);
+}
+
+.bug-admin-toolbar {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.bug-admin-toolbar select,
+.bug-admin-toolbar button {
+  min-height: 42px;
+}
+
+.bug-admin-list {
+  display: grid;
+  gap: 14px;
+}
+
+.bug-report-card {
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,.1);
+  background: rgba(255,255,255,.035);
+  padding: 18px;
+}
+
+.bug-report-card.priority-ALTA {
+  border-left: 4px solid #ff4f61;
+}
+
+.bug-report-card.priority-MEDIA {
+  border-left: 4px solid #ffae45;
+}
+
+.bug-report-card.priority-BAJA {
+  border-left: 4px solid #57d68d;
+}
+
+.bug-report-card.type-ESTETICO {
+  border-left-color: #9a82ff;
+}
+
+.bug-report-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+  margin-bottom: 14px;
+}
+
+.bug-report-tags {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+
+.bug-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border-radius: 999px;
+  padding: 5px 9px;
+  font-size: .78rem;
+  font-weight: 800;
+  background: rgba(255,255,255,.07);
+  border: 1px solid rgba(255,255,255,.08);
+}
+
+.bug-tag.red {
+  color: #ff8390;
+  background: rgba(255,70,90,.1);
+  border-color: rgba(255,70,90,.24);
+}
+
+.bug-tag.orange {
+  color: #ffc16e;
+  background: rgba(255,165,60,.1);
+  border-color: rgba(255,165,60,.23);
+}
+
+.bug-tag.green {
+  color: #79e3a5;
+  background: rgba(50,210,120,.1);
+  border-color: rgba(50,210,120,.22);
+}
+
+.bug-tag.purple {
+  color: #b9aaff;
+  background: rgba(140,110,255,.11);
+  border-color: rgba(140,110,255,.25);
+}
+
+.bug-report-date {
+  opacity: .65;
+  font-size: .82rem;
+  white-space: nowrap;
+}
+
+.bug-report-user {
+  margin-bottom: 12px;
+  line-height: 1.45;
+}
+
+.bug-report-user strong {
+  display: block;
+}
+
+.bug-report-user small {
+  opacity: .65;
+}
+
+.bug-report-section {
+  margin-top: 12px;
+}
+
+.bug-report-section > strong {
+  display: block;
+  margin-bottom: 5px;
+  font-size: .86rem;
+  opacity: .74;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+.bug-report-section p {
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.bug-report-tech {
+  margin-top: 14px;
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  padding: 11px;
+  border-radius: 12px;
+  background: rgba(0,0,0,.17);
+  font-size: .82rem;
+}
+
+.bug-report-tech div {
+  overflow-wrap: anywhere;
+}
+
+.bug-report-tech span {
+  opacity: .6;
+}
+
+.bug-report-controls {
+  display: grid;
+  grid-template-columns: 220px 1fr auto;
+  gap: 10px;
+  margin-top: 16px;
+  align-items: end;
+}
+
+.bug-report-controls label {
+  display: grid;
+  gap: 6px;
+}
+
+.bug-report-controls label > span {
+  font-size: .8rem;
+  font-weight: 700;
+  opacity: .74;
+}
+
+.bug-report-controls select,
+.bug-report-controls textarea {
+  width: 100%;
+  border-radius: 11px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.045);
+  color: inherit;
+  padding: 10px 11px;
+  font: inherit;
+}
+
+.bug-report-controls textarea {
+  min-height: 76px;
+  resize: vertical;
+}
+
+.bug-report-controls button {
+  min-height: 42px;
+}
+
+.bug-empty {
+  text-align: center;
+  padding: 40px 20px;
+  opacity: .65;
+}
+
+.bug-admin-error {
+  color: #ff8390;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(255,70,90,.08);
+  border: 1px solid rgba(255,70,90,.18);
+}
+
+@media (max-width: 900px) {
+  .bug-admin-summary {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+  .bug-report-controls {
+    grid-template-columns: 1fr;
+  }
+
+  .bug-report-tech {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .bug-admin-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .bug-report-head {
+    flex-direction: column;
+  }
+}
