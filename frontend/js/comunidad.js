@@ -460,13 +460,36 @@ return (
   }
 
   function attachmentImageThumbnailUrl(attachment) {
-    const fileId = attachment?.provider_file_id || attachment?.file_id || attachment?.drive_file_id || "";
+    const provider = String(attachment?.provider || "").toLowerCase();
+
+    // R2 ya entrega una URL temporal válida para mostrar el objeto.
+    if (provider === "cloudflare_r2") {
+      return (
+        attachment?.preview_url ||
+        attachment?.view_url ||
+        attachment?.download_url ||
+        attachmentUrl(attachment)
+      );
+    }
+
+    // Compatibilidad con adjuntos históricos de Google Drive.
+    const fileId =
+      attachment?.provider_file_id ||
+      attachment?.file_id ||
+      attachment?.drive_file_id ||
+      "";
 
     if (fileId) {
       return `https://drive.google.com/thumbnail?id=${encodeURIComponent(fileId)}&sz=w1000`;
     }
 
-    return attachment?.thumbnail_url || attachment?.download_url || attachment?.view_url || attachmentUrl(attachment);
+    return (
+      attachment?.thumbnail_url ||
+      attachment?.preview_url ||
+      attachment?.download_url ||
+      attachment?.view_url ||
+      attachmentUrl(attachment)
+    );
   }
 
 
