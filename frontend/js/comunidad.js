@@ -1258,7 +1258,7 @@ return (
     const title = els.title?.value.trim();
     const content = els.content?.value.trim();
     const type = els.type?.value || "consulta";
-    const course = els.course?.value || "ayrpc-2025";
+    const course = els.course?.value || "general";
 
     if (!title || !content) return;
 
@@ -1291,13 +1291,6 @@ return (
       const created = normalizeThread(data.item);
       threadRepliesCache.set(created.id, []);
 
-      notifyCommunity({
-        type: "community_new_post",
-        title: "Nuevo hilo en Comunidad",
-        body: `${TYPE_LABELS[type] || "Publicación"}: ${title}`,
-        actor: currentUserName(),
-        meta: { postId: created.id, postTitle: title, postType: type, course },
-      });
 
       els.form.reset();
       pendingAttachments = [];
@@ -1322,13 +1315,6 @@ return (
 
       await loadThreadDetail(postId);
 
-      notifyCommunity({
-        type: "community_reply",
-        title: "Nueva respuesta en Comunidad",
-        body: `Respondieron en: ${post?.title || "un hilo"}`,
-        actor: currentUserName(),
-        meta: { postId, postTitle: post?.title },
-      });
 
       if (textarea) textarea.value = "";
 
@@ -1364,13 +1350,6 @@ return (
         },
       });
 
-      notifyCommunity({
-        type: "community_status",
-        title: nextStatus === "resuelto" ? "Hilo marcado como resuelto" : "Hilo reabierto",
-        body: post.title,
-        actor: currentUserName(),
-        meta: { postId, postTitle: post.title, status: nextStatus },
-      });
 
       await renderPosts();
     } catch (error) {
@@ -1389,18 +1368,6 @@ return (
         method: "DELETE",
       });
 
-      notifyCommunity({
-        type: "community_status",
-        title: "Hilo eliminado",
-        body: `Se ha eliminado el hilo: ${post?.title || postId}`,
-        actor: currentUserName(),
-        meta: {
-          postId,
-          postTitle: post?.title,
-          status: "eliminado",
-          action: "delete_thread",
-        },
-      });
 
       threadRepliesCache.delete(postId);
       await renderPosts();
