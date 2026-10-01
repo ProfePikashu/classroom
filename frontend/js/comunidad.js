@@ -4699,9 +4699,18 @@ console.log(`[Comunidad] ${PATCH_ID} activo.`);
       return `
         <a class="community-reply-media-card-v3 video" href="${escapeHtml(open)}" target="_blank" rel="noopener">
           <div class="community-reply-video-preview-v3">
-            <i class="fa-solid fa-circle-play"></i>
-            <span>Ver video</span>
+            <video
+              src="${escapeHtml(open)}"
+              preload="metadata"
+              muted
+              playsinline
+            ></video>
+
+            <span class="community-reply-video-play-v3">
+              <i class="fa-solid fa-circle-play"></i>
+            </span>
           </div>
+
           <div class="community-reply-media-caption">
             <i class="fa-solid ${escapeHtml(iconFor(item))}"></i>
             <span>${escapeHtml(name)}</span>
