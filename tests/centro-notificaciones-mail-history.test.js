@@ -31,6 +31,15 @@ test("El modal ordena historial e intentos por fecha descendente", () => {
 });
 
 
+test("El historial consolida los intentos en una fila por usuario", () => {
+  assert.match(js, /groupMailLogItemsByRecipient/);
+  assert.match(js, /uniqueMailLogSummary/);
+  assert.match(js, /mailLogRecipientKey/);
+  assert.match(js, /recipient_id/);
+  assert.match(js, /attempts\.length/);
+});
+
+
 
 test("El envio principal habla de cola y no de envio SMTP inmediato", () => {
   assert.doesNotMatch(js, /Enviando \$\{expected\} correo/);

@@ -1498,6 +1498,78 @@ if (!items.length) {
     );
   }
 
+  function mailLogRecipientKey(item) {
+    const recipientId = String(item?.recipient_id || "").trim();
+
+    if (recipientId) {
+      return `recipient:${recipientId}`;
+    }
+
+    return `email:${String(item?.email || "")
+      .trim()
+      .toLowerCase()}`;
+  }
+
+  function groupMailLogItemsByRecipient(items) {
+    const groups = new Map();
+
+    for (const item of sortMailLogItemsByNewest(items)) {
+      const key = mailLogRecipientKey(item);
+
+      if (!groups.has(key)) {
+        groups.set(key, []);
+      }
+
+      groups.get(key).push(item);
+    }
+
+    return [...groups.values()];
+  }
+
+  function uniqueMailLogSummary(items) {
+    const recipients = groupMailLogItemsByRecipient(items);
+
+    const summary = {
+      total: recipients.length,
+      accepted: 0,
+      failed: 0,
+      deferred: 0,
+      pending: 0,
+      skipped: 0,
+      mailbox_full: 0,
+      invalid_address: 0,
+    };
+
+    for (const attempts of recipients) {
+      const latest = attempts[0] || {};
+      const status = String(
+        latest.error_type || latest.status || ""
+      ).toLowerCase();
+
+      if (status === "accepted" || status === "sent") {
+        summary.accepted += 1;
+      } else if (
+        status === "deferred" ||
+        status === "provider_rate_limit" ||
+        status === "provider_quota"
+      ) {
+        summary.deferred += 1;
+      } else if (status === "failed") {
+        summary.failed += 1;
+      } else if (status === "pending") {
+        summary.pending += 1;
+      } else if (status === "skipped") {
+        summary.skipped += 1;
+      } else if (status === "mailbox_full") {
+        summary.mailbox_full += 1;
+      } else if (status === "invalid_address") {
+        summary.invalid_address += 1;
+      }
+    }
+
+    return summary;
+  }
+
   function audienceLabel(value) {
     const raw = String(value || "").toLowerCase();
 
@@ -1628,9 +1700,49 @@ if (!items.length) {
     const sortedItems = sortMailLogGroupsByNewest(items);
 
     content.innerHTML = sortedItems.map((send, index) => {
-      const s = send.summary || {};
+      const recipientGroups =
+        groupMailLogItemsByRecipient(send.items || []);
 
-      const rows = sortMailLogItemsByNewest(send.items || []).map((item) => `
+      const s = uniqueMailLogSummary(send.items || []);
+
+      const rows = recipientGroups.map((attempts) => {
+        const item = attempts[0] || {};
+
+        const attemptRows = attempts.map((attempt) => `
+          <div style="
+            padding:7px 0;
+            border-top:1px solid #374151;
+            font-size:12px;
+          ">
+            <strong>Intento ${escapeHtml(attempt.attempt_no ?? "-")}</strong>
+            ? ${escapeHtml(formatDate(
+              attempt.attempted_at ||
+              attempt.sent_at ||
+              attempt.created_at
+            ))}
+            <br>
+            ${escapeHtml(statusLabel(
+              attempt.error_type || attempt.status
+            ))}
+            ${
+              attempt.smtp_code
+                ? ` ? SMTP ${escapeHtml(attempt.smtp_code)}`
+                : ""
+            }
+            ${
+              attempt.error || attempt.smtp_response
+                ? `<div style="margin-top:3px;color:#9ca3af;">${
+                    escapeHtml(
+                      attempt.error ||
+                      attempt.smtp_response
+                    )
+                  }</div>`
+                : ""
+            }
+          </div>
+        `).join("");
+
+        return `
         <tr>
           <td style="padding:9px;border-bottom:1px solid #374151;">
             ${escapeHtml(item.email || "Sin email")}
@@ -1650,26 +1762,26 @@ if (!items.length) {
             color:#9ca3af;
             font-size:12px;
           ">
-            <div style="margin-bottom:4px;color:#d1d5db;">
-              ${escapeHtml(
-                `Intento ${item.attempt_no ?? "-"} - ${
-                  formatDate(
-                    item.attempted_at ||
-                    item.sent_at ||
-                    item.created_at
-                  )
-                }`
-              )}
+            <div style="margin-bottom:5px;color:#d1d5db;">
+              ?ltimo intento:
+              ${escapeHtml(formatDate(
+                item.attempted_at ||
+                item.sent_at ||
+                item.created_at
+              ))}
             </div>
-            ${escapeHtml(
-              item.error ||
-              item.smtp_response ||
-              item.provider ||
-              "-"
-            )}
+
+            <details>
+              <summary style="cursor:pointer;color:#facc15;">
+                ${attempts.length}
+                ${attempts.length === 1 ? "intento" : "intentos"}
+              </summary>
+              ${attemptRows}
+            </details>
           </td>
         </tr>
-      `).join("");
+        `;
+      }).join("");
 
       return `
         <details
