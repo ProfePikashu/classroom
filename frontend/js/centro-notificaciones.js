@@ -1475,6 +1475,29 @@ if (!items.length) {
     });
   }
 
+  function mailLogTime(value) {
+    const raw =
+      value?.attempted_at ||
+      value?.sent_at ||
+      value?.created_at ||
+      "";
+
+    const time = new Date(raw).getTime();
+    return Number.isNaN(time) ? 0 : time;
+  }
+
+  function sortMailLogGroupsByNewest(items) {
+    return [...(items || [])].sort(
+      (a, b) => mailLogTime(b) - mailLogTime(a)
+    );
+  }
+
+  function sortMailLogItemsByNewest(items) {
+    return [...(items || [])].sort(
+      (a, b) => mailLogTime(b) - mailLogTime(a)
+    );
+  }
+
   function audienceLabel(value) {
     const raw = String(value || "").toLowerCase();
 
@@ -1495,6 +1518,8 @@ if (!items.length) {
       deferred: "Diferido",
       failed: "Fallido",
       mailbox_full: "Casilla llena",
+      provider_quota: "Cuota del proveedor",
+      provider_rate_limit: "Límite temporal del proveedor",
       invalid_address: "Dirección inválida",
       skipped: "Omitido",
     };
@@ -1600,17 +1625,19 @@ if (!items.length) {
       return;
     }
 
-    content.innerHTML = items.map((send, index) => {
+    const sortedItems = sortMailLogGroupsByNewest(items);
+
+    content.innerHTML = sortedItems.map((send, index) => {
       const s = send.summary || {};
 
-      const rows = (send.items || []).map((item) => `
+      const rows = sortMailLogItemsByNewest(send.items || []).map((item) => `
         <tr>
           <td style="padding:9px;border-bottom:1px solid #374151;">
             ${escapeHtml(item.email || "Sin email")}
           </td>
 
           <td style="padding:9px;border-bottom:1px solid #374151;">
-            ${escapeHtml(statusLabel(item.status))}
+            ${escapeHtml(statusLabel(item.error_type || item.status))}
           </td>
 
           <td style="padding:9px;border-bottom:1px solid #374151;">
@@ -1623,6 +1650,17 @@ if (!items.length) {
             color:#9ca3af;
             font-size:12px;
           ">
+            <div style="margin-bottom:4px;color:#d1d5db;">
+              ${escapeHtml(
+                `Intento ${item.attempt_no ?? "-"} - ${
+                  formatDate(
+                    item.attempted_at ||
+                    item.sent_at ||
+                    item.created_at
+                  )
+                }`
+              )}
+            </div>
             ${escapeHtml(
               item.error ||
               item.smtp_response ||
@@ -6195,252 +6233,4 @@ function notificationTypeForTopic(topic) {
   );
 
   syncButton();
-})();
-
-/* ============================================================
-   AndyAzhTEC Classroom - Historial de correo
-   ============================================================ */
-(function initNotificationMailHistory() {
-  const container =
-    document.getElementById("notificationMailHistory");
-
-  const refreshButton =
-    document.getElementById("notificationMailHistoryRefresh");
-
-  if (!container || !refreshButton) return;
-
-  function getHistorySession() {
-    try {
-      return (
-        window.ClassroomAuth
-          ?.getSession?.() ||
-        JSON.parse(
-          localStorage.getItem(
-            "andyazh-classroom-session"
-          ) || "null"
-        ) ||
-        {}
-      );
-    } catch (_) {
-      return {};
-    }
-  }
-
-  function getHistoryToken() {
-    const session =
-      getHistorySession();
-
-    return (
-      session?.classroomReadToken ||
-      session?.exampro?.accessToken ||
-      session?.exampro?.access_token ||
-      session?.exampro?.token ||
-      session?.accessToken ||
-      session?.access_token ||
-      session?.token ||
-      session?.student_token ||
-      session?.exampro_token ||
-      session?.jwt ||
-      ""
-    );
-  }
-
-  function getHistoryApiBase() {
-    return String(
-      window.CLASSROOM_API_BASE ||
-      window.EXAMPRO_API_BASE ||
-      "https://api.andyazhtec.com"
-    ).replace(/\/+$/, "");
-  }
-
-  function historyBackendError(data, statusCode) {
-    const detail =
-      data?.detail;
-
-    if (typeof detail === "string") {
-      return detail;
-    }
-
-    if (
-      detail &&
-      typeof detail === "object"
-    ) {
-      return (
-        detail.message ||
-        detail.code ||
-        JSON.stringify(detail)
-      );
-    }
-
-    return (
-      data?.message ||
-      `Error backend ${statusCode}`
-    );
-  }
-
-  function escapeHtml(value) {
-    return String(value ?? "")
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#039;");
-  }
-
-  function formatDate(value) {
-    if (!value) return "-";
-
-    const date = new Date(value);
-
-    if (Number.isNaN(date.getTime())) {
-      return String(value);
-    }
-
-    return date.toLocaleString("es-AR");
-  }
-
-  function statusLabel(value) {
-    const labels = {
-      accepted: "Aceptado",
-      sent: "Enviado",
-      failed: "Fallido",
-      pending: "Pendiente",
-      deferred: "Diferido",
-      mailbox_full: "Buzon lleno",
-      invalid_address: "Direccion invalida",
-      skipped: "Omitido",
-      provider_quota: "Cuota del proveedor",
-    };
-
-    return labels[value] || value || "Desconocido";
-  }
-
-  function render(items) {
-    if (!Array.isArray(items) || !items.length) {
-      container.innerHTML =
-        "<p>Todavia no hay intentos de correo registrados.</p>";
-      return;
-    }
-
-    container.innerHTML = items.map(group => {
-      const summary = group?.summary || {};
-      const deliveries =
-        Array.isArray(group?.items)
-          ? group.items
-          : [];
-
-      const rows = deliveries.map(item => {
-        const error =
-          item?.error ||
-          item?.smtp_response ||
-          "";
-
-        return `
-          <div class="notification-admin-item">
-            <div>
-              <strong>${escapeHtml(item?.email || "Sin email")}</strong>
-              <small>
-                ${escapeHtml(statusLabel(item?.error_type || item?.status))}
-                · Intento ${escapeHtml(item?.attempt_no ?? "-")}
-                · ${escapeHtml(formatDate(item?.attempted_at || item?.sent_at))}
-              </small>
-              ${
-                error
-                  ? `<small>${escapeHtml(error)}</small>`
-                  : ""
-              }
-            </div>
-            <div>
-              ${
-                item?.smtp_code
-                  ? `<small>SMTP ${escapeHtml(item.smtp_code)}</small>`
-                  : ""
-              }
-              ${
-                item?.provider
-                  ? `<small>${escapeHtml(item.provider)}</small>`
-                  : ""
-              }
-            </div>
-          </div>
-        `;
-      }).join("");
-
-      return `
-        <section class="notification-admin-history-group">
-          <div class="notification-admin-item">
-            <div>
-              <strong>${escapeHtml(group?.title || "Sin asunto")}</strong>
-              <small>
-                ${escapeHtml(formatDate(group?.created_at))}
-                · Total ${escapeHtml(summary?.total ?? 0)}
-                · Enviados ${escapeHtml(summary?.sent ?? 0)}
-                · Fallidos ${escapeHtml(summary?.failed ?? 0)}
-              </small>
-            </div>
-          </div>
-          ${rows}
-        </section>
-      `;
-    }).join("");
-  }
-
-  async function loadHistory() {
-    refreshButton.disabled = true;
-
-    container.innerHTML =
-      "<p>Cargando historial de correo...</p>";
-
-    try {
-      const token =
-        getHistoryToken();
-
-      const response = await fetch(
-        `${getHistoryApiBase()}/api/classroom/notifications/admin/mail-logs?limit=30`,
-        {
-          method: "GET",
-          cache: "no-store",
-          headers: token
-            ? { Authorization: `Bearer ${token}` }
-            : {},
-        }
-      );
-
-      const data =
-        await response.json().catch(() => ({}));
-
-      if (!response.ok || !data?.ok) {
-        throw new Error(
-          historyBackendError(
-            data,
-            response.status
-          )
-        );
-      }
-
-      render(data?.items || []);
-    } catch (error) {
-      console.error(
-        "[Centro] historial de correo:",
-        error
-      );
-
-      container.innerHTML =
-        `<p>No se pudo cargar el historial de correo: ${escapeHtml(error?.message || error)}</p>`;
-    } finally {
-      refreshButton.disabled = false;
-    }
-  }
-
-  refreshButton.addEventListener(
-    "click",
-    loadHistory
-  );
-
-  window.addEventListener(
-    "classroom:notifications-updated",
-    loadHistory
-  );
-
-  loadHistory();
 })();

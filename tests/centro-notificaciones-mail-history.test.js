@@ -13,13 +13,23 @@ const js = fs.readFileSync(
   "utf8"
 );
 
-test("Centro de notificaciones muestra y carga el historial de correo", () => {
-  assert.match(html, /id="notificationMailHistory"/);
-  assert.match(html, /id="notificationMailHistoryRefresh"/);
+test("El historial de correo vive solo dentro del modal amarillo", () => {
+  assert.doesNotMatch(html, /id="notificationMailHistory"/);
+  assert.doesNotMatch(html, /id="notificationMailHistoryRefresh"/);
+  assert.match(js, /id = "notificationBackendBadge"/);
+  assert.match(js, /window\.ClassroomMailLogsModal/);
+  assert.match(js, /classroomMailLogsContent/);
+  assert.doesNotMatch(js, /function initNotificationMailHistory\(\)/);
   assert.match(js, /\/api\/classroom\/notifications\/admin\/mail-logs/);
-  assert.match(js, /attempt_no/);
-  assert.match(js, /attempted_at/);
 });
+
+test("El modal ordena historial e intentos por fecha descendente", () => {
+  assert.match(js, /sortMailLogGroupsByNewest/);
+  assert.match(js, /sortMailLogItemsByNewest/);
+  assert.match(js, /attempted_at/);
+  assert.match(js, /sent_at/);
+});
+
 
 
 test("El envio principal habla de cola y no de envio SMTP inmediato", () => {
@@ -32,35 +42,31 @@ test("El envio principal habla de cola y no de envio SMTP inmediato", () => {
 });
 
 
-test("El historial de correo tiene autenticacion y helpers propios", () => {
-  const start = js.indexOf("(function initNotificationMailHistory()");
+test("El modal de historial usa el bridge autenticado del backend", () => {
+  const start = js.indexOf("(function initClassroomMailLogsModal()");
   assert.notEqual(start, -1);
 
   const history = js.slice(start);
 
-  assert.doesNotMatch(history, /localStorage\.getItem\("classroom_token"\)/);
-  assert.doesNotMatch(history, /sessionStorage\.getItem\("classroom_token"\)/);
-
-  assert.match(history, /window\.ClassroomAuth/);
-  assert.match(history, /andyazh-classroom-session/);
-  assert.match(history, /function getHistoryToken/);
-  assert.match(history, /function getHistoryApiBase/);
-  assert.match(history, /function historyBackendError/);
+  assert.match(history, /window\.ClassroomBackendNotifications/);
+  assert.match(history, /ensureBackendToken/);
+  assert.match(history, /getApiBase/);
+  assert.match(history, /Authorization/);
 });
 
 
-test("El historial muestra explicitamente errores de cuota del proveedor", () => {
-  const start = js.indexOf("(function initNotificationMailHistory()");
+
+test("El modal muestra explicitamente errores del proveedor", () => {
+  const start = js.indexOf("(function initClassroomMailLogsModal()");
   assert.notEqual(start, -1);
 
   const history = js.slice(start);
 
-  assert.match(history, /item\?\.error_type/);
-  assert.match(
-    history,
-    /statusLabel\(item\?\.error_type \|\| item\?\.status\)/
-  );
+  assert.match(history, /item\.error_type \|\| item\.status/);
+  assert.match(history, /provider_quota/);
+  assert.match(history, /provider_rate_limit/);
 });
+
 
 
 test("Los archivos del centro usan UTF-8 sin BOM ni mojibake conocido", () => {
