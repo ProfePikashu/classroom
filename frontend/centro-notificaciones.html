@@ -680,12 +680,62 @@
 
               </div>
 
+
+            <div
+              class="notification-mail-actions-editor"
+              style="
+                margin:18px 0;
+                padding:18px;
+                border:1px solid rgba(96,165,250,.22);
+                border-radius:16px;
+                background:rgba(15,23,42,.34);
+              "
+            >
+              <div
+                style="
+                  display:flex;
+                  justify-content:space-between;
+                  gap:12px;
+                  align-items:center;
+                  flex-wrap:wrap;
+                  margin-bottom:12px;
+                "
+              >
+                <div>
+                  <span class="notification-section-kicker">
+                    Botones adicionales
+                  </span>
+                  <strong style="display:block;margin-top:4px;">
+                    Agregá accesos secundarios al correo
+                  </strong>
+                  <small style="display:block;margin-top:5px;color:#94a3b8;">
+                    El botón principal sigue siendo el CTA actual.
+                    Acá podés sumar Twitch, WhatsApp, correo u otros enlaces.
+                  </small>
+                </div>
+
+                <button
+                  type="button"
+                  class="btn btn-secondary btn-small"
+                  id="notificationMailActionAdd"
+                >
+                  <i class="fa-solid fa-plus"></i>
+                  Agregar botón
+                </button>
+              </div>
+
+              <div
+                id="notificationMailActions"
+                style="display:grid;gap:10px;"
+              ></div>
+            </div>
+
             <div class="notification-mail-preview-launch">
               <div>
                 <span class="notification-section-kicker">Contenido del correo</span>
                 <strong>Personalizá y revisá el mail antes de enviarlo</strong>
                 <p>
-                  Asunto, etiqueta, saludo, cuerpo, botón, enlace, destacados y pie.
+                  Asunto, etiqueta, saludo, cuerpo, botones, enlaces, destacados y pie.
                 </p>
               </div>
 

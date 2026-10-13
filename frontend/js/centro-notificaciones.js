@@ -5246,6 +5246,237 @@ function notificationTypeForTopic(topic) {
     };
   }
 
+  function isAllowedMailActionUrl(rawUrl) {
+    const url =
+      String(rawUrl || "").trim();
+
+    return (
+      /^https?:\/\//i.test(url) ||
+      /^mailto:/i.test(url)
+    );
+  }
+
+  function getAdditionalMailActions() {
+    const root =
+      document.getElementById(
+        "notificationMailActions"
+      );
+
+    if (!root) return [];
+
+    return [
+      ...root.querySelectorAll(
+        "[data-mail-action-row]"
+      )
+    ]
+      .map((row) => {
+        const label =
+          String(
+            row.querySelector(
+              "[data-mail-action-label]"
+            )?.value ||
+            ""
+          ).trim();
+
+        const url =
+          String(
+            row.querySelector(
+              "[data-mail-action-url]"
+            )?.value ||
+            ""
+          ).trim();
+
+        if (
+          !label ||
+          !url ||
+          !isAllowedMailActionUrl(url)
+        ) {
+          return null;
+        }
+
+        return {
+          label,
+          url,
+        };
+      })
+      .filter(Boolean)
+      .slice(0, 10);
+  }
+
+  function createMailActionRow(action = {}) {
+    const row =
+      document.createElement("div");
+
+    row.setAttribute(
+      "data-mail-action-row",
+      ""
+    );
+
+    row.style.cssText = [
+      "display:grid",
+      "grid-template-columns:minmax(160px,0.8fr) minmax(220px,1.4fr) auto",
+      "gap:8px",
+      "align-items:center"
+    ].join(";");
+
+    const label =
+      document.createElement("input");
+
+    label.type = "text";
+    label.placeholder =
+      "Texto del botón";
+
+    label.value =
+      String(action.label || "");
+
+    label.setAttribute(
+      "data-mail-action-label",
+      ""
+    );
+
+    const url =
+      document.createElement("input");
+
+    url.type = "text";
+    url.placeholder =
+      "https://... o mailto:...";
+
+    url.value =
+      String(action.url || "");
+
+    url.setAttribute(
+      "data-mail-action-url",
+      ""
+    );
+
+    const remove =
+      document.createElement("button");
+
+    remove.type = "button";
+    remove.className =
+      "btn btn-outline btn-small";
+
+    remove.setAttribute(
+      "data-mail-action-remove",
+      ""
+    );
+
+    remove.setAttribute(
+      "aria-label",
+      "Quitar botón"
+    );
+
+    remove.innerHTML =
+      '<i class="fa-solid fa-trash"></i>';
+
+    row.append(
+      label,
+      url,
+      remove
+    );
+
+    return row;
+  }
+
+  function addMailActionRow(action = {}) {
+    const root =
+      document.getElementById(
+        "notificationMailActions"
+      );
+
+    if (!root) return;
+
+    const current =
+      root.querySelectorAll(
+        "[data-mail-action-row]"
+      );
+
+    if (current.length >= 10) {
+      alert(
+        "Podés agregar hasta 10 botones adicionales."
+      );
+      return;
+    }
+
+    root.appendChild(
+      createMailActionRow(action)
+    );
+  }
+
+  function initMailActionsEditor() {
+    const root =
+      document.getElementById(
+        "notificationMailActions"
+      );
+
+    const add =
+      document.getElementById(
+        "notificationMailActionAdd"
+      );
+
+    if (!root || !add) return;
+
+    if (
+      root.dataset.mailActionsReady ===
+      "true"
+    ) {
+      return;
+    }
+
+    root.dataset.mailActionsReady =
+      "true";
+
+    add.addEventListener(
+      "click",
+      () => addMailActionRow()
+    );
+
+    root.addEventListener(
+      "click",
+      (event) => {
+        const remove =
+          event.target.closest(
+            "[data-mail-action-remove]"
+          );
+
+        if (!remove) return;
+
+        remove.closest(
+          "[data-mail-action-row]"
+        )?.remove();
+      }
+    );
+
+    /*
+     * Si en el futuro el preview guarda actions,
+     * las recuperamos automáticamente.
+     */
+    const saved =
+      window
+        .ClassroomMailPreviewModal
+        ?.getSavedDraft?.() ||
+      {};
+
+    const savedActions =
+      Array.isArray(saved.actions)
+        ? saved.actions
+        : [];
+
+    savedActions
+      .slice(0, 10)
+      .forEach(addMailActionRow);
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener(
+      "DOMContentLoaded",
+      initMailActionsEditor
+    );
+  } else {
+    initMailActionsEditor();
+  }
+
+
   function getMailDraft() {
     const saved =
       window
@@ -5295,6 +5526,9 @@ function notificationTypeForTopic(topic) {
           saved.buttonUrl ||
           value("notificationMailLink")
         ).trim(),
+
+      actions:
+        getAdditionalMailActions(),
 
       preset:
         String(
