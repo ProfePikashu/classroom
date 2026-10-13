@@ -3147,6 +3147,29 @@ if (!items.length) {
     setValue("#mailPreviewAccent", accent);
   }
 
+  function getPreviewActions() {
+    const root = qs("#notificationMailActions");
+
+    if (!root) return [];
+
+    return [
+      ...root.querySelectorAll("[data-mail-action-row]")
+    ]
+      .map((row) => ({
+        label: String(
+          row.querySelector("[data-mail-action-label]")?.value || ""
+        ).trim(),
+        url: String(
+          row.querySelector("[data-mail-action-url]")?.value || ""
+        ).trim()
+      }))
+      .filter((action) =>
+        action.label &&
+        /^(https?:\/\/|mailto:)/i.test(action.url)
+      )
+      .slice(0, 10);
+  }
+
   function getPreviewData() {
     return {
       preset:
@@ -3165,6 +3188,7 @@ if (!items.length) {
       highlight: getValue("#mailPreviewHighlight"),
       buttonText: getValue("#mailPreviewButtonText"),
       buttonUrl: getValue("#mailPreviewButtonUrl"),
+      actions: getPreviewActions(),
       footer: getValue("#mailPreviewFooter")
     };
   }
@@ -3173,6 +3197,47 @@ if (!items.length) {
     const accent = ACCENTS[data.accent] || ACCENTS.warning;
     const buttonUrl = data.buttonUrl || "https://classroom.andyazhtec.com/";
     const safeUrl = escapeHtml(buttonUrl);
+
+    const additionalActionsHtml = (
+      Array.isArray(data.actions)
+        ? data.actions
+        : []
+    )
+      .slice(0, 10)
+      .map((action) => {
+        const label = String(action?.label || "").trim();
+        const url = String(action?.url || "").trim();
+
+        if (
+          !label ||
+          !/^(https?:\/\/|mailto:)/i.test(url)
+        ) {
+          return "";
+        }
+
+        const safeLabel = escapeHtml(label);
+        const safeActionUrl = escapeHtml(url);
+
+        return `
+          <table width="100%" cellpadding="0" cellspacing="0"
+                 role="presentation" style="margin:10px 0 0;">
+            <tr>
+              <td align="center">
+                <a href="${safeActionUrl}" target="_blank"
+                   style="display:inline-block;padding:12px 20px;
+                          color:#dbeafe;text-decoration:none;
+                          font-size:14px;font-weight:800;
+                          border-radius:12px;
+                          border:1px solid rgba(96,165,250,.55);
+                          background:rgba(30,41,59,.92);">
+                  ${safeLabel}
+                </a>
+              </td>
+            </tr>
+          </table>
+        `;
+      })
+      .join("");
 
     return `<!doctype html>
 <html lang="es">
@@ -3236,6 +3301,8 @@ if (!items.length) {
                         </td>
                       </tr>
                     </table>
+
+                    ${additionalActionsHtml}
 
                     <div style="margin-top:22px;padding:16px;border-radius:14px;background:rgba(15,23,42,.9);border:1px solid rgba(124,58,237,.35);">
                       <p style="margin:0;color:#ddd6fe;font-size:14px;line-height:1.7;">

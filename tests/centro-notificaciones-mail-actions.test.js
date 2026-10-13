@@ -148,3 +148,56 @@ test("Los cambios mantienen UTF-8 limpio", () => {
   assert.doesNotMatch(html, mojibake);
   assert.doesNotMatch(js, mojibake);
 });
+test("La vista previa incluye y renderiza los botones adicionales", () => {
+  const previewStart = js.indexOf("function getPreviewData()");
+
+  assert.notEqual(
+    previewStart,
+    -1,
+    "No se encontró getPreviewData()"
+  );
+
+  const previewEnd = js.indexOf(
+    "function renderMailHtml(data)",
+    previewStart
+  );
+
+  assert.notEqual(
+    previewEnd,
+    -1,
+    "No se encontró renderMailHtml(data)"
+  );
+
+  const previewData = js.slice(
+    previewStart,
+    previewEnd
+  );
+
+  assert.match(
+    previewData,
+    /\bactions\s*:/
+  );
+
+  const renderStart = previewEnd;
+
+  const renderEnd = js.indexOf(
+    "function renderPreview()",
+    renderStart
+  );
+
+  assert.notEqual(
+    renderEnd,
+    -1,
+    "No se encontró renderPreview()"
+  );
+
+  const renderer = js.slice(
+    renderStart,
+    renderEnd
+  );
+
+  assert.match(
+    renderer,
+    /data\.actions/
+  );
+});
