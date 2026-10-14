@@ -275,6 +275,7 @@
     <option value="all">Todos en la base</option>
     <option value="course-ayrpc-2025">AyRPC 2025</option>
     <option value="course-ayrpc-2026">AyRPC 2026</option>
+    <option value="withdrawn">Dados de baja</option>
     <option value="staff">Staff</option>
     <option value="specific_user">Solo a</option>
   </select>
@@ -332,6 +333,21 @@
       <span>
         <strong>AyRPC 2026</strong>
         <small>Inscriptos activos en la edición 2026.</small>
+      </span>
+    </label>
+
+    <label class="notification-audience-card">
+      <input
+        type="radio"
+        name="notificationAudienceVisual"
+        value="withdrawn"
+      />
+      <span class="notification-audience-icon">
+        <i class="fa-solid fa-user-slash"></i>
+      </span>
+      <span>
+        <strong>Dados de baja</strong>
+        <small>Solo alumnos que solicitaron y tienen la baja aplicada.</small>
       </span>
     </label>
 
