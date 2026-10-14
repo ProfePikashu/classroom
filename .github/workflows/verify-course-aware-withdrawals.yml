@@ -1,0 +1,25 @@
+name: Verify course-aware withdrawals
+
+on:
+  push:
+    branches:
+      - fix/course-aware-withdrawals
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Run withdrawal status tests
+        run: node tests/withdrawal-status.test.js
+
+      - name: Run Classroom test suite
+        run: node --test tests/*.test.js
