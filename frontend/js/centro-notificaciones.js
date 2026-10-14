@@ -768,6 +768,7 @@
 
     if (raw === "course-ayrpc-2025") return { audience_type: "course", course: "AyRPC 2025" };
     if (raw === "course-ayrpc-2026") return { audience_type: "course", course: "AyRPC 2026" };
+    if (raw === "withdrawn") return { audience_type: "withdrawn", course: null };
 
     return {
       audience_type: raw || "all",
@@ -1000,6 +1001,7 @@
     if (raw === "staff") return "Docentes y moderadores";
     if (raw === "course-ayrpc-2025") return "AyRPC 2025";
     if (raw === "course-ayrpc-2026") return "AyRPC 2026";
+    if (raw === "withdrawn") return "Dados de baja";
 
     return value || "Todos";
   }
@@ -1578,6 +1580,7 @@ if (!items.length) {
     if (raw === "specific_user") return "Destinatarios específicos";
     if (raw === "course-ayrpc-2025") return "AyRPC 2025";
     if (raw === "course-ayrpc-2026") return "AyRPC 2026";
+    if (raw === "withdrawn") return "Dados de baja";
 
     return value || "Sin audiencia";
   }
