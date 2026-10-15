@@ -1750,11 +1750,11 @@ const unreadClass = item.read ? "" : "is-unread";
     return api.ensureBackendToken();
   }
 
-  function getWsUrl(token) {
+  function getWsUrl() {
     const api = getBackendApi();
     const apiBase = api?.getApiBase ? api.getApiBase() : "http://127.0.0.1:8000";
 
-    return `${apiBaseToWsUrl(apiBase)}/api/classroom/notifications/ws?token=${encodeURIComponent(token)}`;
+    return `${apiBaseToWsUrl(apiBase)}/api/classroom/notifications/ws`;
   }
 
   function clearTimers() {
@@ -1807,8 +1807,7 @@ const unreadClass = item.read ? "" : "is-unread";
     }
 
     try {
-      const token = await getToken();
-      const wsUrl = getWsUrl(token);
+      const wsUrl = getWsUrl();
 
       manuallyClosed = false;
       socket = new WebSocket(wsUrl);

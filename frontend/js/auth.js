@@ -126,6 +126,7 @@ const ClassroomAuth = {
         `${EXAMPRO_API_BASE}/api/classroom/moderator-login`,
         {
           method: "POST",
+          credentials: "include",
           headers: {
             "Content-Type": "application/json",
           },
@@ -274,6 +275,7 @@ const ClassroomAuth = {
     try {
       const response = await fetch(`${EXAMPRO_API_BASE}/api/classroom/student-login`, {
         method: "POST",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },
