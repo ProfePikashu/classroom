@@ -773,3 +773,35 @@
     height: 164px !important;
   }
 }
+
+/* Pelusita grande, dock compacto */
+#sidebarPelusitaDock {
+  position: relative;
+  min-height: 125px !important;
+  height: 125px !important;
+  overflow: visible;
+}
+
+.pelusita-v2-character.docked {
+  position: absolute !important;
+  left: 50% !important;
+  bottom: 0 !important;
+  width: 108px !important;
+  height: 126px !important;
+  transform: translateX(-50%) scale(1.7) !important;
+  transform-origin: bottom center !important;
+}
+
+/* Mobile: ocupa mucho menos sidebar */
+@media (max-width: 760px) {
+  #sidebarPelusitaDock {
+    min-height: 78px !important;
+    height: 78px !important;
+  }
+
+  .pelusita-v2-character.docked {
+    width: 72px !important;
+    height: 84px !important;
+    transform: translateX(-50%) scale(1.25) !important;
+  }
+}
