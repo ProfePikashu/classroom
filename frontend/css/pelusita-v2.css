@@ -753,3 +753,23 @@
     height: 84px !important;
   }
 }
+
+#sidebarPelusitaDock {
+  min-height: 258px !important;
+}
+
+.pelusita-v2-character.docked {
+  width: 216px !important;
+  height: 252px !important;
+}
+
+@media (max-width: 760px) {
+  #sidebarPelusitaDock {
+    min-height: 170px !important;
+  }
+
+  .pelusita-v2-character.docked {
+    width: 140px !important;
+    height: 164px !important;
+  }
+}
