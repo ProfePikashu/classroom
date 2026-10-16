@@ -721,3 +721,35 @@
   pointer-events: auto !important;
 }
 
+
+#sidebarPelusitaDock {
+  min-height: 132px;
+}
+
+.pelusita-v2-character.docked {
+  width: 108px;
+  height: 126px;
+}
+
+.pelusita-v2-character.guiding,
+.pelusita-v2-character.tutorial-floating {
+  width: 86px !important;
+  height: 100px !important;
+}
+
+@media (max-width: 760px) {
+  #sidebarPelusitaDock {
+    min-height: 96px;
+  }
+
+  .pelusita-v2-character.docked {
+    width: 82px;
+    height: 96px;
+  }
+
+  .pelusita-v2-character.guiding,
+  .pelusita-v2-character.tutorial-floating {
+    width: 72px !important;
+    height: 84px !important;
+  }
+}
