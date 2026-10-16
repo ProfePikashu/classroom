@@ -722,13 +722,54 @@
 }
 
 
-#sidebarPelusitaDock {
-  min-height: 132px;
+
+/* Pelusita dock final */
+.sidebar-v2-nav {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
-.pelusita-v2-character.docked {
-  width: 108px;
-  height: 126px;
+.sidebar-v2-spacer {
+  display: none !important;
+}
+
+.sidebar-v2-staff {
+  flex: 0 0 auto !important;
+}
+
+#sidebarPelusitaDock {
+  position: relative;
+  flex: 0 0 132px;
+  min-height: 132px !important;
+  height: 132px !important;
+  padding: 0 !important;
+  overflow: hidden;
+}
+
+.pelusita-v2-character.docked:not(.guiding):not(.tutorial-floating) {
+  position: absolute !important;
+  left: 50% !important;
+  right: auto !important;
+  top: auto !important;
+  bottom: 0 !important;
+  width: 110px !important;
+  height: 128px !important;
+  margin: 0 !important;
+  transform: translateX(-50%) !important;
+}
+
+.pelusita-v2-character.docked:not(.guiding):not(.tutorial-floating) img {
+  position: absolute !important;
+  width: 190% !important;
+  height: 190% !important;
+  max-width: none !important;
+  max-height: none !important;
+  left: -45% !important;
+  top: -45% !important;
+  object-fit: contain !important;
 }
 
 .pelusita-v2-character.guiding,
@@ -739,69 +780,14 @@
 
 @media (max-width: 760px) {
   #sidebarPelusitaDock {
-    min-height: 96px;
-  }
-
-  .pelusita-v2-character.docked {
-    width: 82px;
-    height: 96px;
+    flex-basis: 132px;
+    min-height: 132px !important;
+    height: 132px !important;
   }
 
   .pelusita-v2-character.guiding,
   .pelusita-v2-character.tutorial-floating {
     width: 72px !important;
     height: 84px !important;
-  }
-}
-
-#sidebarPelusitaDock {
-  min-height: 258px !important;
-}
-
-.pelusita-v2-character.docked {
-  width: 216px !important;
-  height: 252px !important;
-}
-
-@media (max-width: 760px) {
-  #sidebarPelusitaDock {
-    min-height: 170px !important;
-  }
-
-  .pelusita-v2-character.docked {
-    width: 140px !important;
-    height: 164px !important;
-  }
-}
-
-/* Pelusita grande, dock compacto */
-#sidebarPelusitaDock {
-  position: relative;
-  min-height: 125px !important;
-  height: 125px !important;
-  overflow: visible;
-}
-
-.pelusita-v2-character.docked {
-  position: absolute !important;
-  left: 50% !important;
-  bottom: 0 !important;
-  width: 108px !important;
-  height: 126px !important;
-  transform: translateX(-50%) scale(1.7) !important;
-  transform-origin: bottom center !important;
-}
-
-/* Mobile: ocupa mucho menos sidebar */
-@media (max-width: 760px) {
-  #sidebarPelusitaDock {
-    min-height: 78px !important;
-    height: 78px !important;
-  }
-
-  .pelusita-v2-character.docked {
-    width: 72px !important;
-    height: 84px !important;
-    transform: translateX(-50%) scale(1.25) !important;
   }
 }
