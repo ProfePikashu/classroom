@@ -1,17 +1,17 @@
-﻿(() => {
+(() => {
   "use strict";
 
   const VERSION = "2.0.0-alpha.1";
 
   const ASSETS = {
-    idle: "media/pelusita/idle.png",
-    arriving: "media/pelusita/arriving.gif",
-    greeting: "media/pelusita/welcome.png",
-    wave: "media/pelusita/wave.png",
-    thinking: "media/pelusita/see.png",
-    success: "media/pelusita/happy.png",
-    error: "media/pelusita/horror.png",
-    goodbye: "media/pelusita/wave.png"
+    idle: "media/pelusita/pelusita_standby_nobg.webp",
+    arriving: "media/pelusita/pelusita_expo_nobg.webp",
+    greeting: "media/pelusita/pelusita_expo_nobg.webp",
+    wave: "media/pelusita/pelusita_expo_nobg.webp",
+    thinking: "media/pelusita/pelusita_expo_nobg.webp",
+    success: "media/pelusita/pelusita_expo_nobg.webp",
+    error: "media/pelusita/pelusita_expo_nobg.webp",
+    goodbye: "media/pelusita/pelusita_expo_nobg.webp"
   };
 
   const STORAGE = {
