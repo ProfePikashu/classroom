@@ -3,7 +3,19 @@ name: Test compact alumnos cards
 on:
   push:
     branches:
+      - main
       - fix/compact-alumnos-admin-cards
+    paths:
+      - frontend/alumnos.html
+      - frontend/css/alumnos-compact.css
+      - frontend/js/alumnos-compact-panels.js
+      - tests/alumnos-compact-panels.test.js
+  pull_request:
+    paths:
+      - frontend/alumnos.html
+      - frontend/css/alumnos-compact.css
+      - frontend/js/alumnos-compact-panels.js
+      - tests/alumnos-compact-panels.test.js
 
 jobs:
   test:
@@ -13,4 +25,5 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - run: node --check frontend/js/alumnos-compact-panels.js
       - run: node tests/alumnos-compact-panels.test.js
