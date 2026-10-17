@@ -731,7 +731,7 @@
     if (!hasActiveCode) {
       if (message) {
         message.textContent =
-          "La asistencia está habilitada. Seguí las indicaciones dadas durante la transmisión.";
+          "No hay un código de asistencia activo. Esperá que se genere uno nuevo.";
       }
 
       if (form) {
@@ -1266,6 +1266,16 @@
         event.preventDefault();
 
         if (!feedback || !state.selected) return;
+
+        if (state.attendance?.registered) {
+          feedback.hidden = false;
+          feedback.className =
+            "ayrpc2026-live-feedback ok";
+          feedback.textContent =
+            "Tu código de asistencia ya fue registrado correctamente.";
+          form.hidden = true;
+          return;
+        }
 
         const code =
           input.value

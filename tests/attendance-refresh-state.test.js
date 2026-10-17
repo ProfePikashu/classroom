@@ -45,4 +45,16 @@ assert.match(
   "el usuario debe ver un aviso persistente de registro correcto aunque el estado final siga PENDIENTE"
 );
 
+assert.match(
+  source,
+  /if\s*\(state\.attendance\?\.registered\)\s*\{[\s\S]*?return;/,
+  "una vez registrado correctamente el presente, el formulario no debe aceptar otro codigo"
+);
+
+assert.match(
+  source,
+  /No hay un código de asistencia activo\. Esperá que se genere uno nuevo\./,
+  "cuando el token vence no debe seguir informando que la asistencia esta habilitada"
+);
+
 console.log("attendance refresh state tests passed");
