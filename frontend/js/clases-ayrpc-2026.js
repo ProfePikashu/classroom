@@ -53,6 +53,61 @@
 
   const $ = id => document.getElementById(id);
 
+  function attendanceCodeStorageKey(windowId) {
+    return `ayrpc2026.attendance-code.${windowId}`;
+  }
+
+  function storeAttendanceCode(attendance) {
+    if (!attendance?.windowId || !attendance?.code || !attendance?.expiresAt) return;
+
+    try {
+      sessionStorage.setItem(
+        attendanceCodeStorageKey(attendance.windowId),
+        JSON.stringify({
+          code: attendance.code,
+          expiresAt: attendance.expiresAt
+        })
+      );
+    } catch {}
+  }
+
+  function restoreAttendanceCode(windowId, expiresAt) {
+    if (!windowId || !expiresAt || Date.now() >= expiresAt) return "";
+
+    try {
+      const key = attendanceCodeStorageKey(windowId);
+      const raw = sessionStorage.getItem(key);
+
+      if (!raw) return "";
+
+      const saved = JSON.parse(raw);
+      const savedExpiresAt = Number(saved?.expiresAt || 0);
+      const code = String(saved?.code || "");
+
+      if (
+        code &&
+        Math.abs(savedExpiresAt - expiresAt) < 1000 &&
+        Date.now() < savedExpiresAt
+      ) {
+        return code;
+      }
+
+      sessionStorage.removeItem(key);
+    } catch {}
+
+    return "";
+  }
+
+  function clearStoredAttendanceCode(windowId) {
+    if (!windowId) return;
+
+    try {
+      sessionStorage.removeItem(
+        attendanceCodeStorageKey(windowId)
+      );
+    } catch {}
+  }
+
 
   function getClassroomToken() {
     const session =
@@ -315,12 +370,7 @@
   }
 
   async function refreshAttendanceWindowState(item) {
-    if (
-      !item ||
-      !hasPermission("attendance.view")
-    ) {
-      return;
-    }
+    if (!item) return;
 
     const token = getClassroomToken();
 
@@ -332,8 +382,15 @@
         : "https://api.andyazhtec.com";
 
     try {
+      const canViewAdminState =
+        hasPermission("attendance.view");
+
+      const statePath = canViewAdminState
+        ? `/api/classroom/admin/attendance/window-state?course=ayrpc-2026&class_number=${encodeURIComponent(item.number)}`
+        : `/api/classroom/attendance/state?course=ayrpc-2026&class_number=${encodeURIComponent(item.number)}`;
+
       const response = await fetch(
-        `${apiBase}/api/classroom/admin/attendance/window-state?course=ayrpc-2026&class_number=${encodeURIComponent(item.number)}`,
+        `${apiBase}${statePath}`,
         {
           cache: "no-store",
           headers: {
@@ -358,7 +415,12 @@
 
       if (!attendance) return;
 
-      if (!data.window) {
+      const backendOpen = canViewAdminState
+        ? Boolean(data.window)
+        : Boolean(data.open);
+
+      if (!backendOpen) {
+        clearStoredAttendanceCode(attendance.windowId);
         attendance.windowId = "";
         attendance.open = false;
         attendance.code = "";
@@ -366,12 +428,14 @@
         attendance.visible = false;
         attendance.count = 0;
 
+        stopTimer();
         paintAttendance();
         return;
       }
 
-      const backendWindowId =
-        data.window.id || "";
+      const backendWindowId = canViewAdminState
+        ? (data.window?.id || "")
+        : (data.window_id || "");
 
       const backendExpiresAt =
         data.active_token_expires_at
@@ -395,17 +459,27 @@
 
       attendance.open = true;
 
-      attendance.count =
-        Number(data.registered_count || 0);
+      attendance.count = canViewAdminState
+        ? Number(data.registered_count || 0)
+        : attendance.count;
+
+      attendance.expiresAt =
+        Number.isFinite(backendExpiresAt)
+          ? backendExpiresAt
+          : 0;
 
       if (!keepLocalCode) {
-        attendance.code = "";
-        attendance.visible = false;
+        attendance.code = restoreAttendanceCode(
+          backendWindowId,
+          attendance.expiresAt
+        );
+        attendance.visible = Boolean(attendance.code);
+      }
 
-        attendance.expiresAt =
-          Number.isFinite(backendExpiresAt)
-            ? backendExpiresAt
-            : 0;
+      if (attendance.expiresAt > Date.now()) {
+        startTimer();
+      } else {
+        stopTimer();
       }
 
       paintAttendance();
@@ -426,10 +500,6 @@
     }
 
     state.attendancePollTimer = null;
-
-    if (!hasPermission("attendance.view")) {
-      return;
-    }
 
     state.attendancePollTimer =
       window.setInterval(() => {
@@ -605,7 +675,7 @@
 
     const hasActiveCode =
       isThisClassOpen &&
-      state.attendance.code &&
+      state.attendance.expiresAt &&
       Date.now() < state.attendance.expiresAt;
 
     if (status === "PRESENTE") {
@@ -777,6 +847,7 @@
         Date.now() + 30 * 60 * 1000;
 
       state.attendance.visible = true;
+      storeAttendanceCode(state.attendance);
 
       startTimer();
       paintAttendance();
@@ -830,6 +901,7 @@
       }
 
       state.attendance.visible = true;
+      storeAttendanceCode(state.attendance);
 
       startTimer();
       paintAttendance();
@@ -854,6 +926,8 @@
     }
 
     if (IS_PREVIEW) {
+      clearStoredAttendanceCode(state.attendance.windowId);
+      clearStoredAttendanceCode(state.attendance.windowId);
       state.attendance.open = false;
       state.attendance.windowId = "";
       state.attendance.code = "";
@@ -987,7 +1061,7 @@
     const codeActive =
       Boolean(
         isThisClassOpen &&
-        attendance?.code &&
+        attendance?.expiresAt &&
         Date.now() < attendance.expiresAt
       );
 
@@ -1013,7 +1087,8 @@
     if (generateBtn) {
       generateBtn.disabled =
         !canGenerate ||
-        !isThisClassOpen;
+        !isThisClassOpen ||
+        codeActive;
     }
 
     if (hideBtn) {
@@ -1052,9 +1127,10 @@
       window.setInterval(() => {
 
         if (
-          state.attendance.code &&
+          state.attendance.expiresAt &&
           Date.now() >= state.attendance.expiresAt
         ) {
+          clearStoredAttendanceCode(state.attendance.windowId);
           state.attendance.code = "";
           state.attendance.visible = false;
           state.attendance.expiresAt = 0;
@@ -1083,10 +1159,7 @@
 
     if (!timer) return;
 
-    if (
-      !state.attendance.code ||
-      !state.attendance.expiresAt
-    ) {
+    if (!state.attendance.expiresAt) {
       timer.textContent = "";
       return;
     }
