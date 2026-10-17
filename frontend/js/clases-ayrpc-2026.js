@@ -1087,8 +1087,7 @@
     if (generateBtn) {
       generateBtn.disabled =
         !canGenerate ||
-        !isThisClassOpen ||
-        codeActive;
+        !isThisClassOpen;
     }
 
     if (hideBtn) {
