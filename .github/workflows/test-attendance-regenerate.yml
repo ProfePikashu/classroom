@@ -17,25 +17,7 @@ jobs:
         with:
           node-version: '22'
       - name: Allow replacing an active attendance code
-        shell: bash
-        run: |
-          python - <<'PY'
-          from pathlib import Path
-          path = Path('frontend/js/clases-ayrpc-2026.js')
-          source = path.read_text(encoding='utf-8-sig')
-          old = '''      generateBtn.disabled =
-        !canGenerate ||
-        !isThisClassOpen ||
-        codeActive;
-'''
-          new = '''      generateBtn.disabled =
-        !canGenerate ||
-        !isThisClassOpen;
-'''
-          if old in source:
-              source = source.replace(old, new, 1)
-              path.write_text(source, encoding='utf-8')
-          PY
+        run: python -c "from pathlib import Path; p=Path('frontend/js/clases-ayrpc-2026.js'); s=p.read_text(encoding='utf-8-sig'); old='      generateBtn.disabled =\\n        !canGenerate ||\\n        !isThisClassOpen ||\\n        codeActive;\\n'; new='      generateBtn.disabled =\\n        !canGenerate ||\\n        !isThisClassOpen;\\n'; p.write_text(s.replace(old,new,1),encoding='utf-8')"
       - run: node --check frontend/js/clases-ayrpc-2026.js
       - run: node tests/attendance-refresh-state.test.js
       - name: Commit fix to branch
