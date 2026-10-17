@@ -15,3 +15,4 @@ jobs:
           node-version: '22'
       - run: node --check frontend/js/clases-ayrpc-2026.js
       - run: node tests/course-progress-status.test.js
+      # RED: este push verifica que el estado personalizado todavía no se carga.
