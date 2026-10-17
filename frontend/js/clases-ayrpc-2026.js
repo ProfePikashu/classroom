@@ -257,6 +257,67 @@
     resetClassState();
   }
 
+  async function loadCourseProgress() {
+    const token = getClassroomToken();
+
+    if (!token) return;
+
+    const apiBase =
+      typeof EXAMPRO_API_BASE !== "undefined"
+        ? EXAMPRO_API_BASE
+        : "https://api.andyazhtec.com";
+
+    try {
+      const response = await fetch(
+        `${apiBase}/api/classroom/me/course-status?course=ayrpc-2026`,
+        {
+          cache: "no-store",
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+
+      if (!response.ok) return;
+
+      const data = await response.json();
+
+      if (!Array.isArray(data?.attendance)) return;
+
+      const validStatuses = new Set([
+        "PENDIENTE",
+        "PRESENTE",
+        "REVISAR",
+        "AUSENTE",
+        "RECUPERADA"
+      ]);
+
+      for (const row of data.attendance) {
+        const classItem = CLASSES.find(
+          item => item.number === Number(row.class_number)
+        );
+
+        if (!classItem) continue;
+
+        const rawStatus = String(
+          row.status || "PENDIENTE"
+        ).trim().toUpperCase();
+
+        const normalizedStatus = validStatuses.has(rawStatus)
+          ? rawStatus
+          : "PENDIENTE";
+
+        state.statuses[classItem.id] = normalizedStatus;
+      }
+    }
+    catch (error) {
+      console.warn(
+        "No se pudo cargar el progreso de asistencia:",
+        error
+      );
+    }
+  }
+
   function statusClass(status) {
     if (status === "PRESENTE" || status === "RECUPERADA") {
       return "ok";
@@ -1411,6 +1472,7 @@
     try {
       await loadStaffAccess();
       await loadCanonicalClasses();
+      await loadCourseProgress();
       renderClasses();
 
       if (CLASSES.length) {
