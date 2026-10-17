@@ -27,7 +27,8 @@
           code: "",
           expiresAt: 0,
           visible: false,
-          count: 0
+          count: 0,
+          registered: false
         }
       ])
     ),
@@ -206,7 +207,8 @@
           code: "",
           expiresAt: 0,
           visible: false,
-          count: 0
+          count: 0,
+          registered: false
         }
       ])
     );
@@ -427,6 +429,7 @@
         attendance.expiresAt = 0;
         attendance.visible = false;
         attendance.count = 0;
+        attendance.registered = false;
 
         stopTimer();
         paintAttendance();
@@ -462,6 +465,8 @@
       attendance.count = canViewAdminState
         ? Number(data.registered_count || 0)
         : attendance.count;
+
+      attendance.registered = Boolean(data.registered);
 
       attendance.expiresAt =
         Number.isFinite(backendExpiresAt)
@@ -678,6 +683,21 @@
       state.attendance.expiresAt &&
       Date.now() < state.attendance.expiresAt;
 
+    if (isThisClassOpen && state.attendance.registered) {
+      if (message) {
+        message.textContent =
+          "Tu código de asistencia ya fue registrado correctamente. El estado final seguirá PENDIENTE hasta cerrar la clase.";
+      }
+
+      if (form) {
+        form.hidden = true;
+      }
+
+      paintStaff();
+
+      return;
+    }
+
     if (status === "PRESENTE") {
       if (message) {
         message.textContent =
@@ -764,6 +784,7 @@
       state.attendance.code = "";
       state.attendance.visible = false;
       state.attendance.expiresAt = 0;
+      state.attendance.registered = false;
 
       paintAttendance();
       return;
@@ -814,6 +835,7 @@
       state.attendance.visible = false;
       state.attendance.expiresAt = 0;
       state.attendance.count = 0;
+      state.attendance.registered = false;
 
       paintAttendance();
     }
@@ -933,6 +955,7 @@
       state.attendance.code = "";
       state.attendance.visible = false;
       state.attendance.expiresAt = 0;
+      state.attendance.registered = false;
 
       stopTimer();
       paintAttendance();
@@ -979,6 +1002,7 @@
       state.attendance.code = "";
       state.attendance.visible = false;
       state.attendance.expiresAt = 0;
+      state.attendance.registered = false;
 
       stopTimer();
       paintAttendance();
@@ -1319,6 +1343,8 @@
 
           if (data.registered) {
             input.value = "";
+            state.attendance.registered = true;
+            paintAttendance();
           }
         }
         catch (error) {
