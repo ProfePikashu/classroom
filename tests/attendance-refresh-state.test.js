@@ -27,4 +27,10 @@ assert.match(
   "el navegador que genero el codigo debe conservarlo al recargar"
 );
 
+assert.doesNotMatch(
+  source,
+  /generateBtn\.disabled\s*=\s*!canGenerate\s*\|\|\s*!isThisClassOpen\s*\|\|\s*codeActive/,
+  "debe poder generarse un codigo nuevo aunque haya otro token activo"
+);
+
 console.log("attendance refresh state tests passed");
