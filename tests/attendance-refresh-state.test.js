@@ -33,4 +33,16 @@ assert.doesNotMatch(
   "debe poder generarse un codigo nuevo aunque haya otro token activo"
 );
 
+assert.match(
+  source,
+  /attendance\.registered\s*=\s*Boolean\(data\.registered\)/,
+  "al recargar debe restaurarse si el usuario ya registro correctamente el codigo"
+);
+
+assert.match(
+  source,
+  /Tu código de asistencia ya fue registrado correctamente/,
+  "el usuario debe ver un aviso persistente de registro correcto aunque el estado final siga PENDIENTE"
+);
+
 console.log("attendance refresh state tests passed");
