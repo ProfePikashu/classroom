@@ -1,0 +1,24 @@
+name: Test mobile sidebar and header
+
+on:
+  push:
+    branches:
+      - fix/mobile-sidebar-header-20261020
+    paths:
+      - frontend/css/pelusita-v2.css
+      - tests/mobile-sidebar-header.test.js
+      - .github/workflows/test-mobile-sidebar-header.yml
+  pull_request:
+    paths:
+      - frontend/css/pelusita-v2.css
+      - tests/mobile-sidebar-header.test.js
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node tests/mobile-sidebar-header.test.js
