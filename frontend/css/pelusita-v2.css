@@ -1,4 +1,4 @@
-﻿:root {
+:root {
   --pelusita-z: 10050;
   --pelusita-bg: rgba(10,14,28,.96);
   --pelusita-border: rgba(255,255,255,.12);
@@ -789,5 +789,299 @@
   .pelusita-v2-character.tutorial-floating {
     width: 72px !important;
     height: 84px !important;
+  }
+}
+
+/* ==========================================================
+   MOBILE SHELL CLEANUP 20261020
+   Corrige drawer, Cursos, Pelusita y cabecera mobile.
+   ========================================================== */
+
+@property --classroom-mobile-topbar-height {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 54px;
+}
+
+@property --classroom-mobile-topbar-vpad {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 8px;
+}
+
+@property --classroom-mobile-title-size {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 24px;
+}
+
+@property --classroom-mobile-eyebrow-height {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 14px;
+}
+
+@property --classroom-mobile-eyebrow-opacity {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 1;
+}
+
+@property --classroom-mobile-action-size {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 40px;
+}
+
+@media (max-width: 980px) {
+  .sidebar-v2 {
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+    gap: .42rem !important;
+    padding-bottom: .55rem !important;
+  }
+
+  .sidebar-v2-brand {
+    flex: 0 0 auto !important;
+    margin-bottom: .1rem !important;
+  }
+
+  .sidebar-v2-brand-link {
+    gap: .55rem !important;
+  }
+
+  .sidebar-v2-logo {
+    width: 38px !important;
+    height: 38px !important;
+    border-radius: 12px !important;
+  }
+
+  .sidebar-v2-logo img {
+    width: 31px !important;
+    height: 31px !important;
+  }
+
+  .sidebar-v2-brand-text span {
+    font-size: .82rem !important;
+  }
+
+  .sidebar-v2-brand-text small {
+    font-size: .58rem !important;
+    letter-spacing: .11em !important;
+  }
+
+  .sidebar-v2-nav {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    gap: .24rem !important;
+    padding: .05rem .12rem .28rem 0 !important;
+    overscroll-behavior: contain;
+  }
+
+  .sidebar-v2-link {
+    min-height: 34px !important;
+    padding: .42rem .58rem !important;
+    border-radius: 11px !important;
+    font-size: .82rem !important;
+    gap: .58rem !important;
+  }
+
+  .sidebar-v2-submenu {
+    padding-left: .85rem !important;
+  }
+
+  .sidebar-v2-submenu.open {
+    max-height: none !important;
+    overflow: visible !important;
+    opacity: 1 !important;
+    padding-bottom: .18rem !important;
+  }
+
+  .sidebar-v2-subitem {
+    min-height: 26px !important;
+    padding: .26rem .46rem !important;
+    font-size: .76rem !important;
+    gap: .45rem !important;
+  }
+
+  .sidebar-v2-staff {
+    flex: 0 0 auto !important;
+  }
+
+  .sidebar-v2-admin-btn {
+    min-height: 34px !important;
+    padding: .42rem .58rem !important;
+    font-size: .8rem !important;
+  }
+
+  #sidebarPelusitaDock {
+    position: relative !important;
+    bottom: auto !important;
+    flex: 0 0 82px !important;
+    min-height: 82px !important;
+    height: 82px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    border-top: 1px solid rgba(0,234,255,.08) !important;
+    background:
+      linear-gradient(to top, rgba(3,5,18,.92), rgba(3,5,18,.44), transparent) !important;
+  }
+
+  html[data-theme="light"] #sidebarPelusitaDock {
+    background:
+      linear-gradient(to top, rgba(255,255,255,.96), rgba(255,255,255,.58), transparent) !important;
+    border-top-color: rgba(79,70,229,.08) !important;
+  }
+
+  .pelusita-v2-character.docked:not(.guiding):not(.tutorial-floating) {
+    bottom: -3px !important;
+    width: 72px !important;
+    height: 82px !important;
+  }
+
+  .pelusita-v2-character.docked:not(.guiding):not(.tutorial-floating) img {
+    width: 158% !important;
+    height: 158% !important;
+    left: -29% !important;
+    top: -29% !important;
+  }
+
+  .pelusita-v2-panel.open {
+    z-index: 14050 !important;
+    left: 12px !important;
+    right: 12px !important;
+    bottom: 12px !important;
+    width: auto !important;
+    max-width: none !important;
+    max-height: min(58dvh, 420px) !important;
+    border-radius: 18px !important;
+  }
+
+  .pelusita-v2-panel.guiding.open {
+    z-index: 14060 !important;
+    left: 12px !important;
+    right: 12px !important;
+    top: auto !important;
+    bottom: 12px !important;
+  }
+
+  .pelusita-v2-header {
+    padding: .62rem .72rem !important;
+  }
+
+  .pelusita-v2-body {
+    padding: .72rem !important;
+  }
+
+  .pelusita-v2-action {
+    min-height: 36px !important;
+    padding: .5rem .62rem !important;
+    font-size: .88rem !important;
+  }
+
+  .topbar {
+    --classroom-mobile-topbar-height: 54px;
+    --classroom-mobile-topbar-vpad: 8px;
+    --classroom-mobile-title-size: 24px;
+    --classroom-mobile-eyebrow-height: 14px;
+    --classroom-mobile-eyebrow-opacity: 1;
+    --classroom-mobile-action-size: 40px;
+
+    min-height: var(--classroom-mobile-topbar-height) !important;
+    padding-top: var(--classroom-mobile-topbar-vpad) !important;
+    padding-bottom: var(--classroom-mobile-topbar-vpad) !important;
+  }
+
+  .topbar h1 {
+    font-size: var(--classroom-mobile-title-size) !important;
+  }
+
+  .topbar .eyebrow {
+    max-height: var(--classroom-mobile-eyebrow-height) !important;
+    opacity: var(--classroom-mobile-eyebrow-opacity);
+    overflow: hidden !important;
+    transition: opacity .12s linear !important;
+  }
+
+  .theme-toggle-icon,
+  .sound-toggle,
+  .sound-toggle-icon {
+    width: var(--classroom-mobile-action-size) !important;
+    height: var(--classroom-mobile-action-size) !important;
+    min-height: var(--classroom-mobile-action-size) !important;
+    flex-basis: var(--classroom-mobile-action-size) !important;
+  }
+
+  .user-menu-toggle {
+    min-height: var(--classroom-mobile-action-size) !important;
+  }
+
+  .user-avatar {
+    width: calc(var(--classroom-mobile-action-size) - 10px) !important;
+    height: calc(var(--classroom-mobile-action-size) - 10px) !important;
+    flex-basis: calc(var(--classroom-mobile-action-size) - 10px) !important;
+  }
+}
+
+@supports (animation-timeline: scroll()) {
+  @media (max-width: 980px) {
+    .topbar {
+      animation-name: classroom-mobile-topbar-compact;
+      animation-duration: 1ms;
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-timeline: scroll(root block);
+      animation-range: 0 120px;
+    }
+  }
+}
+
+@keyframes classroom-mobile-topbar-compact {
+  from {
+    --classroom-mobile-topbar-height: 54px;
+    --classroom-mobile-topbar-vpad: 8px;
+    --classroom-mobile-title-size: 24px;
+    --classroom-mobile-eyebrow-height: 14px;
+    --classroom-mobile-eyebrow-opacity: 1;
+    --classroom-mobile-action-size: 40px;
+  }
+
+  to {
+    --classroom-mobile-topbar-height: 44px;
+    --classroom-mobile-topbar-vpad: 3px;
+    --classroom-mobile-title-size: 18px;
+    --classroom-mobile-eyebrow-height: 0px;
+    --classroom-mobile-eyebrow-opacity: 0;
+    --classroom-mobile-action-size: 34px;
+  }
+}
+
+@media (max-width: 520px) {
+  .sidebar-v2 {
+    padding-bottom: .45rem !important;
+  }
+
+  #sidebarPelusitaDock {
+    flex-basis: 74px !important;
+    min-height: 74px !important;
+    height: 74px !important;
+  }
+
+  .pelusita-v2-character.docked:not(.guiding):not(.tutorial-floating) {
+    width: 66px !important;
+    height: 76px !important;
+  }
+
+  .pelusita-v2-panel.open {
+    left: 8px !important;
+    right: 8px !important;
+    bottom: 8px !important;
+    max-height: 62dvh !important;
   }
 }
