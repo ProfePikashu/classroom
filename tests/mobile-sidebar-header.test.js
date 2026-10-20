@@ -36,6 +36,21 @@ assert.ok(
   'El eyebrow del header debe colapsarse durante el scroll para liberar altura.'
 );
 
+assert.ok(
+  css.includes('MOBILE COURSE HEADER COMPACT 20261020'),
+  'Debe existir el ajuste específico de cabecera compacta para páginas de curso.'
+);
+
+assert.ok(
+  css.includes('body.page-curso-ayrpc-2025 .topbar h1') && css.includes('display: none !important'),
+  'Los títulos largos AyRPC 2025/2026 deben ocultarse en mobile para no chocar con los controles.'
+);
+
+assert.ok(
+  css.includes('.topbar-actions > button') && css.includes('flex: 0 0 34px !important'),
+  'Los botones de tema/notificaciones/sonido deben compactarse a 34px en mobile.'
+);
+
 const frontendDir = 'frontend';
 const topbarPages = fs.readdirSync(frontendDir)
   .filter((name) => name.endsWith('.html'))
