@@ -1,4 +1,5 @@
 const fs = require('fs');
+const path = require('path');
 const assert = require('assert');
 
 const cssPath = 'frontend/css/pelusita-v2.css';
@@ -31,8 +32,27 @@ assert.ok(
 );
 
 assert.ok(
-  css.includes('.topbar .eyebrow') && css.includes('max-height: 0'),
+  css.includes('.topbar .eyebrow') && css.includes('--classroom-mobile-eyebrow-height: 0px'),
   'El eyebrow del header debe colapsarse durante el scroll para liberar altura.'
 );
 
-console.log('OK: mobile sidebar and compact header');
+const frontendDir = 'frontend';
+const topbarPages = fs.readdirSync(frontendDir)
+  .filter((name) => name.endsWith('.html'))
+  .filter((name) => {
+    const html = fs.readFileSync(path.join(frontendDir, name), 'utf8');
+    return html.includes('class="topbar"');
+  });
+
+const withoutMobileShellCss = topbarPages.filter((name) => {
+  const html = fs.readFileSync(path.join(frontendDir, name), 'utf8');
+  return !html.includes('css/pelusita-v2.css');
+});
+
+assert.deepStrictEqual(
+  withoutMobileShellCss,
+  [],
+  `Toda página con topbar debe cargar pelusita-v2.css. Faltan: ${withoutMobileShellCss.join(', ')}`
+);
+
+console.log(`OK: mobile sidebar and compact header (${topbarPages.length} topbar pages covered)`);
