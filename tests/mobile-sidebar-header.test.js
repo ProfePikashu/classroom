@@ -4,6 +4,8 @@ const assert = require('assert');
 
 const cssPath = 'frontend/css/pelusita-v2.css';
 const css = fs.readFileSync(cssPath, 'utf8');
+const courseHeaderCssPath = 'frontend/css/mobile-course-header.css';
+const courseHeaderCss = fs.readFileSync(courseHeaderCssPath, 'utf8');
 
 assert.ok(
   css.includes('MOBILE SHELL CLEANUP 20261020'),
@@ -37,19 +39,29 @@ assert.ok(
 );
 
 assert.ok(
-  css.includes('MOBILE COURSE HEADER COMPACT 20261020'),
+  courseHeaderCss.includes('MOBILE COURSE HEADER COMPACT 20261020'),
   'Debe existir el ajuste específico de cabecera compacta para páginas de curso.'
 );
 
 assert.ok(
-  css.includes('body.page-curso-ayrpc-2025 .topbar h1') && css.includes('display: none !important'),
+  courseHeaderCss.includes('body.page-curso-ayrpc-2025 .topbar h1') &&
+  courseHeaderCss.includes('display: none !important'),
   'Los títulos largos AyRPC 2025/2026 deben ocultarse en mobile para no chocar con los controles.'
 );
 
 assert.ok(
-  css.includes('.topbar-actions > button') && css.includes('flex: 0 0 34px !important'),
+  courseHeaderCss.includes('.topbar-actions > button') &&
+  courseHeaderCss.includes('flex: 0 0 34px !important'),
   'Los botones de tema/notificaciones/sonido deben compactarse a 34px en mobile.'
 );
+
+for (const page of ['curso-ayrpc-2025.html', 'curso-ayrpc-2026.html']) {
+  const html = fs.readFileSync(path.join('frontend', page), 'utf8');
+  assert.ok(
+    html.includes('css/mobile-course-header.css'),
+    `${page} debe cargar mobile-course-header.css.`
+  );
+}
 
 const frontendDir = 'frontend';
 const topbarPages = fs.readdirSync(frontendDir)
