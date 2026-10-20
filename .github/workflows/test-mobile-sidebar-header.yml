@@ -3,16 +3,18 @@ name: Test mobile sidebar and header
 on:
   push:
     branches:
-      - fix/mobile-sidebar-header-20261020
+      - fix/mobile-course-header-compact-20261020
     paths:
-      - frontend/css/pelusita-v2.css
+      - frontend/css/**
       - frontend/js/**
+      - frontend/*.html
       - tests/**
       - .github/workflows/test-mobile-sidebar-header.yml
   pull_request:
     paths:
-      - frontend/css/pelusita-v2.css
+      - frontend/css/**
       - frontend/js/**
+      - frontend/*.html
       - tests/**
 
 jobs:
