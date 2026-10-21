@@ -1522,7 +1522,7 @@ const unreadClass = item.read ? "" : "is-unread";
   "use strict";
 
   const STORAGE_KEY = window.ClassroomNotificationStorage.key("items");
-  const POLL_MS = 20000;
+  const POLL_MS = 60000;
 
   let pollTimer = null;
   let syncInProgress = false;
@@ -1724,6 +1724,8 @@ const unreadClass = item.read ? "" : "is-unread";
 (function notificationsRealtimeWebSocketBridge() {
   "use strict";
 
+  const REALTIME_WS_ENABLED = false;
+
   let socket = null;
   let reconnectTimer = null;
   let heartbeatTimer = null;
@@ -1891,6 +1893,12 @@ const unreadClass = item.read ? "" : "is-unread";
   }
 
   function init() {
+    if (!REALTIME_WS_ENABLED) {
+      manuallyClosed = true;
+      document.documentElement.classList.remove("notifications-ws-ready");
+      return;
+    }
+
     setTimeout(connect, 1200);
 
     document.addEventListener("visibilitychange", () => {

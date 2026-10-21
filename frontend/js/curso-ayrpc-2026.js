@@ -20,6 +20,10 @@ const CursoAyRPC2026Panel = {
 
     if (!session) return;
 
+    if (this.isTeacherSession(session)) {
+      return;
+    }
+
     const courseStatusData = await this.refreshFromCourseStatus(session);
 
     if (!courseStatusData) {
@@ -35,6 +39,17 @@ const CursoAyRPC2026Panel = {
   getSession() {
     if (typeof ClassroomAuth === "undefined") return null;
     return ClassroomAuth.getSession();
+  },
+
+  isTeacherSession(session) {
+    const role = String(
+      session?.backendRole ||
+      session?.exampro?.role ||
+      session?.role ||
+      ""
+    ).trim().toLowerCase();
+
+    return role === "docente" || role === "teacher";
   },
 
   getApiBase() {
