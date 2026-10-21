@@ -36,57 +36,33 @@ jobs:
               raise SystemExit('No se encontró POLL_MS=60000')
           text = text.replace('const POLL_MS = 60000;', 'const POLL_MS = 300000;', 1)
 
-          old_sync = '''  async function syncBackendQuietly() {
-              if (syncInProgress) return;
-          '''
+          old_sync = '  async function syncBackendQuietly() {\n    if (syncInProgress) return;'
           new_sync = '''  async function syncBackendQuietly() {
               if (document.visibilityState !== "visible") {
                 updateBellBadge();
                 return;
               }
 
-              if (syncInProgress) return;
-          '''
+              if (syncInProgress) return;'''
           if old_sync not in text:
               raise SystemExit('No se encontró syncBackendQuietly esperado')
           text = text.replace(old_sync, new_sync, 1)
 
-          old_click = '''    document.addEventListener("click", (event) => {
+          wire_start = text.index('  function wireEvents() {')
+          click_marker = '    document.addEventListener("click", (event) => {'
+          click_pos = text.index(click_marker, wire_start)
+          bell_refresh_listener = '''    document.addEventListener("click", (event) => {
               if (
                 event.target.closest("#notificationsToggle") ||
                 event.target.closest(".notifications-toggle") ||
-                event.target.closest("[data-notifications-toggle]") ||
-                event.target.closest("[data-notification-delete]") ||
-                event.target.closest("[data-notification-toggle-read]")
+                event.target.closest("[data-notifications-toggle]")
               ) {
-                setTimeout(updateBellBadge, 80);
-                setTimeout(updateBellBadge, 300);
-              }
-            }, true);
-          '''
-          new_click = '''    document.addEventListener("click", (event) => {
-              const openedNotifications =
-                event.target.closest("#notificationsToggle") ||
-                event.target.closest(".notifications-toggle") ||
-                event.target.closest("[data-notifications-toggle]");
-
-              if (openedNotifications) {
                 syncBackendQuietly();
               }
-
-              if (
-                openedNotifications ||
-                event.target.closest("[data-notification-delete]") ||
-                event.target.closest("[data-notification-toggle-read]")
-              ) {
-                setTimeout(updateBellBadge, 80);
-                setTimeout(updateBellBadge, 300);
-              }
             }, true);
+
           '''
-          if old_click not in text:
-              raise SystemExit('No se encontró click handler esperado')
-          text = text.replace(old_click, new_click, 1)
+          text = text[:click_pos] + bell_refresh_listener + text[click_pos:]
           path.write_text(text, encoding='utf-8')
 
           runtime = Path('tests/runtime-load-shedding.test.js')
