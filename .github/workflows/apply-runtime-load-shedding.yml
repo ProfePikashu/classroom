@@ -1,0 +1,147 @@
+name: Apply runtime load shedding
+
+on:
+  push:
+    branches:
+      - fix/runtime-load-shedding-20261020
+    paths:
+      - .github/workflows/apply-runtime-load-shedding.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/runtime-load-shedding-20261020
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Apply minimal runtime load-shedding patch
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          notifications_path = Path('frontend/js/notifications-local.js')
+          text = notifications_path.read_text(encoding='utf-8')
+
+          old_poll = '  const POLL_MS = 20000;'
+          new_poll = '  const POLL_MS = 60000;'
+          if old_poll not in text:
+              raise SystemExit('No se encontró POLL_MS=20000')
+          text = text.replace(old_poll, new_poll, 1)
+
+          ws_marker = '(function notificationsRealtimeWebSocketBridge() {\n  "use strict";\n'
+          ws_replacement = ws_marker + '\n  const REALTIME_WS_ENABLED = false;\n'
+          if ws_marker not in text:
+              raise SystemExit('No se encontró el bridge WebSocket')
+          text = text.replace(ws_marker, ws_replacement, 1)
+
+          old_init = '''  function init() {
+            setTimeout(connect, 1200);
+          '''
+          new_init = '''  function init() {
+            if (!REALTIME_WS_ENABLED) {
+              manuallyClosed = true;
+              document.documentElement.classList.remove("notifications-ws-ready");
+              return;
+            }
+
+            setTimeout(connect, 1200);
+          '''
+          if old_init not in text:
+              raise SystemExit('No se encontró init del WebSocket')
+          text = text.replace(old_init, new_init, 1)
+          notifications_path.write_text(text, encoding='utf-8')
+
+          for filename in ('curso-ayrpc-2025.js', 'curso-ayrpc-2026.js'):
+              path = Path('frontend/js') / filename
+              source = path.read_text(encoding='utf-8')
+
+              old_course_init = '''  async init() {
+                const session = this.getSession();
+
+                if (!session) return;
+
+                const courseStatusData = await this.refreshFromCourseStatus(session);
+              '''
+              new_course_init = '''  async init() {
+                const session = this.getSession();
+
+                if (!session) return;
+
+                if (this.isTeacherSession(session)) {
+                  return;
+                }
+
+                const courseStatusData = await this.refreshFromCourseStatus(session);
+              '''
+              if old_course_init not in source:
+                  raise SystemExit(f'No se encontró init esperado en {filename}')
+              source = source.replace(old_course_init, new_course_init, 1)
+
+              old_get_session = '''  getSession() {
+                if (typeof ClassroomAuth === "undefined") return null;
+                return ClassroomAuth.getSession();
+              },
+
+              getApiBase() {
+              '''
+              new_get_session = '''  getSession() {
+                if (typeof ClassroomAuth === "undefined") return null;
+                return ClassroomAuth.getSession();
+              },
+
+              isTeacherSession(session) {
+                const role = String(
+                  session?.backendRole ||
+                  session?.exampro?.role ||
+                  session?.role ||
+                  ""
+                ).trim().toLowerCase();
+
+                return role === "docente" || role === "teacher";
+              },
+
+              getApiBase() {
+              '''
+              if old_get_session not in source:
+                  raise SystemExit(f'No se encontró getSession esperado en {filename}')
+              source = source.replace(old_get_session, new_get_session, 1)
+              path.write_text(source, encoding='utf-8')
+          PY
+
+      - name: Verify targeted regression
+        run: node tests/runtime-load-shedding.test.js
+
+      - name: Check all frontend JavaScript syntax
+        shell: bash
+        run: |
+          for js in frontend/js/*.js; do
+            node --check "$js"
+          done
+
+      - name: Run full test suite
+        shell: bash
+        run: |
+          for test in tests/*.test.js; do
+            echo "Running $test"
+            node "$test"
+          done
+
+      - name: Commit verified patch and remove one-shot workflow
+        shell: bash
+        run: |
+          git rm .github/workflows/apply-runtime-load-shedding.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add frontend/js/notifications-local.js frontend/js/curso-ayrpc-2025.js frontend/js/curso-ayrpc-2026.js tests/runtime-load-shedding.test.js
+          git commit -m "fix: reduce Classroom runtime database load"
+          git push origin HEAD:fix/runtime-load-shedding-20261020
