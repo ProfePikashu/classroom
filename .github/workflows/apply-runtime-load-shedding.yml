@@ -28,6 +28,7 @@ jobs:
         run: |
           python - <<'PY'
           from pathlib import Path
+          import re
 
           notifications_path = Path('frontend/js/notifications-local.js')
           text = notifications_path.read_text(encoding='utf-8')
@@ -38,83 +39,95 @@ jobs:
               raise SystemExit('No se encontró POLL_MS=20000')
           text = text.replace(old_poll, new_poll, 1)
 
-          ws_marker = '(function notificationsRealtimeWebSocketBridge() {\n  "use strict";\n'
-          ws_replacement = ws_marker + '\n  const REALTIME_WS_ENABLED = false;\n'
-          if ws_marker not in text:
+          ws_marker = '(function notificationsRealtimeWebSocketBridge() {'
+          ws_pos = text.find(ws_marker)
+          if ws_pos < 0:
               raise SystemExit('No se encontró el bridge WebSocket')
-          text = text.replace(ws_marker, ws_replacement, 1)
 
-          old_init = '''  function init() {
-            setTimeout(connect, 1200);
-          '''
-          new_init = '''  function init() {
-            if (!REALTIME_WS_ENABLED) {
-              manuallyClosed = true;
-              document.documentElement.classList.remove("notifications-ws-ready");
-              return;
-            }
+          strict_pattern = re.compile(
+              r'(\(function notificationsRealtimeWebSocketBridge\(\) \{\r?\n  "use strict";\r?\n)'
+          )
+          text, count = strict_pattern.subn(
+              r'\1\n  const REALTIME_WS_ENABLED = false;\n',
+              text,
+              count=1,
+          )
+          if count != 1:
+              raise SystemExit('No se pudo insertar REALTIME_WS_ENABLED')
 
-            setTimeout(connect, 1200);
-          '''
-          if old_init not in text:
+          init_pattern = re.compile(
+              r'(\(function notificationsRealtimeWebSocketBridge\(\) \{[\s\S]*?)(  function init\(\) \{\r?\n\s+setTimeout\(connect, 1200\);)',
+              re.MULTILINE,
+          )
+          init_replacement = (
+              r'\1  function init() {\n'
+              r'    if (!REALTIME_WS_ENABLED) {\n'
+              r'      manuallyClosed = true;\n'
+              r'      document.documentElement.classList.remove("notifications-ws-ready");\n'
+              r'      return;\n'
+              r'    }\n\n'
+              r'    setTimeout(connect, 1200);'
+          )
+          text, count = init_pattern.subn(init_replacement, text, count=1)
+          if count != 1:
               raise SystemExit('No se encontró init del WebSocket')
-          text = text.replace(old_init, new_init, 1)
+
           notifications_path.write_text(text, encoding='utf-8')
 
           for filename in ('curso-ayrpc-2025.js', 'curso-ayrpc-2026.js'):
               path = Path('frontend/js') / filename
               source = path.read_text(encoding='utf-8')
 
-              old_course_init = '''  async init() {
-                const session = this.getSession();
-
-                if (!session) return;
-
-                const courseStatusData = await this.refreshFromCourseStatus(session);
-              '''
-              new_course_init = '''  async init() {
-                const session = this.getSession();
-
-                if (!session) return;
-
-                if (this.isTeacherSession(session)) {
-                  return;
-                }
-
-                const courseStatusData = await this.refreshFromCourseStatus(session);
-              '''
-              if old_course_init not in source:
+              course_init_pattern = re.compile(
+                  r'  async init\(\) \{\r?\n'
+                  r'    const session = this\.getSession\(\);\r?\n\r?\n'
+                  r'    if \(!session\) return;\r?\n'
+              )
+              course_init_replacement = (
+                  '  async init() {\n'
+                  '    const session = this.getSession();\n\n'
+                  '    if (!session) return;\n\n'
+                  '    if (this.isTeacherSession(session)) {\n'
+                  '      return;\n'
+                  '    }\n'
+              )
+              source, count = course_init_pattern.subn(
+                  course_init_replacement,
+                  source,
+                  count=1,
+              )
+              if count != 1:
                   raise SystemExit(f'No se encontró init esperado en {filename}')
-              source = source.replace(old_course_init, new_course_init, 1)
 
-              old_get_session = '''  getSession() {
-                if (typeof ClassroomAuth === "undefined") return null;
-                return ClassroomAuth.getSession();
-              },
-
-              getApiBase() {
-              '''
-              new_get_session = '''  getSession() {
-                if (typeof ClassroomAuth === "undefined") return null;
-                return ClassroomAuth.getSession();
-              },
-
-              isTeacherSession(session) {
-                const role = String(
-                  session?.backendRole ||
-                  session?.exampro?.role ||
-                  session?.role ||
-                  ""
-                ).trim().toLowerCase();
-
-                return role === "docente" || role === "teacher";
-              },
-
-              getApiBase() {
-              '''
-              if old_get_session not in source:
+              get_session_pattern = re.compile(
+                  r'  getSession\(\) \{\r?\n'
+                  r'    if \(typeof ClassroomAuth === "undefined"\) return null;\r?\n'
+                  r'    return ClassroomAuth\.getSession\(\);\r?\n'
+                  r'  \},\r?\n'
+              )
+              get_session_replacement = (
+                  '  getSession() {\n'
+                  '    if (typeof ClassroomAuth === "undefined") return null;\n'
+                  '    return ClassroomAuth.getSession();\n'
+                  '  },\n\n'
+                  '  isTeacherSession(session) {\n'
+                  '    const role = String(\n'
+                  '      session?.backendRole ||\n'
+                  '      session?.exampro?.role ||\n'
+                  '      session?.role ||\n'
+                  '      ""\n'
+                  '    ).trim().toLowerCase();\n\n'
+                  '    return role === "docente" || role === "teacher";\n'
+                  '  },\n'
+              )
+              source, count = get_session_pattern.subn(
+                  get_session_replacement,
+                  source,
+                  count=1,
+              )
+              if count != 1:
                   raise SystemExit(f'No se encontró getSession esperado en {filename}')
-              source = source.replace(old_get_session, new_get_session, 1)
+
               path.write_text(source, encoding='utf-8')
           PY
 
