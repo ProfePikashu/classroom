@@ -1,0 +1,31 @@
+name: Test notification polling visibility
+
+on:
+  push:
+    branches:
+      - fix/notification-polling-visibility-20261020
+      - main
+    paths:
+      - frontend/js/notifications-local.js
+      - tests/notification-polling-visibility.test.js
+      - tests/runtime-load-shedding.test.js
+      - .github/workflows/test-notification-polling-visibility.yml
+  pull_request:
+    paths:
+      - frontend/js/notifications-local.js
+      - tests/notification-polling-visibility.test.js
+      - tests/runtime-load-shedding.test.js
+      - .github/workflows/test-notification-polling-visibility.yml
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check notification JS syntax
+        run: node --check frontend/js/notifications-local.js
+      - name: Run notification polling regression
+        run: node tests/notification-polling-visibility.test.js

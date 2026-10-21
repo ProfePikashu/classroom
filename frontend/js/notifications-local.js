@@ -1522,7 +1522,7 @@ const unreadClass = item.read ? "" : "is-unread";
   "use strict";
 
   const STORAGE_KEY = window.ClassroomNotificationStorage.key("items");
-  const POLL_MS = 60000;
+  const POLL_MS = 300000;
 
   let pollTimer = null;
   let syncInProgress = false;
@@ -1617,6 +1617,11 @@ const unreadClass = item.read ? "" : "is-unread";
   }
 
   async function syncBackendQuietly() {
+    if (document.visibilityState !== "visible") {
+      updateBellBadge();
+      return;
+    }
+
     if (syncInProgress) return;
 
     const api = window.ClassroomBackendNotifications;
@@ -1682,6 +1687,16 @@ const unreadClass = item.read ? "" : "is-unread";
     window.addEventListener("focus", () => {
       syncBackendQuietly();
     });
+
+    document.addEventListener("click", (event) => {
+    if (
+      event.target.closest("#notificationsToggle") ||
+      event.target.closest(".notifications-toggle") ||
+      event.target.closest("[data-notifications-toggle]")
+    ) {
+      syncBackendQuietly();
+    }
+  }, true);
 
     document.addEventListener("click", (event) => {
       if (

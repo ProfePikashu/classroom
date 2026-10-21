@@ -11,8 +11,8 @@ const course2026 = fs.readFileSync(course2026Path, 'utf8');
 
 assert.match(
   notifications,
-  /const\s+POLL_MS\s*=\s*60000\s*;/,
-  'El polling de notificaciones debe ser de 60 segundos para reducir lecturas repetidas.'
+  /const\s+POLL_MS\s*=\s*300000\s*;/,
+  'El polling de notificaciones debe ser de 5 minutos para reducir lecturas repetidas.'
 );
 
 assert.match(
