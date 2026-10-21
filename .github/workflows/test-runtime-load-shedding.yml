@@ -1,0 +1,36 @@
+name: Test runtime load shedding
+
+on:
+  push:
+    branches:
+      - fix/runtime-load-shedding-20261020
+      - main
+    paths:
+      - frontend/js/notifications-local.js
+      - frontend/js/curso-ayrpc-2025.js
+      - frontend/js/curso-ayrpc-2026.js
+      - tests/runtime-load-shedding.test.js
+      - .github/workflows/test-runtime-load-shedding.yml
+  pull_request:
+    paths:
+      - frontend/js/notifications-local.js
+      - frontend/js/curso-ayrpc-2025.js
+      - frontend/js/curso-ayrpc-2026.js
+      - tests/runtime-load-shedding.test.js
+      - .github/workflows/test-runtime-load-shedding.yml
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check JavaScript syntax
+        run: |
+          node --check frontend/js/notifications-local.js
+          node --check frontend/js/curso-ayrpc-2025.js
+          node --check frontend/js/curso-ayrpc-2026.js
+      - name: Run load-shedding regression
+        run: node tests/runtime-load-shedding.test.js
