@@ -1,0 +1,53 @@
+"use strict";
+
+const assert = require("node:assert/strict");
+const fs = require("node:fs");
+const path = require("node:path");
+
+const html = fs.readFileSync(
+  path.join(__dirname, "../frontend/clases-ayrpc-2026.html"),
+  "utf8"
+);
+
+const recovery = fs.readFileSync(
+  path.join(__dirname, "../frontend/js/ayrpc2026-recovery.js"),
+  "utf8"
+);
+
+assert.match(
+  html,
+  /js\/ayrpc2026-recovery\.js/,
+  "la vista 2026 debe cargar el controlador de recuperación"
+);
+
+assert.match(
+  recovery,
+  /\/api\/classroom\/courses\/ayrpc-2026\/classes\/\$\{classNumber\}\/recovery/,
+  "la recuperación debe usar el endpoint autenticado del backend"
+);
+
+assert.match(
+  recovery,
+  /required_correct_answers/,
+  "la UI debe mostrar el requisito de respuestas correctas recibido del backend"
+);
+
+assert.match(
+  recovery,
+  /AUSENTE|REVISAR/,
+  "solo estados recuperables deben habilitar el flujo"
+);
+
+assert.match(
+  recovery,
+  /0\.98/,
+  "el cuestionario debe habilitarse recién al completar prácticamente todo el video"
+);
+
+assert.doesNotMatch(
+  recovery,
+  /FORMAT_CATEGORIES|ETHICS_CATEGORIES|cobrar de mas|pc de escritorio/,
+  "las reglas de corrección no deben viajar al navegador"
+);
+
+console.log("AyRPC 2026 class 1 recovery contract tests passed");
