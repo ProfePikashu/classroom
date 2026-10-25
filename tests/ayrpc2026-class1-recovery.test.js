@@ -37,6 +37,8 @@ assert.match(recovery, /Vista previa docente/, "la vista previa debe identificar
 assert.match(recovery, /function canTrackPlayback\(\)[\s\S]*state\.config\?\.eligible[\s\S]*isPreviewMode\(\)/, "el preview docente debe poder medir el tiempo visto sin volver elegible una recuperación real");
 assert.match(recovery, /new window\.YT\.Player/, "la recuperación debe usar un player controlado por la API de YouTube");
 assert.match(recovery, /ayrpc2026RecoveryPlayerMount/, "el player de recuperación debe montarse separado del iframe general de clases");
+assert.match(recovery, /onYouTubeIframeAPIReady/, "si la API de YouTube todavía no cargó, la recuperación debe esperar el callback oficial como AyRPC 2025");
+assert.match(recovery, /typeof previousYouTubeReady === "function"/, "el callback de recuperación debe preservar cualquier callback previo de YouTube");
 assert.match(recovery, /Para recuperar esta clase tenés que ver el video completo desde esta vista/, "un alumno recuperable debe recibir la advertencia antes de iniciar");
 assert.match(recovery, /visibilitychange/, "el tracker debe reaccionar cuando la pestaña deja de estar visible");
 assert.match(recovery, /document\.hidden|document\.visibilityState/, "el tiempo válido no debe contarse con la pestaña oculta");
