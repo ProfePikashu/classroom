@@ -27,6 +27,8 @@
     submitting: false,
   };
 
+  let youtubeReadyHookInstalled = false;
+
   const $ = id => document.getElementById(id);
 
   function apiBase() {
@@ -500,9 +502,34 @@
   }
 
   function schedulePlayerAttach() {
-    [80, 250, 600, 1200].forEach(delay => {
-      window.setTimeout(attachRecoveryPlayer, delay);
-    });
+    const tryAttach = () => {
+      [0, 80, 250, 600, 1200].forEach(delay => {
+        window.setTimeout(attachRecoveryPlayer, delay);
+      });
+    };
+
+    if (window.YT?.Player) {
+      tryAttach();
+      return;
+    }
+
+    if (youtubeReadyHookInstalled) return;
+    youtubeReadyHookInstalled = true;
+
+    const previousYouTubeReady = window.onYouTubeIframeAPIReady;
+
+    window.onYouTubeIframeAPIReady = () => {
+      if (typeof previousYouTubeReady === "function") {
+        try {
+          previousYouTubeReady();
+        } catch (error) {
+          console.warn("Falló un callback previo de YouTube:", error);
+        }
+      }
+
+      tryAttach();
+      window.setTimeout(() => void syncSelection(), 0);
+    };
   }
 
   function escapeHtml(value) {

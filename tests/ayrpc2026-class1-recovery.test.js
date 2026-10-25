@@ -20,7 +20,8 @@ const auth = fs.readFileSync(
 );
 
 assert.match(html, /js\/ayrpc2026-recovery\.js/, "la vista 2026 debe cargar el controlador de recuperación");
-assert.match(html, /js\/ayrpc2026-recovery\.js\?v=20261025-class1-1h56-v1/, "la vista debe invalidar el cache al publicar el corte de 1h56");
+assert.match(html, /js\/auth\.js\?v=20261025-recovery-auth-v2/, "la vista debe invalidar el cache de auth al exponer ClassroomAuth para recuperación");
+assert.match(html, /js\/ayrpc2026-recovery\.js\?v=20261025-yt-ready-v2/, "la vista debe invalidar el cache del tracker al publicar la espera robusta de YouTube");
 assert.match(recovery, /const COURSE_SLUG = "ayrpc-2026"/, "la recuperación debe apuntar al curso AyRPC 2026");
 assert.match(recovery, /const CLASS1_REQUIRED_WATCH_SECONDS = 6960/, "la Clase 1 debe llegar al 100% en 1h56 desde el inicio");
 assert.match(recovery, /const VIDEO_COMPLETION_RATIO = 1(?:\.0)?;/, "la Clase 1 debe completarse exactamente al llegar al corte configurado");
@@ -37,6 +38,8 @@ assert.match(recovery, /Vista previa docente/, "la vista previa debe identificar
 assert.match(recovery, /function canTrackPlayback\(\)[\s\S]*state\.config\?\.eligible[\s\S]*isPreviewMode\(\)/, "el preview docente debe poder medir el tiempo visto sin volver elegible una recuperación real");
 assert.match(recovery, /new window\.YT\.Player/, "la recuperación debe usar un player controlado por la API de YouTube");
 assert.match(recovery, /ayrpc2026RecoveryPlayerMount/, "el player de recuperación debe montarse separado del iframe general de clases");
+assert.match(recovery, /onYouTubeIframeAPIReady/, "si la API de YouTube todavía no cargó, la recuperación debe esperar el callback oficial como AyRPC 2025");
+assert.match(recovery, /typeof previousYouTubeReady === "function"/, "el callback de recuperación debe preservar cualquier callback previo de YouTube");
 assert.match(recovery, /Para recuperar esta clase tenés que ver el video completo desde esta vista/, "un alumno recuperable debe recibir la advertencia antes de iniciar");
 assert.match(recovery, /visibilitychange/, "el tracker debe reaccionar cuando la pestaña deja de estar visible");
 assert.match(recovery, /document\.hidden|document\.visibilityState/, "el tiempo válido no debe contarse con la pestaña oculta");
