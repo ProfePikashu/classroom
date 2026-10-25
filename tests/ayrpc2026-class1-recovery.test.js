@@ -42,7 +42,7 @@ assert.match(recovery, /onYouTubeIframeAPIReady/, "si la API de YouTube todavía
 assert.match(recovery, /typeof previousYouTubeReady === "function"/, "el callback de recuperación debe preservar cualquier callback previo de YouTube");
 assert.match(recovery, /const PLAYER_ATTACH_RETRY_MS = 250/, "el tracker debe reintentar montar el player hasta que YouTube y el video estén realmente disponibles");
 assert.match(recovery, /const PLAYER_ATTACH_TIMEOUT_MS = 15000/, "los reintentos del player deben tener un límite razonable");
-assert.match(recovery, /function schedulePlayerAttach\(\)[\s\S]*setInterval[\s\S]*attachRecoveryPlayer/, "el montaje no debe depender de cuatro timeouts fijos");
+assert.match(recovery, /function schedulePlayerAttach\(\)[\s\S]*setInterval[\s\S]*PLAYER_ATTACH_RETRY_MS/, "el montaje no debe depender de cuatro timeouts fijos");
 assert.match(recovery, /document\.hasFocus\(\)/, "un click dentro del iframe de YouTube no debe confundirse con abandonar la clase");
 assert.match(recovery, /Para recuperar esta clase tenés que ver el video completo desde esta vista/, "un alumno recuperable debe recibir la advertencia antes de iniciar");
 assert.match(recovery, /visibilitychange/, "el tracker debe reaccionar cuando la pestaña deja de estar visible");
