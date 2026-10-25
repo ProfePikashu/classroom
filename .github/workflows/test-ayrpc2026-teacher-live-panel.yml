@@ -22,3 +22,5 @@ jobs:
         run: node --check frontend/js/curso-ayrpc-2026-teacher-preview.js
       - name: Run teacher live panel contract
         run: node tests/ayrpc2026-teacher-live-panel.test.js
+      - name: Run full Classroom Node suite
+        run: for test in tests/*.test.js; do node "$test"; done
