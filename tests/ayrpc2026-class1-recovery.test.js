@@ -21,6 +21,12 @@ assert.match(
 );
 
 assert.match(
+  html,
+  /js\/ayrpc2026-recovery\.js\?v=20261025-teacher-preview-v2/,
+  "la vista debe invalidar el cache al publicar el preview docente"
+);
+
+assert.match(
   recovery,
   /const COURSE_SLUG = "ayrpc-2026"/,
   "la recuperación debe apuntar al curso AyRPC 2026"
