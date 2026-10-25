@@ -14,21 +14,10 @@ const recovery = fs.readFileSync(
   "utf8"
 );
 
-const classes2026 = fs.readFileSync(
-  path.join(__dirname, "../frontend/js/clases-ayrpc-2026.js"),
-  "utf8"
-);
-
 assert.match(
   html,
   /js\/ayrpc2026-recovery\.js/,
   "la vista 2026 debe cargar el controlador de recuperación"
-);
-
-assert.match(
-  html,
-  /js\/ayrpc2026-recovery\.js\?v=20261025-teacher-preview-v2/,
-  "la vista debe invalidar el cache al publicar el preview docente"
 );
 
 assert.match(
@@ -41,6 +30,12 @@ assert.match(
   recovery,
   /\/api\/classroom\/courses\/\$\{COURSE_SLUG\}\/classes\/\$\{classNumber\}\/recovery/,
   "la recuperación debe usar el endpoint autenticado del backend"
+);
+
+assert.match(
+  recovery,
+  /\/recovery\/watch/,
+  "el frontend debe reportar heartbeats de tiempo visto al backend"
 );
 
 assert.match(
@@ -74,9 +69,15 @@ assert.match(
 );
 
 assert.match(
-  classes2026,
-  /enablejsapi=1/,
-  "el iframe de YouTube debe nacer con enablejsapi=1 para que PLAYING llegue al tracker"
+  recovery,
+  /new window\.YT\.Player/,
+  "la recuperación debe usar un player controlado por la API de YouTube"
+);
+
+assert.match(
+  recovery,
+  /ayrpc2026RecoveryPlayerMount/,
+  "el player de recuperación debe montarse separado del iframe general de clases"
 );
 
 assert.match(
@@ -95,6 +96,12 @@ assert.match(
   recovery,
   /document\.hidden|document\.visibilityState/,
   "el tiempo válido no debe contarse con la pestaña oculta"
+);
+
+assert.match(
+  recovery,
+  /window\.addEventListener\("blur"/,
+  "el tiempo válido debe detenerse al minimizar o perder foco"
 );
 
 assert.match(
