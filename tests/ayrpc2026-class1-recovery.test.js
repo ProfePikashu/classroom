@@ -22,7 +22,13 @@ assert.match(
 
 assert.match(
   recovery,
-  /\/api\/classroom\/courses\/ayrpc-2026\/classes\/\$\{classNumber\}\/recovery/,
+  /const COURSE_SLUG = "ayrpc-2026"/,
+  "la recuperación debe apuntar al curso AyRPC 2026"
+);
+
+assert.match(
+  recovery,
+  /\/api\/classroom\/courses\/\$\{COURSE_SLUG\}\/classes\/\$\{classNumber\}\/recovery/,
   "la recuperación debe usar el endpoint autenticado del backend"
 );
 
