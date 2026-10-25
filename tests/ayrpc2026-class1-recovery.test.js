@@ -14,6 +14,11 @@ const recovery = fs.readFileSync(
   "utf8"
 );
 
+const auth = fs.readFileSync(
+  path.join(__dirname, "../frontend/js/auth.js"),
+  "utf8"
+);
+
 assert.match(html, /js\/ayrpc2026-recovery\.js/, "la vista 2026 debe cargar el controlador de recuperación");
 assert.match(html, /js\/ayrpc2026-recovery\.js\?v=20261025-class1-1h56-v1/, "la vista debe invalidar el cache al publicar el corte de 1h56");
 assert.match(recovery, /const COURSE_SLUG = "ayrpc-2026"/, "la recuperación debe apuntar al curso AyRPC 2026");
@@ -21,8 +26,7 @@ assert.match(recovery, /const CLASS1_REQUIRED_WATCH_SECONDS = 6960/, "la Clase 1
 assert.match(recovery, /const VIDEO_COMPLETION_RATIO = 1(?:\.0)?;/, "la Clase 1 debe completarse exactamente al llegar al corte configurado");
 assert.match(recovery, /function knownDuration\(\)[\s\S]*required_watch_seconds[\s\S]*CLASS1_REQUIRED_WATCH_SECONDS/, "la barra debe usar el corte académico y no la duración completa subida a YouTube");
 assert.match(recovery, /Math\.floor\(rawPercent\)/, "la barra no debe redondear a 100% antes de alcanzar 1h56:00");
-assert.match(recovery, /typeof ClassroomAuth !== "undefined"[\s\S]*ClassroomAuth\.getSession\(\)/, "la recuperación debe leer la misma vinculación global de ClassroomAuth que usa el resto del Classroom");
-assert.doesNotMatch(recovery, /typeof window\.ClassroomAuth !== "undefined"/, "la recuperación no debe depender de window.ClassroomAuth porque auth.js declara ClassroomAuth con const global");
+assert.match(auth, /window\.ClassroomAuth\s*=\s*ClassroomAuth\s*;/, "auth.js debe exponer ClassroomAuth en window para los controladores que lo consumen como propiedad global");
 assert.match(recovery, /\/api\/classroom\/courses\/\$\{COURSE_SLUG\}\/classes\/\$\{classNumber\}\/recovery/, "la recuperación debe usar el endpoint autenticado del backend");
 assert.match(recovery, /function recoveryWatchEndpoint[\s\S]*recoveryEndpoint\(classNumber\)[\s\S]*\/watch/, "el frontend debe reportar heartbeats de tiempo visto al backend");
 assert.match(recovery, /video_duration_seconds:\s*Number\(safePlayerDuration\(\)/, "el heartbeat debe informar la duración real del player");
