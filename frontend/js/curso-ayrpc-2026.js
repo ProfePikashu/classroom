@@ -28,11 +28,17 @@ const CursoAyRPC2026Panel = {
 
     if (!courseStatusData) {
       this.paintUnavailable();
-      this.paintAttendance(Object.fromEntries(this.classes.map(item => [item.statusKey, "PENDIENTE"])));
+      const pendingState = Object.fromEntries(
+        this.classes.map(item => [item.statusKey, "PENDIENTE"])
+      );
+      pendingState.__courseStatus = { attendance: [] };
+      this.paintCourseRoadmap(pendingState);
+      this.paintAttendance(pendingState);
       return;
     }
 
     this.paintCourseState(courseStatusData);
+    this.paintCourseRoadmap(courseStatusData);
     this.paintAttendance(courseStatusData);
   },
 
@@ -134,16 +140,28 @@ const CursoAyRPC2026Panel = {
     return Number.isFinite(numeric) ? numeric : 0;
   },
 
-  formatSeconds(seconds) {
-    const total = Math.max(0, Number(seconds || 0));
+  formatExactAttendanceTime(seconds) {
+    if (seconds === null || seconds === undefined || seconds === "") return "";
+
+    const value = Number(seconds);
+    if (!Number.isFinite(value) || value < 0) return "";
+
+    const total = Math.floor(value);
     const h = Math.floor(total / 3600);
     const m = Math.floor((total % 3600) / 60);
-    const s = Math.floor(total % 60);
+    const s = total % 60;
+    const minuteText = h > 0 ? String(m).padStart(2, "0") : String(m);
+    const secondText = String(s).padStart(2, "0");
 
-    if (h) return `${h}h ${m}m`;
-    if (m) return `${m}m ${s}s`;
-    if (s) return `${s}s`;
-    return "—";
+    return h > 0
+      ? `${h}h ${minuteText}m ${secondText}s`
+      : `${minuteText}m ${secondText}s`;
+  },
+
+  formatSeconds(seconds) {
+    const total = Math.max(0, Number(seconds || 0));
+    if (!total) return "—";
+    return this.formatExactAttendanceTime(total) || "—";
   },
 
   async refreshFromCourseStatus(session) {
@@ -186,10 +204,28 @@ const CursoAyRPC2026Panel = {
           raw[`class_${item.n}_status`] ||
           "";
 
-        courseState[item.timeKey] =
+        const legacyTime =
           row.time ||
           raw[`class_${item.n}_time`] ||
           "";
+
+        const hasLiveSeconds =
+          row.live_presence_seconds !== null &&
+          row.live_presence_seconds !== undefined &&
+          row.live_presence_seconds !== "";
+        const liveSeconds = hasLiveSeconds
+          ? Number(row.live_presence_seconds)
+          : null;
+        const exactTime = Number.isFinite(liveSeconds)
+          ? this.formatExactAttendanceTime(liveSeconds)
+          : "";
+
+        courseState[item.timeKey] = exactTime || legacyTime;
+        courseState[`class_${item.n}_seconds`] = Number.isFinite(liveSeconds)
+          ? Math.max(0, Math.floor(liveSeconds))
+          : this.parseTimeToSeconds(legacyTime);
+        courseState[`class_${item.n}_percent`] =
+          row.live_presence_percent ?? null;
       });
 
       return courseState;
@@ -198,6 +234,85 @@ const CursoAyRPC2026Panel = {
       return null;
     }
   },
+
+  getHeldClassNumbers(alumno) {
+    const data = alumno?.__courseStatus || {};
+    const attendance = Array.isArray(data.attendance)
+      ? data.attendance
+      : [];
+    const held = new Set();
+
+    attendance.forEach((row) => {
+      const classNumber = Number(row?.class_number);
+      if (!Number.isFinite(classNumber) || classNumber < 1) return;
+
+      const status = this.normalizeStatus(row?.status);
+      const hasLiveSeconds =
+        row?.live_presence_seconds !== null &&
+        row?.live_presence_seconds !== undefined;
+      const hasLivePercent =
+        row?.live_presence_percent !== null &&
+        row?.live_presence_percent !== undefined;
+      const hasVideoActivity =
+        row?.video_watch_seconds !== null &&
+        row?.video_watch_seconds !== undefined;
+      const hasResolvedStatus = Boolean(status) &&
+        !["PENDIENTE", "SIN DATOS", "-"].includes(status);
+
+      if (hasLiveSeconds || hasLivePercent || hasVideoActivity || hasResolvedStatus) {
+        held.add(classNumber);
+      }
+    });
+
+    // La Clase 1 finalizó el 24/10. Este fallback cubre alumnos sin fila de progreso.
+    if (Date.now() >= Date.parse("2026-10-24T21:35:00-03:00")) {
+      held.add(1);
+    }
+
+    const highestHeld = held.size ? Math.max(...held) : 0;
+    for (let n = 1; n <= highestHeld; n += 1) {
+      held.add(n);
+    }
+
+    return held;
+  },
+
+  paintCourseRoadmap(alumno) {
+    const held = this.getHeldClassNumbers(alumno);
+    const modules = document.querySelectorAll(
+      "#ayrpc2026Temario .ayrpc-student-grid > div"
+    );
+
+    modules.forEach((module, index) => {
+      const classNumber = index + 1;
+      const oldCheck = module.querySelector(".ayrpc-module-check");
+      if (oldCheck) oldCheck.remove();
+
+      if (!held.has(classNumber)) {
+        module.removeAttribute("data-class-held");
+        return;
+      }
+
+      module.setAttribute("data-class-held", "true");
+      module.style.position = "relative";
+      module.style.paddingRight = "2.75rem";
+
+      const check = document.createElement("i");
+      check.className = "fa-solid fa-circle-check ayrpc-module-check";
+      check.setAttribute("aria-label", "Clase dictada");
+      check.title = "Clase dictada";
+      check.style.cssText = [
+        "position:absolute",
+        "top:12px",
+        "right:12px",
+        "color:var(--green,#22c55e)",
+        "font-size:1.1rem",
+      ].join(";");
+
+      module.appendChild(check);
+    });
+  },
+
   paintUnavailable() {
     const state = document.getElementById("ayrpcCourseState");
     const detail = document.getElementById("ayrpcCourseStateDetail");
@@ -229,6 +344,7 @@ const CursoAyRPC2026Panel = {
       source.className = "status-badge";
     }
   },
+
   paintCourseState(alumno) {
     const data = alumno?.__courseStatus || {};
     const academic = data.academic || {};
@@ -309,6 +425,7 @@ const CursoAyRPC2026Panel = {
       source.className = "status-badge active";
     }
   },
+
   paintAttendance(alumno) {
     const list = document.getElementById("ayrpcClassList");
     const chart = document.getElementById("ayrpcTimeChart");
@@ -320,9 +437,13 @@ const CursoAyRPC2026Panel = {
     const rows = this.classes.map(item => {
       const status = this.normalizeStatus(this.getStatusByKey(alumno, item.statusKey));
       const timeRaw = this.getTimeByKey(alumno, item.timeKey);
-      const seconds = this.parseTimeToSeconds(timeRaw);
+      const storedSeconds = alumno?.[`class_${item.n}_seconds`];
+      const seconds = storedSeconds !== undefined && storedSeconds !== null
+        ? Math.max(0, Number(storedSeconds) || 0)
+        : this.parseTimeToSeconds(timeRaw);
+      const livePercent = alumno?.[`class_${item.n}_percent`] ?? null;
 
-      return { ...item, status, timeRaw, seconds };
+      return { ...item, status, timeRaw, seconds, livePercent };
     });
 
     const covered = rows.filter(row => this.isCovered(row.status)).length;
@@ -356,7 +477,9 @@ const CursoAyRPC2026Panel = {
     }).join("");
 
     chart.innerHTML = rows.map(row => {
-      const width = Math.max(4, Math.round((row.seconds / maxSeconds) * 100));
+      const width = row.seconds > 0
+        ? Math.max(4, Math.round((row.seconds / maxSeconds) * 100))
+        : 0;
       return `
         <div class="ayrpc-chart-row">
           <span>C${row.n}</span>
