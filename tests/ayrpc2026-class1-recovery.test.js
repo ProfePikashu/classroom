@@ -14,6 +14,11 @@ const recovery = fs.readFileSync(
   "utf8"
 );
 
+const classes2026 = fs.readFileSync(
+  path.join(__dirname, "../frontend/js/clases-ayrpc-2026.js"),
+  "utf8"
+);
+
 assert.match(
   html,
   /js\/ayrpc2026-recovery\.js/,
@@ -66,6 +71,30 @@ assert.match(
   recovery,
   /function canTrackPlayback\(\)[\s\S]*state\.config\?\.eligible[\s\S]*isPreviewMode\(\)/,
   "el preview docente debe poder medir el tiempo visto sin volver elegible una recuperación real"
+);
+
+assert.match(
+  classes2026,
+  /enablejsapi=1/,
+  "el iframe de YouTube debe nacer con enablejsapi=1 para que PLAYING llegue al tracker"
+);
+
+assert.match(
+  recovery,
+  /Para recuperar esta clase tenés que ver el video completo desde esta vista/,
+  "un alumno recuperable debe recibir la advertencia antes de iniciar"
+);
+
+assert.match(
+  recovery,
+  /visibilitychange/,
+  "el tracker debe reaccionar cuando la pestaña deja de estar visible"
+);
+
+assert.match(
+  recovery,
+  /document\.hidden|document\.visibilityState/,
+  "el tiempo válido no debe contarse con la pestaña oculta"
 );
 
 assert.match(
