@@ -16,7 +16,6 @@
     configLoading: false,
     player: null,
     playerVideoId: "",
-    playerReady: false,
     trackingTimer: null,
     lastTickAt: 0,
     lastVideoTime: 0,
@@ -115,6 +114,13 @@
     }
   }
 
+  function knownDuration() {
+    return Math.max(
+      safePlayerDuration(),
+      Number(state.config?.video_duration_seconds || 0)
+    );
+  }
+
   function watchedTotal() {
     return Math.max(0, state.serverWatchedSeconds + state.pendingSeconds);
   }
@@ -133,9 +139,7 @@
   }
 
   function updateProgressFromSeconds() {
-    const duration =
-      safePlayerDuration() ||
-      Number(state.config?.video_duration_seconds || 0);
+    const duration = knownDuration();
 
     if (!duration) {
       updateProgress(Number(state.config?.video_watch_percent || 0));
@@ -164,7 +168,9 @@
     }
 
     button.innerHTML = '<i class="fa-solid fa-clipboard-question"></i> Responder cuestionario';
-    button.title = enabled ? "Cuestionario habilitado" : "Completá el tiempo visto válido para habilitarlo";
+    button.title = enabled
+      ? "Cuestionario habilitado"
+      : "Completá el tiempo visto válido para habilitarlo";
   }
 
   function stopTracking() {
@@ -187,7 +193,6 @@
     }
 
     state.player = null;
-    state.playerReady = false;
     state.playerVideoId = "";
   }
 
@@ -273,10 +278,7 @@
   function completionReached() {
     if (isPreviewMode()) return true;
 
-    const duration =
-      safePlayerDuration() ||
-      Number(state.config?.video_duration_seconds || 0);
-
+    const duration = knownDuration();
     if (!duration) return false;
 
     return state.serverWatchedSeconds >= duration * VIDEO_COMPLETION_RATIO;
@@ -324,6 +326,7 @@
         body: JSON.stringify({
           delta_seconds: Number(delta.toFixed(3)),
           video_position_seconds: Number(safePlayerTime().toFixed(3)),
+          video_duration_seconds: Number(safePlayerDuration().toFixed(3)),
           visible: true,
           playing: true,
         }),
@@ -340,14 +343,14 @@
         Number(data.watched_seconds || data.video_watch_seconds || 0)
       );
 
-      if (data.complete === true) {
-        state.quizUnlocked = true;
-        state.pendingSeconds = 0;
-        updateProgress(100);
-        setQuizEnabled(true);
-      } else {
-        refreshUnlockState();
+      if (state.config && Number(data.video_duration_seconds || 0) > 0) {
+        state.config.video_duration_seconds = Math.max(
+          Number(state.config.video_duration_seconds || 0),
+          Number(data.video_duration_seconds)
+        );
       }
+
+      refreshUnlockState();
     } catch (error) {
       state.pendingSeconds += delta;
       console.warn("No se pudo sincronizar el tiempo visto válido:", error);
@@ -444,7 +447,12 @@
         },
         events: {
           onReady: () => {
-            state.playerReady = true;
+            if (state.config) {
+              state.config.video_duration_seconds = Math.max(
+                Number(state.config.video_duration_seconds || 0),
+                safePlayerDuration()
+              );
+            }
             refreshUnlockState();
           },
           onStateChange: event => {
