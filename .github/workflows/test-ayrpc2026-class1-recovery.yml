@@ -1,0 +1,31 @@
+name: Test AyRPC 2026 class 1 recovery
+
+on:
+  push:
+    branches:
+      - feat/ayrpc2026-class1-recovery
+      - main
+    paths:
+      - frontend/clases-ayrpc-2026.html
+      - frontend/js/ayrpc2026-recovery.js
+      - tests/ayrpc2026-class1-recovery.test.js
+      - .github/workflows/test-ayrpc2026-class1-recovery.yml
+  pull_request:
+    paths:
+      - frontend/clases-ayrpc-2026.html
+      - frontend/js/ayrpc2026-recovery.js
+      - tests/ayrpc2026-class1-recovery.test.js
+      - .github/workflows/test-ayrpc2026-class1-recovery.yml
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check recovery JavaScript syntax
+        run: node --check frontend/js/ayrpc2026-recovery.js
+      - name: Run recovery contract test
+        run: node tests/ayrpc2026-class1-recovery.test.js
