@@ -6,6 +6,8 @@
   const CLASS1_REQUIRED_WATCH_SECONDS = 6960;
   const VIDEO_COMPLETION_RATIO = 1;
   const HEARTBEAT_SECONDS = 5;
+  const PLAYER_ATTACH_RETRY_MS = 250;
+  const PLAYER_ATTACH_TIMEOUT_MS = 15000;
   const RECOVERY_START_MESSAGE =
     "Para recuperar esta clase tenés que ver el video completo desde esta vista. Si abandonás la vista de la clase, cambiás de pestaña, minimizás o cerrás el navegador, ese tiempo no cuenta como tiempo visto válido. ¿Querés iniciar la recuperación?";
 
@@ -17,6 +19,8 @@
     configLoading: false,
     player: null,
     playerVideoId: "",
+    playerAttachTimer: null,
+    playerAttachStartedAt: 0,
     trackingTimer: null,
     lastTickAt: 0,
     lastVideoTime: 0,
@@ -186,6 +190,15 @@
       : "Completá el tiempo visto válido para habilitarlo";
   }
 
+  function clearPlayerAttachRetry() {
+    if (state.playerAttachTimer) {
+      window.clearInterval(state.playerAttachTimer);
+      state.playerAttachTimer = null;
+    }
+
+    state.playerAttachStartedAt = 0;
+  }
+
   function stopTracking() {
     if (state.trackingTimer) {
       window.clearInterval(state.trackingTimer);
@@ -197,6 +210,7 @@
   }
 
   function destroyRecoveryPlayer() {
+    clearPlayerAttachRetry();
     stopTracking();
 
     if (state.player) {
@@ -275,7 +289,11 @@
   function extractVideoId() {
     if (state.playerVideoId) return state.playerVideoId;
 
-    const iframe = $("youtubePlayer")?.querySelector("iframe");
+    const host = $("youtubePlayer");
+    const explicitVideoId = String(host?.dataset?.videoId || "").trim();
+    if (explicitVideoId) return explicitVideoId;
+
+    const iframe = host?.querySelector("iframe");
     const src = iframe?.src || "";
 
     try {
@@ -437,16 +455,17 @@
   }
 
   function attachRecoveryPlayer() {
-    if (!canTrackPlayback() || state.player) return;
-    if (!window.YT?.Player) return;
+    if (!canTrackPlayback() || state.player) return Boolean(state.player);
+    if (!window.YT?.Player) return false;
 
     const host = $("youtubePlayer");
-    if (!host) return;
+    if (!host) return false;
 
     const videoId = extractVideoId();
-    if (!videoId) return;
+    if (!videoId) return false;
 
     state.playerVideoId = videoId;
+    host.dataset.videoId = videoId;
     host.innerHTML = '<div id="ayrpc2026RecoveryPlayerMount"></div>';
 
     try {
@@ -460,6 +479,7 @@
         },
         events: {
           onReady: () => {
+            clearPlayerAttachRetry();
             if (state.config) {
               state.config.video_duration_seconds = Math.max(
                 Number(state.config.video_duration_seconds || 0),
@@ -495,41 +515,74 @@
           },
         },
       });
+      return true;
     } catch (error) {
       console.warn("No se pudo iniciar el seguimiento del video:", error);
       state.player = null;
+      return false;
     }
   }
 
   function schedulePlayerAttach() {
+    clearPlayerAttachRetry();
+    state.playerAttachStartedAt = Date.now();
+
     const tryAttach = () => {
-      [0, 80, 250, 600, 1200].forEach(delay => {
-        window.setTimeout(attachRecoveryPlayer, delay);
-      });
+      if (state.player) {
+        clearPlayerAttachRetry();
+        return true;
+      }
+
+      if (attachRecoveryPlayer()) {
+        clearPlayerAttachRetry();
+        return true;
+      }
+
+      if (
+        state.playerAttachStartedAt > 0 &&
+        Date.now() - state.playerAttachStartedAt >= PLAYER_ATTACH_TIMEOUT_MS
+      ) {
+        clearPlayerAttachRetry();
+        console.warn("No se pudo montar el player controlado de recuperación dentro del tiempo esperado.");
+      }
+
+      return false;
+    };
+
+    const startRetryLoop = () => {
+      if (tryAttach()) return;
+      if (state.playerAttachTimer) return;
+
+      state.playerAttachTimer = window.setInterval(
+        tryAttach,
+        PLAYER_ATTACH_RETRY_MS
+      );
     };
 
     if (window.YT?.Player) {
-      tryAttach();
+      startRetryLoop();
       return;
     }
 
-    if (youtubeReadyHookInstalled) return;
-    youtubeReadyHookInstalled = true;
+    if (!youtubeReadyHookInstalled) {
+      youtubeReadyHookInstalled = true;
+      const previousYouTubeReady = window.onYouTubeIframeAPIReady;
 
-    const previousYouTubeReady = window.onYouTubeIframeAPIReady;
-
-    window.onYouTubeIframeAPIReady = () => {
-      if (typeof previousYouTubeReady === "function") {
-        try {
-          previousYouTubeReady();
-        } catch (error) {
-          console.warn("Falló un callback previo de YouTube:", error);
+      window.onYouTubeIframeAPIReady = () => {
+        if (typeof previousYouTubeReady === "function") {
+          try {
+            previousYouTubeReady();
+          } catch (error) {
+            console.warn("Falló un callback previo de YouTube:", error);
+          }
         }
-      }
 
-      tryAttach();
-      window.setTimeout(() => void syncSelection(), 0);
-    };
+        startRetryLoop();
+        window.setTimeout(() => void syncSelection(), 0);
+      };
+    }
+
+    startRetryLoop();
   }
 
   function escapeHtml(value) {
@@ -855,7 +908,10 @@
     });
 
     window.addEventListener("blur", () => {
-      pauseForInactiveView();
+      window.setTimeout(() => {
+        if (document.hasFocus()) return;
+        pauseForInactiveView();
+      }, 0);
     });
 
     window.addEventListener("beforeunload", event => {
