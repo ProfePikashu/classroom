@@ -172,6 +172,15 @@
   opacity: .65;
 }
 
+/* El YT.Player controlado reemplaza el mount por un iframe propio.
+   Forzamos el iframe a ocupar todo el contenedor 16:9 para evitar
+   la franja negra que dejaba la altura por defecto de YouTube. */
+#youtubePlayer iframe {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+}
+
 @media (max-width: 700px) {
   .ayrpc2026-live-head {
     flex-direction: column;
