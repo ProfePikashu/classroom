@@ -35,13 +35,25 @@ assert.match(
 assert.match(
   recovery,
   /AUSENTE|REVISAR/,
-  "solo estados recuperables deben habilitar el flujo"
+  "solo estados recuperables deben habilitar el flujo real"
+);
+
+assert.match(
+  recovery,
+  /preview_mode/,
+  "la UI debe reconocer la vista previa docente del backend"
+);
+
+assert.match(
+  recovery,
+  /Vista previa docente/,
+  "la vista previa debe identificarse claramente como docente"
 );
 
 assert.match(
   recovery,
   /0\.98/,
-  "el cuestionario debe habilitarse recién al completar prácticamente todo el video"
+  "el cuestionario real debe habilitarse recién al completar prácticamente todo el video"
 );
 
 assert.doesNotMatch(
