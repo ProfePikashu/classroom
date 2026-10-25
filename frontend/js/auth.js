@@ -420,3 +420,5 @@ const ClassroomAuth = {
     this.bindLogout();
   },
 };
+
+window.ClassroomAuth = ClassroomAuth;
