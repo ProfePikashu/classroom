@@ -64,6 +64,12 @@ assert.match(
 
 assert.match(
   recovery,
+  /function canTrackPlayback\(\)[\s\S]*state\.config\?\.eligible[\s\S]*isPreviewMode\(\)/,
+  "el preview docente debe poder medir el tiempo visto sin volver elegible una recuperación real"
+);
+
+assert.match(
+  recovery,
   /0\.98/,
   "el cuestionario real debe habilitarse recién al completar prácticamente todo el video"
 );
