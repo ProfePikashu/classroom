@@ -4,6 +4,9 @@
   const COURSE_SLUG = "ayrpc-2026";
   const ENABLED_CLASS_NUMBER = 1;
   const VIDEO_COMPLETION_RATIO = 0.98;
+  const HEARTBEAT_SECONDS = 5;
+  const RECOVERY_START_MESSAGE =
+    "Para recuperar esta clase tenés que ver el video completo desde esta vista. Si abandonás la vista de la clase, cambiás de pestaña, minimizás o cerrás el navegador, ese tiempo no cuenta como tiempo visto válido. ¿Querés iniciar la recuperación?";
 
   const state = {
     key: "",
@@ -12,12 +15,14 @@
     config: null,
     configLoading: false,
     player: null,
-    playerFrame: null,
-    watchedSeconds: 0,
+    playerVideoId: "",
+    trackingTimer: null,
     lastTickAt: 0,
     lastVideoTime: 0,
-    trackingTimer: null,
-    videoComplete: false,
+    serverWatchedSeconds: 0,
+    pendingSeconds: 0,
+    heartbeatSending: false,
+    quizUnlocked: false,
     submitting: false,
   };
 
@@ -71,6 +76,10 @@
     return state.config?.preview_mode === true;
   }
 
+  function canTrackPlayback() {
+    return state.config?.eligible === true || isPreviewMode();
+  }
+
   function selectedClassNumber() {
     const title = $("recoveryTitle")?.textContent || "";
     const match = title.match(/Clase\s+(\d+)/i);
@@ -85,14 +94,35 @@
     return `${apiBase()}/api/classroom/courses/${COURSE_SLUG}/classes/${classNumber}/recovery`;
   }
 
-  function stopTracking() {
-    if (state.trackingTimer) {
-      window.clearInterval(state.trackingTimer);
-      state.trackingTimer = null;
-    }
+  function recoveryWatchEndpoint(classNumber) {
+    return `${recoveryEndpoint(classNumber)}/watch`;
+  }
 
-    state.lastTickAt = 0;
-    state.lastVideoTime = 0;
+  function safePlayerTime() {
+    try {
+      return Number(state.player?.getCurrentTime?.() || 0);
+    } catch {
+      return 0;
+    }
+  }
+
+  function safePlayerDuration() {
+    try {
+      return Number(state.player?.getDuration?.() || 0);
+    } catch {
+      return 0;
+    }
+  }
+
+  function knownDuration() {
+    return Math.max(
+      safePlayerDuration(),
+      Number(state.config?.video_duration_seconds || 0)
+    );
+  }
+
+  function watchedTotal() {
+    return Math.max(0, state.serverWatchedSeconds + state.pendingSeconds);
   }
 
   function updateProgress(percent) {
@@ -106,6 +136,17 @@
 
     if (text) text.textContent = `${safePercent}%`;
     if (bar) bar.style.width = `${safePercent}%`;
+  }
+
+  function updateProgressFromSeconds() {
+    const duration = knownDuration();
+
+    if (!duration) {
+      updateProgress(Number(state.config?.video_watch_percent || 0));
+      return;
+    }
+
+    updateProgress((watchedTotal() / duration) * 100);
   }
 
   function showRecoveryProgress(show) {
@@ -123,25 +164,60 @@
     if (enabled && isPreviewMode()) {
       button.innerHTML = '<i class="fa-solid fa-eye"></i> Ver cuestionario';
       button.title = "Vista previa docente";
+      return;
     }
+
+    button.innerHTML = '<i class="fa-solid fa-clipboard-question"></i> Responder cuestionario';
+    button.title = enabled
+      ? "Cuestionario habilitado"
+      : "Completá el tiempo visto válido para habilitarlo";
+  }
+
+  function stopTracking() {
+    if (state.trackingTimer) {
+      window.clearInterval(state.trackingTimer);
+      state.trackingTimer = null;
+    }
+
+    state.lastTickAt = 0;
+    state.lastVideoTime = safePlayerTime();
+  }
+
+  function destroyRecoveryPlayer() {
+    stopTracking();
+
+    if (state.player) {
+      try {
+        state.player.destroy();
+      } catch {}
+    }
+
+    state.player = null;
+    state.playerVideoId = "";
   }
 
   function resetSelection(nextKey, classNumber, status) {
-    stopTracking();
+    destroyRecoveryPlayer();
 
     state.key = nextKey;
     state.classNumber = classNumber;
     state.status = status;
     state.config = null;
     state.configLoading = false;
-    state.player = null;
-    state.playerFrame = null;
-    state.watchedSeconds = 0;
-    state.videoComplete = false;
+    state.serverWatchedSeconds = 0;
+    state.pendingSeconds = 0;
+    state.heartbeatSending = false;
+    state.quizUnlocked = false;
     state.submitting = false;
 
     updateProgress(0);
     setQuizEnabled(false);
+
+    const box = $("quizBox");
+    if (box) {
+      box.style.display = "none";
+      box.innerHTML = "";
+    }
   }
 
   async function loadRecoveryConfig(classNumber) {
@@ -168,6 +244,12 @@
       if (!response.ok || !data?.ok) return null;
 
       state.config = data;
+      state.serverWatchedSeconds = Math.max(
+        0,
+        Number(data.video_watch_seconds || data.watched_seconds || 0)
+      );
+      state.pendingSeconds = 0;
+
       return data;
     } catch (error) {
       console.warn("No se pudo cargar la recuperación de la clase:", error);
@@ -177,36 +259,103 @@
     }
   }
 
-  function safePlayerTime() {
+  function extractVideoId() {
+    if (state.playerVideoId) return state.playerVideoId;
+
+    const iframe = $("youtubePlayer")?.querySelector("iframe");
+    const src = iframe?.src || "";
+
     try {
-      return Number(state.player?.getCurrentTime?.() || 0);
+      const parsed = new URL(src);
+      const embedMatch = parsed.pathname.match(/\/embed\/([^/?]+)/i);
+      if (embedMatch?.[1]) return embedMatch[1];
+      return parsed.searchParams.get("v") || "";
     } catch {
-      return 0;
+      return "";
     }
   }
 
-  function safePlayerDuration() {
-    try {
-      return Number(state.player?.getDuration?.() || 0);
-    } catch {
-      return 0;
-    }
+  function completionReached() {
+    if (isPreviewMode()) return true;
+
+    const duration = knownDuration();
+    if (!duration) return false;
+
+    return state.serverWatchedSeconds >= duration * VIDEO_COMPLETION_RATIO;
   }
 
-  function checkVideoCompletion() {
-    const duration = safePlayerDuration();
-    if (!duration || !state.config?.eligible) return;
+  function refreshUnlockState() {
+    updateProgressFromSeconds();
 
-    const percent = Math.min(100, (state.watchedSeconds / duration) * 100);
-    updateProgress(percent);
+    if (isPreviewMode()) {
+      state.quizUnlocked = true;
+      setQuizEnabled(true);
+      return;
+    }
 
-    if (
-      !state.videoComplete &&
-      state.watchedSeconds >= duration * VIDEO_COMPLETION_RATIO
-    ) {
-      state.videoComplete = true;
+    if (!state.quizUnlocked && completionReached()) {
+      state.quizUnlocked = true;
+      state.pendingSeconds = 0;
       updateProgress(100);
       setQuizEnabled(true);
+    }
+  }
+
+  async function flushWatchHeartbeat(force = false) {
+    if (isPreviewMode()) return;
+    if (!state.config?.eligible || !state.classNumber) return;
+    if (state.heartbeatSending) return;
+
+    const delta = state.pendingSeconds;
+    if (delta <= 0) return;
+    if (!force && delta < HEARTBEAT_SECONDS) return;
+
+    const token = classroomToken();
+    if (!token) return;
+
+    state.pendingSeconds = Math.max(0, state.pendingSeconds - delta);
+    state.heartbeatSending = true;
+
+    try {
+      const response = await fetch(recoveryWatchEndpoint(state.classNumber), {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          delta_seconds: Number(delta.toFixed(3)),
+          video_position_seconds: Number(safePlayerTime().toFixed(3)),
+          video_duration_seconds: Number(safePlayerDuration().toFixed(3)),
+          visible: true,
+          playing: true,
+        }),
+      });
+
+      const data = await response.json().catch(() => null);
+
+      if (!response.ok || !data?.ok) {
+        throw new Error(data?.detail || "No se pudo guardar el tiempo visto válido.");
+      }
+
+      state.serverWatchedSeconds = Math.max(
+        state.serverWatchedSeconds,
+        Number(data.watched_seconds || data.video_watch_seconds || 0)
+      );
+
+      if (state.config && Number(data.video_duration_seconds || 0) > 0) {
+        state.config.video_duration_seconds = Math.max(
+          Number(state.config.video_duration_seconds || 0),
+          Number(data.video_duration_seconds)
+        );
+      }
+
+      refreshUnlockState();
+    } catch (error) {
+      state.pendingSeconds += delta;
+      console.warn("No se pudo sincronizar el tiempo visto válido:", error);
+    } finally {
+      state.heartbeatSending = false;
     }
   }
 
@@ -217,7 +366,8 @@
     state.lastVideoTime = safePlayerTime();
 
     state.trackingTimer = window.setInterval(() => {
-      if (!state.player || !state.config?.eligible) return;
+      if (!state.player || !canTrackPlayback()) return;
+      if (document.hidden || document.visibilityState !== "visible") return;
 
       try {
         if (
@@ -236,45 +386,87 @@
       const videoDelta = Math.max(0, currentVideoTime - state.lastVideoTime);
 
       if (videoDelta > 0 && videoDelta <= 2.5 && realDelta <= 2.5) {
-        state.watchedSeconds += Math.min(realDelta, videoDelta);
+        const validDelta = Math.min(realDelta, videoDelta);
+
+        if (isPreviewMode()) {
+          state.serverWatchedSeconds += validDelta;
+        } else {
+          state.pendingSeconds += validDelta;
+        }
       }
 
       state.lastTickAt = now;
       state.lastVideoTime = currentVideoTime;
-      checkVideoCompletion();
+      refreshUnlockState();
+
+      if (!isPreviewMode()) {
+        void flushWatchHeartbeat(false);
+      }
     }, 1000);
   }
 
-  function attachYouTubePlayer() {
-    if (!state.config?.eligible || state.videoComplete) return;
+  function pauseForInactiveView() {
+    if (!canTrackPlayback()) return;
 
-    const iframe = $("youtubePlayer")?.querySelector("iframe");
-    if (!iframe || !window.YT?.Player) return;
-
-    if (state.player && state.playerFrame === iframe) return;
+    void flushWatchHeartbeat(true);
+    stopTracking();
 
     try {
-      const src = new URL(iframe.src);
-      src.searchParams.set("enablejsapi", "1");
-      if (window.location.origin !== "null") {
-        src.searchParams.set("origin", window.location.origin);
-      }
-      if (iframe.src !== src.toString()) iframe.src = src.toString();
+      if (state.player?.pauseVideo) state.player.pauseVideo();
     } catch {}
 
-    state.playerFrame = iframe;
+    const note = $("recoveryNote");
+    if (note && state.config?.eligible) {
+      note.className = "recovery-note warn";
+      note.textContent =
+        "La reproducción se pausó porque saliste de la vista de la clase. El tiempo fuera de esta pestaña no cuenta como tiempo visto válido.";
+    }
+  }
+
+  function attachRecoveryPlayer() {
+    if (!canTrackPlayback() || state.player) return;
+    if (!window.YT?.Player) return;
+
+    const host = $("youtubePlayer");
+    if (!host) return;
+
+    const videoId = extractVideoId();
+    if (!videoId) return;
+
+    state.playerVideoId = videoId;
+    host.innerHTML = '<div id="ayrpc2026RecoveryPlayerMount"></div>';
 
     try {
-      state.player = new window.YT.Player(iframe, {
+      state.player = new window.YT.Player("ayrpc2026RecoveryPlayerMount", {
+        videoId,
+        playerVars: {
+          rel: 0,
+          modestbranding: 1,
+          playsinline: 1,
+          enablejsapi: 1,
+        },
         events: {
-          onReady: checkVideoCompletion,
+          onReady: () => {
+            if (state.config) {
+              state.config.video_duration_seconds = Math.max(
+                Number(state.config.video_duration_seconds || 0),
+                safePlayerDuration()
+              );
+            }
+            refreshUnlockState();
+          },
           onStateChange: event => {
-            if (!state.config?.eligible) {
+            if (!canTrackPlayback()) {
               stopTracking();
               return;
             }
 
             if (event.data === window.YT.PlayerState.PLAYING) {
+              if (document.hidden || document.visibilityState !== "visible") {
+                pauseForInactiveView();
+                return;
+              }
+
               startTracking();
               return;
             }
@@ -283,21 +475,22 @@
               event.data === window.YT.PlayerState.PAUSED ||
               event.data === window.YT.PlayerState.ENDED
             ) {
+              void flushWatchHeartbeat(true);
               stopTracking();
-              checkVideoCompletion();
+              refreshUnlockState();
             }
           },
         },
       });
     } catch (error) {
-      console.warn("No se pudo conectar el seguimiento del video:", error);
+      console.warn("No se pudo iniciar el seguimiento del video:", error);
       state.player = null;
     }
   }
 
   function schedulePlayerAttach() {
-    [80, 300, 800, 1600].forEach(delay => {
-      window.setTimeout(attachYouTubePlayer, delay);
+    [80, 250, 600, 1200].forEach(delay => {
+      window.setTimeout(attachRecoveryPlayer, delay);
     });
   }
 
@@ -321,14 +514,13 @@
   function renderQuiz() {
     const box = $("quizBox");
     const config = state.config;
-    const preview = config?.preview_mode === true;
-    const canRender = config?.eligible || preview;
+    const preview = isPreviewMode();
+    const canRender = preview || (config?.eligible && state.quizUnlocked);
 
     if (
       !box ||
       !canRender ||
-      !Array.isArray(config.questions) ||
-      !state.videoComplete
+      !Array.isArray(config?.questions)
     ) {
       return;
     }
@@ -403,6 +595,9 @@
   }
 
   function paintRecoveredState() {
+    void flushWatchHeartbeat(true);
+    stopTracking();
+
     const liveBadge = $("liveAttendanceStatus");
     if (liveBadge) {
       liveBadge.textContent = "RECUPERADA";
@@ -429,13 +624,15 @@
       if (action) {
         action.classList.remove("btn-primary");
         action.classList.add("btn-outline");
+        action.dataset.pelusitaAction = "view-class";
         action.innerHTML = '<i class="fa-solid fa-play"></i> Ver clase';
       }
     });
 
-    setQuizEnabled(false);
     state.status = "RECUPERADA";
-    state.config.eligible = false;
+    state.quizUnlocked = false;
+    if (state.config) state.config.eligible = false;
+    setQuizEnabled(false);
   }
 
   async function submitRecovery(event) {
@@ -444,7 +641,8 @@
     if (
       state.submitting ||
       !state.config?.eligible ||
-      state.config?.preview_mode === true
+      isPreviewMode() ||
+      !state.quizUnlocked
     ) {
       return;
     }
@@ -552,16 +750,18 @@
     }
 
     const config = await loadRecoveryConfig(classNumber);
+    const preview = config?.preview_mode === true;
+    const recoverable = isRecoverableStatus(status);
 
-    if (config?.preview_mode === true) {
-      showRecoveryProgress(false);
-      state.videoComplete = true;
-      updateProgress(100);
+    if (preview) {
+      showRecoveryProgress(true);
+      state.quizUnlocked = true;
       setQuizEnabled(true);
+      updateProgressFromSeconds();
+      schedulePlayerAttach();
       return;
     }
 
-    const recoverable = isRecoverableStatus(status);
     showRecoveryProgress(recoverable);
 
     if (!recoverable || !config?.eligible) {
@@ -570,18 +770,63 @@
     }
 
     if (config.requires_full_video === false) {
-      state.videoComplete = true;
+      state.quizUnlocked = true;
       updateProgress(100);
       setQuizEnabled(true);
       return;
     }
 
+    refreshUnlockState();
     schedulePlayerAttach();
   }
 
   function scheduleSync() {
-    [40, 150, 500].forEach(delay => {
+    [40, 150, 450].forEach(delay => {
       window.setTimeout(() => void syncSelection(), delay);
+    });
+  }
+
+  function isClassOneRecoveryButton(button) {
+    if (!button || button.dataset.pelusitaAction !== "recover-class") {
+      return false;
+    }
+
+    const card = button.closest(".class-row-card");
+    const badge = card?.querySelector(".class-thumb-badge")?.textContent || "";
+    return /Clase\s+1\b/i.test(badge);
+  }
+
+  function bindRecoveryStartWarning() {
+    document.addEventListener("click", event => {
+      const button = event.target.closest("button");
+      if (!isClassOneRecoveryButton(button)) return;
+
+      const ok = window.confirm(RECOVERY_START_MESSAGE);
+      if (ok) return;
+
+      event.preventDefault();
+      event.stopImmediatePropagation();
+    }, true);
+  }
+
+  function bindViewProtection() {
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden || document.visibilityState !== "visible") {
+        pauseForInactiveView();
+      }
+    });
+
+    window.addEventListener("blur", () => {
+      pauseForInactiveView();
+    });
+
+    window.addEventListener("beforeunload", event => {
+      if (!state.config?.eligible || watchedTotal() <= 0 || state.quizUnlocked) {
+        return;
+      }
+
+      event.preventDefault();
+      event.returnValue = "";
     });
   }
 
@@ -615,6 +860,8 @@
 
   function init() {
     injectStyles();
+    bindRecoveryStartWarning();
+    bindViewProtection();
 
     $("quizButton")?.addEventListener("click", renderQuiz);
     $("classesList")?.addEventListener("click", scheduleSync, true);
