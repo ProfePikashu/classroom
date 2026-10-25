@@ -14,11 +14,6 @@ const recovery = fs.readFileSync(
   "utf8"
 );
 
-const classes2026 = fs.readFileSync(
-  path.join(__dirname, "../frontend/js/clases-ayrpc-2026.js"),
-  "utf8"
-);
-
 const auth = fs.readFileSync(
   path.join(__dirname, "../frontend/js/auth.js"),
   "utf8"
@@ -26,8 +21,7 @@ const auth = fs.readFileSync(
 
 assert.match(html, /js\/ayrpc2026-recovery\.js/, "la vista 2026 debe cargar el controlador de recuperación");
 assert.match(html, /js\/auth\.js\?v=20261025-recovery-auth-v2/, "la vista debe invalidar el cache de auth al exponer ClassroomAuth para recuperación");
-assert.match(html, /js\/clases-ayrpc-2026\.js\?v=20261025-recovery-player-v4/, "la vista debe invalidar el cache del controlador de clases al ceder el player a recuperación");
-assert.match(html, /js\/ayrpc2026-recovery\.js\?v=20261025-recovery-player-v4/, "la vista debe invalidar el cache del tracker con el player único");
+assert.match(html, /js\/ayrpc2026-recovery\.js\?v=20261025-recovery-player-v4/, "la vista debe invalidar el cache del tracker con el player controlado");
 assert.match(recovery, /const COURSE_SLUG = "ayrpc-2026"/, "la recuperación debe apuntar al curso AyRPC 2026");
 assert.match(recovery, /const CLASS1_REQUIRED_WATCH_SECONDS = 6960/, "la Clase 1 debe llegar al 100% en 1h56 desde el inicio");
 assert.match(recovery, /const VIDEO_COMPLETION_RATIO = 1(?:\.0)?;/, "la Clase 1 debe completarse exactamente al llegar al corte configurado");
@@ -42,8 +36,8 @@ assert.match(recovery, /AUSENTE|REVISAR/, "solo estados recuperables deben habil
 assert.match(recovery, /preview_mode/, "la UI debe reconocer la vista previa docente del backend");
 assert.match(recovery, /Vista previa docente/, "la vista previa debe identificarse claramente como docente");
 assert.match(recovery, /function canTrackPlayback\(\)[\s\S]*state\.config\?\.eligible[\s\S]*isPreviewMode\(\)/, "el preview docente debe poder medir el tiempo visto sin volver elegible una recuperación real");
-assert.match(classes2026, /player\.dataset\.videoId\s*=\s*item\.videoId/, "el controlador general debe entregar el videoId directamente al recuperador");
-assert.match(classes2026, /if \(recoverable\)[\s\S]*ayrpc2026RecoveryPlayerMount/, "una clase recuperable no debe crear un iframe normal antes del player controlado");
+assert.match(recovery, /function extractVideoId\(\)[\s\S]*querySelector\("iframe"\)/, "la recuperación debe tomar el video seleccionado y luego hacerse dueña del player");
+assert.match(recovery, /host\.innerHTML\s*=\s*'<div id="ayrpc2026RecoveryPlayerMount"><\/div>'/, "el iframe general debe ser reemplazado por el mount controlado");
 assert.match(recovery, /new window\.YT\.Player\("ayrpc2026RecoveryPlayerMount"/, "la recuperación debe ser la única dueña del player controlado");
 assert.match(recovery, /onReady:[\s\S]*startTracking\(\)/, "el watchdog debe arrancar al estar listo el player y no depender exclusivamente del evento PLAYING");
 assert.match(recovery, /getPlayerState\(\)[\s\S]*PlayerState\.PLAYING/, "el watchdog debe consultar el estado real de YouTube antes de sumar tiempo");
