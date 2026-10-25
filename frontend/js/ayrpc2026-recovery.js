@@ -3,7 +3,8 @@
 
   const COURSE_SLUG = "ayrpc-2026";
   const ENABLED_CLASS_NUMBER = 1;
-  const VIDEO_COMPLETION_RATIO = 0.98;
+  const CLASS1_REQUIRED_WATCH_SECONDS = 6960;
+  const VIDEO_COMPLETION_RATIO = 1;
   const HEARTBEAT_SECONDS = 5;
   const RECOVERY_START_MESSAGE =
     "Para recuperar esta clase tenés que ver el video completo desde esta vista. Si abandonás la vista de la clase, cambiás de pestaña, minimizás o cerrás el navegador, ese tiempo no cuenta como tiempo visto válido. ¿Querés iniciar la recuperación?";
@@ -115,6 +116,18 @@
   }
 
   function knownDuration() {
+    const configuredRequired = Number(
+      state.config?.required_watch_seconds || 0
+    );
+
+    if (configuredRequired > 0) {
+      return configuredRequired;
+    }
+
+    if (state.classNumber === ENABLED_CLASS_NUMBER) {
+      return CLASS1_REQUIRED_WATCH_SECONDS;
+    }
+
     return Math.max(
       safePlayerDuration(),
       Number(state.config?.video_duration_seconds || 0)
@@ -126,10 +139,8 @@
   }
 
   function updateProgress(percent) {
-    const safePercent = Math.max(
-      0,
-      Math.min(100, Math.round(Number(percent) || 0))
-    );
+    const rawPercent = Math.max(0, Number(percent) || 0);
+    const safePercent = Math.min(100, Math.floor(rawPercent));
 
     const text = $("watchProgressText") || $("watchProgressPercent");
     const bar = $("watchProgressBar");
