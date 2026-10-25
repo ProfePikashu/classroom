@@ -19,8 +19,8 @@
     configLoading: false,
     player: null,
     playerVideoId: "",
-    playerAttachTimer: null,
-    playerAttachStartedAt: 0,
+    attachRetryTimer: null,
+    attachStartedAt: 0,
     trackingTimer: null,
     lastTickAt: 0,
     lastVideoTime: 0,
@@ -126,10 +126,7 @@
       state.config?.required_watch_seconds || 0
     );
 
-    if (configuredRequired > 0) {
-      return configuredRequired;
-    }
-
+    if (configuredRequired > 0) return configuredRequired;
     if (state.classNumber === ENABLED_CLASS_NUMBER) {
       return CLASS1_REQUIRED_WATCH_SECONDS;
     }
@@ -147,7 +144,6 @@
   function updateProgress(percent) {
     const rawPercent = Math.max(0, Number(percent) || 0);
     const safePercent = Math.min(100, Math.floor(rawPercent));
-
     const text = $("watchProgressText") || $("watchProgressPercent");
     const bar = $("watchProgressBar");
 
@@ -190,13 +186,12 @@
       : "Completá el tiempo visto válido para habilitarlo";
   }
 
-  function clearPlayerAttachRetry() {
-    if (state.playerAttachTimer) {
-      window.clearInterval(state.playerAttachTimer);
-      state.playerAttachTimer = null;
+  function clearAttachRetry() {
+    if (state.attachRetryTimer) {
+      window.clearInterval(state.attachRetryTimer);
+      state.attachRetryTimer = null;
     }
-
-    state.playerAttachStartedAt = 0;
+    state.attachStartedAt = 0;
   }
 
   function stopTracking() {
@@ -204,13 +199,12 @@
       window.clearInterval(state.trackingTimer);
       state.trackingTimer = null;
     }
-
     state.lastTickAt = 0;
-    state.lastVideoTime = safePlayerTime();
+    state.lastVideoTime = 0;
   }
 
   function destroyRecoveryPlayer() {
-    clearPlayerAttachRetry();
+    clearAttachRetry();
     stopTracking();
 
     if (state.player) {
@@ -276,7 +270,6 @@
         Number(data.video_watch_seconds || data.watched_seconds || 0)
       );
       state.pendingSeconds = 0;
-
       return data;
     } catch (error) {
       console.warn("No se pudo cargar la recuperación de la clase:", error);
@@ -290,8 +283,8 @@
     if (state.playerVideoId) return state.playerVideoId;
 
     const host = $("youtubePlayer");
-    const explicitVideoId = String(host?.dataset?.videoId || "").trim();
-    if (explicitVideoId) return explicitVideoId;
+    const explicit = String(host?.dataset?.videoId || "").trim();
+    if (explicit) return explicit;
 
     const iframe = host?.querySelector("iframe");
     const src = iframe?.src || "";
@@ -308,10 +301,8 @@
 
   function completionReached() {
     if (isPreviewMode()) return true;
-
     const duration = knownDuration();
     if (!duration) return false;
-
     return state.serverWatchedSeconds >= duration * VIDEO_COMPLETION_RATIO;
   }
 
@@ -364,7 +355,6 @@
       });
 
       const data = await response.json().catch(() => null);
-
       if (!response.ok || !data?.ok) {
         throw new Error(data?.detail || "No se pudo guardar el tiempo visto válido.");
       }
@@ -374,11 +364,8 @@
         Number(data.watched_seconds || data.video_watch_seconds || 0)
       );
 
-      if (state.config && Number(data.video_duration_seconds || 0) > 0) {
-        state.config.video_duration_seconds = Math.max(
-          Number(state.config.video_duration_seconds || 0),
-          Number(data.video_duration_seconds)
-        );
+      if (state.config && Number(data.required_watch_seconds || 0) > 0) {
+        state.config.required_watch_seconds = Number(data.required_watch_seconds);
       }
 
       refreshUnlockState();
@@ -391,38 +378,38 @@
   }
 
   function startTracking() {
-    stopTracking();
+    if (state.trackingTimer) return;
 
     state.lastTickAt = Date.now();
     state.lastVideoTime = safePlayerTime();
 
     state.trackingTimer = window.setInterval(() => {
       if (!state.player || !canTrackPlayback()) return;
-      if (document.hidden || document.visibilityState !== "visible") return;
-
-      try {
-        if (
-          window.YT?.PlayerState &&
-          state.player.getPlayerState() !== window.YT.PlayerState.PLAYING
-        ) {
-          return;
-        }
-      } catch {
-        return;
-      }
 
       const now = Date.now();
       const currentVideoTime = safePlayerTime();
-      const realDelta = Math.max(0, (now - state.lastTickAt) / 1000);
-      const videoDelta = Math.max(0, currentVideoTime - state.lastVideoTime);
+      const hidden = document.hidden || document.visibilityState !== "visible";
 
-      if (videoDelta > 0 && videoDelta <= 2.5 && realDelta <= 2.5) {
-        const validDelta = Math.min(realDelta, videoDelta);
+      let playing = false;
+      try {
+        playing =
+          state.player.getPlayerState() === window.YT.PlayerState.PLAYING;
+      } catch {
+        playing = false;
+      }
 
-        if (isPreviewMode()) {
-          state.serverWatchedSeconds += validDelta;
-        } else {
-          state.pendingSeconds += validDelta;
+      if (!hidden && playing) {
+        const realDelta = Math.max(0, (now - state.lastTickAt) / 1000);
+        const videoDelta = Math.max(0, currentVideoTime - state.lastVideoTime);
+
+        if (videoDelta > 0 && videoDelta <= 2.5 && realDelta <= 2.5) {
+          const validDelta = Math.min(realDelta, videoDelta);
+
+          if (isPreviewMode()) {
+            state.serverWatchedSeconds += validDelta;
+          } else {
+            state.pendingSeconds += validDelta;
+          }
         }
       }
 
@@ -440,11 +427,13 @@
     if (!canTrackPlayback()) return;
 
     void flushWatchHeartbeat(true);
-    stopTracking();
 
     try {
-      if (state.player?.pauseVideo) state.player.pauseVideo();
+      state.player?.pauseVideo?.();
     } catch {}
+
+    state.lastTickAt = Date.now();
+    state.lastVideoTime = safePlayerTime();
 
     const note = $("recoveryNote");
     if (note && state.config?.eligible) {
@@ -455,7 +444,8 @@
   }
 
   function attachRecoveryPlayer() {
-    if (!canTrackPlayback() || state.player) return Boolean(state.player);
+    if (!canTrackPlayback()) return false;
+    if (state.player) return true;
     if (!window.YT?.Player) return false;
 
     const host = $("youtubePlayer");
@@ -479,28 +469,18 @@
         },
         events: {
           onReady: () => {
-            clearPlayerAttachRetry();
-            if (state.config) {
-              state.config.video_duration_seconds = Math.max(
-                Number(state.config.video_duration_seconds || 0),
-                safePlayerDuration()
-              );
-            }
+            clearAttachRetry();
+            state.lastTickAt = Date.now();
+            state.lastVideoTime = safePlayerTime();
+            startTracking();
             refreshUnlockState();
           },
           onStateChange: event => {
-            if (!canTrackPlayback()) {
-              stopTracking();
-              return;
-            }
+            if (!canTrackPlayback()) return;
 
             if (event.data === window.YT.PlayerState.PLAYING) {
-              if (document.hidden || document.visibilityState !== "visible") {
-                pauseForInactiveView();
-                return;
-              }
-
-              startTracking();
+              state.lastTickAt = Date.now();
+              state.lastVideoTime = safePlayerTime();
               return;
             }
 
@@ -509,8 +489,6 @@
               event.data === window.YT.PlayerState.ENDED
             ) {
               void flushWatchHeartbeat(true);
-              stopTracking();
-              refreshUnlockState();
             }
           },
         },
@@ -524,36 +502,29 @@
   }
 
   function schedulePlayerAttach() {
-    clearPlayerAttachRetry();
-    state.playerAttachStartedAt = Date.now();
+    if (state.player) return;
+
+    clearAttachRetry();
+    state.attachStartedAt = Date.now();
 
     const tryAttach = () => {
-      if (state.player) {
-        clearPlayerAttachRetry();
-        return true;
-      }
-
       if (attachRecoveryPlayer()) {
-        clearPlayerAttachRetry();
-        return true;
+        clearAttachRetry();
+        return;
       }
 
       if (
-        state.playerAttachStartedAt > 0 &&
-        Date.now() - state.playerAttachStartedAt >= PLAYER_ATTACH_TIMEOUT_MS
+        Date.now() - state.attachStartedAt >= PLAYER_ATTACH_TIMEOUT_MS
       ) {
-        clearPlayerAttachRetry();
-        console.warn("No se pudo montar el player controlado de recuperación dentro del tiempo esperado.");
+        clearAttachRetry();
+        console.warn("No se pudo montar el player controlado de recuperación.");
       }
-
-      return false;
     };
 
     const startRetryLoop = () => {
-      if (tryAttach()) return;
-      if (state.playerAttachTimer) return;
-
-      state.playerAttachTimer = window.setInterval(
+      tryAttach();
+      if (state.player || state.attachRetryTimer) return;
+      state.attachRetryTimer = window.setInterval(
         tryAttach,
         PLAYER_ATTACH_RETRY_MS
       );
@@ -566,19 +537,17 @@
 
     if (!youtubeReadyHookInstalled) {
       youtubeReadyHookInstalled = true;
-      const previousYouTubeReady = window.onYouTubeIframeAPIReady;
+      const previous = window.onYouTubeIframeAPIReady;
 
       window.onYouTubeIframeAPIReady = () => {
-        if (typeof previousYouTubeReady === "function") {
+        if (typeof previous === "function") {
           try {
-            previousYouTubeReady();
+            previous();
           } catch (error) {
             console.warn("Falló un callback previo de YouTube:", error);
           }
         }
-
         startRetryLoop();
-        window.setTimeout(() => void syncSelection(), 0);
       };
     }
 
@@ -595,11 +564,7 @@
   }
 
   function feedbackMarkup(message, kind) {
-    return `
-      <div class="ayrpc2026-recovery-feedback ${kind}">
-        ${escapeHtml(message)}
-      </div>
-    `;
+    return `<div class="ayrpc2026-recovery-feedback ${kind}">${escapeHtml(message)}</div>`;
   }
 
   function renderQuiz() {
@@ -608,20 +573,13 @@
     const preview = isPreviewMode();
     const canRender = preview || (config?.eligible && state.quizUnlocked);
 
-    if (
-      !box ||
-      !canRender ||
-      !Array.isArray(config?.questions)
-    ) {
-      return;
-    }
-
-    box.style.display = "grid";
+    if (!box || !canRender || !Array.isArray(config?.questions)) return;
 
     const required = Number(
       config.required_correct_answers || config.questions.length
     );
 
+    box.style.display = "grid";
     box.innerHTML = `
       <div class="ayrpc2026-recovery-shell">
         <div class="ayrpc2026-recovery-head">
@@ -632,14 +590,12 @@
               ? "Estás viendo el cuestionario tal como lo verá un alumno que deba recuperar. Esta vista no registra intentos ni modifica asistencia."
               : "Respondé con tus palabras. No buscamos una frase exacta, sino los conceptos trabajados en clase."}</p>
           </div>
-
           <span class="ayrpc2026-recovery-pill">
             ${preview
               ? "Vista previa docente"
               : `${required}/${config.total_questions || config.questions.length} para recuperar`}
           </span>
         </div>
-
         <form id="ayrpc2026RecoveryForm" class="ayrpc2026-recovery-form">
           ${config.questions.map((question, index) => `
             <label class="ayrpc2026-recovery-question">
@@ -656,7 +612,6 @@
               ></textarea>
             </label>
           `).join("")}
-
           <div id="ayrpc2026RecoveryFeedback">
             ${preview
               ? feedbackMarkup(
@@ -665,15 +620,12 @@
                 )
               : ""}
           </div>
-
           ${preview
             ? ""
-            : `
-              <button class="btn btn-primary" type="submit">
-                <i class="fa-solid fa-paper-plane"></i>
-                Enviar respuestas
-              </button>
-            `}
+            : `<button class="btn btn-primary" type="submit">
+                 <i class="fa-solid fa-paper-plane"></i>
+                 Enviar respuestas
+               </button>`}
         </form>
       </div>
     `;
@@ -687,7 +639,6 @@
 
   function paintRecoveredState() {
     void flushWatchHeartbeat(true);
-    stopTracking();
 
     const liveBadge = $("liveAttendanceStatus");
     if (liveBadge) {
@@ -734,9 +685,7 @@
       !state.config?.eligible ||
       isPreviewMode() ||
       !state.quizUnlocked
-    ) {
-      return;
-    }
+    ) return;
 
     const form = event.currentTarget;
     const feedback = $("ayrpc2026RecoveryFeedback");
@@ -762,12 +711,8 @@
 
     state.submitting = true;
     if (submit) submit.disabled = true;
-
     if (feedback) {
-      feedback.innerHTML = feedbackMarkup(
-        "Revisando tus respuestas...",
-        "warn"
-      );
+      feedback.innerHTML = feedbackMarkup("Revisando tus respuestas...", "warn");
     }
 
     try {
@@ -781,22 +726,17 @@
       });
 
       const data = await response.json().catch(() => null);
-
       if (!response.ok) {
-        throw new Error(
-          data?.detail || "No se pudo registrar la recuperación."
-        );
+        throw new Error(data?.detail || "No se pudo registrar la recuperación.");
       }
 
       if (data?.passed && data?.status === "RECUPERADA") {
         if (feedback) {
           feedback.innerHTML = feedbackMarkup(
-            data.message ||
-              "¡Clase validada! Completaste correctamente la validación de esta clase.",
+            data.message || "¡Clase validada! Completaste correctamente la validación de esta clase.",
             "ok"
           );
         }
-
         paintRecoveredState();
         return;
       }
@@ -809,8 +749,6 @@
         );
       }
     } catch (error) {
-      console.error("Error enviando recuperación:", error);
-
       if (feedback) {
         feedback.innerHTML = feedbackMarkup(
           error?.message || "No se pudo registrar la recuperación.",
@@ -826,7 +764,6 @@
   async function syncSelection() {
     const classNumber = selectedClassNumber();
     const status = selectedStatus();
-
     if (!classNumber) return;
 
     const nextKey = `${classNumber}:${status}`;
@@ -872,7 +809,7 @@
   }
 
   function scheduleSync() {
-    [40, 150, 450].forEach(delay => {
+    [40, 150, 450, 900].forEach(delay => {
       window.setTimeout(() => void syncSelection(), delay);
     });
   }
@@ -904,14 +841,11 @@
     document.addEventListener("visibilitychange", () => {
       if (document.hidden || document.visibilityState !== "visible") {
         pauseForInactiveView();
+        return;
       }
-    });
 
-    window.addEventListener("blur", () => {
-      window.setTimeout(() => {
-        if (document.hasFocus()) return;
-        pauseForInactiveView();
-      }, 0);
+      state.lastTickAt = Date.now();
+      state.lastVideoTime = safePlayerTime();
     });
 
     window.addEventListener("beforeunload", event => {
@@ -961,7 +895,6 @@
     $("classesList")?.addEventListener("click", scheduleSync, true);
 
     const observer = new MutationObserver(scheduleSync);
-
     [$("recoveryTitle"), $("liveAttendanceStatus"), $("youtubePlayer")]
       .filter(Boolean)
       .forEach(element => {
