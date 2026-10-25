@@ -30,9 +30,7 @@
       localStorage.getItem("andyazh-api-base") ||
       "";
 
-    if (configured) {
-      return String(configured).replace(/\/+$/, "");
-    }
+    if (configured) return String(configured).replace(/\/+$/, "");
 
     if (
       window.location.hostname === "localhost" ||
@@ -62,15 +60,15 @@
   }
 
   function normalizeStatus(value) {
-    return String(value || "PENDIENTE")
-      .trim()
-      .toUpperCase();
+    return String(value || "PENDIENTE").trim().toUpperCase();
   }
 
   function isRecoverableStatus(status) {
-    return ["AUSENTE", "REVISAR"].includes(
-      normalizeStatus(status)
-    );
+    return ["AUSENTE", "REVISAR"].includes(normalizeStatus(status));
+  }
+
+  function isPreviewMode() {
+    return state.config?.preview_mode === true;
   }
 
   function selectedClassNumber() {
@@ -80,13 +78,11 @@
   }
 
   function selectedStatus() {
-    return normalizeStatus(
-      $("liveAttendanceStatus")?.textContent
-    );
+    return normalizeStatus($("liveAttendanceStatus")?.textContent);
   }
 
   function recoveryEndpoint(classNumber) {
-    return `${apiBase()}/api/classroom/courses/ayrpc-2026/classes/${classNumber}/recovery`;
+    return `${apiBase()}/api/classroom/courses/${COURSE_SLUG}/classes/${classNumber}/recovery`;
   }
 
   function stopTracking() {
@@ -97,6 +93,37 @@
 
     state.lastTickAt = 0;
     state.lastVideoTime = 0;
+  }
+
+  function updateProgress(percent) {
+    const safePercent = Math.max(
+      0,
+      Math.min(100, Math.round(Number(percent) || 0))
+    );
+
+    const text = $("watchProgressText") || $("watchProgressPercent");
+    const bar = $("watchProgressBar");
+
+    if (text) text.textContent = `${safePercent}%`;
+    if (bar) bar.style.width = `${safePercent}%`;
+  }
+
+  function showRecoveryProgress(show) {
+    const wrap = $("watchProgressWrap");
+    if (wrap) wrap.style.display = show ? "block" : "none";
+  }
+
+  function setQuizEnabled(enabled) {
+    const button = $("quizButton");
+    if (!button) return;
+
+    button.disabled = !enabled;
+    button.classList.toggle("is-enabled", enabled);
+
+    if (enabled && isPreviewMode()) {
+      button.innerHTML = '<i class="fa-solid fa-eye"></i> Ver cuestionario';
+      button.title = "Vista previa docente";
+    }
   }
 
   function resetSelection(nextKey, classNumber, status) {
@@ -117,35 +144,6 @@
     setQuizEnabled(false);
   }
 
-  function setQuizEnabled(enabled) {
-    const button = $("quizButton");
-    if (!button) return;
-
-    button.disabled = !enabled;
-    button.classList.toggle("is-enabled", enabled);
-  }
-
-  function updateProgress(percent) {
-    const safePercent = Math.max(
-      0,
-      Math.min(100, Math.round(Number(percent) || 0))
-    );
-
-    const text =
-      $("watchProgressText") ||
-      $("watchProgressPercent");
-
-    const bar = $("watchProgressBar");
-
-    if (text) text.textContent = `${safePercent}%`;
-    if (bar) bar.style.width = `${safePercent}%`;
-  }
-
-  function showRecoveryProgress(show) {
-    const wrap = $("watchProgressWrap");
-    if (wrap) wrap.style.display = show ? "block" : "none";
-  }
-
   async function loadRecoveryConfig(classNumber) {
     if (
       state.config ||
@@ -161,29 +159,18 @@
     state.configLoading = true;
 
     try {
-      const response = await fetch(
-        recoveryEndpoint(classNumber),
-        {
-          cache: "no-store",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await fetch(recoveryEndpoint(classNumber), {
+        cache: "no-store",
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
       const data = await response.json().catch(() => null);
-
-      if (!response.ok || !data?.ok) {
-        return null;
-      }
+      if (!response.ok || !data?.ok) return null;
 
       state.config = data;
       return data;
     } catch (error) {
-      console.warn(
-        "No se pudo cargar la recuperación de la clase:",
-        error
-      );
+      console.warn("No se pudo cargar la recuperación de la clase:", error);
       return null;
     } finally {
       state.configLoading = false;
@@ -208,14 +195,9 @@
 
   function checkVideoCompletion() {
     const duration = safePlayerDuration();
-
     if (!duration || !state.config?.eligible) return;
 
-    const percent = Math.min(
-      100,
-      (state.watchedSeconds / duration) * 100
-    );
-
+    const percent = Math.min(100, (state.watchedSeconds / duration) * 100);
     updateProgress(percent);
 
     if (
@@ -250,29 +232,15 @@
 
       const now = Date.now();
       const currentVideoTime = safePlayerTime();
-      const realDelta = Math.max(
-        0,
-        (now - state.lastTickAt) / 1000
-      );
-      const videoDelta = Math.max(
-        0,
-        currentVideoTime - state.lastVideoTime
-      );
+      const realDelta = Math.max(0, (now - state.lastTickAt) / 1000);
+      const videoDelta = Math.max(0, currentVideoTime - state.lastVideoTime);
 
-      if (
-        videoDelta > 0 &&
-        videoDelta <= 2.5 &&
-        realDelta <= 2.5
-      ) {
-        state.watchedSeconds += Math.min(
-          realDelta,
-          videoDelta
-        );
+      if (videoDelta > 0 && videoDelta <= 2.5 && realDelta <= 2.5) {
+        state.watchedSeconds += Math.min(realDelta, videoDelta);
       }
 
       state.lastTickAt = now;
       state.lastVideoTime = currentVideoTime;
-
       checkVideoCompletion();
     }, 1000);
   }
@@ -281,27 +249,17 @@
     if (!state.config?.eligible || state.videoComplete) return;
 
     const iframe = $("youtubePlayer")?.querySelector("iframe");
-
     if (!iframe || !window.YT?.Player) return;
 
-    if (
-      state.player &&
-      state.playerFrame === iframe
-    ) {
-      return;
-    }
+    if (state.player && state.playerFrame === iframe) return;
 
     try {
       const src = new URL(iframe.src);
       src.searchParams.set("enablejsapi", "1");
-
       if (window.location.origin !== "null") {
         src.searchParams.set("origin", window.location.origin);
       }
-
-      if (iframe.src !== src.toString()) {
-        iframe.src = src.toString();
-      }
+      if (iframe.src !== src.toString()) iframe.src = src.toString();
     } catch {}
 
     state.playerFrame = iframe;
@@ -309,9 +267,7 @@
     try {
       state.player = new window.YT.Player(iframe, {
         events: {
-          onReady: () => {
-            checkVideoCompletion();
-          },
+          onReady: checkVideoCompletion,
           onStateChange: event => {
             if (!state.config?.eligible) {
               stopTracking();
@@ -334,10 +290,7 @@
         },
       });
     } catch (error) {
-      console.warn(
-        "No se pudo conectar el seguimiento del video:",
-        error
-      );
+      console.warn("No se pudo conectar el seguimiento del video:", error);
       state.player = null;
     }
   }
@@ -368,10 +321,12 @@
   function renderQuiz() {
     const box = $("quizBox");
     const config = state.config;
+    const preview = config?.preview_mode === true;
+    const canRender = config?.eligible || preview;
 
     if (
       !box ||
-      !config?.eligible ||
+      !canRender ||
       !Array.isArray(config.questions) ||
       !state.videoComplete
     ) {
@@ -381,21 +336,24 @@
     box.style.display = "grid";
 
     const required = Number(
-      config.required_correct_answers ||
-      config.questions.length
+      config.required_correct_answers || config.questions.length
     );
 
     box.innerHTML = `
       <div class="ayrpc2026-recovery-shell">
         <div class="ayrpc2026-recovery-head">
           <div>
-            <p class="eyebrow">Validación de la clase</p>
+            <p class="eyebrow">${preview ? "Vista previa docente" : "Validación de la clase"}</p>
             <h3>Clase 1 · Presentación e introducción</h3>
-            <p>Respondé con tus palabras. No buscamos una frase exacta, sino los conceptos trabajados en clase.</p>
+            <p>${preview
+              ? "Estás viendo el cuestionario tal como lo verá un alumno que deba recuperar. Esta vista no registra intentos ni modifica asistencia."
+              : "Respondé con tus palabras. No buscamos una frase exacta, sino los conceptos trabajados en clase."}</p>
           </div>
 
           <span class="ayrpc2026-recovery-pill">
-            ${required}/${config.total_questions || config.questions.length} para recuperar
+            ${preview
+              ? "Vista previa docente"
+              : `${required}/${config.total_questions || config.questions.length} para recuperar`}
           </span>
         </div>
 
@@ -407,32 +365,41 @@
                 name="${escapeHtml(question.id)}"
                 rows="4"
                 maxlength="2000"
-                required
+                ${preview ? "disabled" : "required"}
                 autocomplete="off"
-                placeholder="Respondé con tus palabras..."
+                placeholder="${preview
+                  ? "Vista previa docente · no se registrarán respuestas"
+                  : "Respondé con tus palabras..."}"
               ></textarea>
             </label>
           `).join("")}
 
-          <div id="ayrpc2026RecoveryFeedback"></div>
+          <div id="ayrpc2026RecoveryFeedback">
+            ${preview
+              ? feedbackMarkup(
+                  "Vista previa docente: podés revisar las preguntas sin crear un intento ni alterar el estado de la clase.",
+                  "ok"
+                )
+              : ""}
+          </div>
 
-          <button class="btn btn-primary" type="submit">
-            <i class="fa-solid fa-paper-plane"></i>
-            Enviar respuestas
-          </button>
+          ${preview
+            ? ""
+            : `
+              <button class="btn btn-primary" type="submit">
+                <i class="fa-solid fa-paper-plane"></i>
+                Enviar respuestas
+              </button>
+            `}
         </form>
       </div>
     `;
 
-    $("ayrpc2026RecoveryForm")?.addEventListener(
-      "submit",
-      submitRecovery
-    );
+    if (!preview) {
+      $("ayrpc2026RecoveryForm")?.addEventListener("submit", submitRecovery);
+    }
 
-    box.scrollIntoView({
-      behavior: "smooth",
-      block: "start",
-    });
+    box.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   function paintRecoveredState() {
@@ -448,30 +415,23 @@
       note.textContent = "Esta clase ya figura como RECUPERADA.";
     }
 
-    document
-      .querySelectorAll(".class-row-card")
-      .forEach(card => {
-        const badge = card.querySelector(".class-thumb-badge");
-        if (
-          !badge ||
-          !badge.textContent?.match(/Clase\s+1\b/i)
-        ) {
-          return;
-        }
+    document.querySelectorAll(".class-row-card").forEach(card => {
+      const badge = card.querySelector(".class-thumb-badge");
+      if (!badge || !badge.textContent?.match(/Clase\s+1\b/i)) return;
 
-        const statusBadge = card.querySelector(".class-status");
-        if (statusBadge) {
-          statusBadge.textContent = "RECUPERADA";
-          statusBadge.className = "class-status ok";
-        }
+      const statusBadge = card.querySelector(".class-status");
+      if (statusBadge) {
+        statusBadge.textContent = "RECUPERADA";
+        statusBadge.className = "class-status ok";
+      }
 
-        const action = card.querySelector(".class-row-status .btn");
-        if (action) {
-          action.classList.remove("btn-primary");
-          action.classList.add("btn-outline");
-          action.innerHTML = '<i class="fa-solid fa-play"></i> Ver clase';
-        }
-      });
+      const action = card.querySelector(".class-row-status .btn");
+      if (action) {
+        action.classList.remove("btn-primary");
+        action.classList.add("btn-outline");
+        action.innerHTML = '<i class="fa-solid fa-play"></i> Ver clase';
+      }
+    });
 
     setQuizEnabled(false);
     state.status = "RECUPERADA";
@@ -481,7 +441,13 @@
   async function submitRecovery(event) {
     event.preventDefault();
 
-    if (state.submitting || !state.config?.eligible) return;
+    if (
+      state.submitting ||
+      !state.config?.eligible ||
+      state.config?.preview_mode === true
+    ) {
+      return;
+    }
 
     const form = event.currentTarget;
     const feedback = $("ayrpc2026RecoveryFeedback");
@@ -502,9 +468,7 @@
     const answers = {};
 
     for (const question of state.config.questions || []) {
-      answers[question.id] = String(
-        formData.get(question.id) || ""
-      ).trim();
+      answers[question.id] = String(formData.get(question.id) || "").trim();
     }
 
     state.submitting = true;
@@ -518,24 +482,20 @@
     }
 
     try {
-      const response = await fetch(
-        recoveryEndpoint(state.classNumber),
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ answers }),
-        }
-      );
+      const response = await fetch(recoveryEndpoint(state.classNumber), {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ answers }),
+      });
 
       const data = await response.json().catch(() => null);
 
       if (!response.ok) {
         throw new Error(
-          data?.detail ||
-          "No se pudo registrar la recuperación."
+          data?.detail || "No se pudo registrar la recuperación."
         );
       }
 
@@ -560,23 +520,17 @@
         );
       }
     } catch (error) {
-      console.error(
-        "Error enviando recuperación:",
-        error
-      );
+      console.error("Error enviando recuperación:", error);
 
       if (feedback) {
         feedback.innerHTML = feedbackMarkup(
-          error?.message ||
-            "No se pudo registrar la recuperación.",
+          error?.message || "No se pudo registrar la recuperación.",
           "bad"
         );
       }
     } finally {
       state.submitting = false;
-      if (submit && state.status !== "RECUPERADA") {
-        submit.disabled = false;
-      }
+      if (submit && state.status !== "RECUPERADA") submit.disabled = false;
     }
   }
 
@@ -587,25 +541,30 @@
     if (!classNumber) return;
 
     const nextKey = `${classNumber}:${status}`;
-
     if (nextKey !== state.key) {
       resetSelection(nextKey, classNumber, status);
     }
 
-    const recoverable =
-      classNumber === ENABLED_CLASS_NUMBER &&
-      isRecoverableStatus(status);
-
-    showRecoveryProgress(recoverable);
-
-    if (!recoverable) {
+    if (classNumber !== ENABLED_CLASS_NUMBER) {
+      showRecoveryProgress(false);
       setQuizEnabled(false);
       return;
     }
 
     const config = await loadRecoveryConfig(classNumber);
 
-    if (!config?.eligible) {
+    if (config?.preview_mode === true) {
+      showRecoveryProgress(false);
+      state.videoComplete = true;
+      updateProgress(100);
+      setQuizEnabled(true);
+      return;
+    }
+
+    const recoverable = isRecoverableStatus(status);
+    showRecoveryProgress(recoverable);
+
+    if (!recoverable || !config?.eligible) {
       setQuizEnabled(false);
       return;
     }
@@ -622,9 +581,7 @@
 
   function scheduleSync() {
     [40, 150, 500].forEach(delay => {
-      window.setTimeout(() => {
-        void syncSelection();
-      }, delay);
+      window.setTimeout(() => void syncSelection(), delay);
     });
   }
 
@@ -644,6 +601,7 @@
       .ayrpc2026-recovery-question > span { font-weight:800; line-height:1.4; }
       .ayrpc2026-recovery-question textarea { width:100%; resize:vertical; min-height:96px; padding:12px 14px; border:1px solid rgba(122,64,180,.4); border-radius:10px; background:rgba(0,0,0,.16); color:inherit; font:inherit; line-height:1.45; }
       .ayrpc2026-recovery-question textarea:focus { outline:none; border-color:rgba(0,225,255,.65); box-shadow:0 0 0 3px rgba(0,225,255,.08); }
+      .ayrpc2026-recovery-question textarea:disabled { opacity:.7; cursor:not-allowed; }
       .ayrpc2026-recovery-feedback { padding:11px 13px; border-radius:10px; line-height:1.45; }
       .ayrpc2026-recovery-feedback.ok { border:1px solid rgba(50,220,140,.38); background:rgba(50,220,140,.08); }
       .ayrpc2026-recovery-feedback.warn { border:1px solid rgba(255,190,70,.38); background:rgba(255,190,70,.08); }
@@ -658,24 +616,12 @@
   function init() {
     injectStyles();
 
-    $("quizButton")?.addEventListener(
-      "click",
-      renderQuiz
-    );
-
-    $("classesList")?.addEventListener(
-      "click",
-      scheduleSync,
-      true
-    );
+    $("quizButton")?.addEventListener("click", renderQuiz);
+    $("classesList")?.addEventListener("click", scheduleSync, true);
 
     const observer = new MutationObserver(scheduleSync);
 
-    [
-      $("recoveryTitle"),
-      $("liveAttendanceStatus"),
-      $("youtubePlayer"),
-    ]
+    [$("recoveryTitle"), $("liveAttendanceStatus"), $("youtubePlayer")]
       .filter(Boolean)
       .forEach(element => {
         observer.observe(element, {
@@ -695,8 +641,5 @@
     isRecoverableStatus,
   };
 
-  document.addEventListener(
-    "DOMContentLoaded",
-    init
-  );
+  document.addEventListener("DOMContentLoaded", init);
 })();
