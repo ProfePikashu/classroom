@@ -15,6 +15,7 @@ const recovery = fs.readFileSync(
 );
 
 assert.match(html, /js\/ayrpc2026-recovery\.js/, "la vista 2026 debe cargar el controlador de recuperación");
+assert.match(html, /js\/ayrpc2026-recovery\.js\?v=20261025-class1-1h56-v1/, "la vista debe invalidar el cache al publicar el corte de 1h56");
 assert.match(recovery, /const COURSE_SLUG = "ayrpc-2026"/, "la recuperación debe apuntar al curso AyRPC 2026");
 assert.match(recovery, /const CLASS1_REQUIRED_WATCH_SECONDS = 6960/, "la Clase 1 debe llegar al 100% en 1h56 desde el inicio");
 assert.match(recovery, /const VIDEO_COMPLETION_RATIO = 1(?:\.0)?;/, "la Clase 1 debe completarse exactamente al llegar al corte configurado");
