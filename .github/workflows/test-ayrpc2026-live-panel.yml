@@ -22,3 +22,9 @@ jobs:
         run: node --check frontend/js/curso-ayrpc-2026.js
       - name: Run live panel regression test
         run: node tests/ayrpc2026-live-panel.test.js
+      - name: Run full Classroom Node suite
+        run: |
+          for test_file in tests/*.test.js; do
+            echo "Running ${test_file}"
+            node "${test_file}"
+          done
