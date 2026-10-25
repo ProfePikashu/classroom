@@ -34,7 +34,7 @@ assert.match(
 
 assert.match(
   recovery,
-  /\/recovery\/watch/,
+  /function recoveryWatchEndpoint[\s\S]*recoveryEndpoint\(classNumber\)[\s\S]*\/watch/,
   "el frontend debe reportar heartbeats de tiempo visto al backend"
 );
 
