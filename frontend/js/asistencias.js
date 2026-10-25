@@ -176,11 +176,24 @@ const AdminAsistencias = {
     return `${this.apiBase}/api/classroom/admin/attendance/summary?${params.toString()}`;
   },
 
-  normalizeApiRow(row) {
-    const clases = this.clases.map(({ n }) => [
-      row[`class_${n}_status`] || "SIN DATOS",
-      row[`class_${n}_time`] || "-"
-    ]);
+  normalizeApiRow(row, course = "ayrpc-2025") {
+    const progressByClass = new Map(
+      (Array.isArray(row.classes) ? row.classes : []).map(item => [
+        Number(item.class_number),
+        item
+      ])
+    );
+
+    const clases = this.clases.map(({ n }) => {
+      const progress = progressByClass.get(Number(n)) || {};
+
+      return [
+        row[`class_${n}_status`] || progress.status || "SIN DATOS",
+        row[`class_${n}_time`] || progress.time || "-",
+        progress.live_presence_seconds ?? null,
+        progress.live_presence_percent ?? null
+      ];
+    });
 
     return {
       legacyRow: row.legacy_row,
@@ -191,7 +204,7 @@ const AdminAsistencias = {
       telefono: row.telefono || row.phone_display || "",
       whatsapp: row.whatsapp_number || "",
       twitch: row.twitch_normalized || "",
-      curso: row.course_slug || "ayrpc-2025",
+      curso: course || row.course_slug || "ayrpc-2025",
       clases,
       validas: Number(row.valid_classes || 0),
       apto: String(row.apt_calculated || "").toUpperCase() === "SI",
@@ -223,6 +236,55 @@ const AdminAsistencias = {
       recuperadas,
       apto: Boolean(alumno.apto)
     };
+  },
+
+  formatAttendanceDuration(seconds) {
+    if (seconds === null || seconds === undefined || seconds === "") return "";
+
+    const value = Number(seconds);
+    if (!Number.isFinite(value) || value < 0) return "";
+
+    const totalSeconds = Math.floor(value);
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const secondsPart = totalSeconds % 60;
+    const minuteText = hours > 0
+      ? String(minutes).padStart(2, "0")
+      : String(minutes);
+    const secondText = String(secondsPart).padStart(2, "0");
+
+    return hours > 0
+      ? `${hours}h ${minuteText}m ${secondText}s`
+      : `${minuteText}m ${secondText}s`;
+  },
+
+  attendanceTimeTone(percent) {
+    if (percent === null || percent === undefined || percent === "") return "";
+
+    const value = Number(percent);
+    if (!Number.isFinite(value)) return "";
+    if (value >= 75) return "success";
+    if (value >= 70) return "warning";
+    return "danger";
+  },
+
+  renderAttendanceTime(course, legacyTime, seconds, percent) {
+    if (course !== "ayrpc-2026") {
+      return this.escapeHtml(legacyTime || "-");
+    }
+
+    const exactTime = this.formatAttendanceDuration(seconds);
+    const displayTime = exactTime || String(legacyTime || "-");
+    const tone = exactTime ? this.attendanceTimeTone(percent) : "";
+    const color = {
+      success: "var(--green)",
+      warning: "var(--yellow)",
+      danger: "var(--red)"
+    }[tone] || "";
+
+    if (!color) return this.escapeHtml(displayTime);
+
+    return `<strong style="color:${color};font-weight:700;">${this.escapeHtml(displayTime)}</strong>`;
   },
 
   async render() {
@@ -267,7 +329,7 @@ const AdminAsistencias = {
         );
       }
 
-      this.rows = rawRows.map(row => this.normalizeApiRow(row));
+      this.rows = rawRows.map(row => this.normalizeApiRow(row, curso));
 
       this.renderKpis(this.summary, this.rows);
       this.renderTable(this.rows); this.enableTableDragScroll();
@@ -328,9 +390,14 @@ const AdminAsistencias = {
 
     const body = rows.map((alumno, index) => {
       const resumen = this.getResumenAlumno(alumno);
-      const classCells = alumno.clases.map(([estado, tiempo]) => `
+      const classCells = alumno.clases.map(([estado, tiempo, segundos, porcentaje]) => `
         <td>${this.badge(estado)}</td>
-        <td class="attendance-time">${this.escapeHtml(tiempo)}</td>
+        <td class="attendance-time">${this.renderAttendanceTime(
+          alumno.curso,
+          tiempo,
+          segundos,
+          porcentaje
+        )}</td>
       `).join("");
 
       return `
