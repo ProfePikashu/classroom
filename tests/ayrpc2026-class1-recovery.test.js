@@ -19,9 +19,17 @@ const auth = fs.readFileSync(
   "utf8"
 );
 
+const classesCss = fs.readFileSync(
+  path.join(__dirname, "../frontend/css/clases-ayrpc-2026.css"),
+  "utf8"
+);
+
 assert.match(html, /js\/ayrpc2026-recovery\.js/, "la vista 2026 debe cargar el controlador de recuperación");
 assert.match(html, /js\/auth\.js\?v=20261025-recovery-auth-v2/, "la vista debe invalidar el cache de auth al exponer ClassroomAuth para recuperación");
 assert.match(html, /js\/ayrpc2026-recovery\.js\?v=20261025-watch-heartbeat-v4/, "la vista debe forzar el asset nuevo del tracker");
+assert.match(html, /css\/clases-ayrpc-2026\.css\?v=20261025-player-fit-v1/, "la vista debe invalidar el cache del ajuste visual del player");
+assert.match(classesCss, /#youtubePlayer\s+iframe[\s\S]*width:\s*100%[\s\S]*height:\s*100%/, "el iframe controlado de YouTube debe llenar todo el recuadro 16:9");
+assert.match(classesCss, /#youtubePlayer\s+iframe[\s\S]*display:\s*block/, "el iframe no debe dejar espacio de línea dentro del recuadro");
 assert.match(recovery, /const COURSE_SLUG = "ayrpc-2026"/, "la recuperación debe apuntar al curso AyRPC 2026");
 assert.match(recovery, /const CLASS1_REQUIRED_WATCH_SECONDS = 6960/, "la Clase 1 debe llegar al 100% en 1h56 desde el inicio");
 assert.match(recovery, /const VIDEO_COMPLETION_RATIO = 1(?:\.0)?;/, "la Clase 1 debe completarse exactamente al llegar al corte configurado");
