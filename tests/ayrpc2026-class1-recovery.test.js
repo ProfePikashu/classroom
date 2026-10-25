@@ -40,10 +40,14 @@ assert.match(recovery, /new window\.YT\.Player/, "la recuperación debe usar un 
 assert.match(recovery, /ayrpc2026RecoveryPlayerMount/, "el player de recuperación debe montarse separado del iframe general de clases");
 assert.match(recovery, /onYouTubeIframeAPIReady/, "si la API de YouTube todavía no cargó, la recuperación debe esperar el callback oficial como AyRPC 2025");
 assert.match(recovery, /typeof previousYouTubeReady === "function"/, "el callback de recuperación debe preservar cualquier callback previo de YouTube");
+assert.match(recovery, /const PLAYER_ATTACH_RETRY_MS = 250/, "el tracker debe reintentar montar el player hasta que YouTube y el video estén realmente disponibles");
+assert.match(recovery, /const PLAYER_ATTACH_TIMEOUT_MS = 15000/, "los reintentos del player deben tener un límite razonable");
+assert.match(recovery, /function schedulePlayerAttach\(\)[\s\S]*setInterval[\s\S]*attachRecoveryPlayer/, "el montaje no debe depender de cuatro timeouts fijos");
+assert.match(recovery, /document\.hasFocus\(\)/, "un click dentro del iframe de YouTube no debe confundirse con abandonar la clase");
 assert.match(recovery, /Para recuperar esta clase tenés que ver el video completo desde esta vista/, "un alumno recuperable debe recibir la advertencia antes de iniciar");
 assert.match(recovery, /visibilitychange/, "el tracker debe reaccionar cuando la pestaña deja de estar visible");
 assert.match(recovery, /document\.hidden|document\.visibilityState/, "el tiempo válido no debe contarse con la pestaña oculta");
-assert.match(recovery, /window\.addEventListener\("blur"/, "el tiempo válido debe detenerse al minimizar o perder foco");
+assert.match(recovery, /window\.addEventListener\("blur"/, "el tiempo válido debe detenerse al minimizar o perder foco real");
 assert.doesNotMatch(recovery, /FORMAT_CATEGORIES|ETHICS_CATEGORIES|cobrar de mas|pc de escritorio/, "las reglas de corrección no deben viajar al navegador");
 
 console.log("AyRPC 2026 class 1 recovery contract tests passed");
