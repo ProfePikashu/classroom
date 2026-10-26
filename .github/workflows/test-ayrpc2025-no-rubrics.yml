@@ -1,0 +1,25 @@
+name: Test AyRPC 2025 no rubrics
+
+on:
+  push:
+    paths:
+      - 'frontend/clases-ayrpc-2025.html'
+      - 'frontend/js/clases-ayrpc-2025.js'
+      - 'tests/ayrpc2025-no-rubrics.test.js'
+      - '.github/workflows/test-ayrpc2025-no-rubrics.yml'
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Run AyRPC 2025 no-rubrics test
+        run: node --test tests/ayrpc2025-no-rubrics.test.js
