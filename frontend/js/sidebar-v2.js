@@ -194,7 +194,7 @@
     const link = document.createElement("link");
     link.id = "mobileHeaderScrollStyles";
     link.rel = "stylesheet";
-    link.href = "css/mobile-header-scroll.css?v=20261026-v3";
+    link.href = "css/mobile-header-scroll.css?v=20261026-v4";
     document.head.appendChild(link);
   }
 
