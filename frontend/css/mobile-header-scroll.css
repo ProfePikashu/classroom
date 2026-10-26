@@ -18,9 +18,12 @@
     padding-bottom: var(--classroom-mobile-topbar-vpad) !important;
     gap: .45rem !important;
     transition:
-      min-height .16s ease,
-      padding .16s ease,
-      gap .16s ease !important;
+      height .14s ease,
+      min-height .14s ease,
+      padding .14s ease,
+      gap .14s ease,
+      top .14s ease,
+      border-radius .14s ease !important;
   }
 
   .topbar > div:first-child {
@@ -36,7 +39,7 @@
     white-space: nowrap !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
-    transition: font-size .16s ease !important;
+    transition: font-size .14s ease !important;
   }
 
   .topbar .eyebrow {
@@ -46,9 +49,9 @@
     overflow: hidden !important;
     line-height: 1 !important;
     transition:
-      max-height .16s ease,
-      opacity .12s linear,
-      margin .16s ease !important;
+      max-height .14s ease,
+      opacity .1s linear,
+      margin .14s ease !important;
   }
 
   .topbar-actions {
@@ -123,24 +126,129 @@
     flex-basis: calc(var(--classroom-mobile-action-size) - 6px) !important;
   }
 
+  /* Primer scroll: de ~76px reales del shell mobile a 38px. */
   body.mobile-topbar-scrolled .topbar {
-    --classroom-mobile-topbar-height: 36px;
-    --classroom-mobile-topbar-vpad: 1px;
-    --classroom-mobile-title-size: 14px;
+    --classroom-mobile-topbar-height: 38px;
+    --classroom-mobile-topbar-vpad: 0px;
+    --classroom-mobile-title-size: 13px;
     --classroom-mobile-eyebrow-height: 0px;
     --classroom-mobile-eyebrow-opacity: 0;
-    --classroom-mobile-action-size: 28px;
-    --classroom-mobile-theme-size: 26px;
+    --classroom-mobile-action-size: 24px;
+    --classroom-mobile-theme-size: 22px;
 
-    gap: .28rem !important;
+    height: 38px !important;
+    min-height: 38px !important;
+    max-height: 38px !important;
+    top: 4px !important;
+    left: 6px !important;
+    right: 6px !important;
+    padding: 2px 7px 2px 40px !important;
+    gap: .22rem !important;
+    border-radius: 12px !important;
+    margin-bottom: .6rem !important;
+    overflow: hidden !important;
+  }
+
+  body.mobile-topbar-scrolled .topbar > div:first-child {
+    display: flex !important;
+    align-items: center !important;
+    min-width: 0 !important;
+    height: 100% !important;
   }
 
   body.mobile-topbar-scrolled .topbar .eyebrow {
+    display: none !important;
+    max-height: 0 !important;
     margin: 0 !important;
+    opacity: 0 !important;
+  }
+
+  body.mobile-topbar-scrolled .topbar h1 {
+    display: block !important;
+    margin: 0 !important;
+    font-size: 13px !important;
+    line-height: 1 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
   }
 
   body.mobile-topbar-scrolled .topbar-actions {
-    gap: .2rem !important;
+    gap: .16rem !important;
+    height: 100% !important;
+  }
+
+  body.mobile-topbar-scrolled .theme-toggle-icon,
+  body.mobile-topbar-scrolled .sound-toggle,
+  body.mobile-topbar-scrolled .sound-toggle-icon,
+  body.mobile-topbar-scrolled .notifications-toggle {
+    width: 24px !important;
+    height: 24px !important;
+    min-width: 24px !important;
+    min-height: 24px !important;
+    max-width: 24px !important;
+    max-height: 24px !important;
+    flex: 0 0 24px !important;
+    font-size: .72rem !important;
+  }
+
+  body.mobile-topbar-scrolled .theme-toggle.theme-toggle-icon.theme-switch {
+    width: 22px !important;
+    height: 22px !important;
+    min-width: 22px !important;
+    min-height: 22px !important;
+    max-width: 22px !important;
+    max-height: 22px !important;
+    flex-basis: 22px !important;
+  }
+
+  body.mobile-topbar-scrolled .theme-toggle.theme-toggle-icon.theme-switch::before {
+    font-size: .72rem !important;
+  }
+
+  body.mobile-topbar-scrolled .user-menu-toggle {
+    width: 24px !important;
+    height: 24px !important;
+    min-width: 24px !important;
+    min-height: 24px !important;
+    max-width: 24px !important;
+    padding: 0 !important;
+    justify-content: center !important;
+    border-radius: 999px !important;
+    overflow: hidden !important;
+  }
+
+  body.mobile-topbar-scrolled .user-menu-toggle > div:not(.user-avatar),
+  body.mobile-topbar-scrolled .user-menu-chevron {
+    display: none !important;
+  }
+
+  body.mobile-topbar-scrolled .user-avatar {
+    width: 20px !important;
+    height: 20px !important;
+    min-width: 20px !important;
+    min-height: 20px !important;
+    flex: 0 0 20px !important;
+    font-size: .68rem !important;
+  }
+
+  body.mobile-topbar-scrolled .mobile-menu-toggle {
+    top: 8px !important;
+    left: 10px !important;
+    width: 30px !important;
+    height: 30px !important;
+    min-width: 30px !important;
+    min-height: 30px !important;
+    max-width: 30px !important;
+    max-height: 30px !important;
+    padding: 0 !important;
+    border-radius: 9px !important;
+    gap: 3px !important;
+  }
+
+  body.mobile-topbar-scrolled .mobile-menu-toggle span {
+    width: 15px !important;
+    height: 1.5px !important;
   }
 }
 
@@ -152,16 +260,26 @@
   }
 
   body.mobile-topbar-scrolled .topbar {
-    --classroom-mobile-title-size: 13px;
-    --classroom-mobile-action-size: 27px;
-    --classroom-mobile-theme-size: 25px;
+    --classroom-mobile-title-size: 12px;
+    --classroom-mobile-action-size: 24px;
+    --classroom-mobile-theme-size: 22px;
+
+    height: 38px !important;
+    min-height: 38px !important;
+    max-height: 38px !important;
+    padding-left: 40px !important;
+  }
+
+  body.mobile-topbar-scrolled .topbar h1 {
+    font-size: 12px !important;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .topbar,
   .topbar h1,
-  .topbar .eyebrow {
+  .topbar .eyebrow,
+  .mobile-menu-toggle {
     transition: none !important;
   }
 }
