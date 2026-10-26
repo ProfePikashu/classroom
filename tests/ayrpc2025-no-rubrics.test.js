@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const assert = require('assert');
 
+// Regresión: la página de Rúbricas 2025 debe permanecer eliminada.
 const frontendDir = 'frontend';
 const classesHtml = fs.readFileSync(path.join(frontendDir, 'clases-ayrpc-2025.html'), 'utf8');
 const rubricsPage = path.join(frontendDir, 'rubricas-ayrpc-2025.html');
