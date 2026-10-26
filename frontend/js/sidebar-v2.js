@@ -188,7 +188,47 @@
     });
   }
 
+  function ensureMobileHeaderStyles() {
+    if (document.getElementById("mobileHeaderScrollStyles")) return;
+
+    const link = document.createElement("link");
+    link.id = "mobileHeaderScrollStyles";
+    link.rel = "stylesheet";
+    link.href = "css/mobile-header-scroll.css?v=20261026-v1";
+    document.head.appendChild(link);
+  }
+
+  function bindMobileTopbarScroll() {
+    const mobileMedia = window.matchMedia("(max-width: 980px)");
+    let framePending = false;
+
+    const sync = () => {
+      framePending = false;
+
+      const shouldCompact = mobileMedia.matches && window.scrollY > 28;
+      document.body.classList.toggle("mobile-topbar-scrolled", shouldCompact);
+    };
+
+    const scheduleSync = () => {
+      if (framePending) return;
+
+      framePending = true;
+      window.requestAnimationFrame(sync);
+    };
+
+    sync();
+
+    window.addEventListener("scroll", scheduleSync, { passive: true });
+    window.addEventListener("resize", scheduleSync, { passive: true });
+
+    if (typeof mobileMedia.addEventListener === "function") {
+      mobileMedia.addEventListener("change", scheduleSync);
+    }
+  }
+
   function init() {
+    ensureMobileHeaderStyles();
+    bindMobileTopbarScroll();
     filterAdminLinks();
     bindCourseToggle();
     bindAdminPopover();
