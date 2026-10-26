@@ -2,7 +2,7 @@ const fs = require('fs');
 const assert = require('assert');
 
 const html = fs.readFileSync('frontend/curso-ayrpc-2026.html', 'utf8');
-const css = fs.readFileSync('frontend/css/styles.css', 'utf8');
+const css = fs.readFileSync('frontend/css/mobile-course-header.css', 'utf8');
 
 assert.match(
   html,
@@ -15,11 +15,16 @@ assert.ok(
   'La vista del curso no debe mostrar una fecha estimada de inicio una vez comenzada la cursada.'
 );
 
-const heroBefore = css.match(/\.hero-panel::before\s*\{([\s\S]*?)\}/);
-assert.ok(heroBefore, 'Debe existir la capa decorativa .hero-panel::before.');
-assert.ok(
-  /pointer-events\s*:\s*none\s*;/.test(heroBefore[1]),
-  'La capa decorativa del hero no debe interceptar taps/clicks de los CTA.'
+assert.match(
+  css,
+  /\.page-curso-ayrpc-2026\s+\.hero-panel::before\s*\{[\s\S]*?pointer-events\s*:\s*none\s*!important\s*;/,
+  'La capa decorativa del hero de AyRPC 2026 no debe interceptar taps/clicks.'
+);
+
+assert.match(
+  css,
+  /\.page-curso-ayrpc-2026\s+\.hero-actions\s*\{[\s\S]*?z-index\s*:\s*2\s*;/,
+  'Las acciones del hero deben quedar por encima de la decoración.'
 );
 
 console.log('OK: CTA de AyRPC 2026 navegable y sin fecha estimada obsoleta');
