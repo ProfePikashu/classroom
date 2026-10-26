@@ -8,12 +8,14 @@ on:
     paths:
       - frontend/clases-ayrpc-2026.html
       - frontend/js/ayrpc2026-recovery.js
+      - frontend/js/ayrpc2026-recovery-ux.js
       - tests/ayrpc2026-class1-recovery.test.js
       - .github/workflows/test-ayrpc2026-class1-recovery.yml
   pull_request:
     paths:
       - frontend/clases-ayrpc-2026.html
       - frontend/js/ayrpc2026-recovery.js
+      - frontend/js/ayrpc2026-recovery-ux.js
       - tests/ayrpc2026-class1-recovery.test.js
       - .github/workflows/test-ayrpc2026-class1-recovery.yml
 
@@ -26,6 +28,8 @@ jobs:
         with:
           node-version: '22'
       - name: Check recovery JavaScript syntax
-        run: node --check frontend/js/ayrpc2026-recovery.js
+        run: |
+          node --check frontend/js/ayrpc2026-recovery.js
+          node --check frontend/js/ayrpc2026-recovery-ux.js
       - name: Run recovery contract test
         run: node tests/ayrpc2026-class1-recovery.test.js
