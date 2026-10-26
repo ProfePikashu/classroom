@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - feat/ayrpc2026-class1-recovery
+      - fix/recovery-tracker-watchdog
       - main
     paths:
       - frontend/clases-ayrpc-2026.html
