@@ -4,7 +4,7 @@ on:
   push:
     paths:
       - 'frontend/curso-ayrpc-2026.html'
-      - 'frontend/css/styles.css'
+      - 'frontend/css/mobile-course-header.css'
       - 'tests/ayrpc2026-course-cta.test.js'
       - '.github/workflows/test-ayrpc2026-course-cta.yml'
   workflow_dispatch:
