@@ -11,7 +11,6 @@
   const TEACHER_ONLY_ADMIN_ROUTES = new Set([
     "admin.html",
     "reportes-errores.html",
-    "rubricas-ayrpc-2025.html",
   ]);
 
   function hasPermission(permission) {
@@ -37,6 +36,12 @@
     if (!permission) return false;
 
     return hasPermission(permission);
+  }
+
+  function removeRetiredRubricsLinks() {
+    document
+      .querySelectorAll('a[href="rubricas-ayrpc-2025.html"]')
+      .forEach((link) => link.remove());
   }
 
   function filterAdminLinks() {
@@ -86,7 +91,6 @@
       "cursos.html",
       "curso-ayrpc-2025.html",
       "clases-ayrpc-2025.html",
-      "rubricas-ayrpc-2025.html",
       "curso-ayrpc-2026.html",
       "clases-ayrpc-2026.html"
     ];
@@ -229,6 +233,7 @@
   function init() {
     ensureMobileHeaderStyles();
     bindMobileTopbarScroll();
+    removeRetiredRubricsLinks();
     filterAdminLinks();
     bindCourseToggle();
     bindAdminPopover();
