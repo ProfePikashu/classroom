@@ -1,0 +1,25 @@
+name: Test Home Twitch CTA
+
+on:
+  push:
+    paths:
+      - 'frontend/index.html'
+      - 'frontend/css/home-twitch.css'
+      - 'tests/home-twitch-cta.test.js'
+      - '.github/workflows/test-home-twitch-cta.yml'
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Run home Twitch CTA test
+        run: node --test tests/home-twitch-cta.test.js
