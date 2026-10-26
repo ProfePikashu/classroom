@@ -15,6 +15,12 @@ test('Inicio prioriza el canal oficial de Twitch', () => {
   assert.match(homeHtml, /Ir a Twitch/i);
 });
 
+test('El hero de Twitch conserva al Pikachu del Classroom', () => {
+  assert.match(homeHtml, /class="home-twitch-pikachu-orb"/);
+  assert.match(homeHtml, /src="media\/icons\/classroomico\.png"/);
+  assert.match(homeHtml, /src="media\/icons\/classroomicoclaro\.png"/);
+});
+
 test('Inicio carga estilos responsive dedicados al CTA de Twitch', () => {
   assert.match(homeHtml, /css\/home-twitch\.css/);
   assert.equal(fs.existsSync(twitchCssPath), true);
@@ -22,5 +28,6 @@ test('Inicio carga estilos responsive dedicados al CTA de Twitch', () => {
   const css = fs.readFileSync(twitchCssPath, 'utf8');
   assert.match(css, /@media\s*\(max-width:\s*720px\)/);
   assert.match(css, /\.home-twitch-primary/);
+  assert.match(css, /\.home-twitch-pikachu-orb/);
   assert.match(css, /width:\s*100%/);
 });
