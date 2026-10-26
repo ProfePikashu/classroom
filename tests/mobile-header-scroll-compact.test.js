@@ -11,6 +11,11 @@ assert.ok(
 );
 
 assert.ok(
+  sidebarJs.includes('window.scrollY > 2'),
+  'El header mobile debe compactarse practicamente con el primer gesto de scroll.'
+);
+
+assert.ok(
   sidebarJs.includes('mobile-header-scroll.css'),
   'El shell global debe inyectar los estilos compactos del header mobile.'
 );
@@ -28,13 +33,26 @@ assert.ok(
 );
 
 assert.ok(
-  css.includes('--classroom-mobile-action-size: 32px'),
-  'Los controles mobile deben arrancar mas compactos (32px).'
+  css.includes('height: 38px !important') && css.includes('min-height: 38px !important'),
+  'Al scrollear el header mobile debe quedar aproximadamente a la mitad del alto original de 76px.'
 );
 
 assert.ok(
-  css.includes('--classroom-mobile-action-size: 28px'),
-  'Al scrollear, los controles mobile deben reducirse a 28px.'
+  css.includes('body.mobile-topbar-scrolled .mobile-menu-toggle') &&
+  css.includes('width: 30px !important') &&
+  css.includes('height: 30px !important'),
+  'El boton hamburguesa tambien debe reducirse para no volver a inflar el header compacto.'
+);
+
+assert.ok(
+  css.includes('--classroom-mobile-action-size: 24px'),
+  'Los controles del header scrolleado deben ser realmente compactos.'
+);
+
+assert.ok(
+  css.includes('body.mobile-topbar-scrolled .topbar h1') &&
+  css.includes('display: block !important'),
+  'Al scrollear debe mostrarse el titulo de la vista aunque el header de curso lo oculte en mobile.'
 );
 
 assert.ok(
@@ -58,4 +76,4 @@ assert.deepStrictEqual(
   `Toda pagina con topbar debe cargar sidebar-v2.js para el fallback mobile. Faltan: ${withoutSidebarJs.join(', ')}`
 );
 
-console.log(`OK: mobile header scroll compact (${topbarPages.length} topbar pages covered)`);
+console.log(`OK: mobile header first-scroll half-height (${topbarPages.length} topbar pages covered)`);
