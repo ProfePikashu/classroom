@@ -6,6 +6,9 @@
   const CLASS1_REQUIRED_WATCH_SECONDS = 6960;
   const VIDEO_COMPLETION_RATIO = 1;
   const HEARTBEAT_SECONDS = 5;
+  const MAX_LOCAL_CHECKPOINT_LEAD_SECONDS = 10;
+  const RESUME_REWIND_SECONDS = 5;
+  const MIN_RESUME_POSITION_SECONDS = 10;
   const PLAYER_ATTACH_RETRY_MS = 250;
   const PLAYER_ATTACH_TIMEOUT_MS = 15000;
   const RECOVERY_START_MESSAGE =
@@ -25,6 +28,9 @@
     lastTickAt: 0,
     lastVideoTime: 0,
     serverWatchedSeconds: 0,
+    serverResumePosition: 0,
+    resumePosition: 0,
+    resumeActionDismissed: false,
     pendingSeconds: 0,
     heartbeatSending: false,
     quizUnlocked: false,
@@ -103,6 +109,126 @@
 
   function recoveryWatchEndpoint(classNumber) {
     return `${recoveryEndpoint(classNumber)}/watch`;
+  }
+
+  function recoveryCheckpointKey(classNumber = state.classNumber) {
+    return `${COURSE_SLUG}:recovery:class-${Number(classNumber) || 0}:checkpoint`;
+  }
+
+  function readLocalCheckpoint() {
+    if (isPreviewMode() || !state.classNumber) return 0;
+
+    try {
+      const raw = localStorage.getItem(recoveryCheckpointKey());
+      const parsed = JSON.parse(raw || "{}");
+      const position = Number(parsed?.position_seconds || 0);
+      return Number.isFinite(position) && position > 0 ? position : 0;
+    } catch {
+      return 0;
+    }
+  }
+
+  function writeLocalCheckpoint(positionSeconds) {
+    if (isPreviewMode() || !state.config?.eligible || !state.classNumber) return;
+
+    const position = Math.max(0, Number(positionSeconds) || 0);
+    if (!position) return;
+
+    try {
+      localStorage.setItem(
+        recoveryCheckpointKey(),
+        JSON.stringify({
+          position_seconds: Number(position.toFixed(3)),
+          saved_at: Date.now(),
+        })
+      );
+    } catch {}
+  }
+
+  function clearLocalCheckpoint() {
+    if (!state.classNumber) return;
+    try {
+      localStorage.removeItem(recoveryCheckpointKey());
+    } catch {}
+  }
+
+  function formatResumeTime(seconds) {
+    const total = Math.max(0, Math.floor(Number(seconds) || 0));
+    const hours = Math.floor(total / 3600);
+    const minutes = Math.floor((total % 3600) / 60);
+    const secs = total % 60;
+    return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+  }
+
+  function computeResumePosition() {
+    const serverPosition = Math.max(
+      0,
+      Number(state.serverResumePosition || state.config?.resume_position_seconds || 0)
+    );
+    const localPosition = Math.max(0, Number(readLocalCheckpoint() || 0));
+    const boundedLocalPosition = Math.min(
+      localPosition,
+      serverPosition + MAX_LOCAL_CHECKPOINT_LEAD_SECONDS
+    );
+    const checkpoint = Math.max(serverPosition, boundedLocalPosition);
+    return Math.max(0, checkpoint - RESUME_REWIND_SECONDS);
+  }
+
+  function ensureResumeButton() {
+    const actions = document.querySelector(".recovery-actions");
+    if (!actions) return null;
+
+    let button = $("resumeRecoveryButton");
+    if (button) return button;
+
+    button = document.createElement("button");
+    button.id = "resumeRecoveryButton";
+    button.type = "button";
+    button.className = "btn btn-outline";
+    button.hidden = true;
+    button.addEventListener("click", continueRecoveryPlayback);
+    actions.insertBefore(button, $("quizButton") || null);
+    return button;
+  }
+
+  function refreshResumeAction() {
+    const button = ensureResumeButton();
+    if (!button) return;
+
+    const resumePosition = computeResumePosition();
+    state.resumePosition = resumePosition;
+    const show =
+      !isPreviewMode() &&
+      state.config?.eligible === true &&
+      Boolean(state.player) &&
+      resumePosition >= MIN_RESUME_POSITION_SECONDS &&
+      !state.resumeActionDismissed &&
+      !state.quizUnlocked;
+
+    button.hidden = !show;
+    if (!show) return;
+
+    button.innerHTML =
+      `<i class="fa-solid fa-rotate-right"></i> Continuar desde ${formatResumeTime(resumePosition)}`;
+  }
+
+  function continueRecoveryPlayback() {
+    if (!state.player || isPreviewMode() || !state.config?.eligible) return;
+
+    const resumePosition = computeResumePosition();
+    if (resumePosition < MIN_RESUME_POSITION_SECONDS) return;
+
+    try {
+      state.player.seekTo(resumePosition, true);
+      state.player.playVideo?.();
+      state.lastTickAt = Date.now();
+      state.lastVideoTime = resumePosition;
+      state.resumePosition = resumePosition;
+      state.resumeActionDismissed = true;
+      refreshResumeAction();
+    } catch (error) {
+      console.warn("No se pudo reanudar la reproducción:", error);
+    }
   }
 
   function safePlayerTime() {
@@ -226,7 +352,12 @@
     state.config = null;
     state.configLoading = false;
     state.serverWatchedSeconds = 0;
+    state.serverResumePosition = 0;
+    state.resumePosition = 0;
+    state.resumeActionDismissed = false;
     state.pendingSeconds = 0;
+    const resumeButton = $("resumeRecoveryButton");
+    if (resumeButton) resumeButton.hidden = true;
     state.heartbeatSending = false;
     state.quizUnlocked = false;
     state.submitting = false;
@@ -269,7 +400,12 @@
         0,
         Number(data.video_watch_seconds || data.watched_seconds || 0)
       );
+      state.serverResumePosition = Math.max(
+        0,
+        Number(data.resume_position_seconds || 0)
+      );
       state.pendingSeconds = 0;
+      refreshResumeAction();
       return data;
     } catch (error) {
       console.warn("No se pudo cargar la recuperación de la clase:", error);
@@ -363,12 +499,17 @@
         state.serverWatchedSeconds,
         Number(data.watched_seconds || data.video_watch_seconds || 0)
       );
+      state.serverResumePosition = Math.max(
+        state.serverResumePosition,
+        Number(data.resume_position_seconds || 0)
+      );
 
       if (state.config && Number(data.required_watch_seconds || 0) > 0) {
         state.config.required_watch_seconds = Number(data.required_watch_seconds);
       }
 
       refreshUnlockState();
+      refreshResumeAction();
     } catch (error) {
       state.pendingSeconds += delta;
       console.warn("No se pudo sincronizar el tiempo visto válido:", error);
@@ -399,6 +540,7 @@
       }
 
       if (!hidden && playing) {
+        writeLocalCheckpoint(currentVideoTime);
         const realDelta = Math.max(0, (now - state.lastTickAt) / 1000);
         const videoDelta = Math.max(0, currentVideoTime - state.lastVideoTime);
 
@@ -426,6 +568,7 @@
   function pauseForInactiveView() {
     if (!canTrackPlayback()) return;
 
+    writeLocalCheckpoint(safePlayerTime());
     void flushWatchHeartbeat(true);
 
     try {
@@ -474,6 +617,7 @@
             state.lastVideoTime = safePlayerTime();
             startTracking();
             refreshUnlockState();
+            refreshResumeAction();
           },
           onStateChange: event => {
             if (!canTrackPlayback()) return;
@@ -488,6 +632,7 @@
               event.data === window.YT.PlayerState.PAUSED ||
               event.data === window.YT.PlayerState.ENDED
             ) {
+              writeLocalCheckpoint(safePlayerTime());
               void flushWatchHeartbeat(true);
             }
           },
@@ -639,6 +784,7 @@
 
   function paintRecoveredState() {
     void flushWatchHeartbeat(true);
+    clearLocalCheckpoint();
 
     const liveBadge = $("liveAttendanceStatus");
     if (liveBadge) {
@@ -675,6 +821,7 @@
     state.quizUnlocked = false;
     if (state.config) state.config.eligible = false;
     setQuizEnabled(false);
+    refreshResumeAction();
   }
 
   async function submitRecovery(event) {
@@ -805,6 +952,7 @@
     }
 
     refreshUnlockState();
+    refreshResumeAction();
     schedulePlayerAttach();
   }
 
@@ -849,6 +997,7 @@
     });
 
     window.addEventListener("beforeunload", event => {
+      writeLocalCheckpoint(safePlayerTime());
       if (!state.config?.eligible || watchedTotal() <= 0 || state.quizUnlocked) {
         return;
       }
