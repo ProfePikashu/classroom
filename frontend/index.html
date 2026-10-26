@@ -16,9 +16,10 @@
 
   <!-- Classroom CSS -->
   <link rel="stylesheet" href="css/styles.css?v=20260621-linkedin-recomendacion" />
+  <link rel="stylesheet" href="css/home-twitch.css?v=20261026-twitch-first-v1" />
   <link rel="icon" href="favicon.ico" type="image/x-icon" />
   <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
-    <link rel="stylesheet" href="css/pelusita-v2.css?v=20260930-alpha2" />
+  <link rel="stylesheet" href="css/pelusita-v2.css?v=20260930-alpha2" />
   <link rel="stylesheet" href="css/bug-reporter.css?v=20260930-beta1" />
 </head>
 
@@ -139,14 +140,12 @@
             <span>Comunidad</span>
           </a>
 
-
           <a href="reportes-errores.html"
              class="sidebar-bug-reports-link"
              data-sidebar-route="reportes-errores.html">
             <i class="fa-solid fa-bug"></i>
             <span>Reportes de errores</span>
           </a>
-
 
           <a href="admin.html" data-sidebar-route="admin.html">
             <i class="fa-solid fa-user-shield"></i>
@@ -182,7 +181,6 @@
             <i class="fa-solid fa-moon"></i>
           </button>
 
-
           <div class="user-menu" id="userMenu">
             <button class="user-pill user-menu-toggle" id="userMenuToggle" type="button" aria-label="Abrir menú de usuario">
               <div class="user-avatar">
@@ -212,39 +210,58 @@
         </div>
       </header>
 
-      <!-- HERO -->
-      <section class="hero-panel">
-        <div class="hero-copy">
-          <span class="badge">
-            <i class="fa-solid fa-bolt"></i>
-            Nueva etapa
+      <!-- TWITCH FIRST HERO -->
+      <section class="home-twitch-hero" aria-labelledby="homeTwitchTitle">
+        <div class="home-twitch-copy">
+          <span class="home-twitch-kicker">
+            <span class="home-twitch-kicker-dot" aria-hidden="true"></span>
+            AyRPC 2026 · Canal oficial
           </span>
 
-          <h2>
-            Bienvenido a
-            <span>AndyAzhTEC Classroom</span>
+          <h2 id="homeTwitchTitle">
+            Las clases en vivo son por
+            <span>Twitch</span>
           </h2>
 
-          <p>
-            Accedé a tus cursos, clases, materiales y evaluaciones desde un solo lugar.
+          <div class="home-twitch-channel-url">
+            <i class="fa-brands fa-twitch" aria-hidden="true"></i>
+            twitch.tv/profe_pikashu
+          </div>
+
+          <p class="home-twitch-description">
+            Si te acabás de inscribir, este es el acceso que necesitás tener a mano. Las clases en vivo se transmiten desde el canal oficial del curso.
           </p>
 
-          <div class="hero-actions">
-            <a href="#" class="btn btn-primary">
-              <i class="fa-solid fa-play"></i>
+          <div class="home-twitch-actions">
+            <a
+              href="https://www.twitch.tv/profe_pikashu"
+              class="btn home-twitch-primary"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <i class="fa-brands fa-twitch" aria-hidden="true"></i>
+              Ir a Twitch ahora
+            </a>
+
+            <a href="curso-ayrpc-2026.html" class="btn home-twitch-secondary">
+              <i class="fa-solid fa-play" aria-hidden="true"></i>
               Abrir AyRPC 2026
             </a>
 
             <a href="exampro.html" class="btn btn-outline">
-              <i class="fa-solid fa-file-circle-check"></i>
+              <i class="fa-solid fa-file-circle-check" aria-hidden="true"></i>
               Ir a ExamPro
             </a>
           </div>
         </div>
 
-        <div class="classroom-logo-orb" aria-hidden="true">
-          <img class="classroom-logo-orb-img classroom-logo-orb-img-dark" src="media/icons/classroomico.png" alt="" />
-          <img class="classroom-logo-orb-img classroom-logo-orb-img-light" src="media/icons/classroomicoclaro.png" alt="" />
+        <div class="home-twitch-visual" aria-hidden="true">
+          <div class="home-twitch-icon">
+            <i class="fa-brands fa-twitch"></i>
+          </div>
+          <strong>Canal oficial</strong>
+          <span>@profe_pikashu</span>
+          <small>Clases en vivo + comunidad</small>
         </div>
       </section>
 
@@ -296,9 +313,9 @@
     </main>
   </div>
 
- <script src="js/auth.js?v=20260917-roles-permissions-v1"></script>
+  <script src="js/auth.js?v=20260917-roles-permissions-v1"></script>
   <script src="js/roles.js?v=20260917-roles-permissions-v1"></script>
- <script src="js/main.js?v=20260612-newsletter-api-v1"></script>
+  <script src="js/main.js?v=20260612-newsletter-api-v1"></script>
   <script src="js/notifications-local.js?v=20260930-notification-preferences-v2"></script>
   <script src="js/pelusita-v2.js?v=20260930-alpha2"></script>
   <script src="js/pelusita-v2-classroom-knowledge.js?v=20260930-alpha1"></script>
@@ -307,21 +324,3 @@
   <script src="js/bug-reporter.js?v=20260930-beta1"></script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
