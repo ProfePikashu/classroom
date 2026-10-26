@@ -75,6 +75,37 @@ assert.ok(
   'El switch animado de tema mobile debe forzarse a un tamaño chico sin padding extra.'
 );
 
+assert.ok(
+  css.includes('body.mobile-topbar-scrolled .theme-toggle-icon,') &&
+  css.includes('body.mobile-topbar-scrolled .notifications-toggle,') &&
+  css.includes('body.mobile-topbar-scrolled .sound-toggle,') &&
+  css.includes('body.mobile-topbar-scrolled .user-menu-toggle') &&
+  css.includes('display: grid !important') &&
+  css.includes('place-items: center !important'),
+  'Todos los controles del header compacto deben compartir la misma caja y centrado optico.'
+);
+
+assert.ok(
+  css.includes('body.mobile-topbar-scrolled .theme-toggle.theme-toggle-icon.theme-switch') &&
+  css.includes('width: 24px !important') &&
+  css.includes('height: 24px !important'),
+  'El control de tema debe medir lo mismo que campana, sonido y usuario.'
+);
+
+assert.ok(
+  css.includes('body.mobile-topbar-scrolled .topbar-actions i') &&
+  css.includes('font-size: 12px !important') &&
+  css.includes('line-height: 1 !important'),
+  'Los iconos internos deben usar un tamano visual uniforme.'
+);
+
+assert.ok(
+  css.includes('body.mobile-topbar-scrolled .user-avatar') &&
+  css.includes('width: 24px !important') &&
+  css.includes('height: 24px !important'),
+  'El avatar compacto debe ocupar la misma caja visual que el resto de controles.'
+);
+
 const frontendDir = 'frontend';
 const topbarPages = fs.readdirSync(frontendDir)
   .filter((name) => name.endsWith('.html'))
@@ -91,4 +122,4 @@ assert.deepStrictEqual(
   `Toda pagina con topbar debe cargar sidebar-v2.js para el fallback mobile. Faltan: ${withoutSidebarJs.join(', ')}`
 );
 
-console.log(`OK: mobile header standardized + hidden title on scroll (${topbarPages.length} topbar pages covered)`);
+console.log(`OK: mobile header standardized + symmetric controls (${topbarPages.length} topbar pages covered)`);
