@@ -1,0 +1,167 @@
+/* ==========================================================
+   CLASSROOM MOBILE HEADER COMPACT 20261026
+   Global para todas las vistas que usan .topbar.
+   ========================================================== */
+
+@media (max-width: 980px) {
+  .topbar {
+    --classroom-mobile-topbar-height: 48px;
+    --classroom-mobile-topbar-vpad: 4px;
+    --classroom-mobile-title-size: 20px;
+    --classroom-mobile-eyebrow-height: 12px;
+    --classroom-mobile-eyebrow-opacity: 1;
+    --classroom-mobile-action-size: 32px;
+    --classroom-mobile-theme-size: 30px;
+
+    min-height: var(--classroom-mobile-topbar-height) !important;
+    padding-top: var(--classroom-mobile-topbar-vpad) !important;
+    padding-bottom: var(--classroom-mobile-topbar-vpad) !important;
+    gap: .45rem !important;
+    transition:
+      min-height .16s ease,
+      padding .16s ease,
+      gap .16s ease !important;
+  }
+
+  .topbar > div:first-child {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+  }
+
+  .topbar h1 {
+    max-width: 100% !important;
+    margin: 0 !important;
+    font-size: var(--classroom-mobile-title-size) !important;
+    line-height: 1.05 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    transition: font-size .16s ease !important;
+  }
+
+  .topbar .eyebrow {
+    max-height: var(--classroom-mobile-eyebrow-height) !important;
+    margin: 0 0 .12rem !important;
+    opacity: var(--classroom-mobile-eyebrow-opacity) !important;
+    overflow: hidden !important;
+    line-height: 1 !important;
+    transition:
+      max-height .16s ease,
+      opacity .12s linear,
+      margin .16s ease !important;
+  }
+
+  .topbar-actions {
+    width: auto !important;
+    min-width: 0 !important;
+    margin-left: auto !important;
+    gap: .28rem !important;
+    flex: 0 0 auto !important;
+    flex-wrap: nowrap !important;
+  }
+
+  .theme-toggle-icon,
+  .sound-toggle,
+  .sound-toggle-icon,
+  .notifications-toggle {
+    width: var(--classroom-mobile-action-size) !important;
+    height: var(--classroom-mobile-action-size) !important;
+    min-width: var(--classroom-mobile-action-size) !important;
+    min-height: var(--classroom-mobile-action-size) !important;
+    max-width: var(--classroom-mobile-action-size) !important;
+    max-height: var(--classroom-mobile-action-size) !important;
+    flex: 0 0 var(--classroom-mobile-action-size) !important;
+    padding: 0 !important;
+    border-radius: 999px !important;
+  }
+
+  /* En mobile el switch animado grande se convierte en un boton simple.
+     Desktop conserva intacta la animacion dia/noche. */
+  .theme-toggle.theme-toggle-icon.theme-switch {
+    width: var(--classroom-mobile-theme-size) !important;
+    height: var(--classroom-mobile-theme-size) !important;
+    min-width: var(--classroom-mobile-theme-size) !important;
+    min-height: var(--classroom-mobile-theme-size) !important;
+    max-width: var(--classroom-mobile-theme-size) !important;
+    max-height: var(--classroom-mobile-theme-size) !important;
+    flex: 0 0 var(--classroom-mobile-theme-size) !important;
+    padding: 0 !important;
+    display: grid !important;
+    place-items: center !important;
+    overflow: hidden !important;
+  }
+
+  .theme-toggle.theme-toggle-icon.theme-switch .theme-switch-track {
+    display: none !important;
+  }
+
+  .theme-toggle.theme-toggle-icon.theme-switch::before {
+    content: "\263E";
+    display: block;
+    color: #d8b4fe;
+    font-size: 1rem;
+    line-height: 1;
+    transform: translateY(-1px);
+  }
+
+  .theme-toggle.theme-toggle-icon.theme-switch[data-theme="light"]::before {
+    content: "\2600";
+    color: #f59e0b;
+    font-size: .92rem;
+    transform: none;
+  }
+
+  .user-menu-toggle {
+    min-height: var(--classroom-mobile-action-size) !important;
+    height: var(--classroom-mobile-action-size) !important;
+  }
+
+  .user-avatar {
+    width: calc(var(--classroom-mobile-action-size) - 6px) !important;
+    height: calc(var(--classroom-mobile-action-size) - 6px) !important;
+    min-width: calc(var(--classroom-mobile-action-size) - 6px) !important;
+    flex-basis: calc(var(--classroom-mobile-action-size) - 6px) !important;
+  }
+
+  body.mobile-topbar-scrolled .topbar {
+    --classroom-mobile-topbar-height: 36px;
+    --classroom-mobile-topbar-vpad: 1px;
+    --classroom-mobile-title-size: 14px;
+    --classroom-mobile-eyebrow-height: 0px;
+    --classroom-mobile-eyebrow-opacity: 0;
+    --classroom-mobile-action-size: 28px;
+    --classroom-mobile-theme-size: 26px;
+
+    gap: .28rem !important;
+  }
+
+  body.mobile-topbar-scrolled .topbar .eyebrow {
+    margin: 0 !important;
+  }
+
+  body.mobile-topbar-scrolled .topbar-actions {
+    gap: .2rem !important;
+  }
+}
+
+@media (max-width: 520px) {
+  .topbar {
+    --classroom-mobile-title-size: 18px;
+    --classroom-mobile-action-size: 30px;
+    --classroom-mobile-theme-size: 28px;
+  }
+
+  body.mobile-topbar-scrolled .topbar {
+    --classroom-mobile-title-size: 13px;
+    --classroom-mobile-action-size: 27px;
+    --classroom-mobile-theme-size: 25px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .topbar,
+  .topbar h1,
+  .topbar .eyebrow {
+    transition: none !important;
+  }
+}
