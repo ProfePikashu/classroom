@@ -30,6 +30,7 @@
     serverWatchedSeconds: 0,
     serverResumePosition: 0,
     resumePosition: 0,
+    resumeActionDismissed: false,
     pendingSeconds: 0,
     heartbeatSending: false,
     quizUnlocked: false,
@@ -199,7 +200,9 @@
     const show =
       !isPreviewMode() &&
       state.config?.eligible === true &&
+      Boolean(state.player) &&
       resumePosition >= MIN_RESUME_POSITION_SECONDS &&
+      !state.resumeActionDismissed &&
       !state.quizUnlocked;
 
     button.hidden = !show;
@@ -221,6 +224,7 @@
       state.lastTickAt = Date.now();
       state.lastVideoTime = resumePosition;
       state.resumePosition = resumePosition;
+      state.resumeActionDismissed = true;
       refreshResumeAction();
     } catch (error) {
       console.warn("No se pudo reanudar la reproducción:", error);
@@ -350,6 +354,7 @@
     state.serverWatchedSeconds = 0;
     state.serverResumePosition = 0;
     state.resumePosition = 0;
+    state.resumeActionDismissed = false;
     state.pendingSeconds = 0;
     const resumeButton = $("resumeRecoveryButton");
     if (resumeButton) resumeButton.hidden = true;
