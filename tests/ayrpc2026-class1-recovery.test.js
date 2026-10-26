@@ -47,7 +47,9 @@ assert.match(recovery, /localStorage\.setItem\([\s\S]*position_seconds/, "debe p
 assert.match(recovery, /localStorage\.getItem\(/, "debe recuperar el checkpoint local al volver a entrar");
 assert.match(recovery, /Math\.min\([\s\S]*localPosition[\s\S]*serverPosition\s*\+\s*MAX_LOCAL_CHECKPOINT_LEAD_SECONDS/, "el checkpoint local manipulado debe quedar limitado por el servidor");
 assert.match(recovery, /Continuar desde/, "debe ofrecer un botón explícito para reanudar");
+assert.match(recovery, /Boolean\(state\.player\)/, "el botón continuar debe esperar a que el player esté listo");
 assert.match(recovery, /seekTo\(resumePosition,\s*true\)/, "el seek debe ocurrir sólo al ejecutar la acción de continuar");
+assert.match(recovery, /state\.resumeActionDismissed\s*=\s*true/, "después de continuar el botón debe ocultarse durante esa sesión");
 assert.match(recovery, /serverResumePosition\s*=\s*Math\.max\([\s\S]*data\.resume_position_seconds/, "cada heartbeat debe actualizar el ancla confirmada por servidor");
 assert.match(recovery, /function clearLocalCheckpoint\(/, "al recuperar la clase debe poder limpiar el checkpoint local");
 assert.match(recovery, /required_correct_answers/, "la UI debe mostrar el requisito de respuestas correctas recibido del backend");
