@@ -4,7 +4,9 @@ on:
   push:
     paths:
       - 'frontend/clases-ayrpc-2025.html'
+      - 'frontend/rubricas-ayrpc-2025.html'
       - 'frontend/js/clases-ayrpc-2025.js'
+      - 'frontend/js/sidebar-v2.js'
       - 'tests/ayrpc2025-no-rubrics.test.js'
       - '.github/workflows/test-ayrpc2025-no-rubrics.yml'
   workflow_dispatch:
