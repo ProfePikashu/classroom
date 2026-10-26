@@ -55,7 +55,7 @@ assert.match(recoveryUx, /const WATCHDOG_TIMEOUT_MS = 15000/, "el watchdog separ
 assert.match(recoveryUx, /resume_position_seconds/, "la capa UX debe consumir el último punto confirmado por servidor");
 assert.match(recoveryUx, /function computeResumePosition\(\)[\s\S]*serverResumePosition/, "Continuar desde debe partir sólo del checkpoint confirmado por servidor");
 assert.match(recoveryUx, /Continuar desde/, "debe conservar el botón explícito para reanudar");
-assert.match(recoveryUx, /func:\s*"seekTo"|func:\s*'seekTo'/, "la reanudación aislada debe ordenar el seek sin tocar el contador académico");
+assert.match(recoveryUx, /sendYouTubeCommand\(iframe,\s*"seekTo",\s*\[resumePosition,\s*true\]\)/, "la reanudación aislada debe ordenar el seek sin tocar el contador académico");
 assert.match(recoveryUx, /watchValidationStatus/, "debe existir un estado visible de validación del tiempo");
 assert.match(recoveryUx, /retryWatchValidation/, "debe existir una acción visible para reintentar el seguimiento");
 assert.match(recoveryUx, /Validación activa/, "debe informar al alumno cuando el progreso se está confirmando");
