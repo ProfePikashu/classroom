@@ -3,6 +3,7 @@ const path = require('path');
 const assert = require('assert');
 
 const cssPath = 'frontend/css/mobile-header-scroll.css';
+const courseCssPath = 'frontend/css/mobile-course-header.css';
 const sidebarJs = fs.readFileSync('frontend/js/sidebar-v2.js', 'utf8');
 
 assert.ok(
@@ -26,6 +27,7 @@ assert.ok(
 );
 
 const css = fs.existsSync(cssPath) ? fs.readFileSync(cssPath, 'utf8') : '';
+const courseCss = fs.existsSync(courseCssPath) ? fs.readFileSync(courseCssPath, 'utf8') : '';
 
 assert.ok(
   css.includes('body.mobile-topbar-scrolled .topbar'),
@@ -50,9 +52,22 @@ assert.ok(
 );
 
 assert.ok(
-  css.includes('body.mobile-topbar-scrolled .topbar h1') &&
-  css.includes('display: block !important'),
-  'Al scrollear debe mostrarse el titulo de la vista aunque el header de curso lo oculte en mobile.'
+  css.includes('body.mobile-topbar-scrolled .topbar > div:first-child') &&
+  css.includes('display: none !important'),
+  'Al scrollear debe ocultarse por completo el bloque de titulo para liberar espacio.'
+);
+
+assert.ok(
+  css.includes('body.mobile-topbar-scrolled .topbar-actions') &&
+  css.includes('margin-left: auto !important') &&
+  css.includes('flex: 0 0 auto !important'),
+  'Los botones deben quedar anclados a la derecha sin comprimirse ni desplazarse.'
+);
+
+assert.ok(
+  !courseCss.includes('body.page-curso-ayrpc-2025 .topbar h1') &&
+  !courseCss.includes('body.page-curso-ayrpc-2025 .topbar-actions > button'),
+  'Las paginas de curso no deben tener reglas especiales que cambien el header mobile global.'
 );
 
 assert.ok(
@@ -76,4 +91,4 @@ assert.deepStrictEqual(
   `Toda pagina con topbar debe cargar sidebar-v2.js para el fallback mobile. Faltan: ${withoutSidebarJs.join(', ')}`
 );
 
-console.log(`OK: mobile header first-scroll half-height (${topbarPages.length} topbar pages covered)`);
+console.log(`OK: mobile header standardized + hidden title on scroll (${topbarPages.length} topbar pages covered)`);
