@@ -5,8 +5,8 @@ on:
     branches:
       - main
     paths:
-      - frontend/css/pelusita-v2.css
-      - frontend/js/main.js
+      - frontend/css/mobile-header-scroll.css
+      - frontend/js/sidebar-v2.js
       - frontend/*.html
       - tests/mobile-header-scroll-compact.test.js
       - .github/workflows/test-mobile-header-scroll.yml
@@ -19,7 +19,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Check main.js syntax
-        run: node --check frontend/js/main.js
+      - name: Check sidebar-v2.js syntax
+        run: node --check frontend/js/sidebar-v2.js
       - name: Run mobile header compact test
         run: node tests/mobile-header-scroll-compact.test.js
