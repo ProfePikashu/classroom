@@ -11,7 +11,7 @@
     --classroom-mobile-eyebrow-height: 12px;
     --classroom-mobile-eyebrow-opacity: 1;
     --classroom-mobile-action-size: 32px;
-    --classroom-mobile-theme-size: 30px;
+    --classroom-mobile-theme-size: 32px;
 
     min-height: var(--classroom-mobile-topbar-height) !important;
     padding-top: var(--classroom-mobile-topbar-vpad) !important;
@@ -136,7 +136,7 @@
     --classroom-mobile-eyebrow-height: 0px;
     --classroom-mobile-eyebrow-opacity: 0;
     --classroom-mobile-action-size: 24px;
-    --classroom-mobile-theme-size: 22px;
+    --classroom-mobile-theme-size: 24px;
 
     display: grid !important;
     grid-template-columns: 1fr auto !important;
@@ -170,7 +170,7 @@
     width: auto !important;
     min-width: max-content !important;
     margin-left: auto !important;
-    gap: .16rem !important;
+    gap: .22rem !important;
     height: 100% !important;
     flex: 0 0 auto !important;
     flex-wrap: nowrap !important;
@@ -178,10 +178,15 @@
     align-items: center !important;
   }
 
+  /* Todos los controles compactos comparten exactamente la misma caja. */
   body.mobile-topbar-scrolled .theme-toggle-icon,
+  body.mobile-topbar-scrolled .notifications-toggle,
   body.mobile-topbar-scrolled .sound-toggle,
   body.mobile-topbar-scrolled .sound-toggle-icon,
-  body.mobile-topbar-scrolled .notifications-toggle {
+  body.mobile-topbar-scrolled .user-menu-toggle {
+    display: grid !important;
+    place-items: center !important;
+    box-sizing: border-box !important;
     width: 24px !important;
     height: 24px !important;
     min-width: 24px !important;
@@ -189,32 +194,45 @@
     max-width: 24px !important;
     max-height: 24px !important;
     flex: 0 0 24px !important;
-    font-size: .72rem !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border-radius: 999px !important;
+    line-height: 1 !important;
   }
 
   body.mobile-topbar-scrolled .theme-toggle.theme-toggle-icon.theme-switch {
-    width: 22px !important;
-    height: 22px !important;
-    min-width: 22px !important;
-    min-height: 22px !important;
-    max-width: 22px !important;
-    max-height: 22px !important;
-    flex-basis: 22px !important;
-  }
-
-  body.mobile-topbar-scrolled .theme-toggle.theme-toggle-icon.theme-switch::before {
-    font-size: .72rem !important;
-  }
-
-  body.mobile-topbar-scrolled .user-menu-toggle {
     width: 24px !important;
     height: 24px !important;
     min-width: 24px !important;
     min-height: 24px !important;
     max-width: 24px !important;
+    max-height: 24px !important;
+    flex-basis: 24px !important;
+  }
+
+  body.mobile-topbar-scrolled .topbar-actions i {
+    display: block !important;
+    width: 12px !important;
+    height: 12px !important;
+    font-size: 12px !important;
+    line-height: 1 !important;
+    text-align: center !important;
+    margin: 0 !important;
     padding: 0 !important;
+  }
+
+  body.mobile-topbar-scrolled .theme-toggle.theme-toggle-icon.theme-switch::before {
+    display: block !important;
+    width: 12px !important;
+    height: 12px !important;
+    font-size: 12px !important;
+    line-height: 12px !important;
+    text-align: center !important;
+    transform: none !important;
+  }
+
+  body.mobile-topbar-scrolled .user-menu-toggle {
     justify-content: center !important;
-    border-radius: 999px !important;
     overflow: hidden !important;
   }
 
@@ -224,12 +242,26 @@
   }
 
   body.mobile-topbar-scrolled .user-avatar {
-    width: 20px !important;
-    height: 20px !important;
-    min-width: 20px !important;
-    min-height: 20px !important;
-    flex: 0 0 20px !important;
-    font-size: .68rem !important;
+    display: grid !important;
+    place-items: center !important;
+    width: 24px !important;
+    height: 24px !important;
+    min-width: 24px !important;
+    min-height: 24px !important;
+    max-width: 24px !important;
+    max-height: 24px !important;
+    flex: 0 0 24px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    font-size: 12px !important;
+    line-height: 1 !important;
+  }
+
+  body.mobile-topbar-scrolled .user-avatar i {
+    width: 12px !important;
+    height: 12px !important;
+    font-size: 12px !important;
+    line-height: 1 !important;
   }
 
   body.mobile-topbar-scrolled .mobile-menu-toggle {
@@ -256,13 +288,13 @@
   .topbar {
     --classroom-mobile-title-size: 18px;
     --classroom-mobile-action-size: 30px;
-    --classroom-mobile-theme-size: 28px;
+    --classroom-mobile-theme-size: 30px;
   }
 
   body.mobile-topbar-scrolled .topbar {
     --classroom-mobile-title-size: 0px;
     --classroom-mobile-action-size: 24px;
-    --classroom-mobile-theme-size: 22px;
+    --classroom-mobile-theme-size: 24px;
 
     height: 38px !important;
     min-height: 38px !important;
