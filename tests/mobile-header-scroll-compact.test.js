@@ -2,13 +2,25 @@ const fs = require('fs');
 const path = require('path');
 const assert = require('assert');
 
-const css = fs.readFileSync('frontend/css/pelusita-v2.css', 'utf8');
+const cssPath = 'frontend/css/mobile-header-scroll.css';
 const sidebarJs = fs.readFileSync('frontend/js/sidebar-v2.js', 'utf8');
 
 assert.ok(
   sidebarJs.includes('mobile-topbar-scrolled') && sidebarJs.includes('window.scrollY'),
   'Debe existir un fallback global por JS que compacte el topbar mobile al hacer scroll.'
 );
+
+assert.ok(
+  sidebarJs.includes('mobile-header-scroll.css'),
+  'El shell global debe inyectar los estilos compactos del header mobile.'
+);
+
+assert.ok(
+  fs.existsSync(cssPath),
+  'Debe existir el stylesheet global mobile-header-scroll.css.'
+);
+
+const css = fs.existsSync(cssPath) ? fs.readFileSync(cssPath, 'utf8') : '';
 
 assert.ok(
   css.includes('body.mobile-topbar-scrolled .topbar'),
@@ -26,8 +38,8 @@ assert.ok(
 );
 
 assert.ok(
-  css.includes('.theme-toggle-icon') && css.includes('padding: 0 !important'),
-  'El switch de tema mobile debe eliminar padding extra.'
+  css.includes('.theme-toggle.theme-toggle-icon.theme-switch') && css.includes('padding: 0 !important'),
+  'El switch animado de tema mobile debe forzarse a un tamaño chico sin padding extra.'
 );
 
 const frontendDir = 'frontend';
