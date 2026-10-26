@@ -5,3 +5,18 @@
    anteriores se retiraron para evitar alturas y acciones
    diferentes entre paginas.
    ========================================================== */
+
+/* La decoracion del hero no debe bloquear el boton Ver clases. */
+.page-curso-ayrpc-2026 .hero-panel::before {
+  pointer-events: none !important;
+}
+
+.page-curso-ayrpc-2026 .hero-actions {
+  position: relative;
+  z-index: 2;
+}
+
+.page-curso-ayrpc-2026 .hero-actions .btn {
+  pointer-events: auto;
+  touch-action: manipulation;
+}
