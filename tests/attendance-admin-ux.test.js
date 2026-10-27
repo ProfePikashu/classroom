@@ -54,7 +54,31 @@ assert.match(
 assert.match(
   js,
   /data-attendance-status-edit/,
-  "cada clase editable debe exponer un control de cambio de estado"
+  "la edición manual debe conservar el select funcional y su guardado actual"
+);
+
+assert.match(
+  css,
+  /\.attendance-status-editor\s*\{[^}]*width:\s*2[46]px[^}]*min-width:\s*2[46]px/i,
+  "el editor visible debe compactarse al tamaño de un lapicito"
+);
+
+assert.match(
+  css,
+  /\.attendance-status-editor\s*\{[^}]*background-image:\s*url\(/i,
+  "el editor compacto debe mostrar un icono de lápiz"
+);
+
+assert.match(
+  css,
+  /\.attendance-status-editor\s+option\s*\{[^}]*font-size:\s*(?:10|11|12)px/i,
+  "las opciones del desplegable deben seguir siendo legibles al abrirlo"
+);
+
+assert.doesNotMatch(
+  css,
+  /\.attendance-status-editor\s*\{[^}]*width:\s*100%/i,
+  "el editor no debe volver a ocupar todo el ancho debajo del badge"
 );
 
 assert.match(

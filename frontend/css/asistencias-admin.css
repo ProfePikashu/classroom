@@ -29,27 +29,60 @@
 
 .page-asistencias .attendance-status-cell {
   min-width: 112px;
+  white-space: nowrap;
 }
 
+/*
+ * El select sigue siendo el control real (teclado, change y guardado intactos),
+ * pero visualmente es sólo un lapicito junto al badge. Al tocarlo abre el
+ * desplegable nativo del navegador sin ocupar una segunda línea en la tabla.
+ */
 .page-asistencias .attendance-status-editor {
-  display: block;
-  width: 100%;
-  min-width: 104px;
-  margin-top: 6px;
-  padding: 5px 24px 5px 7px;
-  border: 1px solid rgba(168, 85, 247, .34);
-  border-radius: 8px;
-  background: rgba(15, 23, 42, .74);
-  color: var(--text-main, #e2e8f0);
-  font-size: 10px;
-  font-weight: 700;
-  line-height: 1.2;
+  display: inline-block;
+  width: 26px;
+  min-width: 26px;
+  height: 26px;
+  margin: 0 0 0 5px;
+  padding: 0;
+  vertical-align: middle;
+  border: 1px solid rgba(168, 85, 247, .38);
+  border-radius: 7px;
+  background-color: rgba(168, 85, 247, .10);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23c084fc' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 20h9'/%3E%3Cpath d='M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 13px 13px;
+  color: transparent;
+  font-size: 0;
+  line-height: 1;
+  appearance: none;
+  -webkit-appearance: none;
   cursor: pointer;
+  transition: border-color .16s ease, background-color .16s ease, transform .16s ease;
+}
+
+.page-asistencias .attendance-status-editor:hover {
+  border-color: rgba(192, 132, 252, .78);
+  background-color: rgba(168, 85, 247, .18);
+  transform: translateY(-1px);
+}
+
+.page-asistencias .attendance-status-editor:focus-visible {
+  outline: 2px solid rgba(192, 132, 252, .72);
+  outline-offset: 2px;
+}
+
+.page-asistencias .attendance-status-editor option {
+  color: #e2e8f0;
+  background: #0f172a;
+  font-size: 11px;
+  font-weight: 700;
 }
 
 .page-asistencias .attendance-status-editor:disabled {
-  opacity: .55;
+  opacity: .45;
   cursor: progress;
+  transform: none;
 }
 
 /* La baja sigue visible como historial, pero toda la fila queda anulada. */
@@ -120,9 +153,18 @@
 }
 
 html[data-theme="light"] .page-asistencias .attendance-status-editor {
-  background: #fff;
+  border-color: rgba(124, 58, 237, .30);
+  background-color: rgba(124, 58, 237, .07);
+}
+
+html[data-theme="light"] .page-asistencias .attendance-status-editor:hover {
+  border-color: rgba(124, 58, 237, .58);
+  background-color: rgba(124, 58, 237, .12);
+}
+
+html[data-theme="light"] .page-asistencias .attendance-status-editor option {
   color: #334155;
-  border-color: rgba(124, 58, 237, .28);
+  background: #fff;
 }
 
 @media (max-width: 700px) {
@@ -188,13 +230,14 @@ html[data-theme="light"] .page-asistencias .attendance-status-editor {
   }
 
   .page-asistencias .attendance-status-cell {
-    min-width: 102px;
+    min-width: 96px;
   }
 
   .page-asistencias .attendance-status-editor {
-    min-width: 96px;
-    font-size: 9px;
-    padding-top: 4px;
-    padding-bottom: 4px;
+    width: 24px;
+    min-width: 24px;
+    height: 24px;
+    margin-left: 4px;
+    background-size: 12px 12px;
   }
 }
