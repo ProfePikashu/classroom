@@ -138,9 +138,57 @@ assert.match(
 );
 
 assert.match(
+  recovery,
+  /fs:\s*0/,
+  "el player de recuperación debe ocultar el fullscreen interno de YouTube"
+);
+
+assert.match(
+  classes,
+  /[?&]fs=0/,
+  "el player normal debe ocultar el fullscreen interno de YouTube"
+);
+
+assert.match(
+  html,
+  /id=["']classroomVideoFullscreen["']/,
+  "la vista debe ofrecer un botón fullscreen controlado por el Classroom"
+);
+
+assert.match(
+  recoveryUx,
+  /function toggleClassroomVideoFullscreen\(/,
+  "la UX debe controlar el fullscreen desde el documento principal"
+);
+
+assert.match(
+  recoveryUx,
+  /requestFullscreen\(/,
+  "el fullscreen propio debe usar la Fullscreen API estándar"
+);
+
+assert.match(
+  recoveryUx,
+  /webkitRequestFullscreen\(/,
+  "el fullscreen propio debe conservar fallback WebKit"
+);
+
+assert.match(
+  recoveryUx,
+  /videoPlayerBox/,
+  "el fullscreen propio debe aplicarse al contenedor del video del Classroom"
+);
+
+assert.match(
+  classesCss,
+  /#videoPlayerBox\s*:\s*fullscreen[\s\S]*width:\s*100vw[\s\S]*height:\s*100vh/,
+  "el contenedor propio debe ocupar todo el viewport en fullscreen"
+);
+
+assert.match(
   classesCss,
   /#youtubePlayer\s*:\s*fullscreen[\s\S]*width:\s*100vw[\s\S]*height:\s*100vh/,
-  "el contenedor fullscreen debe ocupar todo el viewport móvil"
+  "el contenedor fullscreen heredado debe seguir ocupando todo el viewport móvil"
 );
 
 assert.match(
@@ -151,26 +199,26 @@ assert.match(
 
 assert.match(
   html,
-  /css\/clases-ayrpc-2026\.css\?v=20261027-fullscreen-v3/,
-  "la vista debe invalidar cache del CSS de fullscreen"
+  /css\/clases-ayrpc-2026\.css\?v=20261027-fullscreen-v4/,
+  "la vista debe invalidar cache del CSS del fullscreen propio"
 );
 
 assert.match(
   html,
-  /js\/ayrpc2026-recovery\.js\?v=20261027-bandwidth-v1/,
-  "la vista debe invalidar cache para la política del player y el heartbeat agrupado"
+  /js\/ayrpc2026-recovery\.js\?v=20261027-fullscreen-v4/,
+  "la vista debe invalidar cache del player de recuperación sin fullscreen interno"
 );
 
 assert.match(
   html,
-  /js\/clases-ayrpc-2026\.js\?v=20261027-bandwidth-v1/,
-  "la vista debe invalidar cache para el embed normal y el polling optimizado"
+  /js\/clases-ayrpc-2026\.js\?v=20261027-fullscreen-v4/,
+  "la vista debe invalidar cache del embed normal sin fullscreen interno"
 );
 
 assert.match(
   html,
-  /js\/ayrpc2026-recovery-ux\.js\?v=20261027-fullscreen-v3/,
-  "la vista debe invalidar cache para la UX de fullscreen responsivo"
+  /js\/ayrpc2026-recovery-ux\.js\?v=20261027-fullscreen-v4/,
+  "la vista debe invalidar cache para la UX de fullscreen controlado"
 );
 
 console.log("AyRPC 2026 player policy tests passed");

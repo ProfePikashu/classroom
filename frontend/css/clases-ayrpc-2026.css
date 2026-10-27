@@ -181,9 +181,44 @@
   display: block;
 }
 
+.ayrpc2026-video-shell {
+  position: relative;
+  background: #000;
+}
+
+.ayrpc2026-video-fullscreen {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  z-index: 20;
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, .72);
+  color: #fff;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background .18s ease, transform .18s ease;
+}
+
+.ayrpc2026-video-fullscreen:hover,
+.ayrpc2026-video-fullscreen:focus-visible {
+  background: rgba(0, 0, 0, .92);
+  transform: scale(1.05);
+}
+
+.ayrpc2026-video-fullscreen[hidden] {
+  display: none !important;
+}
+
 /* En fullscreen mobile el contenedor 16:9 no debe conservar el tamaño
    de la página. Se expande al viewport completo y YouTube decide el
    letterboxing interno necesario sin dejar márgenes extra del Classroom. */
+#videoPlayerBox:fullscreen,
+#videoPlayerBox:-webkit-full-screen,
 #youtubePlayer:fullscreen,
 #youtubePlayer:-webkit-full-screen {
   width: 100vw !important;
@@ -195,6 +230,14 @@
   background: #000;
 }
 
+#videoPlayerBox:fullscreen #youtubePlayer,
+#videoPlayerBox:-webkit-full-screen #youtubePlayer {
+  width: 100vw !important;
+  height: 100vh !important;
+}
+
+#videoPlayerBox:fullscreen #youtubePlayer iframe,
+#videoPlayerBox:-webkit-full-screen #youtubePlayer iframe,
 #youtubePlayer:fullscreen iframe,
 #youtubePlayer:-webkit-full-screen iframe,
 #youtubePlayer iframe:fullscreen,

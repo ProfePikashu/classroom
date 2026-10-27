@@ -35,6 +35,17 @@
 
   const $ = id => document.getElementById(id);
 
+  function classroomFullscreenSupported() {
+    const target = $("videoPlayerBox");
+    return Boolean(
+      target &&
+      (
+        typeof target.requestFullscreen === "function" ||
+        typeof target.webkitRequestFullscreen === "function"
+      )
+    );
+  }
+
   function apiBase() {
     const configured =
       window.EXAMPRO_API_BASE ||
@@ -511,15 +522,22 @@
     host.innerHTML = '<div id="ayrpc2026RecoveryPlayerMount"></div>';
 
     try {
+      const playerVars = {
+        rel: 0,
+        modestbranding: 1,
+        playsinline: 1,
+        enablejsapi: 1,
+        cc_load_policy: 0,
+        fs: 0,
+      };
+
+      if (!classroomFullscreenSupported()) {
+        playerVars.fs = 1;
+      }
+
       state.player = new window.YT.Player("ayrpc2026RecoveryPlayerMount", {
         videoId,
-        playerVars: {
-          rel: 0,
-          modestbranding: 1,
-          playsinline: 1,
-          enablejsapi: 1,
-          cc_load_policy: 0,
-        },
+        playerVars,
         events: {
           onReady: () => {
             clearAttachRetry();

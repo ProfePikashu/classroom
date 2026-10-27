@@ -156,13 +156,15 @@
   }
 
   function isYoutubePlayerFullscreen(element = currentFullscreenElement()) {
+    const shell = $("videoPlayerBox");
     const host = $("youtubePlayer");
     if (!host || !element) return false;
 
     return (
+      element === shell ||
       element === host ||
       host.contains(element) ||
-      element === host.querySelector("#youtubePlayer iframe")
+      Boolean(shell?.contains(element))
     );
   }
 
@@ -213,6 +215,88 @@
     });
   }
 
+  function classroomFullscreenSupported() {
+    const target = $("videoPlayerBox");
+    return Boolean(
+      target &&
+      (
+        typeof target.requestFullscreen === "function" ||
+        typeof target.webkitRequestFullscreen === "function"
+      )
+    );
+  }
+
+  async function requestClassroomFullscreen(target) {
+    if (typeof target?.requestFullscreen === "function") {
+      await target.requestFullscreen();
+      return;
+    }
+
+    if (typeof target?.webkitRequestFullscreen === "function") {
+      target.webkitRequestFullscreen();
+      return;
+    }
+
+    throw new Error("Fullscreen API no disponible.");
+  }
+
+  async function exitClassroomFullscreen() {
+    if (typeof document.exitFullscreen === "function") {
+      await document.exitFullscreen();
+      return;
+    }
+
+    if (typeof document.webkitExitFullscreen === "function") {
+      document.webkitExitFullscreen();
+    }
+  }
+
+  function syncClassroomFullscreenButton() {
+    const button = $("classroomVideoFullscreen");
+    if (!button) return;
+
+    const supported = classroomFullscreenSupported();
+    button.hidden = !supported;
+    if (!supported) return;
+
+    const active = isYoutubePlayerFullscreen();
+    button.setAttribute(
+      "aria-label",
+      active ? "Salir de pantalla completa" : "Ver video en pantalla completa"
+    );
+    button.title = active ? "Salir de pantalla completa" : "Pantalla completa";
+
+    const icon = button.querySelector("i");
+    if (icon) {
+      icon.className = `fa-solid ${active ? "fa-compress" : "fa-expand"}`;
+    }
+  }
+
+  async function toggleClassroomVideoFullscreen() {
+    if (isYoutubePlayerFullscreen()) {
+      try {
+        await exitClassroomFullscreen();
+      } catch (error) {
+        console.debug("El navegador no permitió salir del fullscreen:", error);
+      }
+      return;
+    }
+
+    const target = $("videoPlayerBox");
+    if (!target || !classroomFullscreenSupported()) return;
+
+    try {
+      await requestClassroomFullscreen(target);
+      scheduleYoutubeFullscreenSize();
+      await lockYoutubeLandscape();
+    } catch (error) {
+      console.debug("El navegador no permitió abrir fullscreen del Classroom:", error);
+    } finally {
+      syncClassroomFullscreenButton();
+      scheduleYoutubeFullscreenSize();
+    }
+  }
+
   async function lockYoutubeLandscape() {
     if (typeof screen?.orientation?.lock !== "function") return;
 
@@ -244,6 +328,8 @@
   }
 
   function syncYoutubeFullscreenOrientation() {
+    syncClassroomFullscreenButton();
+
     if (isYoutubePlayerFullscreen()) {
       scheduleYoutubeFullscreenSize();
       void lockYoutubeLandscape().finally(scheduleYoutubeFullscreenSize);
@@ -255,6 +341,15 @@
   }
 
   function bindYoutubeFullscreenOrientation() {
+    const button = $("classroomVideoFullscreen");
+    if (button) {
+      button.addEventListener("click", () => {
+        void toggleClassroomVideoFullscreen();
+      });
+    }
+
+    syncClassroomFullscreenButton();
+
     document.addEventListener(
       "fullscreenchange",
       syncYoutubeFullscreenOrientation
