@@ -390,6 +390,7 @@
     try {
       const response = await fetch(recoveryWatchEndpoint(state.classNumber), {
         method: "POST",
+        keepalive: force,
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -965,6 +966,10 @@
 
       state.lastTickAt = Date.now();
       state.lastVideoTime = safePlayerTime();
+    });
+
+    window.addEventListener("pagehide", () => {
+      void flushWatchHeartbeat(true);
     });
 
     window.addEventListener("beforeunload", event => {
