@@ -9,6 +9,9 @@
     new URLSearchParams(window.location.search)
       .get("attendance-preview") === "1";
 
+  const ATTENDANCE_POLL_OPEN_MS = 15000;
+  const ATTENDANCE_POLL_CLOSED_MS = 60000;
+
   let CLASSES = [];
   const state = {
     selected: null,
@@ -558,23 +561,62 @@
     }
   }
 
-  function startAttendancePolling() {
-    if (state.attendancePollTimer) {
-      window.clearInterval(
-        state.attendancePollTimer
-      );
+  function attendancePollDelay() {
+    return state.attendance?.open
+      ? ATTENDANCE_POLL_OPEN_MS
+      : ATTENDANCE_POLL_CLOSED_MS;
+  }
+
+  function stopAttendancePolling() {
+    if (!state.attendancePollTimer) return;
+
+    window.clearTimeout(state.attendancePollTimer);
+    state.attendancePollTimer = null;
+  }
+
+  function scheduleAttendancePolling(delay = attendancePollDelay()) {
+    stopAttendancePolling();
+
+    if (
+      !state.selected ||
+      document.hidden ||
+      document.visibilityState !== "visible"
+    ) {
+      return;
     }
 
-    state.attendancePollTimer = null;
+    state.attendancePollTimer = window.setTimeout(async () => {
+      state.attendancePollTimer = null;
 
-    state.attendancePollTimer =
-      window.setInterval(() => {
-        if (!state.selected) return;
+      if (
+        !state.selected ||
+        document.hidden ||
+        document.visibilityState !== "visible"
+      ) {
+        return;
+      }
 
-        void refreshAttendanceWindowState(
-          state.selected
-        );
-      }, 15000);
+      await refreshAttendanceWindowState(state.selected);
+      scheduleAttendancePolling();
+    }, delay);
+  }
+
+  function startAttendancePolling() {
+    scheduleAttendancePolling();
+  }
+
+  function bindAttendancePollingVisibility() {
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden || document.visibilityState !== "visible") {
+        stopAttendancePolling();
+        return;
+      }
+
+      if (!state.selected) return;
+
+      void refreshAttendanceWindowState(state.selected)
+        .finally(() => scheduleAttendancePolling());
+    });
   }
 
   function selectClass(item) {
@@ -608,7 +650,8 @@
     paintClassState(status);
     paintAttendance();
 
-    void refreshAttendanceWindowState(item);
+    void refreshAttendanceWindowState(item)
+      .finally(() => scheduleAttendancePolling());
 
     paintVideo(item);
     resetRecoveryUI();
@@ -848,6 +891,7 @@
       state.attendance.registered = false;
 
       paintAttendance();
+      scheduleAttendancePolling(ATTENDANCE_POLL_OPEN_MS);
       return;
     }
 
@@ -899,6 +943,7 @@
       state.attendance.registered = false;
 
       paintAttendance();
+      scheduleAttendancePolling(ATTENDANCE_POLL_OPEN_MS);
     }
     catch (error) {
       console.error(
@@ -1020,6 +1065,7 @@
 
       stopTimer();
       paintAttendance();
+      scheduleAttendancePolling(ATTENDANCE_POLL_CLOSED_MS);
       return;
     }
 
@@ -1067,6 +1113,7 @@
 
       stopTimer();
       paintAttendance();
+      scheduleAttendancePolling(ATTENDANCE_POLL_CLOSED_MS);
     }
     catch (error) {
       console.error(
@@ -1434,6 +1481,7 @@
       }
     );
   }
+
   function bindStaff() {
     $("staffOpenAttendance")
       ?.addEventListener(
@@ -1468,6 +1516,7 @@
   async function init() {
     bindAttendanceForm();
     bindStaff();
+    bindAttendancePollingVisibility();
 
     try {
       await loadStaffAccess();
