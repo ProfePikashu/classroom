@@ -16,7 +16,7 @@
   <link rel="stylesheet" href="css/styles.css?v=20260621-linkedin-recomendacion" />
   <link rel="icon" href="favicon.ico" type="image/x-icon" />
   <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
-  <link rel="stylesheet" href="css/clases-ayrpc-2026.css?v=20261027-fullscreen-v3" />
+  <link rel="stylesheet" href="css/clases-ayrpc-2026.css?v=20261027-fullscreen-v4" />
   <link rel="stylesheet" href="css/pelusita-v2.css?v=20260930-alpha1" />
   <link rel="stylesheet" href="css/bug-reporter.css?v=20260930-beta1" />
 </head>
@@ -384,8 +384,19 @@
 
           </section>
 
-          <div id="videoPlayerBox" class="video-player-box">
+          <div id="videoPlayerBox" class="video-player-box ayrpc2026-video-shell">
             <div id="youtubePlayer"></div>
+            <button
+              id="classroomVideoFullscreen"
+              class="ayrpc2026-video-fullscreen"
+              type="button"
+              aria-label="Ver video en pantalla completa"
+              aria-controls="youtubePlayer"
+              title="Pantalla completa"
+              hidden
+            >
+              <i class="fa-solid fa-expand" aria-hidden="true"></i>
+            </button>
           </div>
 
           <div class="watch-progress-box" id="watchProgressWrap">
@@ -415,9 +426,9 @@
   <script src="js/roles.js?v=20260917-roles-permissions-v1"></script>
   <script src="js/main.js?v=20260612-newsletter-api-v1"></script>
   <script src="js/notifications-local.js?v=20260930-notification-preferences-v2"></script>
-  <script src="js/clases-ayrpc-2026.js?v=20261027-bandwidth-v1"></script>
-  <script src="js/ayrpc2026-recovery.js?v=20261027-bandwidth-v1"></script>
-  <script src="js/ayrpc2026-recovery-ux.js?v=20261027-fullscreen-v3"></script>
+  <script src="js/clases-ayrpc-2026.js?v=20261027-fullscreen-v4"></script>
+  <script src="js/ayrpc2026-recovery.js?v=20261027-fullscreen-v4"></script>
+  <script src="js/ayrpc2026-recovery-ux.js?v=20261027-fullscreen-v4"></script>
   <!-- Pelusita v2 · prueba exclusiva AyRPC 2026 -->
   <script src="js/pelusita-v2.js?v=20260930-alpha1"></script>
   <script src="js/pelusita-v2-knowledge.js?v=20260930-alpha1"></script>

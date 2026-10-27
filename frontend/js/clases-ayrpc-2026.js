@@ -57,6 +57,17 @@
 
   const $ = id => document.getElementById(id);
 
+  function classroomFullscreenSupported() {
+    const target = $("videoPlayerBox");
+    return Boolean(
+      target &&
+      (
+        typeof target.requestFullscreen === "function" ||
+        typeof target.webkitRequestFullscreen === "function"
+      )
+    );
+  }
+
   function attendanceCodeStorageKey(windowId) {
     return `ayrpc2026.attendance-code.${windowId}`;
   }
@@ -711,11 +722,18 @@
       return;
     }
 
+    let videoSrc =
+      `https://www.youtube.com/embed/${item.videoId}?cc_load_policy=0&playsinline=1&fs=0`;
+
+    if (!classroomFullscreenSupported()) {
+      videoSrc = videoSrc.replace("&fs=0", "&fs=1");
+    }
+
     player.innerHTML = `
       <iframe
         width="100%"
         height="100%"
-        src="https://www.youtube.com/embed/${item.videoId}?cc_load_policy=0&playsinline=1"
+        src="${videoSrc}"
         title="${item.title}"
         frameborder="0"
         allowfullscreen
