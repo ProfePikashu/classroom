@@ -36,7 +36,7 @@ assert.match(html, /js\/ayrpc2026-recovery\.js/, "la vista 2026 debe cargar el c
 assert.match(html, /js\/auth\.js\?v=20261025-recovery-auth-v2/, "la vista debe invalidar el cache de auth al exponer ClassroomAuth para recuperación");
 assert.match(html, /js\/clases-ayrpc-2026\.js\?v=20261027-bandwidth-v1/, "la vista debe invalidar el cache del polling de asistencia optimizado");
 assert.match(html, /js\/ayrpc2026-recovery\.js\?v=20261027-bandwidth-v1/, "la vista debe forzar el tracker con heartbeats agrupados");
-assert.match(html, /js\/ayrpc2026-recovery-ux\.js\?v=20261027-bandwidth-v1/, "la vista debe cargar el watchdog alineado al heartbeat agrupado");
+assert.match(html, /js\/ayrpc2026-recovery-ux\.js\?v=20261027-fullscreen-v3/, "la vista debe cargar la UX de fullscreen responsivo con cache actualizado");
 assert.match(classesCss, /#youtubePlayer\s+iframe[\s\S]*width:\s*100%[\s\S]*height:\s*100%/, "el iframe controlado de YouTube debe llenar todo el recuadro 16:9");
 assert.match(classesCss, /#youtubePlayer\s+iframe[\s\S]*display:\s*block/, "el iframe no debe dejar espacio de línea dentro del recuadro");
 assert.match(recovery, /const COURSE_SLUG = "ayrpc-2026"/, "la recuperación debe apuntar al curso AyRPC 2026");
