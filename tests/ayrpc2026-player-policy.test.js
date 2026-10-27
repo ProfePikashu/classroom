@@ -75,14 +75,14 @@ assert.match(
 
 assert.match(
   html,
-  /js\/ayrpc2026-recovery\.js\?v=20261027-player-policy-v1/,
-  "la vista debe invalidar cache para la política nueva del player"
+  /js\/ayrpc2026-recovery\.js\?v=20261027-bandwidth-v1/,
+  "la vista debe invalidar cache para la política del player y el heartbeat agrupado"
 );
 
 assert.match(
   html,
-  /js\/clases-ayrpc-2026\.js\?v=20261027-player-policy-v1/,
-  "la vista debe invalidar cache para el embed normal sin captions"
+  /js\/clases-ayrpc-2026\.js\?v=20261027-bandwidth-v1/,
+  "la vista debe invalidar cache para el embed normal y el polling optimizado"
 );
 
 console.log("AyRPC 2026 player policy tests passed");
