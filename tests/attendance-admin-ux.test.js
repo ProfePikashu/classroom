@@ -29,8 +29,8 @@ assert.match(
 
 assert.match(
   js,
-  /\/api\/classroom\/admin\/attendance\/withdrawn/,
-  "la planilla debe recuperar también matrículas dadas de baja"
+  /enrollment_status/,
+  "la planilla debe usar el estado canónico de la matrícula para detectar bajas"
 );
 
 assert.match(
