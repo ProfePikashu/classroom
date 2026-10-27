@@ -9,6 +9,11 @@ const recovery = fs.readFileSync(
   "utf8"
 );
 
+const recoveryUx = fs.readFileSync(
+  path.join(__dirname, "../frontend/js/ayrpc2026-recovery-ux.js"),
+  "utf8"
+);
+
 const classes = fs.readFileSync(
   path.join(__dirname, "../frontend/js/clases-ayrpc-2026.js"),
   "utf8"
@@ -74,21 +79,27 @@ assert.match(
 );
 
 assert.match(
-  classes,
+  recoveryUx,
   /fullscreenchange/,
   "la vista de clases debe reaccionar al entrar o salir de pantalla completa"
 );
 
 assert.match(
-  classes,
+  recoveryUx,
   /screen\?\.orientation\?\.lock\(["']landscape["']\)/,
   "el reproductor debe pedir orientación horizontal al entrar en fullscreen"
 );
 
 assert.match(
-  classes,
+  recoveryUx,
   /screen\?\.orientation\?\.unlock\(\)/,
   "la orientación debe liberarse al salir del fullscreen del video"
+);
+
+assert.match(
+  recoveryUx,
+  /#youtubePlayer iframe/,
+  "el bloqueo de orientación debe limitarse al reproductor de YouTube del Classroom"
 );
 
 assert.match(
@@ -101,6 +112,12 @@ assert.match(
   html,
   /js\/clases-ayrpc-2026\.js\?v=20261027-bandwidth-v1/,
   "la vista debe invalidar cache para el embed normal y el polling optimizado"
+);
+
+assert.match(
+  html,
+  /js\/ayrpc2026-recovery-ux\.js\?v=20261027-bandwidth-v1/,
+  "la vista debe invalidar cache para la UX de recovery y orientación fullscreen"
 );
 
 console.log("AyRPC 2026 player policy tests passed");
