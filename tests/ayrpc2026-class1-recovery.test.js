@@ -80,5 +80,9 @@ assert.match(recovery, /document\.hidden|document\.visibilityState/, "el tiempo 
 assert.doesNotMatch(recovery, /window\.addEventListener\("blur"/, "hacer click dentro del iframe de YouTube no debe detener el tracking");
 assert.match(recovery, /Para recuperar esta clase tenés que ver el video completo desde esta vista/, "un alumno recuperable debe recibir la advertencia antes de iniciar");
 assert.doesNotMatch(recovery, /FORMAT_CATEGORIES|ETHICS_CATEGORIES|cobrar de mas|pc de escritorio/, "las reglas de corrección no deben viajar al navegador");
+assert.match(recovery, /function paintQuestionResults\(/, "la UI debe centralizar el pintado verde o rojo por respuesta");
+assert.match(recovery, /data\?\.question_results/, "la UI debe usar el resultado por pregunta devuelto por el backend");
+assert.match(recovery, /is-valid/, "una respuesta válida debe tener estado visual verde");
+assert.match(recovery, /is-invalid/, "una respuesta insuficiente debe tener estado visual rojo");
 
 console.log("AyRPC 2026 class 1 recovery contract tests passed");
