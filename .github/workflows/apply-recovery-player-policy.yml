@@ -1,0 +1,36 @@
+name: Apply recovery player policy
+
+on:
+  push:
+    branches:
+      - fix/recovery-player-1x-captions-20261027
+    paths:
+      - tools/apply_recovery_player_policy.py
+      - .github/workflows/apply-recovery-player-policy.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/recovery-player-1x-captions-20261027
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Apply player policy patch
+        run: python tools/apply_recovery_player_policy.py
+      - name: Commit patched files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add frontend/js/ayrpc2026-recovery.js frontend/js/clases-ayrpc-2026.js frontend/clases-ayrpc-2026.html tests/ayrpc2026-class1-recovery.test.js
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git commit -m "fix: enforce 1x recovery playback and reduce captions"
+          git push origin HEAD:fix/recovery-player-1x-captions-20261027
