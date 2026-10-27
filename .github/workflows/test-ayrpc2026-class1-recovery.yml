@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - feat/ayrpc2026-class1-recovery
+      - fix/render-bandwidth-polling-20261027
       - main
     paths:
       - frontend/clases-ayrpc-2026.html
