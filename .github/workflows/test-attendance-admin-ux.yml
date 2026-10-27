@@ -1,0 +1,33 @@
+name: Test attendance admin UX
+
+on:
+  push:
+    branches:
+      - feat/attendance-admin-ux
+      - main
+    paths:
+      - frontend/asistencias.html
+      - frontend/js/asistencias.js
+      - frontend/css/asistencias-admin.css
+      - tests/attendance-admin-ux.test.js
+      - .github/workflows/test-attendance-admin-ux.yml
+  pull_request:
+    paths:
+      - frontend/asistencias.html
+      - frontend/js/asistencias.js
+      - frontend/css/asistencias-admin.css
+      - tests/attendance-admin-ux.test.js
+      - .github/workflows/test-attendance-admin-ux.yml
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check attendance JavaScript syntax
+        run: node --check frontend/js/asistencias.js
+      - name: Run attendance admin UX contract
+        run: node tests/attendance-admin-ux.test.js

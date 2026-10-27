@@ -1,4 +1,4 @@
-/* AndyAzhTEC Classroom â€” Admin Asistencias */
+/* AndyAzhTEC Classroom — Admin Asistencias */
 
 "use strict";
 
@@ -9,11 +9,10 @@ const AdminAsistencias = {
   },
 
   clases: [],
-
   rows: [],
-  summary: null,
   loading: false,
   lastError: "",
+  canEdit: false,
 
   get apiBase() {
     if (typeof ClassroomAuth !== "undefined" && ClassroomAuth?.apiBase) {
@@ -56,11 +55,23 @@ const AdminAsistencias = {
     return token ? { Authorization: `Bearer ${token}` } : {};
   },
 
-  canViewAttendance() {
+  hasPermission(permission) {
     return (
       typeof ClassroomRoles !== "undefined" &&
       typeof ClassroomRoles.currentHasPermission === "function" &&
-      ClassroomRoles.currentHasPermission("attendance.view")
+      ClassroomRoles.currentHasPermission(permission)
+    );
+  },
+
+  canViewAttendance() {
+    return this.hasPermission("attendance.view");
+  },
+
+  canEditAttendance() {
+    return (
+      typeof ClassroomRoles !== "undefined" &&
+      typeof ClassroomRoles.currentHasPermission === "function" &&
+      ClassroomRoles.currentHasPermission("attendance.edit")
     );
   },
 
@@ -74,25 +85,19 @@ const AdminAsistencias = {
     this.tableWrap = document.getElementById("attendanceTableWrap");
     this.modal = document.getElementById("attendanceStudentModal");
     this.modalBody = document.getElementById("attendanceStudentModalBody");
+    this.canEdit = this.canEditAttendance();
 
     if (!this.canViewAttendance()) {
       if (this.status) {
         this.status.textContent = "No tenés permiso para ver asistencias.";
       }
 
-      if (this.kpis) {
-        this.kpis.innerHTML = "";
-      }
-
-      if (this.tableWrap) {
-        this.tableWrap.innerHTML = "";
-      }
-
+      if (this.kpis) this.kpis.innerHTML = "";
+      if (this.tableWrap) this.tableWrap.innerHTML = "";
       if (this.courseSelect) this.courseSelect.disabled = true;
       if (this.searchInput) this.searchInput.disabled = true;
       if (this.statusFilter) this.statusFilter.disabled = true;
       if (this.refreshBtn) this.refreshBtn.disabled = true;
-
       return;
     }
 
@@ -120,6 +125,11 @@ const AdminAsistencias = {
       if (btn) this.openProfile(Number(btn.dataset.attendanceProfile));
     });
 
+    this.tableWrap?.addEventListener("change", (event) => {
+      const editor = event.target.closest("[data-attendance-status-edit]");
+      if (editor) this.updateAttendanceStatus(editor);
+    });
+
     this.modal?.addEventListener("click", (event) => {
       if (event.target.closest("[data-attendance-modal-close]")) this.closeProfile();
     });
@@ -131,11 +141,13 @@ const AdminAsistencias = {
     });
   },
 
-  async fetchJson(url) {
+  async requestJson(url, options = {}) {
     const response = await fetch(url, {
+      ...options,
       headers: {
         Accept: "application/json",
-        ...this.getAuthHeaders()
+        ...this.getAuthHeaders(),
+        ...(options.headers || {})
       }
     });
 
@@ -154,7 +166,7 @@ const AdminAsistencias = {
   },
 
   buildStudentsUrl() {
-    const course = this.courseSelect?.value || "ayrpc-2025";
+    const course = this.courseSelect?.value || "ayrpc-2026";
     const search = String(this.searchInput?.value || "").trim();
     const statusFilter = this.statusFilter?.value || "all";
 
@@ -164,19 +176,14 @@ const AdminAsistencias = {
     params.set("offset", "0");
 
     if (search) params.set("search", search);
-    if (statusFilter && statusFilter !== "all") params.set("status_filter", statusFilter);
+    if (statusFilter && statusFilter !== "all") {
+      params.set("status_filter", statusFilter);
+    }
 
     return `${this.apiBase}/api/classroom/admin/attendance/students?${params.toString()}`;
   },
 
-  buildSummaryUrl() {
-    const course = this.courseSelect?.value || "ayrpc-2025";
-    const params = new URLSearchParams();
-    params.set("course", course);
-    return `${this.apiBase}/api/classroom/admin/attendance/summary?${params.toString()}`;
-  },
-
-  normalizeApiRow(row, course = "ayrpc-2025") {
+  normalizeApiRow(row, course = "ayrpc-2026") {
     const progressByClass = new Map(
       (Array.isArray(row.classes) ? row.classes : []).map(item => [
         Number(item.class_number),
@@ -195,19 +202,26 @@ const AdminAsistencias = {
       ];
     });
 
+    const enrollmentStatus = String(row.enrollment_status || "active").toLowerCase();
+    const isWithdrawn = enrollmentStatus === "withdrawn";
+
     return {
+      enrollmentId: row.enrollment_id || "",
+      studentId: row.student_id ?? null,
+      enrollmentStatus,
+      isWithdrawn,
       legacyRow: row.legacy_row,
-      inscripcion: row.inscription_at || "\u2014",
+      inscripcion: row.inscription_at || row.enrolled_at || "—",
       full_name: row.full_name_normalized || row.full_name_raw || row.full_name || "Sin nombre",
       dni: row.dni || "-",
       email: row.email || "",
       telefono: row.telefono || row.phone_display || "",
-      whatsapp: row.whatsapp_number || "",
+      whatsapp: row.whatsapp_number || row.telefono || "",
       twitch: row.twitch_normalized || "",
-      curso: course || row.course_slug || "ayrpc-2025",
+      curso: course || row.course_slug || "ayrpc-2026",
       clases,
       validas: Number(row.valid_classes || 0),
-      apto: String(row.apt_calculated || "").toUpperCase() === "SI",
+      apto: !isWithdrawn && String(row.apt_calculated || "").toUpperCase() === "SI",
       aptSheet: row.apt_sheet || "",
       participado: row.participated || "",
       resultado: row.result || "",
@@ -234,7 +248,7 @@ const AdminAsistencias = {
       revisar,
       ausente,
       recuperadas,
-      apto: Boolean(alumno.apto)
+      apto: !alumno.isWithdrawn && Boolean(alumno.apto)
     };
   },
 
@@ -288,8 +302,9 @@ const AdminAsistencias = {
   },
 
   async render() {
-    const curso = this.courseSelect?.value || "ayrpc-2025";
+    const curso = this.courseSelect?.value || "ayrpc-2026";
     const cursoLabel = this.cursos[curso] || "Cursada";
+    const statusFilter = this.statusFilter?.value || "all";
 
     this.loading = true;
     this.lastError = "";
@@ -303,13 +318,7 @@ const AdminAsistencias = {
     }
 
     try {
-      const [summaryData, studentsData] = await Promise.all([
-        this.fetchJson(this.buildSummaryUrl()),
-        this.fetchJson(this.buildStudentsUrl())
-      ]);
-
-      this.summary = summaryData?.summary || null;
-
+      const studentsData = await this.requestJson(this.buildStudentsUrl());
       const rawRows = studentsData?.items || [];
       const apiClasses = rawRows[0]?.classes;
 
@@ -329,20 +338,37 @@ const AdminAsistencias = {
         );
       }
 
-      this.rows = rawRows.map(row => this.normalizeApiRow(row, curso));
+      let normalized = rawRows.map(row => this.normalizeApiRow(row, curso));
 
-      this.renderKpis(this.summary, this.rows);
-      this.renderTable(this.rows); this.enableTableDragScroll();
+      // Una baja se conserva en la vista general y en búsquedas, pero no tiene
+      // sentido mezclarla con filtros académicos como "debe" o "ausente".
+      if (statusFilter !== "all") {
+        normalized = normalized.filter(row => !row.isWithdrawn);
+      }
+
+      normalized.sort((a, b) => {
+        const withdrawalOrder = Number(a.isWithdrawn) - Number(b.isWithdrawn);
+        if (withdrawalOrder !== 0) return withdrawalOrder;
+        return a.full_name.localeCompare(b.full_name, "es", { sensitivity: "base" });
+      });
+
+      this.rows = normalized;
+      this.renderKpis(this.rows);
+      this.renderTable(this.rows);
+      this.enableTableDragScroll();
 
       if (this.status) {
-        const total = Number(studentsData?.total || this.rows.length);
-        this.status.textContent = `${cursoLabel}: ${this.rows.length} alumnos mostrados de ${total}. Fuente: Supabase via API Classroom.`;
+        const active = this.rows.filter(row => !row.isWithdrawn).length;
+        const withdrawn = this.rows.filter(row => row.isWithdrawn).length;
+        const suffix = withdrawn
+          ? ` + ${withdrawn} baja${withdrawn === 1 ? "" : "s"} visible${withdrawn === 1 ? "" : "s"}`
+          : "";
+        this.status.textContent = `${cursoLabel}: ${active} alumnos activos${suffix}. Fuente: Supabase vía API Classroom.`;
       }
     } catch (error) {
       this.lastError = error?.message || "No se pudieron cargar las asistencias.";
       this.rows = [];
-      this.summary = null;
-      this.renderKpis(null, []);
+      this.renderKpis([]);
       this.renderTable([]);
 
       if (this.status) {
@@ -353,15 +379,16 @@ const AdminAsistencias = {
     }
   },
 
-  renderKpis(summary, rows) {
+  renderKpis(rows) {
     if (!this.kpis) return;
 
-    const total = Number(summary?.total_students ?? rows.length ?? 0);
-    const aptos = Number(summary?.aptos_examen ?? rows.filter(a => this.getResumenAlumno(a).apto).length ?? 0);
-    const deben = Number(summary?.deben_clases ?? Math.max(total - aptos, 0));
-    const revisar = Number(summary?.con_revisar ?? rows.filter(a => this.getResumenAlumno(a).revisar).length ?? 0);
-    const ausentes = Number(summary?.con_ausentes ?? rows.filter(a => this.getResumenAlumno(a).ausente).length ?? 0);
-    const recuperadas = Number(summary?.con_recuperadas ?? rows.filter(a => this.getResumenAlumno(a).recuperadas > 0).length ?? 0);
+    const activeRows = rows.filter(row => !row.isWithdrawn);
+    const total = activeRows.length;
+    const aptos = activeRows.filter(a => this.getResumenAlumno(a).apto).length;
+    const deben = Math.max(total - aptos, 0);
+    const revisar = activeRows.filter(a => this.getResumenAlumno(a).revisar).length;
+    const ausentes = activeRows.filter(a => this.getResumenAlumno(a).ausente).length;
+    const recuperadas = activeRows.filter(a => this.getResumenAlumno(a).recuperadas > 0).length;
 
     const items = [
       ["Total", total],
@@ -380,6 +407,35 @@ const AdminAsistencias = {
     `).join("");
   },
 
+  renderStatusCell(alumno, rowIndex, classIndex, estado) {
+    const classNumber = this.clases[classIndex]?.n;
+    const badge = this.badge(estado);
+
+    if (!this.canEdit || alumno.isWithdrawn || !alumno.enrollmentId || !classNumber) {
+      return badge;
+    }
+
+    const raw = String(estado || "PENDIENTE").toUpperCase();
+    const allowed = ["PENDIENTE", "PRESENTE", "AUSENTE", "REVISAR", "RECUPERADA"];
+    const selectedValue = allowed.includes(raw) ? raw : "PENDIENTE";
+    const options = allowed.map(value => `
+      <option value="${value}"${value === selectedValue ? " selected" : ""}>${value}</option>
+    `).join("");
+
+    return `
+      ${badge}
+      <select
+        class="attendance-status-editor"
+        data-attendance-status-edit
+        data-row-index="${rowIndex}"
+        data-class-number="${classNumber}"
+        data-previous-status="${this.escapeHtml(selectedValue)}"
+        aria-label="Cambiar estado de ${this.escapeHtml(alumno.full_name)}, clase ${classNumber}"
+        title="Cambio manual de asistencia"
+      >${options}</select>
+    `;
+  },
+
   renderTable(rows) {
     if (!this.tableWrap) return;
 
@@ -390,8 +446,8 @@ const AdminAsistencias = {
 
     const body = rows.map((alumno, index) => {
       const resumen = this.getResumenAlumno(alumno);
-      const classCells = alumno.clases.map(([estado, tiempo, segundos, porcentaje]) => `
-        <td>${this.badge(estado)}</td>
+      const classCells = alumno.clases.map(([estado, tiempo, segundos, porcentaje], classIndex) => `
+        <td class="attendance-status-cell">${this.renderStatusCell(alumno, index, classIndex, estado)}</td>
         <td class="attendance-time">${this.renderAttendanceTime(
           alumno.curso,
           tiempo,
@@ -400,27 +456,37 @@ const AdminAsistencias = {
         )}</td>
       `).join("");
 
+      const bajaBadge = alumno.isWithdrawn
+        ? `<span class="attendance-baja-badge">BAJA</span>`
+        : "";
+      const rowClass = alumno.isWithdrawn ? "attendance-withdrawn-row" : "";
+
       return `
-        <tr>
+        <tr class="${rowClass}">
           <td class="sticky-col">
             <div class="attendance-student-main">
               <div class="attendance-avatar"><i class="fa-solid fa-user-graduate"></i></div>
-              <div>
-                <strong>${this.escapeHtml(alumno.full_name)}</strong>
-                <small>@${this.escapeHtml(alumno.twitch || "sin-twitch")} - DNI ${this.escapeHtml(alumno.dni)}</small>
+              <div class="attendance-student-copy">
+                <div class="attendance-student-name-line">
+                  <strong>${this.escapeHtml(alumno.full_name)}</strong>
+                  ${bajaBadge}
+                </div>
+                <small>@${this.escapeHtml(alumno.twitch || "sin-twitch")} · DNI ${this.escapeHtml(alumno.dni)}</small>
               </div>
             </div>
           </td>
           <td>${this.escapeHtml(alumno.inscripcion)}</td>
-          <td>${this.escapeHtml(alumno.email || "\u2014")}</td>
-          <td>${this.escapeHtml(alumno.telefono || "\u2014")}</td>
+          <td>${this.escapeHtml(alumno.email || "—")}</td>
+          <td>${this.escapeHtml(alumno.telefono || "—")}</td>
           ${classCells}
           <td><strong>${resumen.validas}/${this.clases.length}</strong></td>
-          <td>${this.badge(resumen.apto ? "APTO" : "NO APTO")}</td>
+          <td>${alumno.isWithdrawn ? bajaBadge : this.badge(resumen.apto ? "APTO" : "NO APTO")}</td>
           <td><button class="btn btn-outline btn-table" type="button" data-attendance-profile="${index}">Ficha</button></td>
         </tr>
       `;
     }).join("");
+
+    const colspan = 7 + (this.clases.length * 2);
 
     this.tableWrap.innerHTML = `
       <div class="attendance-table-shell">
@@ -432,28 +498,92 @@ const AdminAsistencias = {
         </button>
         <div class="attendance-table-scroll">
           <table class="attendance-table">
-        <thead>
-          <tr>
-            <th class="sticky-col">Alumno</th>
-            <th>Inscripcion</th>
-            <th>Correo</th>
-            <th>Telefono</th>
-            ${classHeaders}
-            <th>Validas</th>
-            <th>Examen</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${body || `<tr><td colspan="22">No hay alumnos para mostrar.</td></tr>`}
-        </tbody>
+            <thead>
+              <tr>
+                <th class="sticky-col">Alumno</th>
+                <th>Inscripción</th>
+                <th>Correo</th>
+                <th>Teléfono</th>
+                ${classHeaders}
+                <th>Válidas</th>
+                <th>Examen</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${body || `<tr><td colspan="${colspan}">No hay alumnos para mostrar.</td></tr>`}
+            </tbody>
           </table>
         </div>
       </div>
     `;
   },
 
+  async updateAttendanceStatus(editor) {
+    if (!this.canEditAttendance()) return;
 
+    const rowIndex = Number(editor.dataset.rowIndex);
+    const classNumber = Number(editor.dataset.classNumber);
+    const alumno = this.rows[rowIndex];
+    const classIndex = this.clases.findIndex(item => Number(item.n) === classNumber);
+
+    if (!alumno || classIndex < 0 || alumno.isWithdrawn || !alumno.enrollmentId) {
+      return;
+    }
+
+    const previousStatus = String(
+      editor.dataset.previousStatus || alumno.clases[classIndex]?.[0] || "PENDIENTE"
+    ).toUpperCase();
+    const newStatus = String(editor.value || "").toUpperCase();
+
+    if (!newStatus || newStatus === previousStatus) return;
+
+    editor.disabled = true;
+    if (this.status) {
+      this.status.textContent = `Guardando Clase ${classNumber} de ${alumno.full_name}: ${previousStatus} → ${newStatus}...`;
+    }
+
+    try {
+      const data = await this.requestJson(
+        `${this.apiBase}/api/classroom/admin/attendance/progress`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            course: alumno.curso,
+            enrollment_id: alumno.enrollmentId,
+            class_number: classNumber,
+            status: newStatus
+          })
+        }
+      );
+
+      alumno.clases[classIndex][0] = newStatus;
+      if (data?.academic) {
+        alumno.validas = Number(data.academic.valid_classes ?? alumno.validas);
+        alumno.apto = Boolean(data.academic.exam_eligible);
+      }
+
+      const scroller = this.tableWrap?.querySelector(".attendance-table-scroll");
+      const scrollLeft = scroller?.scrollLeft || 0;
+      this.renderKpis(this.rows);
+      this.renderTable(this.rows);
+      this.enableTableDragScroll();
+      const nextScroller = this.tableWrap?.querySelector(".attendance-table-scroll");
+      if (nextScroller) nextScroller.scrollLeft = scrollLeft;
+      this.updateScrollButtons();
+
+      if (this.status) {
+        this.status.textContent = `${alumno.full_name} · Clase ${classNumber}: estado actualizado manualmente a ${newStatus}.`;
+      }
+    } catch (error) {
+      editor.value = previousStatus;
+      editor.disabled = false;
+      if (this.status) {
+        this.status.textContent = `No se pudo actualizar la asistencia: ${error?.message || "error desconocido"}`;
+      }
+    }
+  },
 
   scrollTable(direction) {
     const scroller = this.tableWrap?.querySelector(".attendance-table-scroll");
@@ -487,6 +617,11 @@ const AdminAsistencias = {
 
     this.updateScrollButtons();
 
+    if (!this._resizeBound) {
+      window.addEventListener("resize", () => this.updateScrollButtons());
+      this._resizeBound = true;
+    }
+
     if (scroller.dataset.dragReady === "1") return;
     scroller.dataset.dragReady = "1";
 
@@ -495,7 +630,6 @@ const AdminAsistencias = {
     let startLeft = 0;
 
     scroller.addEventListener("scroll", () => this.updateScrollButtons(), { passive: true });
-    window.addEventListener("resize", () => this.updateScrollButtons());
 
     scroller.addEventListener("pointerdown", (event) => {
       if (event.target.closest("button, a, input, select, textarea")) return;
@@ -528,6 +662,7 @@ const AdminAsistencias = {
       "RECUPERADA": "recuperada",
       "REVISAR": "revisar",
       "AUSENTE": "ausente",
+      "PENDIENTE": "none",
       "APTO": "apto",
       "NO APTO": "no-apto",
       "SIN DATOS": "none"
@@ -541,31 +676,35 @@ const AdminAsistencias = {
     if (!alumno || !this.modal || !this.modalBody) return;
 
     const resumen = this.getResumenAlumno(alumno);
+    const bajaBadge = alumno.isWithdrawn
+      ? `<span class="attendance-baja-badge">BAJA</span>`
+      : "";
 
     this.modalBody.innerHTML = `
       <div class="attendance-profile-head">
         <div class="attendance-profile-avatar"><i class="fa-solid fa-user-graduate"></i></div>
         <div>
-          <p class="eyebrow">Ficha de asistencia</p>
+          <p class="eyebrow">Ficha de asistencia ${bajaBadge}</p>
           <h3 id="attendanceStudentModalTitle">${this.escapeHtml(alumno.full_name)}</h3>
-          <p>@${this.escapeHtml(alumno.twitch || "sin-twitch")} - DNI ${this.escapeHtml(alumno.dni)}</p>
+          <p>@${this.escapeHtml(alumno.twitch || "sin-twitch")} · DNI ${this.escapeHtml(alumno.dni)}</p>
         </div>
       </div>
 
       <div class="attendance-profile-grid">
-        ${this.profileField("Inscripcion", alumno.inscripcion)}
+        ${this.profileField("Estado matrícula", alumno.isWithdrawn ? "BAJA" : "ACTIVA")}
+        ${this.profileField("Inscripción", alumno.inscripcion)}
         ${this.profileField("Correo", alumno.email)}
-        ${this.profileField("Telefono", alumno.telefono)}
+        ${this.profileField("Teléfono", alumno.telefono)}
         ${this.profileField("Twitch login", alumno.twitch ? "@" + alumno.twitch : "-")}
-        ${this.profileField("Clases vÃ¡lidas", resumen.validas + "/" + this.clases.length)}
-        ${this.profileField("Apto examen", resumen.apto ? "Si" : "No")}
-        ${this.profileField("Participacion examen", alumno.participado || "-")}
+        ${this.profileField("Clases válidas", resumen.validas + "/" + this.clases.length)}
+        ${this.profileField("Apto examen", alumno.isWithdrawn ? "No aplica" : (resumen.apto ? "Sí" : "No"))}
+        ${this.profileField("Participación examen", alumno.participado || "-")}
         ${this.profileField("Resultado", alumno.resultado || "-")}
         ${this.profileField("Recuperatorio", alumno.recuperatorio || "-")}
       </div>
 
       <div class="attendance-profile-actions">
-        <a class="btn btn-outline" href="mailto:${this.escapeHtml(alumno.email || "\u2014")}">
+        <a class="btn btn-outline" href="mailto:${this.escapeHtml(alumno.email || "")}">
           <i class="fa-solid fa-envelope"></i>
           <span>Enviar mail</span>
         </a>
