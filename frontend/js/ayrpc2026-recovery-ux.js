@@ -3,7 +3,7 @@
 
   const COURSE_SLUG = "ayrpc-2026";
   const CLASS_NUMBER = 1;
-  const WATCHDOG_TIMEOUT_MS = 15000;
+  const WATCHDOG_TIMEOUT_MS = 60000;
   const PLAYER_ATTACH_TIMEOUT_MS = 15000;
   const WATCHDOG_INTERVAL_MS = 1000;
   const RESUME_REWIND_SECONDS = 5;
@@ -26,6 +26,8 @@
     resumeDismissed: false,
     validationProblem: false,
   };
+
+  let videoOrientationLocked = false;
 
   const $ = id => document.getElementById(id);
 
@@ -143,6 +145,75 @@
         src.includes("enablejsapi=1")
       );
     }) || null;
+  }
+
+  function currentFullscreenElement() {
+    return (
+      document.fullscreenElement ||
+      document.webkitFullscreenElement ||
+      null
+    );
+  }
+
+  function isYoutubePlayerFullscreen(element = currentFullscreenElement()) {
+    const host = $("youtubePlayer");
+    if (!host || !element) return false;
+
+    return (
+      element === host ||
+      host.contains(element) ||
+      element === host.querySelector("#youtubePlayer iframe")
+    );
+  }
+
+  async function lockYoutubeLandscape() {
+    if (typeof screen?.orientation?.lock !== "function") return;
+
+    try {
+      await screen?.orientation?.lock("landscape");
+
+      if (isYoutubePlayerFullscreen()) {
+        videoOrientationLocked = true;
+        return;
+      }
+
+      screen?.orientation?.unlock();
+    } catch (error) {
+      console.debug("El navegador no permitió bloquear la orientación del video:", error);
+    }
+  }
+
+  function unlockYoutubeOrientation() {
+    if (!videoOrientationLocked) return;
+
+    videoOrientationLocked = false;
+
+    try {
+      screen?.orientation?.unlock();
+    } catch (error) {
+      console.debug("El navegador no permitió liberar la orientación del video:", error);
+    }
+  }
+
+  function syncYoutubeFullscreenOrientation() {
+    if (isYoutubePlayerFullscreen()) {
+      void lockYoutubeLandscape();
+      return;
+    }
+
+    unlockYoutubeOrientation();
+  }
+
+  function bindYoutubeFullscreenOrientation() {
+    document.addEventListener(
+      "fullscreenchange",
+      syncYoutubeFullscreenOrientation
+    );
+
+    document.addEventListener(
+      "webkitfullscreenchange",
+      syncYoutubeFullscreenOrientation
+    );
   }
 
   function formatResumeTime(seconds) {
@@ -490,6 +561,7 @@
     injectStyles();
     ensureValidationStatus();
     startWatchdog();
+    bindYoutubeFullscreenOrientation();
 
     window.addEventListener("message", handleYoutubeMessage);
 

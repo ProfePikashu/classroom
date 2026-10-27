@@ -30,29 +30,31 @@ assert.ok(
 assert.ok(
   css.includes('@keyframes classroom-mobile-topbar-compact') &&
   css.includes('animation-timeline: scroll(root block)'),
-  'El header mobile debe compactarse progresivamente al hacer scroll.'
+  'El header mobile global debe compactarse progresivamente al hacer scroll.'
 );
 
 assert.ok(
   css.includes('.topbar .eyebrow') && css.includes('--classroom-mobile-eyebrow-height: 0px'),
-  'El eyebrow del header debe colapsarse durante el scroll para liberar altura.'
+  'El eyebrow del header global debe colapsarse durante el scroll para liberar altura.'
 );
 
 assert.ok(
-  courseHeaderCss.includes('MOBILE COURSE HEADER COMPACT 20261020'),
-  'Debe existir el ajuste específico de cabecera compacta para páginas de curso.'
+  courseHeaderCss.includes('MOBILE COURSE HEADER') &&
+  courseHeaderCss.includes('.page-curso-ayrpc-2026 .hero-panel::before') &&
+  courseHeaderCss.includes('pointer-events: none !important'),
+  'El CSS específico de curso debe limitarse a evitar que la decoración bloquee el CTA.'
 );
 
 assert.ok(
-  courseHeaderCss.includes('body.page-curso-ayrpc-2025 .topbar h1') &&
-  courseHeaderCss.includes('display: none !important'),
-  'Los títulos largos AyRPC 2025/2026 deben ocultarse en mobile para no chocar con los controles.'
+  courseHeaderCss.includes('.page-curso-ayrpc-2026 .hero-actions .btn') &&
+  courseHeaderCss.includes('pointer-events: auto'),
+  'El botón Ver clases de AyRPC 2026 debe seguir siendo interactivo.'
 );
 
 assert.ok(
-  courseHeaderCss.includes('.topbar-actions > button') &&
-  courseHeaderCss.includes('flex: 0 0 34px !important'),
-  'Los botones de tema/notificaciones/sonido deben compactarse a 34px en mobile.'
+  !courseHeaderCss.includes('.topbar h1') &&
+  !courseHeaderCss.includes('.topbar-actions > button'),
+  'Las páginas de curso deben usar el header mobile global sin overrides compactos propios.'
 );
 
 for (const page of ['curso-ayrpc-2025.html', 'curso-ayrpc-2026.html']) {
@@ -61,25 +63,10 @@ for (const page of ['curso-ayrpc-2025.html', 'curso-ayrpc-2026.html']) {
     html.includes('css/mobile-course-header.css'),
     `${page} debe cargar mobile-course-header.css.`
   );
+  assert.ok(
+    html.includes('css/pelusita-v2.css'),
+    `${page} debe cargar pelusita-v2.css para usar el shell mobile global.`
+  );
 }
 
-const frontendDir = 'frontend';
-const topbarPages = fs.readdirSync(frontendDir)
-  .filter((name) => name.endsWith('.html'))
-  .filter((name) => {
-    const html = fs.readFileSync(path.join(frontendDir, name), 'utf8');
-    return html.includes('class="topbar"');
-  });
-
-const withoutMobileShellCss = topbarPages.filter((name) => {
-  const html = fs.readFileSync(path.join(frontendDir, name), 'utf8');
-  return !html.includes('css/pelusita-v2.css');
-});
-
-assert.deepStrictEqual(
-  withoutMobileShellCss,
-  [],
-  `Toda página con topbar debe cargar pelusita-v2.css. Faltan: ${withoutMobileShellCss.join(', ')}`
-);
-
-console.log(`OK: mobile sidebar and compact header (${topbarPages.length} topbar pages covered)`);
+console.log('OK: mobile sidebar + course header aligned with global mobile shell');

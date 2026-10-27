@@ -5,7 +5,7 @@
   const ENABLED_CLASS_NUMBER = 1;
   const CLASS1_REQUIRED_WATCH_SECONDS = 6960;
   const VIDEO_COMPLETION_RATIO = 1;
-  const HEARTBEAT_SECONDS = 5;
+  const HEARTBEAT_SECONDS = 30;
   const PLAYER_ATTACH_RETRY_MS = 250;
   const PLAYER_ATTACH_TIMEOUT_MS = 15000;
   const RECOVERY_START_MESSAGE =
@@ -390,6 +390,7 @@
     try {
       const response = await fetch(recoveryWatchEndpoint(state.classNumber), {
         method: "POST",
+        keepalive: force,
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -965,6 +966,10 @@
 
       state.lastTickAt = Date.now();
       state.lastVideoTime = safePlayerTime();
+    });
+
+    window.addEventListener("pagehide", () => {
+      void flushWatchHeartbeat(true);
     });
 
     window.addEventListener("beforeunload", event => {

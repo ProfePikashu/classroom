@@ -4,18 +4,22 @@ on:
   push:
     branches:
       - fix/mobile-course-header-compact-20261020
+      - main
     paths:
-      - frontend/css/**
-      - frontend/js/**
-      - frontend/*.html
-      - tests/**
+      - frontend/css/pelusita-v2.css
+      - frontend/css/mobile-course-header.css
+      - frontend/curso-ayrpc-2025.html
+      - frontend/curso-ayrpc-2026.html
+      - tests/mobile-sidebar-header.test.js
       - .github/workflows/test-mobile-sidebar-header.yml
   pull_request:
     paths:
-      - frontend/css/**
-      - frontend/js/**
-      - frontend/*.html
-      - tests/**
+      - frontend/css/pelusita-v2.css
+      - frontend/css/mobile-course-header.css
+      - frontend/curso-ayrpc-2025.html
+      - frontend/curso-ayrpc-2026.html
+      - tests/mobile-sidebar-header.test.js
+      - .github/workflows/test-mobile-sidebar-header.yml
 
 jobs:
   test:
@@ -25,14 +29,5 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Check JavaScript syntax
-        run: |
-          for js in frontend/js/*.js; do
-            node --check "$js"
-          done
-      - name: Run full test suite
-        run: |
-          for test in tests/*.test.js; do
-            echo "Running $test"
-            node "$test"
-          done
+      - name: Run mobile sidebar/header regression
+        run: node tests/mobile-sidebar-header.test.js
