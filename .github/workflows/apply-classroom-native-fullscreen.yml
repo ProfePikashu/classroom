@@ -1,0 +1,42 @@
+name: Apply Classroom native fullscreen
+
+on:
+  push:
+    branches:
+      - fix/classroom-native-fullscreen-landscape-20261027
+    paths:
+      - tools/apply_classroom_native_fullscreen.py
+      - .github/workflows/apply-classroom-native-fullscreen.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/classroom-native-fullscreen-landscape-20261027
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Apply Classroom fullscreen patch
+        run: python tools/apply_classroom_native_fullscreen.py
+      - name: Commit patched files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add \
+            frontend/clases-ayrpc-2026.html \
+            frontend/css/clases-ayrpc-2026.css \
+            frontend/js/clases-ayrpc-2026.js \
+            frontend/js/ayrpc2026-recovery.js \
+            frontend/js/ayrpc2026-recovery-ux.js \
+            tests/ayrpc2026-class1-recovery.test.js
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git commit -m "fix: use Classroom-owned fullscreen on mobile"
+          git push origin HEAD:fix/classroom-native-fullscreen-landscape-20261027
