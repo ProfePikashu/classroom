@@ -1,35 +1,29 @@
-name: Test AyRPC 2026 class 1 recovery
+name: Apply AyRPC recovery question feedback
 
 on:
   push:
     branches:
-      - feat/ayrpc2026-class1-recovery
-      - main
-    paths:
-      - frontend/clases-ayrpc-2026.html
-      - frontend/js/ayrpc2026-recovery.js
-      - frontend/js/ayrpc2026-recovery-ux.js
-      - tests/ayrpc2026-class1-recovery.test.js
-      - .github/workflows/test-ayrpc2026-class1-recovery.yml
-  pull_request:
-    paths:
-      - frontend/clases-ayrpc-2026.html
-      - frontend/js/ayrpc2026-recovery.js
-      - frontend/js/ayrpc2026-recovery-ux.js
-      - tests/ayrpc2026-class1-recovery.test.js
-      - .github/workflows/test-ayrpc2026-class1-recovery.yml
+      - fix/recovery-question-feedback-20261027
+
+permissions:
+  contents: write
 
 jobs:
-  test:
+  patch:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
         with:
-          node-version: '22'
-      - name: Check recovery JavaScript syntax
+          ref: fix/recovery-question-feedback-20261027
+      - name: Apply patch
+        run: python tools/apply_recovery_question_feedback_patch.py
+      - name: Commit patch when needed
+        shell: bash
         run: |
-          node --check frontend/js/ayrpc2026-recovery.js
-          node --check frontend/js/ayrpc2026-recovery-ux.js
-      - name: Run recovery contract test
-        run: node tests/ayrpc2026-class1-recovery.test.js
+          if ! git diff --quiet; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add frontend/js/ayrpc2026-recovery.js frontend/clases-ayrpc-2026.html tests/ayrpc2026-class1-recovery.test.js
+            git commit -m "feat: show recovery result per answer"
+            git push
+          fi
