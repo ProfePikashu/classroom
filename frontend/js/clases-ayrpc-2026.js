@@ -672,7 +672,7 @@
       <iframe
         width="100%"
         height="100%"
-        src="https://www.youtube.com/embed/${item.videoId}"
+        src="https://www.youtube.com/embed/${item.videoId}?cc_load_policy=0&playsinline=1"
         title="${item.title}"
         frameborder="0"
         allowfullscreen
