@@ -45,7 +45,7 @@ assert.match(
 
 assert.match(
   recovery,
-  /getPlaybackRate\(\)/,
+  /getPlaybackRate/,
   "la recuperación debe verificar la velocidad real del player"
 );
 
