@@ -53,32 +53,32 @@ assert.match(
 
 assert.match(
   js,
-  /data-attendance-status-trigger/,
-  "la edición visible debe ser un botón contextual y no un select permanente"
-);
-
-assert.match(
-  js,
-  /fa-(?:solid\s+)?fa-pen|fa-pen/,
-  "el botón de edición debe mostrar un lapicito"
-);
-
-assert.match(
-  js,
-  /data-attendance-status-edit[^>]*hidden|hidden[^>]*data-attendance-status-edit/,
-  "el select real debe nacer oculto hasta tocar el lapicito"
+  /data-attendance-status-edit/,
+  "la edición manual debe conservar el select funcional y su guardado actual"
 );
 
 assert.match(
   css,
-  /\.attendance-status-popover[\s\S]*?position:\s*absolute/i,
-  "el editor debe abrir como popover sin agrandar la fila"
+  /\.attendance-status-editor\s*\{[\s\S]*?width:\s*2[46]px[\s\S]*?min-width:\s*2[46]px/i,
+  "el editor visible debe compactarse al tamaño de un lapicito"
+);
+
+assert.match(
+  css,
+  /\.attendance-status-editor\s*\{[\s\S]*?background-image:\s*url\(/i,
+  "el editor compacto debe mostrar un icono de lápiz"
+);
+
+assert.match(
+  css,
+  /\.attendance-status-editor\s+option\s*\{[\s\S]*?font-size:\s*(?:10|11|12)px/i,
+  "las opciones del desplegable deben seguir siendo legibles al abrirlo"
 );
 
 assert.doesNotMatch(
   css,
-  /\.attendance-status-editor\s*\{[\s\S]*?display:\s*block/i,
-  "el editor no debe ocupar espacio permanente debajo de cada badge"
+  /\.attendance-status-editor\s*\{[\s\S]*?width:\s*100%/i,
+  "el editor no debe volver a ocupar todo el ancho debajo del badge"
 );
 
 assert.match(
