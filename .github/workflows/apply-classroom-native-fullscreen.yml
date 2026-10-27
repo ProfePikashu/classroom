@@ -25,22 +25,30 @@ jobs:
         run: |
           python - <<'PY'
           from pathlib import Path
+
           path = Path("tools/apply_classroom_native_fullscreen.py")
           text = path.read_text(encoding="utf-8")
           marker = "# Keep legacy recovery contract aligned with cache-bust changes."
           if marker not in text:
               raise SystemExit("legacy test section not found")
+
           prefix = text.split(marker, 1)[0]
-          suffix = '''# Keep legacy recovery contract aligned with cache-bust changes.\n"
-          suffix += '''test_path = Path("tests/ayrpc2026-class1-recovery.test.js")\n'''
-          suffix += '''test = test_path.read_text(encoding="utf-8")\n'''
-          suffix += '''if test.count("20261027-bandwidth-v1") < 2:\n    raise SystemExit("legacy bandwidth cache anchors not found")\n'''
-          suffix += '''if "20261027-fullscreen-v3" not in test:\n    raise SystemExit("legacy fullscreen cache anchor not found")\n'''
-          suffix += '''test = test.replace("20261027-bandwidth-v1", "20261027-fullscreen-v4", 2)\n'''
-          suffix += '''test = test.replace("20261027-fullscreen-v3", "20261027-fullscreen-v4", 1)\n'''
-          suffix += '''test_path.write_text(test, encoding="utf-8")\n\n'''
-          suffix += '''print("Classroom native fullscreen patch applied")\n'''
-          path.write_text(prefix + marker + "\n" + suffix.split("\n", 1)[1], encoding="utf-8")
+          suffix = """# Keep legacy recovery contract aligned with cache-bust changes.
+          test_path = Path("tests/ayrpc2026-class1-recovery.test.js")
+          test = test_path.read_text(encoding="utf-8")
+          if test.count("20261027-bandwidth-v1") < 2:
+              raise SystemExit("legacy bandwidth cache anchors not found")
+          if "20261027-fullscreen-v3" not in test:
+              raise SystemExit("legacy fullscreen cache anchor not found")
+          test = test.replace("20261027-bandwidth-v1", "20261027-fullscreen-v4", 2)
+          test = test.replace("20261027-fullscreen-v3", "20261027-fullscreen-v4", 1)
+          test_path.write_text(test, encoding="utf-8")
+
+          print("Classroom native fullscreen patch applied")
+          """
+          # Remove YAML indentation introduced inside the triple-quoted block.
+          suffix = "\n".join(line[10:] if line.startswith("          ") else line for line in suffix.splitlines()) + "\n"
+          path.write_text(prefix + suffix, encoding="utf-8")
           PY
       - name: Apply Classroom fullscreen patch
         run: python tools/apply_classroom_native_fullscreen.py
