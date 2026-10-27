@@ -19,6 +19,11 @@ const classes = fs.readFileSync(
   "utf8"
 );
 
+const classesCss = fs.readFileSync(
+  path.join(__dirname, "../frontend/css/clases-ayrpc-2026.css"),
+  "utf8"
+);
+
 const html = fs.readFileSync(
   path.join(__dirname, "../frontend/clases-ayrpc-2026.html"),
   "utf8"
@@ -100,6 +105,18 @@ assert.match(
   recoveryUx,
   /#youtubePlayer iframe/,
   "el bloqueo de orientación debe limitarse al reproductor de YouTube del Classroom"
+);
+
+assert.match(
+  classesCss,
+  /#youtubePlayer\s*:\s*fullscreen[\s\S]*width:\s*100vw[\s\S]*height:\s*100vh/,
+  "el contenedor fullscreen debe ocupar todo el viewport móvil"
+);
+
+assert.match(
+  classesCss,
+  /#youtubePlayer\s*:\s*fullscreen[\s\S]*iframe[\s\S]*width:\s*100vw[\s\S]*height:\s*100vh/,
+  "el iframe de YouTube debe llenar todo el viewport cuando está en fullscreen"
 );
 
 assert.match(
