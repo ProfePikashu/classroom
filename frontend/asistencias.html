@@ -13,6 +13,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600;700;800&display=swap" rel="stylesheet" />
 
   <link rel="stylesheet" href="css/styles.css?v=20260704-admin-attendance-scroll-v4" />
+  <link rel="stylesheet" href="css/asistencias-admin.css?v=20261027-v1" />
   <link rel="stylesheet" href="css/pelusita-v2.css?v=20261016-v3" />
   <link rel="icon" href="favicon.ico" type="image/x-icon" />
 </head>
@@ -134,14 +135,12 @@
             <span>Comunidad</span>
           </a>
 
-
           <a href="reportes-errores.html"
              class="sidebar-bug-reports-link"
              data-sidebar-route="reportes-errores.html">
             <i class="fa-solid fa-bug"></i>
             <span>Reportes de errores</span>
           </a>
-
 
           <a href="admin.html" data-sidebar-route="admin.html">
             <i class="fa-solid fa-user-shield"></i>
@@ -182,48 +181,49 @@
       </header>
 
       <section class="attendance-admin-panel panel">
-  <div class="attendance-admin-head">
-    <div>
-      <p class="eyebrow">Panel académico</p>
-      <h2>Asistencia por cursada</h2>
-      <p>Vista tipo planilla para controlar inscripción, datos base, presentes, tiempos, recuperaciones y aptitud a examen.</p>
-    </div>
-    <label class="attendance-course-picker">
-      <span>Cursada</span>
-      <select id="attendanceCourseSelect">
-        <option value="ayrpc-2025">AyRPC 2025</option>
-        <option value="ayrpc-2026">AyRPC 2026</option>
-      </select>
-    </label>
-  </div>
+        <div class="attendance-admin-head">
+          <div>
+            <p class="eyebrow">Panel académico</p>
+            <h2>Asistencia por cursada</h2>
+            <p>Vista tipo planilla para controlar inscripción, datos base, presentes, tiempos, recuperaciones y aptitud a examen.</p>
+          </div>
+          <label class="attendance-course-picker">
+            <span>Cursada</span>
+            <select id="attendanceCourseSelect">
+              <option value="ayrpc-2026" selected>AyRPC 2026</option>
+              <option value="ayrpc-2025">AyRPC 2025</option>
+            </select>
+          </label>
+        </div>
 
-  <div class="attendance-kpis" id="attendanceKpis"></div>
+        <div class="attendance-kpis" id="attendanceKpis"></div>
 
-  <div class="attendance-toolbar">
-    <label>
-      <span>Buscar</span>
-      <input id="attendanceSearchInput" type="search" placeholder="Nombre, DNI, Twitch o correo" autocomplete="off" />
-    </label>
-    <label>
-      <span>Estado</span>
-      <select id="attendanceStatusFilter">
-        <option value="all">Todos</option>
-        <option value="apto">Aptos a examen</option>
-        <option value="debe">Deben clases</option>
-        <option value="revisar">En revisar</option>
-        <option value="ausente">Ausentes</option>
-        <option value="recuperada">Con recuperadas</option>
-      </select>
-    </label>
-    <button class="btn btn-outline" id="attendanceRefreshBtn" type="button">
-      <i class="fa-solid fa-rotate-right"></i>
-      Actualizar vista
-    </button>
-  </div>
+        <div class="attendance-toolbar">
+          <label>
+            <span>Buscar</span>
+            <input id="attendanceSearchInput" type="search" placeholder="Nombre, DNI, Twitch o correo" autocomplete="off" />
+          </label>
+          <label>
+            <span>Estado</span>
+            <select id="attendanceStatusFilter">
+              <option value="all">Todos</option>
+              <option value="apto">Aptos a examen</option>
+              <option value="debe">Deben clases</option>
+              <option value="revisar">En revisar</option>
+              <option value="ausente">Ausentes</option>
+              <option value="recuperada">Con recuperadas</option>
+            </select>
+          </label>
+          <button class="btn btn-outline" id="attendanceRefreshBtn" type="button">
+            <i class="fa-solid fa-rotate-right"></i>
+            Actualizar vista
+          </button>
+        </div>
 
-  <div class="attendance-status" id="attendanceStatus">Preparando vista de asistencia...</div>
-  <div class="attendance-table-wrap" id="attendanceTableWrap"></div>
-</section>
+        <div class="attendance-status" id="attendanceStatus">Preparando vista de asistencia...</div>
+        <div class="attendance-table-wrap" id="attendanceTableWrap"></div>
+      </section>
+
       <div class="attendance-modal" id="attendanceStudentModal" hidden>
         <div class="attendance-modal-backdrop" data-attendance-modal-close></div>
         <div class="attendance-modal-card" role="dialog" aria-modal="true" aria-labelledby="attendanceStudentModalTitle">
@@ -235,13 +235,14 @@
       </div>
     </main>
   </div>
+
   <script src="js/auth.js?v=20260917-roles-permissions-v1"></script>
   <script src="js/roles.js?v=20260917-roles-permissions-v1"></script>
   <script src="js/main.js?v=20260612-newsletter-api-v1"></script>
   <script src="js/notifications-local.js?v=20260930-notification-preferences-v2"></script>
   <script src="js/pelusita-v2.js?v=20261016-v3"></script>
   <script src="js/pelusita-v2-classroom-knowledge.js?v=20260930-alpha1"></script>
-  <script src="js/asistencias.js?v=20260923-permissions-v1"></script>
+  <script src="js/asistencias.js?v=20261027-admin-ux-v1"></script>
   <script src="js/sidebar-v2.js?v=20260923-permissions-v1"></script>
 </body>
 </html>
