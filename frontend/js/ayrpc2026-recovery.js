@@ -567,6 +567,55 @@
     return `<div class="ayrpc2026-recovery-feedback ${kind}">${escapeHtml(message)}</div>`;
   }
 
+  function clearQuestionResult(textarea) {
+    if (!textarea) return;
+    const wrapper = textarea.closest(".ayrpc2026-recovery-question");
+    if (!wrapper) return;
+
+    wrapper.classList.remove("is-valid", "is-invalid");
+    textarea.classList.remove("is-valid", "is-invalid");
+
+    const status = wrapper.querySelector(".ayrpc2026-recovery-question-status");
+    if (status) {
+      status.textContent = "";
+      status.classList.remove("is-valid", "is-invalid");
+    }
+  }
+
+  function paintQuestionResults(results = {}) {
+    const form = $("ayrpc2026RecoveryForm");
+    if (!form) return;
+
+    for (const question of state.config?.questions || []) {
+      const textarea = form.elements.namedItem(question.id);
+      if (!textarea || textarea.tagName !== "TEXTAREA") continue;
+
+      clearQuestionResult(textarea);
+      const wrapper = textarea.closest(".ayrpc2026-recovery-question");
+      if (!wrapper) continue;
+
+      let status = wrapper.querySelector(".ayrpc2026-recovery-question-status");
+      if (!status) {
+        status = document.createElement("small");
+        status.className = "ayrpc2026-recovery-question-status";
+        textarea.insertAdjacentElement("afterend", status);
+      }
+
+      const result = results?.[question.id];
+      if (result === true) {
+        wrapper.classList.add("is-valid");
+        textarea.classList.add("is-valid");
+        status.classList.add("is-valid");
+        status.textContent = "Respuesta válida.";
+      } else if (result === false) {
+        wrapper.classList.add("is-invalid");
+        textarea.classList.add("is-invalid");
+        status.classList.add("is-invalid");
+        status.textContent = "Respuesta inválida o insuficiente. Revisala e intentá nuevamente.";
+      }
+    }
+  }
+
   function renderQuiz() {
     const box = $("quizBox");
     const config = state.config;
@@ -631,7 +680,11 @@
     `;
 
     if (!preview) {
-      $("ayrpc2026RecoveryForm")?.addEventListener("submit", submitRecovery);
+      const form = $("ayrpc2026RecoveryForm");
+      form?.addEventListener("submit", submitRecovery);
+      form?.querySelectorAll("textarea").forEach(textarea => {
+        textarea.addEventListener("input", () => clearQuestionResult(textarea));
+      });
     }
 
     box.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -729,6 +782,8 @@
       if (!response.ok) {
         throw new Error(data?.detail || "No se pudo registrar la recuperación.");
       }
+
+      paintQuestionResults(data?.question_results || {});
 
       if (data?.passed && data?.status === "RECUPERADA") {
         if (feedback) {
@@ -875,6 +930,11 @@
       .ayrpc2026-recovery-question textarea { width:100%; resize:vertical; min-height:96px; padding:12px 14px; border:1px solid rgba(122,64,180,.4); border-radius:10px; background:rgba(0,0,0,.16); color:inherit; font:inherit; line-height:1.45; }
       .ayrpc2026-recovery-question textarea:focus { outline:none; border-color:rgba(0,225,255,.65); box-shadow:0 0 0 3px rgba(0,225,255,.08); }
       .ayrpc2026-recovery-question textarea:disabled { opacity:.7; cursor:not-allowed; }
+      .ayrpc2026-recovery-question-status { min-height:1.2em; font-size:.84rem; font-weight:800; line-height:1.3; }
+      .ayrpc2026-recovery-question.is-valid > span, .ayrpc2026-recovery-question-status.is-valid { color:rgb(50,220,140); }
+      .ayrpc2026-recovery-question textarea.is-valid { border-color:rgba(50,220,140,.85); background:rgba(50,220,140,.08); box-shadow:0 0 0 3px rgba(50,220,140,.08); }
+      .ayrpc2026-recovery-question.is-invalid > span, .ayrpc2026-recovery-question-status.is-invalid { color:rgb(255,80,110); }
+      .ayrpc2026-recovery-question textarea.is-invalid { border-color:rgba(255,80,110,.9); background:rgba(255,80,110,.08); box-shadow:0 0 0 3px rgba(255,80,110,.08); }
       .ayrpc2026-recovery-feedback { padding:11px 13px; border-radius:10px; line-height:1.45; }
       .ayrpc2026-recovery-feedback.ok { border:1px solid rgba(50,220,140,.38); background:rgba(50,220,140,.08); }
       .ayrpc2026-recovery-feedback.warn { border:1px solid rgba(255,190,70,.38); background:rgba(255,190,70,.08); }

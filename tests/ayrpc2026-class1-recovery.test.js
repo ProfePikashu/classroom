@@ -34,7 +34,7 @@ const classesCss = fs.readFileSync(
 
 assert.match(html, /js\/ayrpc2026-recovery\.js/, "la vista 2026 debe cargar el controlador de recuperación");
 assert.match(html, /js\/auth\.js\?v=20261025-recovery-auth-v2/, "la vista debe invalidar el cache de auth al exponer ClassroomAuth para recuperación");
-assert.match(html, /js\/ayrpc2026-recovery\.js\?v=20261026-tracker-restored-v1/, "la vista debe forzar el tracker estable restaurado");
+assert.match(html, /js\/ayrpc2026-recovery\.js\?v=20261027-question-feedback-v1/, "la vista debe forzar el tracker estable restaurado");
 assert.match(html, /js\/ayrpc2026-recovery-ux\.js\?v=20261026-watchdog-v1/, "la vista debe cargar el watchdog como capa separada");
 assert.match(classesCss, /#youtubePlayer\s+iframe[\s\S]*width:\s*100%[\s\S]*height:\s*100%/, "el iframe controlado de YouTube debe llenar todo el recuadro 16:9");
 assert.match(classesCss, /#youtubePlayer\s+iframe[\s\S]*display:\s*block/, "el iframe no debe dejar espacio de línea dentro del recuadro");
@@ -80,5 +80,9 @@ assert.match(recovery, /document\.hidden|document\.visibilityState/, "el tiempo 
 assert.doesNotMatch(recovery, /window\.addEventListener\("blur"/, "hacer click dentro del iframe de YouTube no debe detener el tracking");
 assert.match(recovery, /Para recuperar esta clase tenés que ver el video completo desde esta vista/, "un alumno recuperable debe recibir la advertencia antes de iniciar");
 assert.doesNotMatch(recovery, /FORMAT_CATEGORIES|ETHICS_CATEGORIES|cobrar de mas|pc de escritorio/, "las reglas de corrección no deben viajar al navegador");
+assert.match(recovery, /function paintQuestionResults\(/, "la UI debe centralizar el pintado verde o rojo por respuesta");
+assert.match(recovery, /data\?\.question_results/, "la UI debe usar el resultado por pregunta devuelto por el backend");
+assert.match(recovery, /is-valid/, "una respuesta válida debe tener estado visual verde");
+assert.match(recovery, /is-invalid/, "una respuesta insuficiente debe tener estado visual rojo");
 
 console.log("AyRPC 2026 class 1 recovery contract tests passed");
