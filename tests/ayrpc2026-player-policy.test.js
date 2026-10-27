@@ -108,6 +108,36 @@ assert.match(
 );
 
 assert.match(
+  recoveryUx,
+  /function fullscreenViewportSize\(/,
+  "fullscreen debe recalcular el viewport real después de rotar"
+);
+
+assert.match(
+  recoveryUx,
+  /visualViewport/,
+  "fullscreen debe usar visualViewport cuando el navegador lo exponga"
+);
+
+assert.match(
+  recoveryUx,
+  /setAttribute\(["']width["']/,
+  "el iframe debe actualizar su ancho real y no sólo el CSS"
+);
+
+assert.match(
+  recoveryUx,
+  /setAttribute\(["']height["']/,
+  "el iframe debe actualizar su alto real y no sólo el CSS"
+);
+
+assert.match(
+  recoveryUx,
+  /orientationchange/,
+  "el player debe recalcular tamaño cuando cambia la orientación"
+);
+
+assert.match(
   classesCss,
   /#youtubePlayer\s*:\s*fullscreen[\s\S]*width:\s*100vw[\s\S]*height:\s*100vh/,
   "el contenedor fullscreen debe ocupar todo el viewport móvil"
@@ -117,6 +147,12 @@ assert.match(
   classesCss,
   /#youtubePlayer\s*:\s*fullscreen[\s\S]*iframe[\s\S]*width:\s*100vw[\s\S]*height:\s*100vh/,
   "el iframe de YouTube debe llenar todo el viewport cuando está en fullscreen"
+);
+
+assert.match(
+  html,
+  /css\/clases-ayrpc-2026\.css\?v=20261027-fullscreen-v3/,
+  "la vista debe invalidar cache del CSS de fullscreen"
 );
 
 assert.match(
@@ -133,8 +169,8 @@ assert.match(
 
 assert.match(
   html,
-  /js\/ayrpc2026-recovery-ux\.js\?v=20261027-bandwidth-v1/,
-  "la vista debe invalidar cache para la UX de recovery y orientación fullscreen"
+  /js\/ayrpc2026-recovery-ux\.js\?v=20261027-fullscreen-v3/,
+  "la vista debe invalidar cache para la UX de fullscreen responsivo"
 );
 
 console.log("AyRPC 2026 player policy tests passed");
