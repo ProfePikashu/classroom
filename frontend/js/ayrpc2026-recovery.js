@@ -9,7 +9,7 @@
   const PLAYER_ATTACH_RETRY_MS = 250;
   const PLAYER_ATTACH_TIMEOUT_MS = 15000;
   const RECOVERY_START_MESSAGE =
-    "Para recuperar esta clase tenés que ver el video completo desde esta vista. Si abandonás la vista de la clase, cambiás de pestaña, minimizás o cerrás el navegador, ese tiempo no cuenta como tiempo visto válido. ¿Querés iniciar la recuperación?";
+    "Para recuperar esta clase tenés que ver el video completo desde esta vista y a velocidad 1x. Si abandonás la vista de la clase, cambiás de pestaña, minimizás, cerrás el navegador o intentás acelerar la reproducción, ese tiempo no cuenta como tiempo visto válido. ¿Querés iniciar la recuperación?";
 
   const state = {
     key: "",
@@ -119,6 +119,55 @@
     } catch {
       return 0;
     }
+  }
+
+  function safePlaybackRate() {
+    try {
+      return Number(state.player?.getPlaybackRate?.() || 1);
+    } catch {
+      return 1;
+    }
+  }
+
+  function suppressCaptions() {
+    if (!state.player) return;
+
+    try {
+      if (typeof state.player.unloadModule === "function") {
+        state.player.unloadModule("captions");
+        state.player.unloadModule("cc");
+      }
+    } catch (error) {
+      console.debug("YouTube no permitió descargar captions:", error);
+    }
+  }
+
+  function showPlaybackRateWarning() {
+    const note = $("recoveryNote");
+    if (!note || !state.config?.eligible) return;
+
+    note.className = "recovery-note warn";
+    note.textContent =
+      "Para validar la recuperación, el video se reproduce a velocidad 1x. Si cambiás la velocidad, volverá automáticamente a 1x y ese instante no contará.";
+  }
+
+  function enforceNormalPlaybackRate({ warn = false } = {}) {
+    if (!state.player) return true;
+
+    const rate = safePlaybackRate();
+    if (Math.abs(rate - 1) < 0.01) return true;
+
+    try {
+      state.player.setPlaybackRate(1);
+    } catch (error) {
+      console.warn("No se pudo restaurar la velocidad 1x:", error);
+    }
+
+    state.lastTickAt = Date.now();
+    state.lastVideoTime = safePlayerTime();
+
+    if (warn) showPlaybackRateWarning();
+    return false;
   }
 
   function knownDuration() {
@@ -398,7 +447,9 @@
         playing = false;
       }
 
-      if (!hidden && playing) {
+      const normalPlaybackRate = enforceNormalPlaybackRate({ warn: false });
+
+      if (!hidden && playing && normalPlaybackRate) {
         const realDelta = Math.max(0, (now - state.lastTickAt) / 1000);
         const videoDelta = Math.max(0, currentVideoTime - state.lastVideoTime);
 
@@ -466,10 +517,13 @@
           modestbranding: 1,
           playsinline: 1,
           enablejsapi: 1,
+          cc_load_policy: 0,
         },
         events: {
           onReady: () => {
             clearAttachRetry();
+            suppressCaptions();
+            enforceNormalPlaybackRate({ warn: false });
             state.lastTickAt = Date.now();
             state.lastVideoTime = safePlayerTime();
             startTracking();
@@ -479,6 +533,8 @@
             if (!canTrackPlayback()) return;
 
             if (event.data === window.YT.PlayerState.PLAYING) {
+              suppressCaptions();
+              enforceNormalPlaybackRate({ warn: false });
               state.lastTickAt = Date.now();
               state.lastVideoTime = safePlayerTime();
               return;
@@ -490,6 +546,14 @@
             ) {
               void flushWatchHeartbeat(true);
             }
+          },
+          onPlaybackRateChange: event => {
+            if (!canTrackPlayback()) return;
+            if (Math.abs(Number(event.data || 1) - 1) < 0.01) return;
+            enforceNormalPlaybackRate({ warn: true });
+          },
+          onApiChange: () => {
+            suppressCaptions();
           },
         },
       });
