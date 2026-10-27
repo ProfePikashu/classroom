@@ -4,11 +4,15 @@ on:
   push:
     branches:
       - fix/runtime-load-shedding-20261020
+      - fix/render-bandwidth-polling-20261027
       - main
     paths:
       - frontend/js/notifications-local.js
       - frontend/js/curso-ayrpc-2025.js
       - frontend/js/curso-ayrpc-2026.js
+      - frontend/js/clases-ayrpc-2026.js
+      - frontend/js/ayrpc2026-recovery.js
+      - frontend/js/ayrpc2026-recovery-ux.js
       - tests/runtime-load-shedding.test.js
       - .github/workflows/test-runtime-load-shedding.yml
   pull_request:
@@ -16,6 +20,9 @@ on:
       - frontend/js/notifications-local.js
       - frontend/js/curso-ayrpc-2025.js
       - frontend/js/curso-ayrpc-2026.js
+      - frontend/js/clases-ayrpc-2026.js
+      - frontend/js/ayrpc2026-recovery.js
+      - frontend/js/ayrpc2026-recovery-ux.js
       - tests/runtime-load-shedding.test.js
       - .github/workflows/test-runtime-load-shedding.yml
 
@@ -32,5 +39,8 @@ jobs:
           node --check frontend/js/notifications-local.js
           node --check frontend/js/curso-ayrpc-2025.js
           node --check frontend/js/curso-ayrpc-2026.js
+          node --check frontend/js/clases-ayrpc-2026.js
+          node --check frontend/js/ayrpc2026-recovery.js
+          node --check frontend/js/ayrpc2026-recovery-ux.js
       - name: Run load-shedding regression
         run: node tests/runtime-load-shedding.test.js
