@@ -74,6 +74,24 @@ assert.match(
 );
 
 assert.match(
+  classes,
+  /fullscreenchange/,
+  "la vista de clases debe reaccionar al entrar o salir de pantalla completa"
+);
+
+assert.match(
+  classes,
+  /screen\?\.orientation\?\.lock\(["']landscape["']\)/,
+  "el reproductor debe pedir orientación horizontal al entrar en fullscreen"
+);
+
+assert.match(
+  classes,
+  /screen\?\.orientation\?\.unlock\(\)/,
+  "la orientación debe liberarse al salir del fullscreen del video"
+);
+
+assert.match(
   html,
   /js\/ayrpc2026-recovery\.js\?v=20261027-bandwidth-v1/,
   "la vista debe invalidar cache para la política del player y el heartbeat agrupado"
