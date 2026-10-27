@@ -5,7 +5,6 @@ on:
     branches:
       - feat/ayrpc2026-class1-recovery
       - main
-      - fix/recovery-player-1x-captions-20261027
     paths:
       - frontend/clases-ayrpc-2026.html
       - frontend/js/clases-ayrpc-2026.js
