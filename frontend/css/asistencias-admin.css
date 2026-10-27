@@ -61,7 +61,7 @@
   text-decoration-color: rgba(248, 113, 113, .78);
 }
 
-/* Segundo trazo, deliberadamente separado del line-through del contenido. */
+/* Doble trazo a nivel fila para navegadores que lo renderizan sobre <tr>. */
 .page-asistencias .attendance-withdrawn-row::before,
 .page-asistencias .attendance-withdrawn-row::after {
   content: "";
@@ -79,6 +79,31 @@
 }
 
 .page-asistencias .attendance-withdrawn-row::after {
+  top: calc(50% + 3px);
+}
+
+/* Fallback robusto: cada celda replica los dos trazos y forma una línea continua. */
+.page-asistencias .attendance-withdrawn-row > td {
+  position: relative;
+}
+
+.page-asistencias .attendance-withdrawn-row > td::before,
+.page-asistencias .attendance-withdrawn-row > td::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 6;
+  height: 1px;
+  pointer-events: none;
+  background: rgba(248, 113, 113, .48);
+}
+
+.page-asistencias .attendance-withdrawn-row > td::before {
+  top: calc(50% - 3px);
+}
+
+.page-asistencias .attendance-withdrawn-row > td::after {
   top: calc(50% + 3px);
 }
 
