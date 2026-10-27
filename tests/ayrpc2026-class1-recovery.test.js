@@ -50,6 +50,8 @@ assert.match(auth, /window\.ClassroomAuth\s*=\s*ClassroomAuth\s*;/, "auth.js deb
 assert.match(recovery, /\/api\/classroom\/courses\/\$\{COURSE_SLUG\}\/classes\/\$\{classNumber\}\/recovery/, "la recuperación debe usar el endpoint autenticado del backend");
 assert.match(recovery, /function recoveryWatchEndpoint[\s\S]*recoveryEndpoint\(classNumber\)[\s\S]*\/watch/, "el frontend debe reportar heartbeats de tiempo visto al backend");
 assert.match(recovery, /video_duration_seconds:\s*Number\(safePlayerDuration\(\)/, "el heartbeat debe informar la duración real del player");
+assert.match(recovery, /keepalive:\s*force/, "un flush forzado debe usar keepalive para no perder progreso al cerrar la vista");
+assert.match(recovery, /window\.addEventListener\(\s*["']pagehide["'][\s\S]*flushWatchHeartbeat\(true\)/, "al cerrar o abandonar la página debe intentarse un último flush del tiempo pendiente");
 assert.doesNotMatch(recovery, /readLocalCheckpoint|writeLocalCheckpoint|recoveryCheckpointKey/, "el tracker académico restaurado no debe contener la lógica de reanudación local");
 assert.match(recovery, /function startTracking\(\)[\s\S]*getPlayerState\(\)[\s\S]*PlayerState\.PLAYING/, "el tracker restaurado debe medir reproducción real de YouTube");
 assert.match(recovery, /onReady:[\s\S]*startTracking\(\)/, "el tracker debe arrancar cuando el player controlado está listo");
