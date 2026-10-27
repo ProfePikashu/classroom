@@ -53,8 +53,32 @@ assert.match(
 
 assert.match(
   js,
-  /data-attendance-status-edit/,
-  "cada clase editable debe exponer un control de cambio de estado"
+  /data-attendance-status-trigger/,
+  "la edición visible debe ser un botón contextual y no un select permanente"
+);
+
+assert.match(
+  js,
+  /fa-(?:solid\s+)?fa-pen|fa-pen/,
+  "el botón de edición debe mostrar un lapicito"
+);
+
+assert.match(
+  js,
+  /data-attendance-status-edit[^>]*hidden|hidden[^>]*data-attendance-status-edit/,
+  "el select real debe nacer oculto hasta tocar el lapicito"
+);
+
+assert.match(
+  css,
+  /\.attendance-status-popover[\s\S]*?position:\s*absolute/i,
+  "el editor debe abrir como popover sin agrandar la fila"
+);
+
+assert.doesNotMatch(
+  css,
+  /\.attendance-status-editor\s*\{[\s\S]*?display:\s*block/i,
+  "el editor no debe ocupar espacio permanente debajo de cada badge"
 );
 
 assert.match(
