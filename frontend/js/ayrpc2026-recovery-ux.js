@@ -166,6 +166,53 @@
     );
   }
 
+  function fullscreenViewportSize() {
+    const viewport = window.visualViewport;
+    return {
+      width: Math.max(
+        1,
+        Math.round(
+          Number(viewport?.width || window.innerWidth || document.documentElement.clientWidth || 1)
+        )
+      ),
+      height: Math.max(
+        1,
+        Math.round(
+          Number(viewport?.height || window.innerHeight || document.documentElement.clientHeight || 1)
+        )
+      ),
+    };
+  }
+
+  function applyYoutubeFullscreenSize() {
+    const host = $("youtubePlayer");
+    const iframe = controlledPlayerIframe() || host?.querySelector("iframe");
+    if (!host || !iframe) return;
+
+    if (isYoutubePlayerFullscreen()) {
+      const { width, height } = fullscreenViewportSize();
+      iframe.style.width = `${width}px`;
+      iframe.style.height = `${height}px`;
+      iframe.setAttribute("width", String(width));
+      iframe.setAttribute("height", String(height));
+      return;
+    }
+
+    iframe.style.width = "100%";
+    iframe.style.height = "100%";
+
+    const width = Math.max(1, Math.round(host.clientWidth || iframe.clientWidth || 1));
+    const height = Math.max(1, Math.round(host.clientHeight || iframe.clientHeight || 1));
+    iframe.setAttribute("width", String(width));
+    iframe.setAttribute("height", String(height));
+  }
+
+  function scheduleYoutubeFullscreenSize() {
+    [0, 60, 180, 350, 600].forEach(delay => {
+      window.setTimeout(applyYoutubeFullscreenSize, delay);
+    });
+  }
+
   async function lockYoutubeLandscape() {
     if (typeof screen?.orientation?.lock !== "function") return;
 
@@ -174,6 +221,7 @@
 
       if (isYoutubePlayerFullscreen()) {
         videoOrientationLocked = true;
+        scheduleYoutubeFullscreenSize();
         return;
       }
 
@@ -197,11 +245,13 @@
 
   function syncYoutubeFullscreenOrientation() {
     if (isYoutubePlayerFullscreen()) {
-      void lockYoutubeLandscape();
+      scheduleYoutubeFullscreenSize();
+      void lockYoutubeLandscape().finally(scheduleYoutubeFullscreenSize);
       return;
     }
 
     unlockYoutubeOrientation();
+    scheduleYoutubeFullscreenSize();
   }
 
   function bindYoutubeFullscreenOrientation() {
@@ -214,6 +264,15 @@
       "webkitfullscreenchange",
       syncYoutubeFullscreenOrientation
     );
+
+    const refreshFullscreenSize = () => {
+      if (!isYoutubePlayerFullscreen()) return;
+      scheduleYoutubeFullscreenSize();
+    };
+
+    window.addEventListener("resize", refreshFullscreenSize);
+    window.addEventListener("orientationchange", refreshFullscreenSize);
+    window.visualViewport?.addEventListener("resize", refreshFullscreenSize);
   }
 
   function formatResumeTime(seconds) {
