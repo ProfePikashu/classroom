@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - fix/runtime-load-shedding-20261020
-      - fix/render-bandwidth-polling-20261027
       - main
     paths:
       - frontend/js/notifications-local.js
