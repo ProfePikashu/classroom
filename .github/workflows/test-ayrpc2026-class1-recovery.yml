@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - feat/ayrpc2026-class1-recovery
+      - feat/recovery-edge-tracker
       - main
     paths:
       - frontend/clases-ayrpc-2026.html
@@ -11,6 +12,7 @@ on:
       - frontend/js/ayrpc2026-recovery.js
       - frontend/js/ayrpc2026-recovery-ux.js
       - tests/ayrpc2026-class1-recovery.test.js
+      - tests/ayrpc2026-recovery-edge.test.js
       - tests/ayrpc2026-player-policy.test.js
       - .github/workflows/test-ayrpc2026-class1-recovery.yml
   pull_request:
@@ -20,6 +22,7 @@ on:
       - frontend/js/ayrpc2026-recovery.js
       - frontend/js/ayrpc2026-recovery-ux.js
       - tests/ayrpc2026-class1-recovery.test.js
+      - tests/ayrpc2026-recovery-edge.test.js
       - tests/ayrpc2026-player-policy.test.js
       - .github/workflows/test-ayrpc2026-class1-recovery.yml
 
@@ -39,4 +42,5 @@ jobs:
       - name: Run recovery contract tests
         run: |
           node tests/ayrpc2026-class1-recovery.test.js
+          node tests/ayrpc2026-recovery-edge.test.js
           node tests/ayrpc2026-player-policy.test.js
