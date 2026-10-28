@@ -103,6 +103,7 @@ assert.match(
   "el progreso provisional debe quedar visualmente en 99% hasta el checkpoint final"
 );
 
+// Regression guard: repeated function declarations silently shadow each other in JS.
 for (const functionName of [
   "ensureEdgeSession",
   "applyDirectHeartbeatResult",
