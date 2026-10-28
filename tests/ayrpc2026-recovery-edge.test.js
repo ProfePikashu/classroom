@@ -4,6 +4,7 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 
 const recovery = fs.readFileSync("frontend/js/ayrpc2026-recovery.js", "utf8");
+const recoveryUx = fs.readFileSync("frontend/js/ayrpc2026-recovery-ux.js", "utf8");
 const html = fs.readFileSync("frontend/clases-ayrpc-2026.html", "utf8");
 
 assert.match(
@@ -62,6 +63,12 @@ assert.match(
 
 assert.match(
   recovery,
+  /edgeFallbackUntil/,
+  "si el Worker falla temporalmente debe existir una ventana de fallback directo sin martillar Cloudflare"
+);
+
+assert.match(
+  recovery,
   /edgePendingSeconds/,
   "la UI debe separar progreso aceptado en edge pero todavía no persistido"
 );
@@ -85,9 +92,27 @@ assert.match(
 );
 
 assert.match(
+  recoveryUx,
+  /recovery\.andyazhtec\.com/,
+  "el watchdog debe reconocer respuestas del Worker edge"
+);
+
+assert.match(
+  recoveryUx,
+  /accepted[\s\S]*markValidationActive/,
+  "un heartbeat aceptado por Cloudflare debe mantener la validación visual activa aunque todavía no haya checkpoint"
+);
+
+assert.match(
   html,
   /js\/ayrpc2026-recovery\.js\?v=20261028-edge-v1/,
   "la vista debe invalidar el cache del tracker al activar el transporte edge"
+);
+
+assert.match(
+  html,
+  /js\/ayrpc2026-recovery-ux\.js\?v=20261028-edge-v1/,
+  "la vista debe invalidar también el cache del watchdog edge"
 );
 
 console.log("AyRPC 2026 recovery edge transport contract tests passed");
