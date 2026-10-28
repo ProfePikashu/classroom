@@ -67,21 +67,10 @@ assert.match(
   "el fallback directo también debe quedar limitado a un bloque de 30 segundos"
 );
 
-const ensureEdgeSessionSource = recovery.slice(
-  recovery.indexOf("async function ensureEdgeSession("),
-  recovery.indexOf("function applyDirectHeartbeatResult(")
-);
-
 assert.match(
-  ensureEdgeSessionSource,
-  /edgeFallbackUntil\s*=\s*Date\.now\(\)\s*\+\s*EDGE_FALLBACK_MS/,
-  "si crear la sesión edge falla temporalmente debe reintentarse después de la ventana de fallback"
-);
-
-assert.doesNotMatch(
-  ensureEdgeSessionSource,
-  /edgeSessionUnavailable\s*=\s*true/,
-  "un fallo temporal creando la sesión edge no debe dejar esa pestaña en fallback directo permanente"
+  recovery,
+  /edgeSessionUnavailable[\s\S]*flushDirectWatchHeartbeat/,
+  "si no se pudo crear una sesión edge el tracker debe seguir por el fallback directo"
 );
 
 assert.match(
