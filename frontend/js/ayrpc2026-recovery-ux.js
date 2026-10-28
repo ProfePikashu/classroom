@@ -3,6 +3,7 @@
 
   const COURSE_SLUG = "ayrpc-2026";
   const CLASS_NUMBER = 1;
+  const RECOVERY_EDGE_HOST = "recovery.andyazhtec.com";
   const WATCHDOG_TIMEOUT_MS = 60000;
   const PLAYER_ATTACH_TIMEOUT_MS = 15000;
   const WATCHDOG_INTERVAL_MS = 1000;
@@ -54,6 +55,18 @@
       return parsed.pathname.endsWith(recoveryPath(kind));
     } catch {
       return String(url || "").includes(recoveryPath(kind));
+    }
+  }
+
+  function matchesEdgeHeartbeat(url) {
+    try {
+      const parsed = new URL(url, window.location.href);
+      return (
+        parsed.hostname === RECOVERY_EDGE_HOST &&
+        parsed.pathname.endsWith("/v1/recovery/heartbeat")
+      );
+    } catch {
+      return String(url || "").includes(`${RECOVERY_EDGE_HOST}/v1/recovery/heartbeat`);
     }
   }
 
@@ -515,11 +528,31 @@
     }
   }
 
+  function handleEdgeHeartbeatResponse(data, responseOk) {
+    if (!state.eligible || state.preview) return;
+    if (!responseOk || !data?.ok || data?.accepted !== true) {
+      markValidationProblem();
+      return;
+    }
+
+    state.lastServerProgressAt = Date.now();
+    state.lastServerWatchedSeconds = Math.max(
+      state.lastServerWatchedSeconds,
+      Number(data.persisted_watched_seconds || 0)
+    );
+    markValidationActive();
+  }
+
   async function inspectRecoveryResponse(response, kind) {
     const data = await response.json().catch(() => null);
 
     if (kind === "status") {
       if (response.ok) handleRecoveryConfig(data);
+      return;
+    }
+
+    if (kind === "edge") {
+      handleEdgeHeartbeatResponse(data, response.ok);
       return;
     }
 
@@ -536,20 +569,22 @@
         method === "GET" && matchesRecoveryRequest(url, "status");
       const isWatch =
         method === "POST" && matchesRecoveryRequest(url, "watch");
+      const isEdgeWatch =
+        method === "POST" && matchesEdgeHeartbeat(url);
 
       try {
         const response = await nativeFetch(input, init);
 
-        if (isStatus || isWatch) {
+        if (isStatus || isWatch || isEdgeWatch) {
           void inspectRecoveryResponse(
             response.clone(),
-            isWatch ? "watch" : "status"
+            isEdgeWatch ? "edge" : isWatch ? "watch" : "status"
           );
         }
 
         return response;
       } catch (error) {
-        if (isWatch) markValidationProblem();
+        if (isWatch || isEdgeWatch) markValidationProblem();
         throw error;
       }
     };
