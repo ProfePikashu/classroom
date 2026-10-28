@@ -1,0 +1,33 @@
+name: Apply recovery edge frontend patch
+
+on:
+  push:
+    branches:
+      - feat/recovery-edge-tracker
+    paths:
+      - scripts/apply_recovery_edge_frontend.py
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/recovery-edge-tracker
+          fetch-depth: 0
+      - name: Apply patch
+        run: python scripts/apply_recovery_edge_frontend.py
+      - name: Commit patched frontend
+        run: |
+          if git diff --quiet; then
+            echo "No changes needed"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add frontend/js/ayrpc2026-recovery.js frontend/js/ayrpc2026-recovery-ux.js frontend/clases-ayrpc-2026.html
+          git commit -m "feat: route recovery heartbeats through edge"
+          git push origin HEAD:feat/recovery-edge-tracker
