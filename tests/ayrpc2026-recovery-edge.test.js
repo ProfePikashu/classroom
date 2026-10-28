@@ -31,6 +31,12 @@ assert.match(
   "el heartbeat edge debe usar el token limitado y no el Classroom token"
 );
 
+assert.doesNotMatch(
+  recovery,
+  /X-Recovery-Edge-Secret|RECOVERY_EDGE_SHARED_SECRET/,
+  "la credencial privada Worker→Render jamás debe quedar en el bundle del navegador"
+);
+
 assert.match(
   recovery,
   /persisted_watched_seconds:\s*state\.serverWatchedSeconds/,
