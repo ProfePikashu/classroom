@@ -1,4 +1,4 @@
-(() => {
+﻿(() => {
   "use strict";
 
   const COURSE_SLUG = "ayrpc-2026";
@@ -11,7 +11,7 @@
   const PLAYER_ATTACH_RETRY_MS = 250;
   const PLAYER_ATTACH_TIMEOUT_MS = 15000;
   const RECOVERY_START_MESSAGE =
-    "Para recuperar esta clase tenés que ver el video completo desde esta vista y a velocidad 1x. Si abandonás la vista de la clase, cambiás de pestaña, minimizás, cerrás el navegador o intentás acelerar la reproducción, ese tiempo no cuenta como tiempo visto válido. ¿Querés iniciar la recuperación?";
+    "Para recuperar esta clase tenÃ©s que ver el video completo desde esta vista y a velocidad 1x. Si abandonÃ¡s la vista de la clase, cambiÃ¡s de pestaÃ±a, minimizÃ¡s, cerrÃ¡s el navegador o intentÃ¡s acelerar la reproducciÃ³n, ese tiempo no cuenta como tiempo visto vÃ¡lido. Â¿QuerÃ©s iniciar la recuperaciÃ³n?";
 
   const state = {
     key: "",
@@ -170,7 +170,7 @@
         state.player.unloadModule("cc");
       }
     } catch (error) {
-      console.debug("YouTube no permitió descargar captions:", error);
+      console.debug("YouTube no permitiÃ³ descargar captions:", error);
     }
   }
 
@@ -180,7 +180,7 @@
 
     note.className = "recovery-note warn";
     note.textContent =
-      "Para validar la recuperación, el video se reproduce a velocidad 1x. Si cambiás la velocidad, volverá automáticamente a 1x y ese instante no contará.";
+      "Para validar la recuperaciÃ³n, el video se reproduce a velocidad 1x. Si cambiÃ¡s la velocidad, volverÃ¡ automÃ¡ticamente a 1x y ese instante no contarÃ¡.";
   }
 
   function enforceNormalPlaybackRate({ warn = false } = {}) {
@@ -273,7 +273,7 @@
     button.innerHTML = '<i class="fa-solid fa-clipboard-question"></i> Responder cuestionario';
     button.title = enabled
       ? "Cuestionario habilitado"
-      : "Completá el tiempo visto válido para habilitarlo";
+      : "CompletÃ¡ el tiempo visto vÃ¡lido para habilitarlo";
   }
 
   function clearAttachRetry() {
@@ -378,7 +378,7 @@
 
       return data;
     } catch (error) {
-      console.warn("No se pudo cargar la recuperación de la clase:", error);
+      console.warn("No se pudo cargar la recuperaciÃ³n de la clase:", error);
       return null;
     } finally {
       state.configLoading = false;
@@ -453,7 +453,7 @@
       });
       const data = await response.json().catch(() => null);
       if (!response.ok || !data?.ok || !data?.session_token) {
-        throw new Error(data?.detail || "No se pudo crear la sesión edge.");
+        throw new Error(data?.detail || "No se pudo crear la sesiÃ³n edge.");
       }
 
       state.edgeSessionToken = String(data.session_token);
@@ -494,7 +494,7 @@
 
   async function flushDirectWatchHeartbeat(delta, force = false) {
     const token = classroomToken();
-    if (!token) throw new Error("Tu sesión venció.");
+    if (!token) throw new Error("Tu sesiÃ³n venciÃ³.");
 
     const response = await fetch(recoveryWatchEndpoint(state.classNumber), {
       method: "POST",
@@ -514,7 +514,7 @@
 
     const data = await response.json().catch(() => null);
     if (!response.ok || !data?.ok) {
-      throw new Error(data?.detail || "No se pudo guardar el tiempo visto válido.");
+      throw new Error(data?.detail || "No se pudo guardar el tiempo visto vÃ¡lido.");
     }
     applyDirectHeartbeatResult(data);
     return data;
@@ -595,7 +595,7 @@
       refreshUnlockState();
     } catch (error) {
       state.pendingSeconds += delta;
-      console.warn("No se pudo sincronizar el tiempo visto válido:", error);
+      console.warn("No se pudo sincronizar el tiempo visto vÃ¡lido:", error);
     } finally {
       state.heartbeatSending = false;
     }
@@ -665,7 +665,7 @@
     if (note && state.config?.eligible) {
       note.className = "recovery-note warn";
       note.textContent =
-        "La reproducción se pausó porque saliste de la vista de la clase. El tiempo fuera de esta pestaña no cuenta como tiempo visto válido.";
+        "La reproducciÃ³n se pausÃ³ porque saliste de la vista de la clase. El tiempo fuera de esta pestaÃ±a no cuenta como tiempo visto vÃ¡lido.";
     }
   }
 
@@ -763,7 +763,7 @@
         Date.now() - state.attachStartedAt >= PLAYER_ATTACH_TIMEOUT_MS
       ) {
         clearAttachRetry();
-        console.warn("No se pudo montar el player controlado de recuperación.");
+        console.warn("No se pudo montar el player controlado de recuperaciÃ³n.");
       }
     };
 
@@ -790,7 +790,7 @@
           try {
             previous();
           } catch (error) {
-            console.warn("Falló un callback previo de YouTube:", error);
+            console.warn("FallÃ³ un callback previo de YouTube:", error);
           }
         }
         startRetryLoop();
@@ -852,12 +852,12 @@
         wrapper.classList.add("is-valid");
         textarea.classList.add("is-valid");
         status.classList.add("is-valid");
-        status.textContent = "Respuesta válida.";
+        status.textContent = "Respuesta vÃ¡lida.";
       } else if (result === false) {
         wrapper.classList.add("is-invalid");
         textarea.classList.add("is-invalid");
         status.classList.add("is-invalid");
-        status.textContent = "Respuesta inválida o insuficiente. Revisala e intentá nuevamente.";
+        status.textContent = "Respuesta invÃ¡lida o insuficiente. Revisala e intentÃ¡ nuevamente.";
       }
     }
   }
@@ -879,11 +879,11 @@
       <div class="ayrpc2026-recovery-shell">
         <div class="ayrpc2026-recovery-head">
           <div>
-            <p class="eyebrow">${preview ? "Vista previa docente" : "Validación de la clase"}</p>
-            <h3>Clase 1 · Presentación e introducción</h3>
+            <p class="eyebrow">${preview ? "Vista previa docente" : "ValidaciÃ³n de la clase"}</p>
+            <h3>Clase 1 Â· PresentaciÃ³n e introducciÃ³n</h3>
             <p>${preview
-              ? "Estás viendo el cuestionario tal como lo verá un alumno que deba recuperar. Esta vista no registra intentos ni modifica asistencia."
-              : "Respondé con tus palabras. No buscamos una frase exacta, sino los conceptos trabajados en clase."}</p>
+              ? "EstÃ¡s viendo el cuestionario tal como lo verÃ¡ un alumno que deba recuperar. Esta vista no registra intentos ni modifica asistencia."
+              : "RespondÃ© con tus palabras. No buscamos una frase exacta, sino los conceptos trabajados en clase."}</p>
           </div>
           <span class="ayrpc2026-recovery-pill">
             ${preview
@@ -902,15 +902,15 @@
                 ${preview ? "disabled" : "required"}
                 autocomplete="off"
                 placeholder="${preview
-                  ? "Vista previa docente · no se registrarán respuestas"
-                  : "Respondé con tus palabras..."}"
+                  ? "Vista previa docente Â· no se registrarÃ¡n respuestas"
+                  : "RespondÃ© con tus palabras..."}"
               ></textarea>
             </label>
           `).join("")}
           <div id="ayrpc2026RecoveryFeedback">
             ${preview
               ? feedbackMarkup(
-                  "Vista previa docente: podés revisar las preguntas sin crear un intento ni alterar el estado de la clase.",
+                  "Vista previa docente: podÃ©s revisar las preguntas sin crear un intento ni alterar el estado de la clase.",
                   "ok"
                 )
               : ""}
@@ -994,7 +994,7 @@
     if (!token) {
       if (feedback) {
         feedback.innerHTML = feedbackMarkup(
-          "Tu sesión venció. Volvé a iniciar sesión.",
+          "Tu sesiÃ³n venciÃ³. VolvÃ© a iniciar sesiÃ³n.",
           "bad"
         );
       }
@@ -1026,7 +1026,7 @@
 
       const data = await response.json().catch(() => null);
       if (!response.ok) {
-        throw new Error(data?.detail || "No se pudo registrar la recuperación.");
+        throw new Error(data?.detail || "No se pudo registrar la recuperaciÃ³n.");
       }
 
       paintQuestionResults(data?.question_results || {});
@@ -1034,7 +1034,7 @@
       if (data?.passed && data?.status === "RECUPERADA") {
         if (feedback) {
           feedback.innerHTML = feedbackMarkup(
-            data.message || "¡Clase validada! Completaste correctamente la validación de esta clase.",
+            data.message || "Â¡Clase validada! Completaste correctamente la validaciÃ³n de esta clase.",
             "ok"
           );
         }
@@ -1045,14 +1045,14 @@
       if (feedback) {
         feedback.innerHTML = feedbackMarkup(
           data?.message ||
-            "Todavía te queda algo por revisar. Una o más respuestas no coinciden con los conceptos trabajados en clase. Revisá tus respuestas e intentá nuevamente.",
+            "TodavÃ­a te queda algo por revisar. Una o mÃ¡s respuestas no coinciden con los conceptos trabajados en clase. RevisÃ¡ tus respuestas e intentÃ¡ nuevamente.",
           "warn"
         );
       }
     } catch (error) {
       if (feedback) {
         feedback.innerHTML = feedbackMarkup(
-          error?.message || "No se pudo registrar la recuperación.",
+          error?.message || "No se pudo registrar la recuperaciÃ³n.",
           "bad"
         );
       }
@@ -1227,3 +1227,4 @@
 
   document.addEventListener("DOMContentLoaded", init);
 })();
+
