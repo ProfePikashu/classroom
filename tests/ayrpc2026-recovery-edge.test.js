@@ -57,6 +57,12 @@ assert.match(
 
 assert.match(
   recovery,
+  /const\s+delta\s*=\s*Math\.min\(state\.pendingSeconds,\s*HEARTBEAT_SECONDS\)/,
+  "el fallback directo también debe quedar limitado a un bloque de 30 segundos"
+);
+
+assert.match(
+  recovery,
   /edgeSessionUnavailable[\s\S]*flushDirectWatchHeartbeat/,
   "si no se pudo crear una sesión edge el tracker debe seguir por el fallback directo"
 );
