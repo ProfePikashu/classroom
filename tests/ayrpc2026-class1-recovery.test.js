@@ -35,8 +35,8 @@ const classesCss = fs.readFileSync(
 assert.match(html, /js\/ayrpc2026-recovery\.js/, "la vista 2026 debe cargar el controlador de recuperación");
 assert.match(html, /js\/auth\.js\?v=20261025-recovery-auth-v2/, "la vista debe invalidar el cache de auth al exponer ClassroomAuth para recuperación");
 assert.match(html, /js\/clases-ayrpc-2026\.js\?v=20261027-fullscreen-v4/, "la vista debe invalidar el cache del polling de asistencia optimizado");
-assert.match(html, /js\/ayrpc2026-recovery\.js\?v=20261027-fullscreen-v4/, "la vista debe forzar el tracker con heartbeats agrupados");
-assert.match(html, /js\/ayrpc2026-recovery-ux\.js\?v=20261027-fullscreen-v4/, "la vista debe cargar la UX de fullscreen responsivo con cache actualizado");
+assert.match(html, /js\/ayrpc2026-recovery\.js\?v=20261028-edge-v1/, "la vista debe forzar el tracker edge nuevo");
+assert.match(html, /js\/ayrpc2026-recovery-ux\.js\?v=20261028-edge-v1/, "la vista debe cargar la UX compatible con el tracker edge");
 assert.match(classesCss, /#youtubePlayer\s+iframe[\s\S]*width:\s*100%[\s\S]*height:\s*100%/, "el iframe controlado de YouTube debe llenar todo el recuadro 16:9");
 assert.match(classesCss, /#youtubePlayer\s+iframe[\s\S]*display:\s*block/, "el iframe no debe dejar espacio de línea dentro del recuadro");
 assert.match(recovery, /const COURSE_SLUG = "ayrpc-2026"/, "la recuperación debe apuntar al curso AyRPC 2026");
@@ -48,7 +48,7 @@ assert.match(recovery, /function knownDuration\(\)[\s\S]*required_watch_seconds[
 assert.match(recovery, /Math\.floor\(rawPercent\)/, "la barra no debe redondear a 100% antes de alcanzar 1h56:00");
 assert.match(auth, /window\.ClassroomAuth\s*=\s*ClassroomAuth\s*;/, "auth.js debe exponer ClassroomAuth en window para los controladores que lo consumen como propiedad global");
 assert.match(recovery, /\/api\/classroom\/courses\/\$\{COURSE_SLUG\}\/classes\/\$\{classNumber\}\/recovery/, "la recuperación debe usar el endpoint autenticado del backend");
-assert.match(recovery, /function recoveryWatchEndpoint[\s\S]*recoveryEndpoint\(classNumber\)[\s\S]*\/watch/, "el frontend debe reportar heartbeats de tiempo visto al backend");
+assert.match(recovery, /function recoveryWatchEndpoint[\s\S]*recoveryEndpoint\(classNumber\)[\s\S]*\/watch/, "el frontend debe conservar el heartbeat directo al backend como fallback");
 assert.match(recovery, /video_duration_seconds:\s*Number\(safePlayerDuration\(\)/, "el heartbeat debe informar la duración real del player");
 assert.match(recovery, /keepalive:\s*force/, "un flush forzado debe usar keepalive para no perder progreso al cerrar la vista");
 assert.match(recovery, /window\.addEventListener\(\s*["']pagehide["'][\s\S]*flushWatchHeartbeat\(true\)/, "al cerrar o abandonar la página debe intentarse un último flush del tiempo pendiente");

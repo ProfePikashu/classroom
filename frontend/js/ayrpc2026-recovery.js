@@ -6,6 +6,8 @@
   const CLASS1_REQUIRED_WATCH_SECONDS = 6960;
   const VIDEO_COMPLETION_RATIO = 1;
   const HEARTBEAT_SECONDS = 30;
+  const RECOVERY_EDGE_BASE = "https://recovery.andyazhtec.com";
+  const EDGE_FALLBACK_MS = 60000;
   const PLAYER_ATTACH_RETRY_MS = 250;
   const PLAYER_ATTACH_TIMEOUT_MS = 15000;
   const RECOVERY_START_MESSAGE =
@@ -26,6 +28,12 @@
     lastVideoTime: 0,
     serverWatchedSeconds: 0,
     pendingSeconds: 0,
+    edgePendingSeconds: 0,
+    edgeSessionToken: "",
+    edgeSessionUnavailable: false,
+    edgeSessionLoading: false,
+    edgeConfirmedComplete: false,
+    edgeFallbackUntil: 0,
     heartbeatSending: false,
     quizUnlocked: false,
     submitting: false,
@@ -116,6 +124,19 @@
     return `${recoveryEndpoint(classNumber)}/watch`;
   }
 
+  function recoveryEdgeBase() {
+    const configured = window.CLASSROOM_RECOVERY_EDGE_BASE || RECOVERY_EDGE_BASE;
+    return String(configured).replace(/\/+$/, "");
+  }
+
+  function edgeSessionEndpoint(classNumber) {
+    return `${recoveryEndpoint(classNumber)}/edge-session`;
+  }
+
+  function edgeHeartbeatEndpoint() {
+    return `${recoveryEdgeBase()}/v1/recovery/heartbeat`;
+  }
+
   function safePlayerTime() {
     try {
       return Number(state.player?.getCurrentTime?.() || 0);
@@ -198,7 +219,10 @@
   }
 
   function watchedTotal() {
-    return Math.max(0, state.serverWatchedSeconds + state.pendingSeconds);
+    return Math.max(
+      0,
+      state.serverWatchedSeconds + state.edgePendingSeconds + state.pendingSeconds
+    );
   }
 
   function updateProgress(percent) {
@@ -219,7 +243,13 @@
       return;
     }
 
-    updateProgress((watchedTotal() / duration) * 100);
+    const provisionalPercent = (watchedTotal() / duration) * 100;
+    if (state.edgeSessionToken && !state.edgeConfirmedComplete) {
+      updateProgress(Math.min(99, provisionalPercent));
+      return;
+    }
+
+    updateProgress(provisionalPercent);
   }
 
   function showRecoveryProgress(show) {
@@ -287,6 +317,12 @@
     state.configLoading = false;
     state.serverWatchedSeconds = 0;
     state.pendingSeconds = 0;
+    state.edgePendingSeconds = 0;
+    state.edgeSessionToken = "";
+    state.edgeSessionUnavailable = false;
+    state.edgeSessionLoading = false;
+    state.edgeConfirmedComplete = false;
+    state.edgeFallbackUntil = 0;
     state.heartbeatSending = false;
     state.quizUnlocked = false;
     state.submitting = false;
@@ -330,6 +366,16 @@
         Number(data.video_watch_seconds || data.watched_seconds || 0)
       );
       state.pendingSeconds = 0;
+      state.edgePendingSeconds = 0;
+      state.edgeConfirmedComplete = Boolean(
+        Number(data.required_watch_seconds || 0) > 0 &&
+        state.serverWatchedSeconds >= Number(data.required_watch_seconds || 0)
+      );
+
+      if (data.eligible === true && data.preview_mode !== true) {
+        await ensureEdgeSession(classNumber);
+      }
+
       return data;
     } catch (error) {
       console.warn("No se pudo cargar la recuperación de la clase:", error);
@@ -363,7 +409,10 @@
     if (isPreviewMode()) return true;
     const duration = knownDuration();
     if (!duration) return false;
-    return state.serverWatchedSeconds >= duration * VIDEO_COMPLETION_RATIO;
+    return (
+      state.edgeConfirmedComplete ||
+      state.serverWatchedSeconds >= duration * VIDEO_COMPLETION_RATIO
+    );
   }
 
   function refreshUnlockState() {
@@ -378,9 +427,135 @@
     if (!state.quizUnlocked && completionReached()) {
       state.quizUnlocked = true;
       state.pendingSeconds = 0;
+      state.edgePendingSeconds = 0;
       updateProgress(100);
       setQuizEnabled(true);
     }
+  }
+
+  async function ensureEdgeSession(classNumber) {
+    if (isPreviewMode() || !state.config?.eligible) return false;
+    if (state.edgeSessionToken) return true;
+    if (state.edgeSessionUnavailable || state.edgeSessionLoading) return false;
+
+    const token = classroomToken();
+    if (!token) {
+      state.edgeSessionUnavailable = true;
+      return false;
+    }
+
+    state.edgeSessionLoading = true;
+    try {
+      const response = await fetch(edgeSessionEndpoint(classNumber), {
+        method: "POST",
+        cache: "no-store",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await response.json().catch(() => null);
+      if (!response.ok || !data?.ok || !data?.session_token) {
+        throw new Error(data?.detail || "No se pudo crear la sesión edge.");
+      }
+
+      state.edgeSessionToken = String(data.session_token);
+      state.edgeSessionUnavailable = false;
+      state.edgePendingSeconds = 0;
+      state.serverWatchedSeconds = Math.max(
+        state.serverWatchedSeconds,
+        Number(data.persisted_watched_seconds || data.video_watch_seconds || 0)
+      );
+      state.edgeConfirmedComplete = Boolean(data.complete);
+      if (state.config && Number(data.required_watch_seconds || 0) > 0) {
+        state.config.required_watch_seconds = Number(data.required_watch_seconds);
+      }
+      return true;
+    } catch (error) {
+      state.edgeSessionUnavailable = true;
+      console.warn("No se pudo iniciar el tracker edge; usamos fallback directo:", error);
+      return false;
+    } finally {
+      state.edgeSessionLoading = false;
+    }
+  }
+
+  function applyDirectHeartbeatResult(data) {
+    state.serverWatchedSeconds = Math.max(
+      state.serverWatchedSeconds,
+      Number(data?.watched_seconds || data?.video_watch_seconds || 0)
+    );
+    state.edgePendingSeconds = 0;
+    if (state.config && Number(data?.required_watch_seconds || 0) > 0) {
+      state.config.required_watch_seconds = Number(data.required_watch_seconds);
+    }
+    const duration = knownDuration();
+    if (duration > 0 && state.serverWatchedSeconds >= duration) {
+      state.edgeConfirmedComplete = true;
+    }
+  }
+
+  async function flushDirectWatchHeartbeat(delta, force = false) {
+    const token = classroomToken();
+    if (!token) throw new Error("Tu sesión venció.");
+
+    const response = await fetch(recoveryWatchEndpoint(state.classNumber), {
+      method: "POST",
+      keepalive: force,
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        delta_seconds: Number(delta.toFixed(3)),
+        video_position_seconds: Number(safePlayerTime().toFixed(3)),
+        video_duration_seconds: Number(safePlayerDuration().toFixed(3)),
+        visible: true,
+        playing: true,
+      }),
+    });
+
+    const data = await response.json().catch(() => null);
+    if (!response.ok || !data?.ok) {
+      throw new Error(data?.detail || "No se pudo guardar el tiempo visto válido.");
+    }
+    applyDirectHeartbeatResult(data);
+    return data;
+  }
+
+  async function flushEdgeHeartbeat(delta, force = false) {
+    const response = await fetch(edgeHeartbeatEndpoint(), {
+      method: "POST",
+      keepalive: force,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        session_token: state.edgeSessionToken,
+        course_slug: COURSE_SLUG,
+        class_number: state.classNumber,
+        delta_seconds: Number(delta.toFixed(3)),
+        video_position_seconds: Number(safePlayerTime().toFixed(3)),
+        video_duration_seconds: Number(safePlayerDuration().toFixed(3)),
+        visible: true,
+        playing: true,
+        force: Boolean(force),
+        persisted_watched_seconds: state.serverWatchedSeconds,
+        required_watch_seconds: knownDuration(),
+      }),
+    });
+
+    const data = await response.json().catch(() => null);
+    if (!response.ok || !data?.ok || data?.accepted !== true) {
+      throw new Error(data?.detail || "Cloudflare no pudo aceptar el heartbeat.");
+    }
+
+    state.serverWatchedSeconds = Math.max(
+      state.serverWatchedSeconds,
+      Number(data.persisted_watched_seconds || 0)
+    );
+    state.edgePendingSeconds = Math.max(0, Number(data.pending_seconds || 0));
+    state.edgeConfirmedComplete = state.edgeConfirmedComplete || Boolean(data.complete);
+    state.edgeFallbackUntil = 0;
+    if (state.config && Number(data.required_watch_seconds || 0) > 0) {
+      state.config.required_watch_seconds = Number(data.required_watch_seconds);
+    }
+    return data;
   }
 
   async function flushWatchHeartbeat(force = false) {
@@ -388,45 +563,33 @@
     if (!state.config?.eligible || !state.classNumber) return;
     if (state.heartbeatSending) return;
 
-    const delta = state.pendingSeconds;
+    const delta = Math.min(state.pendingSeconds, HEARTBEAT_SECONDS);
     if (delta <= 0) return;
-    if (!force && delta < HEARTBEAT_SECONDS) return;
-
-    const token = classroomToken();
-    if (!token) return;
+    if (!force && state.pendingSeconds < HEARTBEAT_SECONDS) return;
 
     state.pendingSeconds = Math.max(0, state.pendingSeconds - delta);
     state.heartbeatSending = true;
 
     try {
-      const response = await fetch(recoveryWatchEndpoint(state.classNumber), {
-        method: "POST",
-        keepalive: force,
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          delta_seconds: Number(delta.toFixed(3)),
-          video_position_seconds: Number(safePlayerTime().toFixed(3)),
-          video_duration_seconds: Number(safePlayerDuration().toFixed(3)),
-          visible: true,
-          playing: true,
-        }),
-      });
-
-      const data = await response.json().catch(() => null);
-      if (!response.ok || !data?.ok) {
-        throw new Error(data?.detail || "No se pudo guardar el tiempo visto válido.");
+      if (!state.edgeSessionToken && !state.edgeSessionUnavailable) {
+        await ensureEdgeSession(state.classNumber);
       }
 
-      state.serverWatchedSeconds = Math.max(
-        state.serverWatchedSeconds,
-        Number(data.watched_seconds || data.video_watch_seconds || 0)
-      );
+      const useDirect =
+        state.edgeSessionUnavailable ||
+        !state.edgeSessionToken ||
+        Date.now() < state.edgeFallbackUntil;
 
-      if (state.config && Number(data.required_watch_seconds || 0) > 0) {
-        state.config.required_watch_seconds = Number(data.required_watch_seconds);
+      if (useDirect) {
+        await flushDirectWatchHeartbeat(delta, force);
+      } else {
+        try {
+          await flushEdgeHeartbeat(delta, force);
+        } catch (edgeError) {
+          state.edgeFallbackUntil = Date.now() + EDGE_FALLBACK_MS;
+          console.warn("Tracker edge temporalmente no disponible; fallback directo:", edgeError);
+          await flushDirectWatchHeartbeat(delta, force);
+        }
       }
 
       refreshUnlockState();

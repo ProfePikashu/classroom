@@ -205,7 +205,7 @@ assert.match(
 
 assert.match(
   html,
-  /js\/ayrpc2026-recovery\.js\?v=20261027-fullscreen-v4/,
+  /js\/ayrpc2026-recovery\.js\?v=20261028-edge-v1/,
   "la vista debe invalidar cache del player de recuperación sin fullscreen interno"
 );
 
@@ -217,7 +217,7 @@ assert.match(
 
 assert.match(
   html,
-  /js\/ayrpc2026-recovery-ux\.js\?v=20261027-fullscreen-v4/,
+  /js\/ayrpc2026-recovery-ux\.js\?v=20261028-edge-v1/,
   "la vista debe invalidar cache para la UX de fullscreen controlado"
 );
 
