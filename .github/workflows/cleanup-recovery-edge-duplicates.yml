@@ -1,0 +1,72 @@
+name: Cleanup recovery edge duplicate helpers
+
+on:
+  push:
+    branches:
+      - feat/recovery-edge-tracker
+    paths:
+      - .github/workflows/cleanup-recovery-edge-duplicates.yml
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/recovery-edge-tracker
+          fetch-depth: 0
+
+      - name: Remove duplicate edge helper blocks
+        shell: python
+        run: |
+          from pathlib import Path
+
+          path = Path("frontend/js/ayrpc2026-recovery.js")
+          text = path.read_text(encoding="utf-8")
+          marker = "\n  async function ensureEdgeSession(classNumber) {"
+          flush_marker = "\n  async function flushWatchHeartbeat(force = false) {"
+
+          positions = []
+          start = 0
+          while True:
+              pos = text.find(marker, start)
+              if pos < 0:
+                  break
+              positions.append(pos)
+              start = pos + len(marker)
+
+          if len(positions) != 3:
+              raise SystemExit(f"Expected exactly 3 ensureEdgeSession declarations, found {len(positions)}")
+
+          flush_pos = text.find(flush_marker, positions[-1])
+          if flush_pos < 0:
+              raise SystemExit("flushWatchHeartbeat marker not found after duplicate blocks")
+
+          cleaned = text[:positions[1]] + text[flush_pos:]
+          path.write_text(cleaned, encoding="utf-8")
+
+      - name: Verify duplicate declarations are gone
+        shell: bash
+        run: |
+          set -euo pipefail
+          for fn in ensureEdgeSession applyDirectHeartbeatResult flushDirectWatchHeartbeat flushEdgeHeartbeat; do
+            count="$(grep -Ec "(async )?function ${fn}\\(" frontend/js/ayrpc2026-recovery.js)"
+            test "$count" = "1"
+          done
+
+      - name: Run recovery edge contract test
+        run: node tests/ayrpc2026-recovery-edge.test.js
+
+      - name: Commit cleanup
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add frontend/js/ayrpc2026-recovery.js
+          git diff --cached --check
+          git commit -m "fix: remove duplicated recovery edge helpers"
+          git push origin HEAD:feat/recovery-edge-tracker
