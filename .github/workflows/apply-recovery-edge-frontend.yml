@@ -6,6 +6,7 @@ on:
       - feat/recovery-edge-tracker
     paths:
       - scripts/apply_recovery_edge_frontend.py
+      - .github/workflows/apply-recovery-edge-frontend.yml
 
 permissions:
   contents: write
