@@ -103,6 +103,20 @@ assert.match(
   "el progreso provisional debe quedar visualmente en 99% hasta el checkpoint final"
 );
 
+for (const functionName of [
+  "ensureEdgeSession",
+  "applyDirectHeartbeatResult",
+  "flushDirectWatchHeartbeat",
+  "flushEdgeHeartbeat",
+]) {
+  const matches = recovery.match(new RegExp(`(?:async\\s+)?function\\s+${functionName}\\s*\\(`, "g")) || [];
+  assert.equal(
+    matches.length,
+    1,
+    `${functionName} debe declararse una sola vez para evitar shadowing silencioso`
+  );
+}
+
 assert.match(
   recoveryUx,
   /recovery\.andyazhtec\.com/,
