@@ -211,7 +211,7 @@ assert.match(
 
 assert.match(
   html,
-  /js\/clases-ayrpc-2026\.js\?v=20261027-fullscreen-v4/,
+  /js\/clases-ayrpc-2026\.js\?v=20261030-paste-v1/,
   "la vista debe invalidar cache del embed normal sin fullscreen interno"
 );
 
