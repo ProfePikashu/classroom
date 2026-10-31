@@ -730,7 +730,7 @@
     }
 
     let videoSrc =
-      `https://www.youtube.com/embed/${item.videoId}?cc_load_policy=0&playsinline=1&fs=0`;
+      `https://www.youtube-nocookie.com/embed/${item.videoId}?cc_load_policy=0&playsinline=1&fs=0`;
 
     if (!classroomFullscreenSupported()) {
       videoSrc = videoSrc.replace("&fs=0", "&fs=1");
@@ -743,6 +743,7 @@
         src="${videoSrc}"
         title="${item.title}"
         frameborder="0"
+        referrerpolicy="strict-origin-when-cross-origin"
         allowfullscreen
       ></iframe>
     `;
