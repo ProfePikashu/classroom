@@ -52,20 +52,26 @@ for (const [name, source] of [
 
 assert.match(
   classes2026,
-  /const\s+ATTENDANCE_POLL_OPEN_MS\s*=\s*15000\s*;/,
-  'Con una ventana de asistencia abierta se debe conservar polling rápido de 15 segundos.'
+  /const\s+ATTENDANCE_POLL_OPEN_MS\s*=\s*60000\s*;/,
+  'Con una ventana de asistencia abierta el polling debe bajar a una vez por minuto.'
 );
 
 assert.match(
   classes2026,
-  /const\s+ATTENDANCE_POLL_CLOSED_MS\s*=\s*60000\s*;/,
-  'Con la asistencia cerrada el polling debe bajar a una vez por minuto.'
+  /const\s+ATTENDANCE_POLL_CLOSED_MS\s*=\s*120000\s*;/,
+  'Con la asistencia cerrada el polling debe bajar a una vez cada dos minutos.'
 );
 
 assert.match(
   classes2026,
-  /function\s+attendancePollDelay\(\)[\s\S]*?state\.attendance\?\.open[\s\S]*?ATTENDANCE_POLL_OPEN_MS[\s\S]*?ATTENDANCE_POLL_CLOSED_MS/,
-  'La frecuencia de asistencia debe adaptarse a si la ventana está abierta o cerrada.'
+  /const\s+ATTENDANCE_POLL_JITTER_MS\s*=\s*15000\s*;/,
+  'El polling de asistencia debe incorporar jitter para evitar estampidas sincronizadas.'
+);
+
+assert.match(
+  classes2026,
+  /function\s+attendancePollDelay\(\)[\s\S]*?state\.attendance\?\.open[\s\S]*?ATTENDANCE_POLL_OPEN_MS[\s\S]*?ATTENDANCE_POLL_CLOSED_MS[\s\S]*?Math\.random\(\)[\s\S]*?ATTENDANCE_POLL_JITTER_MS/,
+  'La frecuencia de asistencia debe adaptarse al estado y sumar jitter aleatorio.'
 );
 
 assert.match(
