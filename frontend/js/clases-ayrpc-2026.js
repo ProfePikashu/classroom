@@ -9,8 +9,9 @@
     new URLSearchParams(window.location.search)
       .get("attendance-preview") === "1";
 
-  const ATTENDANCE_POLL_OPEN_MS = 15000;
-  const ATTENDANCE_POLL_CLOSED_MS = 60000;
+  const ATTENDANCE_POLL_OPEN_MS = 60000;
+  const ATTENDANCE_POLL_CLOSED_MS = 120000;
+  const ATTENDANCE_POLL_JITTER_MS = 15000;
 
   let CLASSES = [];
   const state = {
@@ -573,9 +574,15 @@
   }
 
   function attendancePollDelay() {
-    return state.attendance?.open
+    const baseDelay = state.attendance?.open
       ? ATTENDANCE_POLL_OPEN_MS
       : ATTENDANCE_POLL_CLOSED_MS;
+
+    const jitter = Math.floor(
+      Math.random() * ATTENDANCE_POLL_JITTER_MS
+    );
+
+    return baseDelay + jitter;
   }
 
   function stopAttendancePolling() {
