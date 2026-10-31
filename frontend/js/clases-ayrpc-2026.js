@@ -1342,35 +1342,10 @@
     const feedback =
       $("liveAttendanceFeedback");
 
+    const pasteButton =
+      $("liveAttendancePaste");
+
     if (!input || !form) return;
-
-    input.addEventListener(
-      "paste",
-      event => event.preventDefault()
-    );
-
-    input.addEventListener(
-      "drop",
-      event => event.preventDefault()
-    );
-
-    input.addEventListener(
-      "contextmenu",
-      event => event.preventDefault()
-    );
-
-    input.addEventListener(
-      "keydown",
-      event => {
-
-        if (
-          (event.ctrlKey || event.metaKey) &&
-          event.key.toLowerCase() === "v"
-        ) {
-          event.preventDefault();
-        }
-      }
-    );
 
     input.addEventListener(
       "input",
@@ -1382,6 +1357,41 @@
             .replace(/[^A-Z2-9]/g, "")
             .replace(/[IO01]/g, "")
             .slice(0, 6);
+      }
+    );
+
+    pasteButton?.addEventListener(
+      "click",
+      async () => {
+        try {
+          if (!navigator.clipboard?.readText) {
+            throw new Error("Clipboard API no disponible");
+          }
+
+          input.value = await navigator.clipboard.readText();
+          input.dispatchEvent(new Event("input", { bubbles: true }));
+          input.focus();
+
+          if (feedback) {
+            feedback.hidden = true;
+          }
+        }
+        catch (error) {
+          console.warn(
+            "No se pudo leer el portapapeles:",
+            error
+          );
+
+          input.focus();
+
+          if (feedback) {
+            feedback.hidden = false;
+            feedback.className =
+              "ayrpc2026-live-feedback warn";
+            feedback.textContent =
+              "No pude leer el portapapeles automáticamente. Pegá el código con Ctrl+V.";
+          }
+        }
       }
     );
 
