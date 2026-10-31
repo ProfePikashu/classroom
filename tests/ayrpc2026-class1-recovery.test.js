@@ -34,7 +34,7 @@ const classesCss = fs.readFileSync(
 
 assert.match(html, /js\/ayrpc2026-recovery\.js/, "la vista 2026 debe cargar el controlador de recuperación");
 assert.match(html, /js\/auth\.js\?v=20261025-recovery-auth-v2/, "la vista debe invalidar el cache de auth al exponer ClassroomAuth para recuperación");
-assert.match(html, /js\/clases-ayrpc-2026\.js\?v=20261027-fullscreen-v4/, "la vista debe invalidar el cache del polling de asistencia optimizado");
+assert.match(html, /js\/clases-ayrpc-2026\.js\?v=20261030-paste-v1/, "la vista debe invalidar el cache del polling de asistencia optimizado");
 assert.match(html, /js\/ayrpc2026-recovery\.js\?v=20261028-edge-v1/, "la vista debe forzar el tracker edge nuevo");
 assert.match(html, /js\/ayrpc2026-recovery-ux\.js\?v=20261028-edge-v1/, "la vista debe cargar la UX compatible con el tracker edge");
 assert.match(classesCss, /#youtubePlayer\s+iframe[\s\S]*width:\s*100%[\s\S]*height:\s*100%/, "el iframe controlado de YouTube debe llenar todo el recuadro 16:9");
