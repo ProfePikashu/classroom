@@ -1,0 +1,56 @@
+name: Rebuild attendance stability v2 on current main
+
+on:
+  push:
+    branches:
+      - fix/attendance-token-stability-v2
+    paths:
+      - .github/workflows/rebase-attendance-stability-v2.yml
+
+permissions:
+  contents: write
+
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/attendance-token-stability-v2
+          fetch-depth: 0
+      - name: Copy tested stability layer and patch current Classroom HTML
+        run: |
+          git fetch origin fix/attendance-token-stability:refs/remotes/origin/fix/attendance-token-stability
+          git checkout origin/fix/attendance-token-stability -- \
+            frontend/js/attendance-token-stability.js \
+            tests/attendance-token-stability.test.mjs \
+            .github/workflows/test-attendance-token-stability.yml
+
+          python - <<'PY'
+          from pathlib import Path
+
+          wf = Path('.github/workflows/test-attendance-token-stability.yml')
+          text = wf.read_text(encoding='utf-8')
+          text = text.replace('fix/attendance-token-stability\n', 'fix/attendance-token-stability-v2\n')
+          wf.write_text(text, encoding='utf-8', newline='\n')
+
+          html = Path('frontend/clases-ayrpc-2026.html')
+          text = html.read_text(encoding='utf-8')
+          anchor = '  <script src="js/clases-ayrpc-2026.js?v=20261030-paste-v1"></script>\n'
+          insert = anchor + '  <script src="js/attendance-token-stability.js?v=20261101-stable-token-v1"></script>\n'
+          if 'js/attendance-token-stability.js' not in text:
+              if anchor not in text:
+                  raise SystemExit('attendance script anchor not found')
+              text = text.replace(anchor, insert, 1)
+              html.write_text(text, encoding='utf-8', newline='\n')
+          PY
+      - name: Commit rebuilt v2 branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add frontend/clases-ayrpc-2026.html \
+            frontend/js/attendance-token-stability.js \
+            tests/attendance-token-stability.test.mjs \
+            .github/workflows/test-attendance-token-stability.yml
+          git commit -m "fix: stabilize attendance token UX on current main"
+          git push origin HEAD:fix/attendance-token-stability-v2
