@@ -4,19 +4,28 @@ on:
   push:
     branches:
       - feat/attendance-admin-ux
+      - fix/attendance-token-stability
       - main
     paths:
       - frontend/asistencias.html
       - frontend/js/asistencias.js
       - frontend/css/asistencias-admin.css
+      - frontend/js/clases-ayrpc-2026.js
+      - frontend/js/attendance-token-stability.js
+      - frontend/clases-ayrpc-2026.html
       - tests/attendance-admin-ux.test.js
+      - tests/attendance-token-stability.test.mjs
       - .github/workflows/test-attendance-admin-ux.yml
   pull_request:
     paths:
       - frontend/asistencias.html
       - frontend/js/asistencias.js
       - frontend/css/asistencias-admin.css
+      - frontend/js/clases-ayrpc-2026.js
+      - frontend/js/attendance-token-stability.js
+      - frontend/clases-ayrpc-2026.html
       - tests/attendance-admin-ux.test.js
+      - tests/attendance-token-stability.test.mjs
       - .github/workflows/test-attendance-admin-ux.yml
 
 jobs:
@@ -31,3 +40,7 @@ jobs:
         run: node --check frontend/js/asistencias.js
       - name: Run attendance admin UX contract
         run: node tests/attendance-admin-ux.test.js
+      - name: Run live attendance token stability contract
+        run: node --test tests/attendance-token-stability.test.mjs
+      - name: Check live attendance stability script syntax
+        run: node --check frontend/js/attendance-token-stability.js
