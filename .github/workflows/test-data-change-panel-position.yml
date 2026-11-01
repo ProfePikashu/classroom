@@ -1,0 +1,20 @@
+name: Test data change panel position
+
+on:
+  push:
+    branches:
+      - fix/data-change-panel-top-stack
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Check JS syntax
+        run: node --check frontend/js/alumnos-data-change-requests-api.js
+      - name: Run panel placement contract
+        run: node tests/test-alumnos-data-change-requests-api.mjs
