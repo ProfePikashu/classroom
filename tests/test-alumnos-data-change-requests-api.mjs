@@ -18,4 +18,12 @@ assert.match(css, /\.students-admin-summary-stack\s*\{/);
 assert.match(css, /grid-column:\s*2/);
 assert.match(css, /grid-row:\s*1/);
 
+assert.match(source, /adminDataChangeToggle/);
+assert.match(source, /admin-data-change-body/);
+assert.match(source, /classList\.toggle\(["']is-collapsed["']/);
+assert.match(source, /setDataChangeCollapsed\(panel,\s*true\)/);
+assert.match(css, /#solicitudes-cambios-datos\.is-collapsed\s+\.admin-data-change-body\s*\{[^}]*display:\s*none/s);
+assert.match(css, /#solicitudes-cambios-datos\s*\{[^}]*--data-change-accent:\s*#facc15/s);
+assert.match(css, /#solicitudes-cambios-datos\s*\{[^}]*border-color:\s*rgba\(250,\s*204,\s*21,/s);
+
 console.log("alumnos data change request contract: ok");

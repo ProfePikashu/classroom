@@ -189,6 +189,122 @@ html[data-theme="light"] .admin-withdrawal-toggle {
   color: #334155 !important;
 }
 
+#solicitudes-cambios-datos {
+  --data-change-accent: #facc15;
+  --data-change-accent-rgb: 250, 204, 21;
+  padding: 14px 16px !important;
+  border-color: rgba(250, 204, 21, 0.42) !important;
+  background: linear-gradient(135deg, rgba(250, 204, 21, 0.045), rgba(250, 204, 21, 0.015)) !important;
+}
+
+#solicitudes-cambios-datos .admin-data-change-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 !important;
+}
+
+#solicitudes-cambios-datos .admin-data-change-head > div:first-child {
+  min-width: 0;
+}
+
+#solicitudes-cambios-datos .admin-data-change-head > div:first-child > p:not(.eyebrow) {
+  display: none;
+}
+
+#solicitudes-cambios-datos .eyebrow {
+  margin: 0 0 2px !important;
+  font-size: 0.64rem !important;
+  letter-spacing: 1.2px !important;
+  color: var(--data-change-accent) !important;
+}
+
+#solicitudes-cambios-datos h3 {
+  margin: 0 !important;
+  font-size: clamp(1rem, 1.6vw, 1.18rem) !important;
+  line-height: 1.2;
+}
+
+#solicitudes-cambios-datos .admin-data-change-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 7px;
+  flex-wrap: nowrap;
+}
+
+#solicitudes-cambios-datos .admin-data-change-counter,
+#solicitudes-cambios-datos .admin-data-change-toggle {
+  min-height: 34px;
+  padding: 6px 10px !important;
+  border-radius: 999px !important;
+  font-size: 0.78rem !important;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+#solicitudes-cambios-datos .admin-data-change-counter {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid rgba(var(--data-change-accent-rgb), 0.5) !important;
+  background: rgba(var(--data-change-accent-rgb), 0.10) !important;
+  color: var(--data-change-accent) !important;
+}
+
+#solicitudes-cambios-datos .admin-data-change-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1px solid rgba(var(--data-change-accent-rgb), 0.42) !important;
+  background: rgba(var(--data-change-accent-rgb), 0.08) !important;
+  color: var(--text-main) !important;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+#solicitudes-cambios-datos .admin-data-change-toggle:hover {
+  border-color: rgba(var(--data-change-accent-rgb), 0.75) !important;
+  color: var(--data-change-accent) !important;
+  background: rgba(var(--data-change-accent-rgb), 0.13) !important;
+}
+
+#solicitudes-cambios-datos .admin-data-change-toggle i {
+  transition: transform 0.2s ease;
+}
+
+#solicitudes-cambios-datos .admin-data-change-toggle[aria-expanded="true"] i {
+  transform: rotate(180deg);
+}
+
+#solicitudes-cambios-datos .admin-data-change-body {
+  margin-top: 12px;
+}
+
+#solicitudes-cambios-datos.is-collapsed .admin-data-change-body {
+  display: none;
+}
+
+#solicitudes-cambios-datos .admin-data-change-list {
+  max-height: 360px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 4px;
+}
+
+#solicitudes-cambios-datos .admin-data-change-filter.is-active {
+  color: var(--data-change-accent) !important;
+}
+
+html[data-theme="light"] #solicitudes-cambios-datos {
+  background: rgba(250, 204, 21, 0.045) !important;
+}
+
+html[data-theme="light"] #solicitudes-cambios-datos .admin-data-change-toggle {
+  color: #334155 !important;
+}
+
 @media (max-width: 1180px) {
   .students-page-panel {
     grid-template-columns: minmax(0, 1fr) minmax(320px, 0.8fr);
@@ -243,12 +359,14 @@ html[data-theme="light"] .admin-withdrawal-toggle {
     min-width: 0;
   }
 
-  .admin-withdrawal-panel .admin-data-change-head {
+  .admin-withdrawal-panel .admin-data-change-head,
+  #solicitudes-cambios-datos .admin-data-change-head {
     align-items: flex-start;
     flex-direction: column;
   }
 
-  .admin-withdrawal-panel .admin-data-change-actions {
+  .admin-withdrawal-panel .admin-data-change-actions,
+  #solicitudes-cambios-datos .admin-data-change-actions {
     width: 100%;
     justify-content: flex-start;
     flex-wrap: wrap;

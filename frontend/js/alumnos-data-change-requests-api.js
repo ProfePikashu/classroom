@@ -65,6 +65,18 @@
     }
   }
 
+  function setDataChangeCollapsed(panel, collapsed) {
+    const toggle = panel?.querySelector("#adminDataChangeToggle");
+    if (!panel || !toggle) return;
+
+    panel.classList.toggle("is-collapsed", collapsed);
+    toggle.setAttribute("aria-expanded", String(!collapsed));
+    toggle.innerHTML = `
+      <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
+      <span>${collapsed ? "Mostrar" : "Ocultar"}</span>
+    `;
+  }
+
   function ensureStyles() {
     if (document.getElementById("dataChangeRequestsApiStyles")) return;
 
@@ -76,11 +88,11 @@
         flex-wrap: wrap;
         gap: 8px;
         align-items: center;
-        margin: 14px 0;
+        margin: 0 0 12px;
       }
       #${PANEL_ID} .admin-data-change-filter.is-active {
-        border-color: var(--accent, #8b5cf6);
-        box-shadow: 0 0 0 1px var(--accent, #8b5cf6) inset;
+        border-color: var(--data-change-accent, #facc15);
+        box-shadow: 0 0 0 1px var(--data-change-accent, #facc15) inset;
       }
       #${PANEL_ID} .data-change-card {
         border: 1px solid rgba(255,255,255,.12);
@@ -106,10 +118,10 @@
       }
       #${PANEL_ID} .data-change-detail {
         white-space: pre-wrap;
-        border-left: 3px solid rgba(139,92,246,.6);
+        border-left: 3px solid rgba(250,204,21,.68);
         padding: 10px 12px;
         margin: 12px 0;
-        background: rgba(139,92,246,.06);
+        background: rgba(250,204,21,.06);
         border-radius: 8px;
       }
       #${PANEL_ID} .data-change-notes {
@@ -146,34 +158,48 @@
     panel = document.createElement("section");
     panel.id = PANEL_ID;
     panel.dataset.backend = "1";
-    panel.className = "admin-data-change-panel panel";
+    panel.className = "admin-data-change-panel panel is-collapsed";
     panel.innerHTML = `
       <div class="admin-data-change-head">
         <div>
-          <p class="eyebrow danger">Revisión requerida</p>
+          <p class="eyebrow data-change-eyebrow">Revisión requerida</p>
           <h3>Solicitudes de cambio de datos</h3>
           <p>Pedidos enviados desde <strong>Mis Datos</strong>. Quedan guardados hasta que el equipo los cierre.</p>
         </div>
-        <span class="admin-data-change-counter" id="adminDataChangeCounter">0 abiertas</span>
+        <div class="admin-data-change-actions">
+          <span class="admin-data-change-counter" id="adminDataChangeCounter">0 abiertas</span>
+          <button
+            class="admin-data-change-toggle"
+            id="adminDataChangeToggle"
+            type="button"
+            aria-controls="adminDataChangeBody"
+            aria-expanded="false"
+          >
+            <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
+            <span>Mostrar</span>
+          </button>
+        </div>
       </div>
 
-      <div class="admin-data-change-toolbar">
-        <button class="btn btn-outline admin-data-change-filter is-active" type="button" data-filter="open">Abiertas</button>
-        <button class="btn btn-outline admin-data-change-filter" type="button" data-filter="pending">Pendientes</button>
-        <button class="btn btn-outline admin-data-change-filter" type="button" data-filter="in_review">En revisión</button>
-        <button class="btn btn-outline admin-data-change-filter" type="button" data-filter="resolved">Resueltas</button>
-        <button class="btn btn-outline admin-data-change-filter" type="button" data-filter="rejected">Rechazadas</button>
-        <button class="btn btn-outline admin-data-change-filter" type="button" data-filter="all">Todas</button>
-        <button class="btn btn-outline" id="adminDataChangeRefresh" type="button">
-          <i class="fa-solid fa-rotate-right"></i>
-          Actualizar
-        </button>
-      </div>
+      <div class="admin-data-change-body" id="adminDataChangeBody">
+        <div class="admin-data-change-toolbar">
+          <button class="btn btn-outline admin-data-change-filter is-active" type="button" data-filter="open">Abiertas</button>
+          <button class="btn btn-outline admin-data-change-filter" type="button" data-filter="pending">Pendientes</button>
+          <button class="btn btn-outline admin-data-change-filter" type="button" data-filter="in_review">En revisión</button>
+          <button class="btn btn-outline admin-data-change-filter" type="button" data-filter="resolved">Resueltas</button>
+          <button class="btn btn-outline admin-data-change-filter" type="button" data-filter="rejected">Rechazadas</button>
+          <button class="btn btn-outline admin-data-change-filter" type="button" data-filter="all">Todas</button>
+          <button class="btn btn-outline" id="adminDataChangeRefresh" type="button">
+            <i class="fa-solid fa-rotate-right"></i>
+            Actualizar
+          </button>
+        </div>
 
-      <div class="admin-data-change-list" id="adminDataChangeList">
-        <div class="admin-data-change-empty">
-          <i class="fa-solid fa-spinner fa-spin"></i>
-          <span>Cargando solicitudes...</span>
+        <div class="admin-data-change-list" id="adminDataChangeList">
+          <div class="admin-data-change-empty">
+            <i class="fa-solid fa-spinner fa-spin"></i>
+            <span>Cargando solicitudes...</span>
+          </div>
         </div>
       </div>
     `;
@@ -364,6 +390,11 @@
     panel.dataset.eventsBound = "1";
 
     panel.addEventListener("click", async (event) => {
+      if (event.target.closest("#adminDataChangeToggle")) {
+        setDataChangeCollapsed(panel, !panel.classList.contains("is-collapsed"));
+        return;
+      }
+
       const filterButton = event.target.closest("[data-filter]");
       if (filterButton) {
         currentFilter = filterButton.dataset.filter || "open";
@@ -394,9 +425,11 @@
     ensureStyles();
     const panel = ensurePanel();
     bind(panel);
+    setDataChangeCollapsed(panel, true);
     loadRequests();
 
     if (window.location.hash === `#${PANEL_ID}`) {
+      setDataChangeCollapsed(panel, false);
       setTimeout(() => {
         document.getElementById(PANEL_ID)?.scrollIntoView({
           behavior: "smooth",
