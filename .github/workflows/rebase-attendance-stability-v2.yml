@@ -23,16 +23,10 @@ jobs:
           git fetch origin fix/attendance-token-stability:refs/remotes/origin/fix/attendance-token-stability
           git checkout origin/fix/attendance-token-stability -- \
             frontend/js/attendance-token-stability.js \
-            tests/attendance-token-stability.test.mjs \
-            .github/workflows/test-attendance-token-stability.yml
+            tests/attendance-token-stability.test.mjs
 
           python - <<'PY'
           from pathlib import Path
-
-          wf = Path('.github/workflows/test-attendance-token-stability.yml')
-          text = wf.read_text(encoding='utf-8')
-          text = text.replace('fix/attendance-token-stability\n', 'fix/attendance-token-stability-v2\n')
-          wf.write_text(text, encoding='utf-8', newline='\n')
 
           html = Path('frontend/clases-ayrpc-2026.html')
           text = html.read_text(encoding='utf-8')
@@ -50,7 +44,6 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add frontend/clases-ayrpc-2026.html \
             frontend/js/attendance-token-stability.js \
-            tests/attendance-token-stability.test.mjs \
-            .github/workflows/test-attendance-token-stability.yml
+            tests/attendance-token-stability.test.mjs
           git commit -m "fix: stabilize attendance token UX on current main"
           git push origin HEAD:fix/attendance-token-stability-v2
