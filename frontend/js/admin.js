@@ -25,6 +25,7 @@ const ClassroomAdmin = {
       group: "Administración",
       items: [
         ["withdrawals.view", "Ver solicitudes de baja", "Puede consultar solicitudes de baja."],
+        ["data_change_requests.view", "Ver cambios de datos", "Puede revisar las solicitudes enviadas desde Mis Datos. Activo para todos los moderadores."],
         ["notifications.manage", "Gestionar notificaciones", "Puede administrar avisos del Classroom."],
         ["community.moderate", "Moderar comunidad", "Puede usar herramientas de moderación."],
         ["roles.manage", "Administrar roles", "Por seguridad permanece reservado al docente."],
@@ -224,11 +225,14 @@ const ClassroomAdmin = {
   },
 
   renderPermission(permission, label, description, item) {
+    const mandatory =
+      permission === "data_change_requests.view";
+
     const checked =
-      Boolean(item.permissions?.[permission]);
+      mandatory || Boolean(item.permissions?.[permission]);
 
     const locked =
-      permission === "roles.manage";
+      permission === "roles.manage" || mandatory;
 
     return `
       <label class="role-permission-row ${locked ? "is-locked" : ""}">
@@ -292,19 +296,23 @@ const ClassroomAdmin = {
       .map((item) => {
         const permissionCells = permissions
           .map((permissionItem) => {
+            const mandatory =
+              permissionItem.permission === "data_change_requests.view";
+
             const checked =
-              Boolean(item.permissions?.[permissionItem.permission]);
+              mandatory || Boolean(item.permissions?.[permissionItem.permission]);
 
             return `
               <td
                 class="roles-matrix-permission"
                 title="${this.escapeHtml(permissionItem.description)}"
               >
-                <label class="role-switch role-switch--compact">
+                <label class="role-switch role-switch--compact ${mandatory ? "is-locked" : ""}">
                   <input
                     type="checkbox"
                     data-role-permission="${this.escapeHtml(permissionItem.permission)}"
                     ${checked ? "checked" : ""}
+                    ${mandatory ? "disabled" : ""}
                   />
                   <span class="role-switch-ui"></span>
                 </label>
@@ -407,6 +415,11 @@ const ClassroomAdmin = {
       group.items.forEach(([permission]) => {
         if (permission === "roles.manage") {
           permissions[permission] = false;
+          return;
+        }
+
+        if (permission === "data_change_requests.view") {
+          permissions[permission] = true;
           return;
         }
 
