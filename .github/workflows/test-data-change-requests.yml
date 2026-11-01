@@ -23,3 +23,8 @@ jobs:
         run: |
           node tests/test-profile-data-change-requests-api.mjs
           node tests/test-alumnos-data-change-requests-api.mjs
+      - name: Verify page wiring and permission catalog
+        run: |
+          grep -q 'profile-data-change-requests-api.js' frontend/perfil.html
+          grep -q 'alumnos-data-change-requests-api.js' frontend/alumnos.html
+          grep -q 'data_change_requests.view' frontend/js/admin.js
