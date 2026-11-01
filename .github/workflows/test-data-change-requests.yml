@@ -1,0 +1,25 @@
+name: Test data change requests frontend
+
+on:
+  push:
+    branches:
+      - feat/data-change-requests
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check JavaScript syntax
+        run: |
+          node --check frontend/js/profile-data-change-requests-api.js
+          node --check frontend/js/alumnos-data-change-requests-api.js
+          node --check frontend/js/admin.js
+      - name: Run contract tests
+        run: |
+          node tests/test-profile-data-change-requests-api.mjs
+          node tests/test-alumnos-data-change-requests-api.mjs
