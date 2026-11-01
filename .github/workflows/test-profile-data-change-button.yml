@@ -14,9 +14,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - name: Check JS syntax
+      - name: Check deployed JS syntax
         run: |
-          node --check frontend/js/perfil.js
+          node --check frontend/js/perfil-core.js
           node --check frontend/js/profile-data-change-requests-api.js
+          node --check frontend/js/profile-data-change-placement.js
       - name: Run profile button contract
         run: node tests/test-profile-data-change-button.mjs
