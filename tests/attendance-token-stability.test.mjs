@@ -8,7 +8,7 @@ const htmlPath = "frontend/clases-ayrpc-2026.html";
 
 const read = path => fs.readFileSync(path, "utf8");
 
-
+// Regression contract for the live-attendance incident from 2026-10-31.
 test("keeps the proven attendance polling mitigation", () => {
   const source = read(mainPath);
 
