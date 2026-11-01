@@ -1,0 +1,18 @@
+name: Test attendance class filter frontend
+
+on:
+  push:
+    branches:
+      - feat/attendance-class-filter-performance
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Run attendance class filter contract
+        run: node tests/test-asistencias-class-filter.mjs
