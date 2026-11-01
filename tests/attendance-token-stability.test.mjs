@@ -50,3 +50,11 @@ test("guards staff token generation and student check-in against duplicate concu
   assert.match(source, /tokenRequestInFlight/);
   assert.match(source, /checkinRequestInFlight/);
 });
+
+
+test("lets the first staff click reach the original handler before disabling the button", () => {
+  const source = read(stabilityPath);
+
+  assert.match(source, /deferDisable/);
+  assert.match(source, /queueMicrotask/);
+});
