@@ -14,5 +14,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
+      - name: Check extension syntax
+        run: node --check frontend/js/asistencias-class-filter.js
       - name: Run attendance class filter contract
         run: node tests/test-asistencias-class-filter.mjs
+      - name: Run existing attendance UX tests
+        run: |
+          node tests/attendance-admin-ux.test.js
+          node tests/attendance-refresh-state.test.js
+          node tests/attendance-time-colors.test.js
