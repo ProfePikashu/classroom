@@ -102,7 +102,12 @@
     }
   }
 
-  function setButtonBusy(id, busy, busyLabel = "Procesando...") {
+  function setButtonBusy(
+    id,
+    busy,
+    busyLabel = "Procesando...",
+    { deferDisable = false } = {}
+  ) {
     const button = document.getElementById(id);
     if (!button) return;
 
@@ -110,9 +115,21 @@
       if (!button.dataset.attendanceStableLabel) {
         button.dataset.attendanceStableLabel = button.innerHTML;
       }
-      button.disabled = true;
+
       button.setAttribute("aria-busy", "true");
       button.textContent = busyLabel;
+
+      const disable = () => {
+        if (button.getAttribute("aria-busy") === "true") {
+          button.disabled = true;
+        }
+      };
+
+      if (deferDisable) {
+        queueMicrotask(disable);
+      } else {
+        disable();
+      }
       return;
     }
 
@@ -166,7 +183,12 @@
       }
 
       tokenRequestInFlight = true;
-      setButtonBusy("staffGenerateAttendanceCode", true, "Cargando código...");
+      setButtonBusy(
+        "staffGenerateAttendanceCode",
+        true,
+        "Cargando código...",
+        { deferDisable: true }
+      );
     },
     { capture: true }
   );
