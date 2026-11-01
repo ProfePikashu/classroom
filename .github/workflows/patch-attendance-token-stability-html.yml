@@ -1,0 +1,45 @@
+name: Patch attendance token stability HTML
+
+on:
+  push:
+    branches:
+      - fix/attendance-token-stability
+    paths:
+      - .github/workflows/patch-attendance-token-stability-html.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/attendance-token-stability
+      - name: Insert stability layer after the main attendance script
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path('frontend/clases-ayrpc-2026.html')
+          text = path.read_text(encoding='utf-8')
+          anchor = '  <script src="js/clases-ayrpc-2026.js?v=20261030-paste-v1"></script>\n'
+          insert = anchor + '  <script src="js/attendance-token-stability.js?v=20261101-stable-token-v1"></script>\n'
+
+          if 'js/attendance-token-stability.js' not in text:
+              if anchor not in text:
+                  raise SystemExit('attendance script anchor not found')
+              text = text.replace(anchor, insert, 1)
+              path.write_text(text, encoding='utf-8', newline='\n')
+          PY
+      - name: Commit branch-only HTML patch
+        run: |
+          if git diff --quiet -- frontend/clases-ayrpc-2026.html; then
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add frontend/clases-ayrpc-2026.html
+          git commit -m "feat: load attendance token stability layer"
+          git push origin HEAD:fix/attendance-token-stability
