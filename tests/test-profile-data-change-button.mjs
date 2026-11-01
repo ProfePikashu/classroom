@@ -32,14 +32,26 @@ assert.match(
   "top button must guard against duplicate click listeners"
 );
 assert.match(placement, /button\.dataset\.placementV3Bound = ["']true["']/);
+assert.match(
+  placement,
+  /getElementById\(["']profileChangeRequestTopButton["']\)\?\.remove\(\)/,
+  "staff must not keep a ghost top button when the student request panel is absent"
+);
 
 assert.match(api, /\/api\/classroom\/me\/data-change-requests/);
 assert.match(api, /profileChangeRequestToggle/);
+assert.match(
+  api,
+  /!\[["']alumno["'],\s*["']student["']\]\.includes\(role\)/,
+  "data-change request UI must remain student-only"
+);
 
 const coreIndex = html.indexOf("js/perfil-core.js");
 const apiIndex = html.indexOf("js/profile-data-change-requests-api.js");
 const placementIndex = html.indexOf("js/profile-data-change-placement.js");
-assert.ok(coreIndex >= 0 && coreIndex < apiIndex && apiIndex < placementIndex,
-  "profile scripts must load core -> API -> placement");
+assert.ok(
+  coreIndex >= 0 && coreIndex < apiIndex && apiIndex < placementIndex,
+  "profile scripts must load core -> API -> placement"
+);
 
 console.log("profile data change button contract: ok");
