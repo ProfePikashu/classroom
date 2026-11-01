@@ -16,8 +16,26 @@
   padding: 16px 18px !important;
 }
 
-.students-page-panel.has-withdrawal-summary .students-hero-panel {
+.students-page-panel.has-withdrawal-summary .students-hero-panel,
+.students-page-panel.has-admin-summary-stack .students-hero-panel {
   grid-column: 1;
+}
+
+.students-admin-summary-stack {
+  grid-column: 2;
+  grid-row: 1;
+  align-self: start;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.students-admin-summary-stack > .admin-withdrawal-panel,
+.students-admin-summary-stack > #solicitudes-cambios-datos {
+  width: 100%;
+  min-width: 0;
+  margin: 0 !important;
 }
 
 .students-hero-panel > div:first-child {
@@ -187,7 +205,9 @@ html[data-theme="light"] .admin-withdrawal-toggle {
   }
 
   .students-page-panel.has-withdrawal-summary .students-hero-panel,
+  .students-page-panel.has-admin-summary-stack .students-hero-panel,
   .students-hero-panel,
+  .students-admin-summary-stack,
   .admin-withdrawal-panel,
   .students-toolbar,
   .students-list-panel {
@@ -198,6 +218,7 @@ html[data-theme="light"] .admin-withdrawal-toggle {
     grid-row: 1;
   }
 
+  .students-admin-summary-stack,
   .admin-withdrawal-panel {
     grid-row: 2;
   }
