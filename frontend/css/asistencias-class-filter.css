@@ -1,0 +1,51 @@
+/* Asistencias: filtro por clase y scroll adaptado por dispositivo. */
+
+.page-asistencias .attendance-head-pickers {
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.page-asistencias .attendance-head-pickers .attendance-course-picker {
+  min-width: 118px;
+}
+
+.page-asistencias .attendance-head-pickers select {
+  min-width: 118px;
+}
+
+.page-asistencias .attendance-class-context {
+  color: var(--cyan, #22d3ee);
+  font-weight: 700;
+}
+
+/* En PC el scroll horizontal sigue disponible con rueda/trackpad y flechas,
+ * pero no mostramos ni activamos la metafora de arrastrar con la manito. */
+@media (pointer: fine) and (min-width: 901px) {
+  .page-asistencias .attendance-table-scroll,
+  .page-asistencias .attendance-table-scroll:hover,
+  .page-asistencias .attendance-table-scroll.is-dragging {
+    cursor: auto !important;
+  }
+}
+
+@media (max-width: 900px) {
+  .page-asistencias .attendance-admin-head {
+    align-items: flex-start;
+  }
+
+  .page-asistencias .attendance-head-pickers {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .page-asistencias .attendance-head-pickers .attendance-course-picker {
+    flex: 1 1 140px;
+  }
+
+  .page-asistencias .attendance-head-pickers select {
+    width: 100%;
+  }
+}
