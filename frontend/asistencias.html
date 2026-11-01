@@ -14,6 +14,7 @@
 
   <link rel="stylesheet" href="css/styles.css?v=20260704-admin-attendance-scroll-v4" />
   <link rel="stylesheet" href="css/asistencias-admin.css?v=20261027-v2" />
+  <link rel="stylesheet" href="css/asistencias-class-filter.css?v=20261101-class-filter-v1" />
   <link rel="stylesheet" href="css/pelusita-v2.css?v=20261016-v3" />
   <link rel="icon" href="favicon.ico" type="image/x-icon" />
 </head>
@@ -187,13 +188,23 @@
             <h2>Asistencia por cursada</h2>
             <p>Vista tipo planilla para controlar inscripción, datos base, presentes, tiempos, recuperaciones y aptitud a examen.</p>
           </div>
-          <label class="attendance-course-picker">
-            <span>Cursada</span>
-            <select id="attendanceCourseSelect">
-              <option value="ayrpc-2026" selected>AyRPC 2026</option>
-              <option value="ayrpc-2025">AyRPC 2025</option>
-            </select>
-          </label>
+
+          <div class="attendance-head-pickers">
+            <label class="attendance-course-picker">
+              <span>Cursada</span>
+              <select id="attendanceCourseSelect">
+                <option value="ayrpc-2026" selected>AyRPC 2026</option>
+                <option value="ayrpc-2025">AyRPC 2025</option>
+              </select>
+            </label>
+
+            <label class="attendance-course-picker">
+              <span>Clase</span>
+              <select id="attendanceClassSelect">
+                <option value="all" selected>Todas las clases</option>
+              </select>
+            </label>
+          </div>
         </div>
 
         <div class="attendance-kpis" id="attendanceKpis"></div>
@@ -243,6 +254,7 @@
   <script src="js/pelusita-v2.js?v=20261016-v3"></script>
   <script src="js/pelusita-v2-classroom-knowledge.js?v=20260930-alpha1"></script>
   <script src="js/asistencias.js?v=20261027-admin-ux-v1"></script>
+  <script src="js/asistencias-class-filter.js?v=20261101-class-filter-v1"></script>
   <script src="js/sidebar-v2.js?v=20260923-permissions-v1"></script>
 </body>
 </html>
