@@ -1,0 +1,292 @@
+name: Temporary Class 2 recovery frontend patch
+
+on:
+  push:
+    branches:
+      - prep/ayrpc2026-class2-final-rubric
+    paths:
+      - .github/workflows/temp-class2-frontend-patch.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: prep/ayrpc2026-class2-final-rubric
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Patch recovery frontend for Classes 1 and 2
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          def replace_once(text, old, new, label):
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(f"{label}: expected exactly 1 match, got {count}")
+              return text.replace(old, new, 1)
+
+          main_path = Path("frontend/js/ayrpc2026-recovery.js")
+          text = main_path.read_text(encoding="utf-8")
+
+          text = replace_once(
+              text,
+              '  const ENABLED_CLASS_NUMBER = 1;\n  const CLASS1_REQUIRED_WATCH_SECONDS = 6960;',
+              '''  const ENABLED_CLASS_NUMBERS = new Set([1, 2]);
+  const REQUIRED_WATCH_SECONDS_BY_CLASS = {
+    1: 6960,
+    2: 11400,
+  };
+  const RECOVERY_TITLES = {
+    1: "Clase 1 · Presentación e introducción",
+    2: "Clase 2 · Componentes de una PC",
+  };''',
+              "main constants",
+          )
+
+          text = replace_once(
+              text,
+              '''    if (configuredRequired > 0) return configuredRequired;
+    if (state.classNumber === ENABLED_CLASS_NUMBER) {
+      return CLASS1_REQUIRED_WATCH_SECONDS;
+    }
+
+    return Math.max(''',
+              '''    if (configuredRequired > 0) return configuredRequired;
+
+    const fallbackRequired = Number(
+      REQUIRED_WATCH_SECONDS_BY_CLASS[state.classNumber] || 0
+    );
+    if (fallbackRequired > 0) return fallbackRequired;
+
+    return Math.max(''',
+              "known duration",
+          )
+
+          text = replace_once(
+              text,
+              '''      state.config ||
+      state.configLoading ||
+      classNumber !== ENABLED_CLASS_NUMBER''',
+              '''      state.config ||
+      state.configLoading ||
+      !ENABLED_CLASS_NUMBERS.has(Number(classNumber))''',
+              "load config gate",
+          )
+
+          text = replace_once(
+              text,
+              '''    if (classNumber !== ENABLED_CLASS_NUMBER) {
+      showRecoveryProgress(false);
+      setQuizEnabled(false);
+      return;
+    }''',
+              '''    if (!ENABLED_CLASS_NUMBERS.has(Number(classNumber))) {
+      showRecoveryProgress(false);
+      setQuizEnabled(false);
+      return;
+    }''',
+              "selection gate",
+          )
+
+          text = replace_once(
+              text,
+              '            <h3>Clase 1 · Presentación e introducción</h3>',
+              '            <h3>${escapeHtml(RECOVERY_TITLES[state.classNumber] || `Clase ${state.classNumber}`)}</h3>',
+              "quiz title",
+          )
+
+          text = replace_once(
+              text,
+              '''      const badge = card.querySelector(".class-thumb-badge");
+      if (!badge || !badge.textContent?.match(/Clase\\s+1\\b/i)) return;''',
+              '''      const badge = card.querySelector(".class-thumb-badge");
+      const recoveredClassPattern = new RegExp(`Clase\\\\s+${state.classNumber}\\\\b`, "i");
+      if (!badge || !recoveredClassPattern.test(badge.textContent || "")) return;''',
+              "recovered card",
+          )
+
+          text = replace_once(
+              text,
+              '''  function isClassOneRecoveryButton(button) {
+    if (!button || button.dataset.pelusitaAction !== "recover-class") {
+      return false;
+    }
+
+    const card = button.closest(".class-row-card");
+    const badge = card?.querySelector(".class-thumb-badge")?.textContent || "";
+    return /Clase\\s+1\\b/i.test(badge);
+  }''',
+              '''  function isEnabledRecoveryButton(button) {
+    if (!button || button.dataset.pelusitaAction !== "recover-class") {
+      return false;
+    }
+
+    const card = button.closest(".class-row-card");
+    const badge = card?.querySelector(".class-thumb-badge")?.textContent || "";
+    const match = badge.match(/Clase\\s+(\\d+)/i);
+    return Boolean(match && ENABLED_CLASS_NUMBERS.has(Number(match[1])));
+  }''',
+              "recovery warning helper",
+          )
+
+          text = replace_once(
+              text,
+              '      if (!isClassOneRecoveryButton(button)) return;',
+              '      if (!isEnabledRecoveryButton(button)) return;',
+              "recovery warning call",
+          )
+
+          main_path.write_text(text, encoding="utf-8")
+
+          ux_path = Path("frontend/js/ayrpc2026-recovery-ux.js")
+          ux = ux_path.read_text(encoding="utf-8")
+
+          ux = replace_once(
+              ux,
+              '  const CLASS_NUMBER = 1;',
+              '  const ENABLED_CLASS_NUMBERS = new Set([1, 2]);',
+              "ux constants",
+          )
+
+          ux = replace_once(
+              ux,
+              '''  function recoveryPath(kind) {
+    const suffix = kind === "watch" ? "/recovery/watch" : "/recovery";
+    return `/api/classroom/courses/${COURSE_SLUG}/classes/${CLASS_NUMBER}${suffix}`;
+  }
+
+  function matchesRecoveryRequest(url, kind) {
+    try {
+      const parsed = new URL(url, window.location.href);
+      return parsed.pathname.endsWith(recoveryPath(kind));
+    } catch {
+      return String(url || "").includes(recoveryPath(kind));
+    }
+  }''',
+              '''  function recoveryClassNumberFromUrl(url) {
+    try {
+      const parsed = new URL(url, window.location.href);
+      const match = parsed.pathname.match(
+        /\\/api\\/classroom\\/courses\\/ayrpc-2026\\/classes\\/(\\d+)\\/recovery(?:\\/watch)?$/
+      );
+      const classNumber = match ? Number(match[1]) : null;
+      return ENABLED_CLASS_NUMBERS.has(classNumber) ? classNumber : null;
+    } catch {
+      return null;
+    }
+  }
+
+  function recoveryPath(classNumber, kind) {
+    const suffix = kind === "watch" ? "/recovery/watch" : "/recovery";
+    return `/api/classroom/courses/${COURSE_SLUG}/classes/${classNumber}${suffix}`;
+  }
+
+  function matchesRecoveryRequest(url, kind) {
+    const classNumber = recoveryClassNumberFromUrl(url);
+    if (!classNumber) return false;
+
+    try {
+      const parsed = new URL(url, window.location.href);
+      return parsed.pathname.endsWith(recoveryPath(classNumber, kind));
+    } catch {
+      return false;
+    }
+  }''',
+              "ux recovery path",
+          )
+
+          ux = replace_once(
+              ux,
+              '''  function handleRecoveryConfig(data) {
+    if (!data?.ok || Number(data.class_number || CLASS_NUMBER) !== CLASS_NUMBER) {
+      return;
+    }
+
+    state.classNumber = CLASS_NUMBER;''',
+              '''  function handleRecoveryConfig(data) {
+    const classNumber = Number(data?.class_number || 0);
+    if (!data?.ok || !ENABLED_CLASS_NUMBERS.has(classNumber)) {
+      return;
+    }
+
+    state.classNumber = classNumber;''',
+              "ux config",
+          )
+
+          ux = replace_once(
+              ux,
+              '''    if (
+      selectedNumber !== CLASS_NUMBER ||
+      ["RECUPERADA", "PRESENTE", "PENDIENTE"].includes(attendanceStatus)
+    ) {
+      if (selectedNumber !== CLASS_NUMBER || attendanceStatus !== "REVISAR" && attendanceStatus !== "AUSENTE") {
+        state.eligible = false;
+        state.playbackStartedAt = 0;
+        hideValidationStatus();
+      }
+    }''',
+              '''    const selectedEnabled = ENABLED_CLASS_NUMBERS.has(selectedNumber);
+    const selectionChanged = Boolean(
+      state.classNumber && selectedNumber !== state.classNumber
+    );
+    const recoverable = ["REVISAR", "AUSENTE"].includes(attendanceStatus);
+
+    if (!selectedEnabled || selectionChanged || !recoverable) {
+      state.eligible = false;
+      state.playbackStartedAt = 0;
+      hideValidationStatus();
+    }''',
+              "ux dom state",
+          )
+
+          ux_path.write_text(ux, encoding="utf-8")
+
+          html_path = Path("frontend/clases-ayrpc-2026.html")
+          html = html_path.read_text(encoding="utf-8")
+          html, count_main = re.subn(
+              r'js/ayrpc2026-recovery\.js\?v=[^"\']+',
+              'js/ayrpc2026-recovery.js?v=20261102-class2-qa-v1',
+              html,
+              count=1,
+          )
+          html, count_ux = re.subn(
+              r'js/ayrpc2026-recovery-ux\.js\?v=[^"\']+',
+              'js/ayrpc2026-recovery-ux.js?v=20261102-class2-qa-v1',
+              html,
+              count=1,
+          )
+          if count_main != 1 or count_ux != 1:
+              raise SystemExit(f"cache busters: recovery={count_main}, ux={count_ux}")
+          html_path.write_text(html, encoding="utf-8")
+          PY
+
+          node --check frontend/js/ayrpc2026-recovery.js
+          node --check frontend/js/ayrpc2026-recovery-ux.js
+
+          grep -q 'new Set(\[1, 2\])' frontend/js/ayrpc2026-recovery.js
+          grep -q '2: 11400' frontend/js/ayrpc2026-recovery.js
+          grep -q 'Clase 2 · Componentes de una PC' frontend/js/ayrpc2026-recovery.js
+          grep -q 'new Set(\[1, 2\])' frontend/js/ayrpc2026-recovery-ux.js
+          grep -q '20261102-class2-qa-v1' frontend/clases-ayrpc-2026.html
+
+      - name: Commit patched frontend and remove temporary workflow
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/temp-class2-frontend-patch.yml
+          git add frontend/js/ayrpc2026-recovery.js frontend/js/ayrpc2026-recovery-ux.js frontend/clases-ayrpc-2026.html
+          git diff --cached --check
+          git commit -m "feat: habilitar preview y QA de recuperación Clase 2"
+          git push origin HEAD:prep/ayrpc2026-class2-final-rubric
