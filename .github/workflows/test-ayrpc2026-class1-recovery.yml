@@ -1,4 +1,5 @@
 name: Test AyRPC 2026 recovery
+# Mantener cubierta la rama de refactor hasta integrar el registro.
 
 on:
   push:
