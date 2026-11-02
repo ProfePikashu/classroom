@@ -2,8 +2,15 @@
   "use strict";
 
   const COURSE_SLUG = "ayrpc-2026";
-  const ENABLED_CLASS_NUMBER = 1;
-  const CLASS1_REQUIRED_WATCH_SECONDS = 6960;
+  const ENABLED_CLASS_NUMBERS = new Set([1, 2]);
+  const REQUIRED_WATCH_SECONDS_BY_CLASS = {
+    1: 6960,
+    2: 11400,
+  };
+  const RECOVERY_TITLES = {
+    1: "Clase 1 · Presentación e introducción",
+    2: "Clase 2 · Componentes de una PC",
+  };
   const VIDEO_COMPLETION_RATIO = 1;
   const HEARTBEAT_SECONDS = 30;
   const RECOVERY_EDGE_BASE = "https://recovery.andyazhtec.com";
@@ -208,9 +215,11 @@
     );
 
     if (configuredRequired > 0) return configuredRequired;
-    if (state.classNumber === ENABLED_CLASS_NUMBER) {
-      return CLASS1_REQUIRED_WATCH_SECONDS;
-    }
+
+    const fallbackRequired = Number(
+      REQUIRED_WATCH_SECONDS_BY_CLASS[state.classNumber] || 0
+    );
+    if (fallbackRequired > 0) return fallbackRequired;
 
     return Math.max(
       safePlayerDuration(),
@@ -341,7 +350,7 @@
     if (
       state.config ||
       state.configLoading ||
-      classNumber !== ENABLED_CLASS_NUMBER
+      !ENABLED_CLASS_NUMBERS.has(Number(classNumber))
     ) {
       return state.config;
     }
@@ -880,7 +889,7 @@
         <div class="ayrpc2026-recovery-head">
           <div>
             <p class="eyebrow">${preview ? "Vista previa docente" : "Validación de la clase"}</p>
-            <h3>Clase 1 · Presentación e introducción</h3>
+            <h3>${escapeHtml(RECOVERY_TITLES[state.classNumber] || ("Clase " + state.classNumber))}</h3>
             <p>${preview
               ? "Estás viendo el cuestionario tal como lo verá un alumno que deba recuperar. Esta vista no registra intentos ni modifica asistencia."
               : "Respondé con tus palabras. No buscamos una frase exacta, sino los conceptos trabajados en clase."}</p>
@@ -953,7 +962,8 @@
 
     document.querySelectorAll(".class-row-card").forEach(card => {
       const badge = card.querySelector(".class-thumb-badge");
-      if (!badge || !badge.textContent?.match(/Clase\s+1\b/i)) return;
+      const recoveredClassPattern = new RegExp(`Clase\\s+${state.classNumber}\\b`, "i");
+      if (!badge || !recoveredClassPattern.test(badge.textContent || "")) return;
 
       const statusBadge = card.querySelector(".class-status");
       if (statusBadge) {
@@ -1072,7 +1082,7 @@
       resetSelection(nextKey, classNumber, status);
     }
 
-    if (classNumber !== ENABLED_CLASS_NUMBER) {
+    if (!ENABLED_CLASS_NUMBERS.has(Number(classNumber))) {
       showRecoveryProgress(false);
       setQuizEnabled(false);
       return;
@@ -1115,20 +1125,21 @@
     });
   }
 
-  function isClassOneRecoveryButton(button) {
+  function isEnabledRecoveryButton(button) {
     if (!button || button.dataset.pelusitaAction !== "recover-class") {
       return false;
     }
 
     const card = button.closest(".class-row-card");
     const badge = card?.querySelector(".class-thumb-badge")?.textContent || "";
-    return /Clase\s+1\b/i.test(badge);
+    const match = badge.match(/Clase\s+(\d+)/i);
+    return Boolean(match && ENABLED_CLASS_NUMBERS.has(Number(match[1])));
   }
 
   function bindRecoveryStartWarning() {
     document.addEventListener("click", event => {
       const button = event.target.closest("button");
-      if (!isClassOneRecoveryButton(button)) return;
+      if (!isEnabledRecoveryButton(button)) return;
 
       const ok = window.confirm(RECOVERY_START_MESSAGE);
       if (ok) return;

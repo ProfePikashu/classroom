@@ -2,7 +2,7 @@
   "use strict";
 
   const COURSE_SLUG = "ayrpc-2026";
-  const CLASS_NUMBER = 1;
+  const ENABLED_CLASS_NUMBERS = new Set([1, 2]);
   const RECOVERY_EDGE_HOST = "recovery.andyazhtec.com";
   const WATCHDOG_TIMEOUT_MS = 60000;
   const PLAYER_ATTACH_TIMEOUT_MS = 15000;
@@ -44,17 +44,33 @@
     ).toUpperCase();
   }
 
-  function recoveryPath(kind) {
+  function recoveryClassNumberFromUrl(url) {
+    try {
+      const parsed = new URL(url, window.location.href);
+      const match = parsed.pathname.match(
+        /\/api\/classroom\/courses\/ayrpc-2026\/classes\/(\d+)\/recovery(?:\/watch)?$/
+      );
+      const classNumber = match ? Number(match[1]) : null;
+      return ENABLED_CLASS_NUMBERS.has(classNumber) ? classNumber : null;
+    } catch {
+      return null;
+    }
+  }
+
+  function recoveryPath(classNumber, kind) {
     const suffix = kind === "watch" ? "/recovery/watch" : "/recovery";
-    return `/api/classroom/courses/${COURSE_SLUG}/classes/${CLASS_NUMBER}${suffix}`;
+    return `/api/classroom/courses/${COURSE_SLUG}/classes/${classNumber}${suffix}`;
   }
 
   function matchesRecoveryRequest(url, kind) {
+    const classNumber = recoveryClassNumberFromUrl(url);
+    if (!classNumber) return false;
+
     try {
       const parsed = new URL(url, window.location.href);
-      return parsed.pathname.endsWith(recoveryPath(kind));
+      return parsed.pathname.endsWith(recoveryPath(classNumber, kind));
     } catch {
-      return String(url || "").includes(recoveryPath(kind));
+      return false;
     }
   }
 
@@ -466,11 +482,12 @@
   }
 
   function handleRecoveryConfig(data) {
-    if (!data?.ok || Number(data.class_number || CLASS_NUMBER) !== CLASS_NUMBER) {
+    const classNumber = Number(data?.class_number || 0);
+    if (!data?.ok || !ENABLED_CLASS_NUMBERS.has(classNumber)) {
       return;
     }
 
-    state.classNumber = CLASS_NUMBER;
+    state.classNumber = classNumber;
     state.preview = data.preview_mode === true;
     state.eligible = data.eligible === true;
     state.serverResumePosition = Math.max(
@@ -713,15 +730,16 @@
       $("liveAttendanceStatus")?.textContent || ""
     ).trim().toUpperCase();
 
-    if (
-      selectedNumber !== CLASS_NUMBER ||
-      ["RECUPERADA", "PRESENTE", "PENDIENTE"].includes(attendanceStatus)
-    ) {
-      if (selectedNumber !== CLASS_NUMBER || attendanceStatus !== "REVISAR" && attendanceStatus !== "AUSENTE") {
-        state.eligible = false;
-        state.playbackStartedAt = 0;
-        hideValidationStatus();
-      }
+    const selectedEnabled = ENABLED_CLASS_NUMBERS.has(selectedNumber);
+    const selectionChanged = Boolean(
+      state.classNumber && selectedNumber !== state.classNumber
+    );
+    const recoverable = ["REVISAR", "AUSENTE"].includes(attendanceStatus);
+
+    if (!selectedEnabled || selectionChanged || !recoverable) {
+      state.eligible = false;
+      state.playbackStartedAt = 0;
+      hideValidationStatus();
     }
 
     refreshPlayerObservation();
