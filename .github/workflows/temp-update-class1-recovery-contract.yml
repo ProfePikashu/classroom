@@ -26,7 +26,7 @@ jobs:
       - name: Update stale contract assertions
         run: python tools/update_class1_recovery_contract.py
 
-      - name: Verify updated Class 1 recovery contract
+      - name: Verify updated recovery contracts
         shell: bash
         run: |
           node --check frontend/js/ayrpc2026-recovery.js
@@ -41,7 +41,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git rm .github/workflows/temp-update-class1-recovery-contract.yml tools/update_class1_recovery_contract.py
-          git add tests/ayrpc2026-class1-recovery.test.js
+          git add tests/ayrpc2026-class1-recovery.test.js tests/ayrpc2026-recovery-edge.test.js
           git diff --cached --check
-          git commit -m "test: adaptar contrato de recuperación Clase 1 al motor multiclase"
+          git commit -m "test: adaptar contratos de recuperación al motor multiclase"
           git push origin HEAD:fix/class1-recovery-contract-after-class2
