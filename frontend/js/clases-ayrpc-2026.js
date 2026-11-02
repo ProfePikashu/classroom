@@ -713,6 +713,8 @@
 
     if (!player) return;
 
+    player.dataset.videoId = String(item.videoId || "");
+
     if (!item.videoId) {
       player.innerHTML = `
         <div class="ayrpc2026-video-placeholder">
