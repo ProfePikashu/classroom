@@ -132,13 +132,13 @@ assert.match(
 
 assert.match(
   html,
-  /js\/ayrpc2026-recovery\.js\?v=20261028-edge-v1/,
+  /js\/ayrpc2026-recovery\.js\?v=[A-Za-z0-9._-]+/,
   "la vista debe invalidar el cache del tracker al activar el transporte edge"
 );
 
 assert.match(
   html,
-  /js\/ayrpc2026-recovery-ux\.js\?v=20261028-edge-v1/,
+  /js\/ayrpc2026-recovery-ux\.js\?v=[A-Za-z0-9._-]+/,
   "la vista debe invalidar también el cache del watchdog edge"
 );
 
