@@ -34,3 +34,13 @@ replace_all(
             '/js\\/ayrpc2026-recovery-ux\\.js\\?v=[A-Za-z0-9._-]+/',
     },
 )
+
+replace_all(
+    Path("tests/ayrpc2026-player-policy.test.js"),
+    {
+        '/js\\/ayrpc2026-recovery\\.js\\?v=20261028-edge-v1/':
+            '/js\\/ayrpc2026-recovery\\.js\\?v=[A-Za-z0-9._-]+/',
+        '/js\\/ayrpc2026-recovery-ux\\.js\\?v=20261028-edge-v1/':
+            '/js\\/ayrpc2026-recovery-ux\\.js\\?v=[A-Za-z0-9._-]+/',
+    },
+)
