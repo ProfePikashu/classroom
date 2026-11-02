@@ -1,0 +1,49 @@
+name: Temporary fix Class 2 recovery switching
+
+on:
+  push:
+    branches:
+      - fix/ayrpc2026-class2-player-switch-race
+    paths:
+      - .github/workflows/temp-fix-class2-recovery-switch.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/ayrpc2026-class2-player-switch-race
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Apply class switching fix
+        run: python tools/fix_class2_recovery_switch.py
+
+      - name: Verify syntax and recovery contracts
+        shell: bash
+        run: |
+          node --check frontend/js/clases-ayrpc-2026.js
+          node --check frontend/js/ayrpc2026-recovery.js
+          node --check frontend/js/ayrpc2026-recovery-ux.js
+          node tests/ayrpc2026-class1-recovery.test.js
+          node tests/ayrpc2026-recovery-edge.test.js
+          node tests/ayrpc2026-player-policy.test.js
+          node tests/ayrpc2026-class-switching.test.js
+
+      - name: Commit fix and remove temporary helpers
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/temp-fix-class2-recovery-switch.yml tools/fix_class2_recovery_switch.py
+          git add frontend/js/clases-ayrpc-2026.js frontend/js/ayrpc2026-recovery.js
+          git diff --cached --check
+          git commit -m "fix: aislar player y tracking por clase en AyRPC 2026"
+          git push origin HEAD:fix/ayrpc2026-class2-player-switch-race
