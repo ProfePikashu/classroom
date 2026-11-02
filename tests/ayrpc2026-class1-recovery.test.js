@@ -40,12 +40,12 @@ assert.match(html, /js\/ayrpc2026-recovery-ux\.js\?v=[A-Za-z0-9._-]+/, "la vista
 assert.match(classesCss, /#youtubePlayer\s+iframe[\s\S]*width:\s*100%[\s\S]*height:\s*100%/, "el iframe controlado de YouTube debe llenar todo el recuadro 16:9");
 assert.match(classesCss, /#youtubePlayer\s+iframe[\s\S]*display:\s*block/, "el iframe no debe dejar espacio de línea dentro del recuadro");
 assert.match(recovery, /const COURSE_SLUG = "ayrpc-2026"/, "la recuperación debe apuntar al curso AyRPC 2026");
-assert.match(recovery, /REQUIRED_WATCH_SECONDS_BY_CLASS[\s\S]*1:\s*6960/, "la Clase 1 debe seguir llegando al 100% en 1h56 desde el inicio");
-assert.match(recovery, /const VIDEO_COMPLETION_RATIO = 1(?:\.0)?;/, "la Clase 1 debe completarse exactamente al llegar al corte configurado");
+assert.doesNotMatch(recovery, /REQUIRED_WATCH_SECONDS_BY_CLASS/, "el frontend no debe duplicar cortes académicos por clase");
+assert.match(recovery, /const VIDEO_COMPLETION_RATIO = 1(?:\.0)?;/, "la recuperación debe completarse exactamente al llegar al corte configurado por backend");
 assert.match(recovery, /const HEARTBEAT_SECONDS = 30/, "el tracker debe agrupar el tiempo visto en heartbeats de 30 segundos");
 assert.match(recovery, /const PLAYER_ATTACH_TIMEOUT_MS = 15000/, "el montaje del player académico mantiene su timeout conocido");
-assert.match(recovery, /function knownDuration\(\)[\s\S]*required_watch_seconds[\s\S]*REQUIRED_WATCH_SECONDS_BY_CLASS/, "la barra debe priorizar el corte académico del backend y conservar el fallback por clase");
-assert.match(recovery, /Math\.floor\(rawPercent\)/, "la barra no debe redondear a 100% antes de alcanzar 1h56:00");
+assert.match(recovery, /function knownDuration\(\)[\s\S]*state\.config\?\.required_watch_seconds/, "la barra debe priorizar el corte académico recibido del backend");
+assert.match(recovery, /Math\.floor\(rawPercent\)/, "la barra no debe redondear a 100% antes de alcanzar el corte académico");
 assert.match(auth, /window\.ClassroomAuth\s*=\s*ClassroomAuth\s*;/, "auth.js debe exponer ClassroomAuth en window para los controladores que lo consumen como propiedad global");
 assert.match(recovery, /\/api\/classroom\/courses\/\$\{COURSE_SLUG\}\/classes\/\$\{classNumber\}\/recovery/, "la recuperación debe usar el endpoint autenticado del backend");
 assert.match(recovery, /function recoveryWatchEndpoint[\s\S]*recoveryEndpoint\(classNumber\)[\s\S]*\/watch/, "el frontend debe conservar el heartbeat directo al backend como fallback");
@@ -83,6 +83,7 @@ assert.match(recovery, /visibilitychange/, "el tracker debe reaccionar cuando la
 assert.match(recovery, /document\.hidden|document\.visibilityState/, "el tiempo válido no debe contarse con la pestaña oculta");
 assert.doesNotMatch(recovery, /window\.addEventListener\("blur"/, "hacer click dentro del iframe de YouTube no debe detener el tracking");
 assert.match(recovery, /Para recuperar esta clase tenés que ver el video completo desde esta vista/, "un alumno recuperable debe recibir la advertencia antes de iniciar");
+assert.match(recovery, /YouTube[\s\S]*puede no registrarse[\s\S]*pantalla completa/, "la advertencia debe explicar el riesgo de salir a YouTube y recomendar pantalla completa");
 assert.doesNotMatch(recovery, /FORMAT_CATEGORIES|ETHICS_CATEGORIES|cobrar de mas|pc de escritorio/, "las reglas de corrección no deben viajar al navegador");
 assert.match(recovery, /function paintQuestionResults\(/, "la UI debe centralizar el pintado verde o rojo por respuesta");
 assert.match(recovery, /data\?\.question_results/, "la UI debe usar el resultado por pregunta devuelto por el backend");

@@ -2,15 +2,6 @@
   "use strict";
 
   const COURSE_SLUG = "ayrpc-2026";
-  const ENABLED_CLASS_NUMBERS = new Set([1, 2]);
-  const REQUIRED_WATCH_SECONDS_BY_CLASS = {
-    1: 6960,
-    2: 11400,
-  };
-  const RECOVERY_TITLES = {
-    1: "Clase 1 · Presentación e introducción",
-    2: "Clase 2 · Componentes de una PC",
-  };
   const VIDEO_COMPLETION_RATIO = 1;
   const HEARTBEAT_SECONDS = 30;
   const RECOVERY_EDGE_BASE = "https://recovery.andyazhtec.com";
@@ -18,7 +9,7 @@
   const PLAYER_ATTACH_RETRY_MS = 250;
   const PLAYER_ATTACH_TIMEOUT_MS = 15000;
   const RECOVERY_START_MESSAGE =
-    "Para recuperar esta clase tenés que ver el video completo desde esta vista y a velocidad 1x. Si abandonás la vista de la clase, cambiás de pestaña, minimizás, cerrás el navegador o intentás acelerar la reproducción, ese tiempo no cuenta como tiempo visto válido. ¿Querés iniciar la recuperación?";
+    "Para recuperar esta clase tenés que ver el video completo desde esta vista y a velocidad 1x. Si abandonás la vista de la clase, cambiás de pestaña, minimizás, cerrás el navegador o intentás acelerar la reproducción, ese tiempo no cuenta como tiempo visto válido. Permanecé dentro del Classroom: si abrís el video directamente en YouTube, ese tiempo puede no registrarse. Para verlo más grande usá la pantalla completa del reproductor. ¿Querés iniciar la recuperación?";
 
   const state = {
     key: "",
@@ -217,11 +208,6 @@
 
     if (configuredRequired > 0) return configuredRequired;
 
-    const fallbackRequired = Number(
-      REQUIRED_WATCH_SECONDS_BY_CLASS[state.classNumber] || 0
-    );
-    if (fallbackRequired > 0) return fallbackRequired;
-
     return Math.max(
       safePlayerDuration(),
       Number(state.config?.video_duration_seconds || 0)
@@ -349,10 +335,6 @@
   }
 
   async function loadRecoveryConfig(classNumber, revision = state.selectionRevision) {
-    if (!ENABLED_CLASS_NUMBERS.has(Number(classNumber))) {
-      return null;
-    }
-
     if (
       state.config &&
       classNumber === state.classNumber &&
@@ -919,7 +901,7 @@
         <div class="ayrpc2026-recovery-head">
           <div>
             <p class="eyebrow">${preview ? "Vista previa docente" : "Validación de la clase"}</p>
-            <h3>${escapeHtml(RECOVERY_TITLES[state.classNumber] || ("Clase " + state.classNumber))}</h3>
+            <h3>${escapeHtml(config.title || ("Clase " + state.classNumber))}</h3>
             <p>${preview
               ? "Estás viendo el cuestionario tal como lo verá un alumno que deba recuperar. Esta vista no registra intentos ni modifica asistencia."
               : "Respondé con tus palabras. No buscamos una frase exacta, sino los conceptos trabajados en clase."}</p>
@@ -1112,12 +1094,6 @@
       resetSelection(nextKey, classNumber, status);
     }
 
-    if (!ENABLED_CLASS_NUMBERS.has(Number(classNumber))) {
-      showRecoveryProgress(false);
-      setQuizEnabled(false);
-      return;
-    }
-
     const revision = state.selectionRevision;
     const config = await loadRecoveryConfig(classNumber, revision);
 
@@ -1128,7 +1104,13 @@
       return;
     }
 
-    const preview = config?.preview_mode === true;
+    if (!config) {
+      showRecoveryProgress(false);
+      setQuizEnabled(false);
+      return;
+    }
+
+    const preview = config.preview_mode === true;
     const recoverable = isRecoverableStatus(status);
 
     if (preview) {
@@ -1142,7 +1124,7 @@
 
     showRecoveryProgress(recoverable);
 
-    if (!recoverable || !config?.eligible) {
+    if (!recoverable || !config.eligible) {
       setQuizEnabled(false);
       return;
     }
@@ -1172,7 +1154,7 @@
     const card = button.closest(".class-row-card");
     const badge = card?.querySelector(".class-thumb-badge")?.textContent || "";
     const match = badge.match(/Clase\s+(\d+)/i);
-    return Boolean(match && ENABLED_CLASS_NUMBERS.has(Number(match[1])));
+    return Boolean(match);
   }
 
   function bindRecoveryStartWarning() {

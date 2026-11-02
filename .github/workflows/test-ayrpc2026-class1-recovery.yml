@@ -1,10 +1,12 @@
 name: Test AyRPC 2026 recovery
+# Mantener cubierta la rama de refactor hasta integrar el registro.
 
 on:
   push:
     branches:
       - feat/ayrpc2026-class1-recovery
       - feat/recovery-edge-tracker
+      - refactor/ayrpc2026-recovery-registry
       - main
     paths:
       - frontend/clases-ayrpc-2026.html
@@ -15,6 +17,7 @@ on:
       - tests/ayrpc2026-recovery-edge.test.js
       - tests/ayrpc2026-player-policy.test.js
       - tests/ayrpc2026-class-switching.test.js
+      - tests/ayrpc2026-recovery-registry.test.js
       - .github/workflows/test-ayrpc2026-class1-recovery.yml
   pull_request:
     paths:
@@ -26,6 +29,7 @@ on:
       - tests/ayrpc2026-recovery-edge.test.js
       - tests/ayrpc2026-player-policy.test.js
       - tests/ayrpc2026-class-switching.test.js
+      - tests/ayrpc2026-recovery-registry.test.js
       - .github/workflows/test-ayrpc2026-class1-recovery.yml
 
 jobs:
@@ -47,3 +51,4 @@ jobs:
           node tests/ayrpc2026-recovery-edge.test.js
           node tests/ayrpc2026-player-policy.test.js
           node tests/ayrpc2026-class-switching.test.js
+          node tests/ayrpc2026-recovery-registry.test.js
