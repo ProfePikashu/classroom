@@ -25,7 +25,8 @@
     classNumber: null,
     status: "PENDIENTE",
     config: null,
-    configLoading: false,
+    configLoadingClassNumber: null,
+    selectionRevision: 0,
     player: null,
     playerVideoId: "",
     attachRetryTimer: null,
@@ -319,11 +320,12 @@
   function resetSelection(nextKey, classNumber, status) {
     destroyRecoveryPlayer();
 
+    state.selectionRevision += 1;
     state.key = nextKey;
     state.classNumber = classNumber;
     state.status = status;
     state.config = null;
-    state.configLoading = false;
+    state.configLoadingClassNumber = null;
     state.serverWatchedSeconds = 0;
     state.pendingSeconds = 0;
     state.edgePendingSeconds = 0;
@@ -346,19 +348,30 @@
     }
   }
 
-  async function loadRecoveryConfig(classNumber) {
+  async function loadRecoveryConfig(classNumber, revision = state.selectionRevision) {
+    if (!ENABLED_CLASS_NUMBERS.has(Number(classNumber))) {
+      return null;
+    }
+
     if (
-      state.config ||
-      state.configLoading ||
-      !ENABLED_CLASS_NUMBERS.has(Number(classNumber))
+      state.config &&
+      classNumber === state.classNumber &&
+      revision === state.selectionRevision
     ) {
       return state.config;
+    }
+
+    if (
+      state.configLoadingClassNumber === classNumber &&
+      revision === state.selectionRevision
+    ) {
+      return null;
     }
 
     const token = classroomToken();
     if (!token) return null;
 
-    state.configLoading = true;
+    state.configLoadingClassNumber = classNumber;
 
     try {
       const response = await fetch(recoveryEndpoint(classNumber), {
@@ -368,6 +381,13 @@
 
       const data = await response.json().catch(() => null);
       if (!response.ok || !data?.ok) return null;
+
+      if (
+        revision !== state.selectionRevision ||
+        classNumber !== state.classNumber
+      ) {
+        return null;
+      }
 
       state.config = data;
       state.serverWatchedSeconds = Math.max(
@@ -385,12 +405,21 @@
         await ensureEdgeSession(classNumber);
       }
 
+      if (
+        revision !== state.selectionRevision ||
+        classNumber !== state.classNumber
+      ) {
+        return null;
+      }
+
       return data;
     } catch (error) {
       console.warn("No se pudo cargar la recuperación de la clase:", error);
       return null;
     } finally {
-      state.configLoading = false;
+      if (state.configLoadingClassNumber === classNumber) {
+        state.configLoadingClassNumber = null;
+      }
     }
   }
 
@@ -398,20 +427,21 @@
     if (state.playerVideoId) return state.playerVideoId;
 
     const host = $("youtubePlayer");
-    const explicit = String(host?.dataset?.videoId || "").trim();
-    if (explicit) return explicit;
-
     const iframe = host?.querySelector("iframe");
     const src = iframe?.src || "";
 
-    try {
-      const parsed = new URL(src);
-      const embedMatch = parsed.pathname.match(/\/embed\/([^/?]+)/i);
-      if (embedMatch?.[1]) return embedMatch[1];
-      return parsed.searchParams.get("v") || "";
-    } catch {
-      return "";
+    if (src) {
+      try {
+        const parsed = new URL(src);
+        const embedMatch = parsed.pathname.match(/\/embed\/([^/?]+)/i);
+        if (embedMatch?.[1]) return embedMatch[1];
+        const queryVideoId = parsed.searchParams.get("v") || "";
+        if (queryVideoId) return queryVideoId;
+      } catch {}
     }
+
+    const explicit = String(host?.dataset?.videoId || "").trim();
+    return explicit;
   }
 
   function completionReached() {
@@ -1088,7 +1118,16 @@
       return;
     }
 
-    const config = await loadRecoveryConfig(classNumber);
+    const revision = state.selectionRevision;
+    const config = await loadRecoveryConfig(classNumber, revision);
+
+    if (
+      revision !== state.selectionRevision ||
+      classNumber !== state.classNumber
+    ) {
+      return;
+    }
+
     const preview = config?.preview_mode === true;
     const recoverable = isRecoverableStatus(status);
 

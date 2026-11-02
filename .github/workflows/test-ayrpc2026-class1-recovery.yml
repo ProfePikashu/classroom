@@ -1,4 +1,4 @@
-name: Test AyRPC 2026 class 1 recovery
+name: Test AyRPC 2026 recovery
 
 on:
   push:
@@ -14,6 +14,7 @@ on:
       - tests/ayrpc2026-class1-recovery.test.js
       - tests/ayrpc2026-recovery-edge.test.js
       - tests/ayrpc2026-player-policy.test.js
+      - tests/ayrpc2026-class-switching.test.js
       - .github/workflows/test-ayrpc2026-class1-recovery.yml
   pull_request:
     paths:
@@ -24,6 +25,7 @@ on:
       - tests/ayrpc2026-class1-recovery.test.js
       - tests/ayrpc2026-recovery-edge.test.js
       - tests/ayrpc2026-player-policy.test.js
+      - tests/ayrpc2026-class-switching.test.js
       - .github/workflows/test-ayrpc2026-class1-recovery.yml
 
 jobs:
@@ -44,3 +46,4 @@ jobs:
           node tests/ayrpc2026-class1-recovery.test.js
           node tests/ayrpc2026-recovery-edge.test.js
           node tests/ayrpc2026-player-policy.test.js
+          node tests/ayrpc2026-class-switching.test.js
