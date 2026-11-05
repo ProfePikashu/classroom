@@ -9,7 +9,8 @@ test("optional device selector appears before the six-character code", () => {
   const selector = html.indexOf('id="liveAttendanceDevice"');
   const token = html.indexOf('id="liveAttendanceCode"');
   assert.ok(selector >= 0 && selector < token);
-  assert.match(html, /value="tv_mobile_chat"/);
+  // Combinaciones con el selector principal y adicionales opcionales.
+  assert.match(html, /name="attendance_secondary_device"/);
   assert.match(html, /value="smart_tv"/);
   assert.match(html, /value="other"/);
   assert.doesNotMatch(html, /id="liveAttendanceDevice"[^>]*required/);
@@ -23,6 +24,6 @@ test("device selected is submitted without replacing token validation", () => {
 });
 
 test("no Twitch chat participation is required in the form", () => {
-  assert.match(html, /No necesitás escribir en el chat de Twitch/);
-  assert.match(html, /Tu elección no afecta el presente/);
+  assert.match(html, /No necesitás escribir en Twitch/);
+  assert.match(html, /Es opcional/);
 });

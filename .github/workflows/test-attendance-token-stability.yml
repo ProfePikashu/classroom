@@ -12,6 +12,7 @@ on:
       - frontend/clases-ayrpc-2026.html
       - tests/attendance-token-stability.test.mjs
       - tests/ayrpc2026-multidevice-attendance.test.mjs
+      - tests/ayrpc2026-attendance-device-icons.test.mjs
       - .github/workflows/test-attendance-token-stability.yml
   pull_request:
     paths:
@@ -21,6 +22,7 @@ on:
       - frontend/clases-ayrpc-2026.html
       - tests/attendance-token-stability.test.mjs
       - tests/ayrpc2026-multidevice-attendance.test.mjs
+      - tests/ayrpc2026-attendance-device-icons.test.mjs
       - .github/workflows/test-attendance-token-stability.yml
 
 jobs:
