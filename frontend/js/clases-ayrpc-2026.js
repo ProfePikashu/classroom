@@ -1471,7 +1471,9 @@
               body: JSON.stringify({
                 course_slug: "ayrpc-2026",
                 class_number: state.selected.number,
-                code
+                code,
+                // Dato estadistico voluntario: nunca bloquea el presente.
+                viewing_device: $("liveAttendanceDevice")?.value || null
               })
             }
           );
