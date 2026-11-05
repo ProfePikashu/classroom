@@ -314,7 +314,7 @@ const AdminAsistencias = {
     return `<span class="attendance-device-icons" role="img" aria-label="${safeTitle}" title="${safeTitle}">${icons}</span>`;
   },
 
-  renderAttendanceTime(course, legacyTime, seconds, percent, viewingDevice, secondaryDevices) {
+  renderAttendanceTime(course, legacyTime, seconds, percent, viewingDevice, secondaryDevices, classNumber) {
     if (course !== "ayrpc-2026") {
       return this.escapeHtml(legacyTime || "-");
     }
@@ -331,7 +331,12 @@ const AdminAsistencias = {
     const timeHtml = color
       ? `<strong style="color:${color};font-weight:700;">${this.escapeHtml(displayTime)}</strong>`
       : this.escapeHtml(displayTime);
-    return timeHtml + this.renderAttendanceDevice(viewingDevice, secondaryDevices);
+    // Las clases 1 y 2 no solicitaban informacion de dispositivos.
+    // Mostrar un guion neutro sin alterar los tiempos ni sus colores.
+    const deviceHtml = Number(classNumber) === 1 || Number(classNumber) === 2
+      ? '<span class="attendance-device-unavailable" title="Sin registro de dispositivo en esta clase">-</span>'
+      : this.renderAttendanceDevice(viewingDevice, secondaryDevices);
+    return timeHtml + deviceHtml;
   },
 
   async render() {
@@ -487,7 +492,8 @@ const AdminAsistencias = {
           segundos,
           porcentaje,
           viewingDevice,
-          secondaryDevices
+          secondaryDevices,
+          this.clases[classIndex]?.n
         )}</td>
       `).join("");
 
