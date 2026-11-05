@@ -1472,8 +1472,11 @@
                 course_slug: "ayrpc-2026",
                 class_number: state.selected.number,
                 code,
-                // Dato estadistico voluntario: nunca bloquea el presente.
-                viewing_device: $("liveAttendanceDevice")?.value || null
+                // Datos voluntarios: nunca condicionan el presente.
+                viewing_device: $("liveAttendanceDevice")?.value || null,
+                secondary_devices: Array.from(
+                  form.querySelectorAll('input[name="attendance_secondary_device"]:checked')
+                ).map(input => input.value)
               })
             }
           );
