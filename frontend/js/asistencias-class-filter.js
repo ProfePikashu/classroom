@@ -278,7 +278,8 @@
           segundos,
           porcentaje,
           viewingDevice,
-          secondaryDevices
+          secondaryDevices,
+          this.clases[classIndex]?.n
         )}</td>
       `).join("");
 
