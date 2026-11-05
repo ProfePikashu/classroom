@@ -105,7 +105,9 @@
         row[`class_${n}_status`] || progress.status || "PENDIENTE",
         row[`class_${n}_time`] || progress.time || "-",
         progress.live_presence_seconds ?? null,
-        progress.live_presence_percent ?? null
+        progress.live_presence_percent ?? null,
+        progress.viewing_device ?? null,
+        Array.isArray(progress.secondary_devices) ? progress.secondary_devices : []
       ];
     });
 
@@ -268,13 +270,15 @@
 
     const body = rows.map((alumno, index) => {
       const resumen = this.getResumenAlumno(alumno);
-      const classCells = alumno.clases.map(([estado, tiempo, segundos, porcentaje], classIndex) => `
+      const classCells = alumno.clases.map(([estado, tiempo, segundos, porcentaje, viewingDevice, secondaryDevices], classIndex) => `
         <td class="attendance-status-cell">${this.renderStatusCell(alumno, index, classIndex, estado)}</td>
         <td class="attendance-time">${this.renderAttendanceTime(
           alumno.curso,
           tiempo,
           segundos,
-          porcentaje
+          porcentaje,
+          viewingDevice,
+          secondaryDevices
         )}</td>
       `).join("");
 
