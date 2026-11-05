@@ -50,6 +50,47 @@
   font: inherit;
 }
 
+.ayrpc2026-extra-devices {
+  margin-top: 10px;
+  padding: 9px 12px;
+  border: 1px solid rgba(0, 225, 255, .22);
+  border-radius: 10px;
+}
+
+.ayrpc2026-extra-devices summary {
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.ayrpc2026-extra-devices p {
+  margin: 8px 0;
+  opacity: .85;
+  font-size: .89rem;
+}
+
+.ayrpc2026-extra-device-choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.ayrpc2026-live-form .ayrpc2026-extra-device-choices label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  padding: 6px 9px;
+  border: 1px solid rgba(0, 225, 255, .26);
+  border-radius: 9px;
+  cursor: pointer;
+  font-size: .89rem;
+  font-weight: 500;
+}
+
+.ayrpc2026-extra-device-choices input {
+  accent-color: #58e0d6;
+}
+
 .ayrpc2026-live-device-help {
   margin: 7px 0 16px;
   opacity: .82;
