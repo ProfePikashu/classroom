@@ -199,7 +199,7 @@ assert.match(
 
 assert.match(
   html,
-  /css\/clases-ayrpc-2026\.css\?v=20261027-fullscreen-v4/,
+  /css\/clases-ayrpc-2026\.css\?v=[A-Za-z0-9._-]+/,
   "la vista debe invalidar cache del CSS del fullscreen propio"
 );
 

@@ -16,7 +16,7 @@
   <link rel="stylesheet" href="css/styles.css?v=20260621-linkedin-recomendacion" />
   <link rel="icon" href="favicon.ico" type="image/x-icon" />
   <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
-  <link rel="stylesheet" href="css/clases-ayrpc-2026.css?v=20261027-fullscreen-v4" />
+  <link rel="stylesheet" href="css/clases-ayrpc-2026.css?v=20261104-multidevice-v1" />
   <link rel="stylesheet" href="css/pelusita-v2.css?v=20260930-alpha1" />
   <link rel="stylesheet" href="css/bug-reporter.css?v=20260930-beta1" />
 </head>
@@ -275,6 +275,26 @@
               class="ayrpc2026-live-form"
               hidden
             >
+              <label for="liveAttendanceDevice">
+                ¿Desde dónde seguís la clase? (opcional)
+              </label>
+              <select id="liveAttendanceDevice" class="ayrpc2026-live-device" name="viewing_device">
+                <option value="">Elegí tu dispositivo</option>
+                <option value="pc">PC o notebook</option>
+                <option value="mobile">Celular</option>
+                <option value="tablet">Tablet</option>
+                <option value="smart_tv">Smart TV, Android TV o Fire TV</option>
+                <option value="tv_mobile_chat">Televisor + chat desde el celular</option>
+                <option value="casting">Chromecast, AirPlay o pantalla compartida</option>
+                <option value="console">Consola de videojuegos</option>
+                <option value="audio_only">Solo audio o segundo plano</option>
+                <option value="other">Otro dispositivo</option>
+                <option value="prefer_not_say">Prefiero no decir</option>
+              </select>
+              <p class="ayrpc2026-live-device-help">
+                No necesitás escribir en el chat de Twitch. Tu elección no afecta el presente.
+              </p>
+
               <label for="liveAttendanceCode">
                 Ingresá el código indicado durante la transmisión
               </label>
@@ -436,7 +456,7 @@
   <script src="js/roles.js?v=20260917-roles-permissions-v1"></script>
   <script src="js/main.js?v=20260612-newsletter-api-v1"></script>
   <script src="js/notifications-local.js?v=20260930-notification-preferences-v2"></script>
-  <script src="js/clases-ayrpc-2026.js?v=20261102-class2-switch-fix-v1"></script>
+  <script src="js/clases-ayrpc-2026.js?v=20261104-multidevice-v1"></script>
   <script src="js/attendance-token-stability.js?v=20261101-stable-token-v1"></script>
   <script src="js/ayrpc2026-recovery.js?v=20261102-recovery-registry-v1"></script>
   <script src="js/ayrpc2026-recovery-ux.js?v=20261102-class2-qa-v1"></script>

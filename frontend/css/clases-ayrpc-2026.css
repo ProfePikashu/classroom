@@ -39,6 +39,24 @@
   font-weight: 700;
 }
 
+.ayrpc2026-live-device {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid rgba(0, 225, 255, .45);
+  border-radius: 10px;
+  background: #20142e;
+  color: inherit;
+  color-scheme: dark;
+  font: inherit;
+}
+
+.ayrpc2026-live-device-help {
+  margin: 7px 0 16px;
+  opacity: .82;
+  line-height: 1.4;
+  font-size: .89rem;
+}
+
 .ayrpc2026-live-code-row {
   display: flex;
   gap: 10px;

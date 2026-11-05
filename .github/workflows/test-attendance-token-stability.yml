@@ -6,17 +6,21 @@ on:
       - fix/attendance-token-stability-v2
       - main
     paths:
+      - frontend/css/clases-ayrpc-2026.css
       - frontend/js/clases-ayrpc-2026.js
       - frontend/js/attendance-token-stability.js
       - frontend/clases-ayrpc-2026.html
       - tests/attendance-token-stability.test.mjs
+      - tests/ayrpc2026-multidevice-attendance.test.mjs
       - .github/workflows/test-attendance-token-stability.yml
   pull_request:
     paths:
+      - frontend/css/clases-ayrpc-2026.css
       - frontend/js/clases-ayrpc-2026.js
       - frontend/js/attendance-token-stability.js
       - frontend/clases-ayrpc-2026.html
       - tests/attendance-token-stability.test.mjs
+      - tests/ayrpc2026-multidevice-attendance.test.mjs
       - .github/workflows/test-attendance-token-stability.yml
 
 jobs:
@@ -28,6 +32,6 @@ jobs:
         with:
           node-version: '22'
       - name: Run attendance regression tests
-        run: node --test tests/attendance-token-stability.test.mjs
+        run: node --test tests/attendance-token-stability.test.mjs tests/ayrpc2026-multidevice-attendance.test.mjs
       - name: Check stability script syntax
-        run: node --check frontend/js/attendance-token-stability.js
+        run: node --check frontend/js/attendance-token-stability.js && node --check frontend/js/clases-ayrpc-2026.js
