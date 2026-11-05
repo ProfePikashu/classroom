@@ -1,5 +1,12 @@
 /* Admin Asistencias: ajustes específicos sin seguir cargando styles.css. */
 
+.page-asistencias .attendance-device-unavailable {
+  display: inline-block;
+  margin-left: 6px;
+  color: var(--text-muted, #999);
+  vertical-align: middle;
+}
+
 .page-asistencias .attendance-device-icons {
   display: inline-block;
   margin-left: 6px;
