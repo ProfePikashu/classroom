@@ -16,7 +16,7 @@
   <link rel="stylesheet" href="css/styles.css?v=20260621-linkedin-recomendacion" />
   <link rel="icon" href="favicon.ico" type="image/x-icon" />
   <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
-  <link rel="stylesheet" href="css/clases-ayrpc-2026.css?v=20261104-multidevice-v1" />
+  <link rel="stylesheet" href="css/clases-ayrpc-2026.css?v=20261105-device-combos-v1" />
   <link rel="stylesheet" href="css/pelusita-v2.css?v=20260930-alpha1" />
   <link rel="stylesheet" href="css/bug-reporter.css?v=20260930-beta1" />
 </head>
@@ -283,16 +283,28 @@
                 <option value="pc">PC o notebook</option>
                 <option value="mobile">Celular</option>
                 <option value="tablet">Tablet</option>
-                <option value="smart_tv">Smart TV, Android TV o Fire TV</option>
-                <option value="tv_mobile_chat">Televisor + chat desde el celular</option>
+                <option value="smart_tv">Televisor (Smart TV, Android TV, Fire TV o TV común)</option>
                 <option value="casting">Chromecast, AirPlay o pantalla compartida</option>
                 <option value="console">Consola de videojuegos</option>
                 <option value="audio_only">Solo audio o segundo plano</option>
                 <option value="other">Otro dispositivo</option>
                 <option value="prefer_not_say">Prefiero no decir</option>
               </select>
+              <details class="ayrpc2026-extra-devices">
+                <summary>¿Usás además otro dispositivo? (opcional)</summary>
+                <p>Por ejemplo, si mirás en la tele y usás celular y PC, marcá ambos.</p>
+                <div class="ayrpc2026-extra-device-choices" role="group" aria-label="Otros dispositivos">
+                  <label><input type="checkbox" name="attendance_secondary_device" value="mobile"> 📱 Celular</label>
+                  <label><input type="checkbox" name="attendance_secondary_device" value="pc"> 💻 PC</label>
+                  <label><input type="checkbox" name="attendance_secondary_device" value="tablet"> 📲 Tablet</label>
+                  <label><input type="checkbox" name="attendance_secondary_device" value="smart_tv"> 📺 Televisor</label>
+                  <label><input type="checkbox" name="attendance_secondary_device" value="casting"> 📡 Transmisión a pantalla</label>
+                  <label><input type="checkbox" name="attendance_secondary_device" value="console"> 🎮 Consola</label>
+                  <label><input type="checkbox" name="attendance_secondary_device" value="other"> 🔌 Otro</label>
+                </div>
+              </details>
               <p class="ayrpc2026-live-device-help">
-                No necesitás escribir en el chat de Twitch. Tu elección no afecta el presente.
+                Es opcional. No necesitás escribir en Twitch ni escanear un QR para registrar el presente.
               </p>
 
               <label for="liveAttendanceCode">
@@ -456,7 +468,7 @@
   <script src="js/roles.js?v=20260917-roles-permissions-v1"></script>
   <script src="js/main.js?v=20260612-newsletter-api-v1"></script>
   <script src="js/notifications-local.js?v=20260930-notification-preferences-v2"></script>
-  <script src="js/clases-ayrpc-2026.js?v=20261104-multidevice-v1"></script>
+  <script src="js/clases-ayrpc-2026.js?v=20261105-device-combos-v1"></script>
   <script src="js/attendance-token-stability.js?v=20261101-stable-token-v1"></script>
   <script src="js/ayrpc2026-recovery.js?v=20261102-recovery-registry-v1"></script>
   <script src="js/ayrpc2026-recovery-ux.js?v=20261102-class2-qa-v1"></script>
