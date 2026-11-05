@@ -23,6 +23,24 @@ test("device emojis sit beside colored attendance time", () => {
   assert.ok(cell.indexOf("</strong>") < cell.indexOf("📺"), "device emoji must not inherit time color");
 });
 
+test("class 1 and class 2 show a dash beside time, without changing the time color", () => {
+  for (const classNumber of [1, 2]) {
+    const cell = admin.renderAttendanceTime(
+      "ayrpc-2026", "-", 7600, 80, null, [], classNumber
+    );
+    assert.match(cell, /var\(--green\)/);
+    assert.match(cell, /2h 06m 40s/);
+    assert.match(cell, /attendance-device-unavailable/);
+    assert.match(cell, />-<\/span>/);
+    assert.doesNotMatch(cell, /attendance-device-icons/);
+  }
+  const class3 = admin.renderAttendanceTime(
+    "ayrpc-2026", "-", 7600, 80, "pc", [], 3
+  );
+  assert.match(class3, /💻/);
+  assert.doesNotMatch(class3, /attendance-device-unavailable/);
+});
+
 test("legacy TV+mobile values and duplicate devices normalize safely", () => {
   const cell = admin.renderAttendanceTime(
     "ayrpc-2026", "-", 100, 50, "tv_mobile_chat", ["mobile", "pc"]
