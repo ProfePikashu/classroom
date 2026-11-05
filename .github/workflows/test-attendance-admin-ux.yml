@@ -11,6 +11,7 @@ on:
       - frontend/js/asistencias-class-filter.js
       - frontend/css/asistencias-admin.css
       - tests/attendance-admin-ux.test.js
+      - tests/attendance-arrow-column.test.mjs
       - tests/ayrpc2026-attendance-device-icons.test.mjs
       - .github/workflows/test-attendance-admin-ux.yml
   pull_request:
@@ -20,6 +21,7 @@ on:
       - frontend/js/asistencias-class-filter.js
       - frontend/css/asistencias-admin.css
       - tests/attendance-admin-ux.test.js
+      - tests/attendance-arrow-column.test.mjs
       - tests/ayrpc2026-attendance-device-icons.test.mjs
       - .github/workflows/test-attendance-admin-ux.yml
 
@@ -34,4 +36,4 @@ jobs:
       - name: Check attendance JavaScript syntax
         run: node --check frontend/js/asistencias.js && node --check frontend/js/asistencias-class-filter.js
       - name: Run attendance admin UX contract
-        run: node tests/attendance-admin-ux.test.js && node --test tests/ayrpc2026-attendance-device-icons.test.mjs
+        run: node tests/attendance-admin-ux.test.js && node --test tests/ayrpc2026-attendance-device-icons.test.mjs tests/attendance-arrow-column.test.mjs

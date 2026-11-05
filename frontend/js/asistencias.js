@@ -628,15 +628,29 @@ const AdminAsistencias = {
 
   scrollTable(direction) {
     const scroller = this.tableWrap?.querySelector(".attendance-table-scroll");
-    if (!scroller) return;
+    const table = scroller?.querySelector(".attendance-table");
+    const headers = Array.from(table?.tHead?.rows?.[0]?.cells || []);
+    if (!scroller || !table || headers.length < 2) return;
+    if (direction !== "left" && direction !== "right") return;
 
-    const amount = Math.max(420, Math.round(scroller.clientWidth * 0.72));
+    // Cada clic avanza una columna real, sin desplazar la columna fija Alumno.
+    const tableLeft = table.getBoundingClientRect().left;
+    const fixedWidth = headers[0].getBoundingClientRect().width;
+    const maxScroll = Math.max(0, scroller.scrollWidth - scroller.clientWidth);
+    const positions = [...new Set(headers.slice(1).map(header =>
+      Math.min(maxScroll, Math.max(0, Math.round(
+        header.getBoundingClientRect().left - tableLeft - fixedWidth
+      )))
+    ))].sort((a, b) => a - b);
 
-    scroller.scrollBy({
-      left: direction === "left" ? -amount : amount,
-      behavior: "smooth"
-    });
+    const current = scroller.scrollLeft;
+    const epsilon = 3;
+    const target = direction === "right"
+      ? (positions.find(position => position > current + epsilon) ?? maxScroll)
+      : ([...positions].reverse().find(position => position < current - epsilon) ?? 0);
 
+    if (Math.abs(target - current) <= epsilon) return;
+    scroller.scrollBy({ left: target - current, behavior: "smooth" });
     window.setTimeout(() => this.updateScrollButtons(), 280);
   },
 
