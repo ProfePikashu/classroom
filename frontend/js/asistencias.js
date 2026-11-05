@@ -198,7 +198,9 @@ const AdminAsistencias = {
         row[`class_${n}_status`] || progress.status || "SIN DATOS",
         row[`class_${n}_time`] || progress.time || "-",
         progress.live_presence_seconds ?? null,
-        progress.live_presence_percent ?? null
+        progress.live_presence_percent ?? null,
+        progress.viewing_device ?? null,
+        Array.isArray(progress.secondary_devices) ? progress.secondary_devices : []
       ];
     });
 
@@ -282,7 +284,37 @@ const AdminAsistencias = {
     return "danger";
   },
 
-  renderAttendanceTime(course, legacyTime, seconds, percent) {
+  renderAttendanceDevice(viewingDevice, secondaryDevices) {
+    // Mostrar la declaracion del alumno, no una deteccion de MKC.
+    if (viewingDevice === "prefer_not_say") return "";
+
+    const devices = {
+      pc: { icon: "💻", label: "PC o notebook" },
+      mobile: { icon: "📱", label: "Celular" },
+      tablet: { icon: "📲", label: "Tablet" },
+      smart_tv: { icon: "📺", label: "Televisor / Smart TV" },
+      casting: { icon: "📺📡", label: "Chromecast / AirPlay" },
+      console: { icon: "🎮", label: "Consola" },
+      audio_only: { icon: "🎧", label: "Solo audio" },
+      other: { icon: "🔌", label: "Otro dispositivo" }
+    };
+
+    // Compatibilidad con los tokens ya emitidos con la opcion combinada.
+    const selected = viewingDevice === "tv_mobile_chat"
+      ? ["smart_tv", "mobile"]
+      : [viewingDevice];
+    if (Array.isArray(secondaryDevices)) selected.push(...secondaryDevices);
+
+    const unique = [...new Set(selected)].filter(key => Object.hasOwn(devices, key));
+    if (!unique.length) return "";
+
+    const title = `Dispositivos declarados: ${unique.map(key => devices[key].label).join(" + ")}`;
+    const icons = unique.map(key => devices[key].icon).join("");
+    const safeTitle = this.escapeHtml(title);
+    return `<span class="attendance-device-icons" role="img" aria-label="${safeTitle}" title="${safeTitle}">${icons}</span>`;
+  },
+
+  renderAttendanceTime(course, legacyTime, seconds, percent, viewingDevice, secondaryDevices) {
     if (course !== "ayrpc-2026") {
       return this.escapeHtml(legacyTime || "-");
     }
@@ -296,9 +328,10 @@ const AdminAsistencias = {
       danger: "var(--red)"
     }[tone] || "";
 
-    if (!color) return this.escapeHtml(displayTime);
-
-    return `<strong style="color:${color};font-weight:700;">${this.escapeHtml(displayTime)}</strong>`;
+    const timeHtml = color
+      ? `<strong style="color:${color};font-weight:700;">${this.escapeHtml(displayTime)}</strong>`
+      : this.escapeHtml(displayTime);
+    return timeHtml + this.renderAttendanceDevice(viewingDevice, secondaryDevices);
   },
 
   async render() {
@@ -446,13 +479,15 @@ const AdminAsistencias = {
 
     const body = rows.map((alumno, index) => {
       const resumen = this.getResumenAlumno(alumno);
-      const classCells = alumno.clases.map(([estado, tiempo, segundos, porcentaje], classIndex) => `
+      const classCells = alumno.clases.map(([estado, tiempo, segundos, porcentaje, viewingDevice, secondaryDevices], classIndex) => `
         <td class="attendance-status-cell">${this.renderStatusCell(alumno, index, classIndex, estado)}</td>
         <td class="attendance-time">${this.renderAttendanceTime(
           alumno.curso,
           tiempo,
           segundos,
-          porcentaje
+          porcentaje,
+          viewingDevice,
+          secondaryDevices
         )}</td>
       `).join("");
 
