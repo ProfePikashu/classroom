@@ -58,3 +58,23 @@ test("lets the first staff click reach the original handler before disabling the
   assert.match(source, /deferDisable/);
   assert.match(source, /queueMicrotask/);
 });
+
+
+test("formats FastAPI validation errors instead of showing [object Object]", () => {
+  const source = read(mainPath);
+
+  assert.match(source, /function readableAttendanceTokenError\(detail\)/);
+  assert.match(source, /Array\.isArray\(detail\)/);
+  assert.match(source, /item\?\.msg \|\| item\?\.message/);
+  assert.match(source, /response\.status/);
+  assert.doesNotMatch(source, /new Error\(\s*data\?\.detail/);
+});
+
+test("validates the token server response before saving it", () => {
+  const source = read(mainPath);
+
+  assert.match(source, /if \(!data\?\.ok/);
+  assert.match(source, /Number\.isFinite\(expiration\)/);
+  assert.match(source, /expiration <= Date\.now\(\)/);
+  assert.match(source, /storeAttendanceCode\(state\.attendance\)/);
+});
