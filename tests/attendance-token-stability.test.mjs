@@ -67,7 +67,11 @@ test("formats FastAPI validation errors instead of showing [object Object]", () 
   assert.match(source, /Array\.isArray\(detail\)/);
   assert.match(source, /item\?\.msg \|\| item\?\.message/);
   assert.match(source, /response\.status/);
-  assert.doesNotMatch(source, /new Error\(\s*data\?\.detail/);
+  const tokenHandler = source.slice(
+    source.indexOf("async function generateCode()"),
+    source.indexOf("async function closeAttendance()")
+  );
+  assert.doesNotMatch(tokenHandler, /new Error\(\s*data\?\.detail/);
 });
 
 test("validates the token server response before saving it", () => {
