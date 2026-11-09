@@ -1,0 +1,38 @@
+name: Test AyRPC 2026 recovery frontend
+
+on:
+  pull_request:
+    paths:
+      - frontend/js/ayrpc2026-recovery-ux.js
+      - frontend/js/ayrpc2026-recovery.js
+      - frontend/clases-ayrpc-2026.html
+      - tests/ayrpc2026-class1-recovery.test.js
+      - tests/ayrpc2026-recovery-ux-dynamic.test.js
+      - .github/workflows/test-recovery-frontend.yml
+  push:
+    branches:
+      - main
+      - fix/ayrpc2026-recovery-ux-auto-classes-20261109
+    paths:
+      - frontend/js/ayrpc2026-recovery-ux.js
+      - frontend/js/ayrpc2026-recovery.js
+      - frontend/clases-ayrpc-2026.html
+      - tests/ayrpc2026-class1-recovery.test.js
+      - tests/ayrpc2026-recovery-ux-dynamic.test.js
+      - .github/workflows/test-recovery-frontend.yml
+
+permissions:
+  contents: read
+
+jobs:
+  node-recovery-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Check recovery and privacy contract
+        run: node tests/ayrpc2026-class1-recovery.test.js
+      - name: Verify future classes and mobile status behavior
+        run: node tests/ayrpc2026-recovery-ux-dynamic.test.js
