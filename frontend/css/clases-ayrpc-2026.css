@@ -245,6 +245,36 @@
   background: #000;
 }
 
+/* Consejo de calidad aplicable a todas las clases, sin intervenir el player. */
+.ayrpc2026-video-quality-hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  margin: 9px 0 13px;
+  padding: 9px 11px;
+  border: 1px solid rgba(0, 225, 255, .22);
+  border-radius: 9px;
+  background: rgba(0, 225, 255, .045);
+  color: #d7d6e9;
+  font-size: .86rem;
+  line-height: 1.45;
+}
+
+.ayrpc2026-video-quality-hint > i {
+  flex: none;
+  margin-top: 2px;
+  color: #6fe4ed;
+}
+
+.ayrpc2026-video-quality-hint > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.ayrpc2026-video-quality-hint strong {
+  color: #f2f5ff;
+}
+
 .ayrpc2026-video-fullscreen {
   position: absolute;
   right: 10px;
