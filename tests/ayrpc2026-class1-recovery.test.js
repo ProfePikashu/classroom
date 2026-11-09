@@ -39,6 +39,14 @@ assert.match(html, /js\/ayrpc2026-recovery\.js\?v=[A-Za-z0-9._-]+/, "la vista de
 assert.match(html, /js\/ayrpc2026-recovery-ux\.js\?v=[A-Za-z0-9._-]+/, "la vista debe invalidar cache al cargar la UX del tracker");
 assert.match(classesCss, /#youtubePlayer\s+iframe[\s\S]*width:\s*100%[\s\S]*height:\s*100%/, "el iframe controlado de YouTube debe llenar todo el recuadro 16:9");
 assert.match(classesCss, /#youtubePlayer\s+iframe[\s\S]*display:\s*block/, "el iframe no debe dejar espacio de línea dentro del recuadro");
+
+assert.match(html, /id="videoPlayerBox"[\s\S]*class="ayrpc2026-video-quality-hint"[\s\S]*id="watchProgressWrap"/, "el consejo de calidad debe ubicarse bajo el reproductor y antes del progreso");
+assert.match(html, /¿Se ve borroso el video\?/, "el alumno debe identificar fácilmente cuándo revisar la calidad");
+assert.match(html, /Calidad<\/strong>[\s\S]*720p o 1080p/, "el aviso debe indicar cómo subir la resolución cuando esté disponible");
+assert.match(html, /sin salir del Classroom/, "el consejo no debe sugerir abrir YouTube fuera del tracker");
+assert.match(html, /css\/clases-ayrpc-2026\.css\?v=20261109-video-quality-tip-v1/, "el cambio CSS debe invalidar la caché del celular");
+assert.match(classesCss, /\.ayrpc2026-video-quality-hint\s*\{[\s\S]*?font-size:\s*\.86rem;/, "el aviso de calidad debe mantener texto compacto y responsivo");
+
 assert.match(recovery, /const COURSE_SLUG = "ayrpc-2026"/, "la recuperación debe apuntar al curso AyRPC 2026");
 assert.doesNotMatch(recovery, /REQUIRED_WATCH_SECONDS_BY_CLASS/, "el frontend no debe duplicar cortes académicos por clase");
 assert.match(recovery, /const VIDEO_COMPLETION_RATIO = 1(?:\.0)?;/, "la recuperación debe completarse exactamente al llegar al corte configurado por backend");
