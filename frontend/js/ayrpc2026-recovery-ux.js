@@ -2,7 +2,6 @@
   "use strict";
 
   const COURSE_SLUG = "ayrpc-2026";
-  const ENABLED_CLASS_NUMBERS = new Set([1, 2]);
   const RECOVERY_EDGE_HOST = "recovery.andyazhtec.com";
   const WATCHDOG_TIMEOUT_MS = 60000;
   const PLAYER_ATTACH_TIMEOUT_MS = 15000;
@@ -51,7 +50,11 @@
         /\/api\/classroom\/courses\/ayrpc-2026\/classes\/(\d+)\/recovery(?:\/watch)?$/
       );
       const classNumber = match ? Number(match[1]) : null;
-      return ENABLED_CLASS_NUMBERS.has(classNumber) ? classNumber : null;
+      // La configuración académica proviene del servidor, no de una lista
+      // manual de clases habilitadas en el frontend.
+      return Number.isSafeInteger(classNumber) && classNumber > 0
+        ? classNumber
+        : null;
     } catch {
       return null;
     }
@@ -483,7 +486,12 @@
 
   function handleRecoveryConfig(data) {
     const classNumber = Number(data?.class_number || 0);
-    if (!data?.ok || !ENABLED_CLASS_NUMBERS.has(classNumber)) {
+    if (
+      !data?.ok ||
+      !Number.isSafeInteger(classNumber) ||
+      classNumber <= 0 ||
+      Number(data.required_watch_seconds || 0) <= 0
+    ) {
       return;
     }
 
@@ -730,7 +738,10 @@
       $("liveAttendanceStatus")?.textContent || ""
     ).trim().toUpperCase();
 
-    const selectedEnabled = ENABLED_CLASS_NUMBERS.has(selectedNumber);
+    // Sólo mostramos el estado UX para la recuperación confirmada por el
+    // backend y que además corresponde a la clase actualmente seleccionada.
+    const selectedEnabled =
+      state.classNumber !== null && selectedNumber === state.classNumber;
     const selectionChanged = Boolean(
       state.classNumber && selectedNumber !== state.classNumber
     );
@@ -752,7 +763,9 @@
     style.id = "ayrpc2026RecoveryUxStyles";
     style.textContent = `
       .watch-validation-status { margin:12px 0 4px; padding:12px 14px; border-radius:12px; display:flex; align-items:center; justify-content:space-between; gap:12px; line-height:1.4; }
-      .watch-validation-copy { display:flex; align-items:flex-start; gap:9px; }
+      #watchValidationStatus[hidden], #retryWatchValidation[hidden], #resumeRecoveryButton[hidden] { display:none !important; }
+      .watch-validation-copy { display:flex; align-items:flex-start; gap:9px; min-width:0; }
+      .watch-validation-copy span { overflow-wrap:anywhere; }
       .watch-validation-status.waiting { border:1px solid rgba(120,150,190,.35); background:rgba(120,150,190,.08); }
       .watch-validation-status.ok { border:1px solid rgba(50,220,140,.4); background:rgba(50,220,140,.08); }
       .watch-validation-status.warn { border:1px solid rgba(255,174,66,.5); background:rgba(255,174,66,.10); }
