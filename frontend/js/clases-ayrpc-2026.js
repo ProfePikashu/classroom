@@ -986,6 +986,28 @@
   }
 
 
+  function readableAttendanceTokenError(detail) {
+    if (typeof detail === "string" && detail.trim()) {
+      return detail;
+    }
+
+    if (Array.isArray(detail)) {
+      const messages = detail
+        .map(item => typeof item === "string"
+          ? item
+          : (item?.msg || item?.message || ""))
+        .filter(Boolean);
+
+      return messages.join("; ") || "No se pudo generar el código.";
+    }
+
+    if (detail && typeof detail === "object") {
+      return detail.message || detail.msg || "No se pudo generar el código.";
+    }
+
+    return "No se pudo generar el código.";
+  }
+
   async function generateCode() {
     if (
       !state.selected ||
@@ -1035,26 +1057,27 @@
         }
       );
 
-      const data = await response.json();
+      const data = await response.json().catch(() => null);
 
       if (!response.ok) {
         throw new Error(
-          data?.detail ||
-          "No se pudo generar el código."
+          `HTTP ${response.status}: ${readableAttendanceTokenError(data?.detail)}`
         );
       }
 
-      state.attendance.code =
-        data.code || "";
+      // Never display/store a fictitious code or expiration on a bad reply.
+      const code = typeof data?.code === "string"
+        ? data.code.trim().toUpperCase()
+        : "";
+      const expiration = Date.parse(data?.expires_at || "");
 
-      state.attendance.expiresAt =
-        Date.parse(data.expires_at);
-
-      if (!Number.isFinite(state.attendance.expiresAt)) {
-        state.attendance.expiresAt =
-          Date.now() + 30 * 60 * 1000;
+      if (!data?.ok || !/^[A-HJ-NP-Z2-9]{6}$/.test(code) ||
+          !Number.isFinite(expiration) || expiration <= Date.now()) {
+        throw new Error("El servidor no devolvió un código de asistencia válido. No se guardó ningún código.");
       }
 
+      state.attendance.code = code;
+      state.attendance.expiresAt = expiration;
       state.attendance.visible = true;
       storeAttendanceCode(state.attendance);
 
