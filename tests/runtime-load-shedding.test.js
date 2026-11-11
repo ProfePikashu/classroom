@@ -5,6 +5,7 @@ const notificationsPath = 'frontend/js/notifications-local.js';
 const course2025Path = 'frontend/js/curso-ayrpc-2025.js';
 const course2026Path = 'frontend/js/curso-ayrpc-2026.js';
 const classes2026Path = 'frontend/js/clases-ayrpc-2026.js';
+const classes2026HtmlPath = 'frontend/clases-ayrpc-2026.html';
 const recovery2026Path = 'frontend/js/ayrpc2026-recovery.js';
 const recoveryUx2026Path = 'frontend/js/ayrpc2026-recovery-ux.js';
 
@@ -12,6 +13,7 @@ const notifications = fs.readFileSync(notificationsPath, 'utf8');
 const course2025 = fs.readFileSync(course2025Path, 'utf8');
 const course2026 = fs.readFileSync(course2026Path, 'utf8');
 const classes2026 = fs.readFileSync(classes2026Path, 'utf8');
+const classes2026Html = fs.readFileSync(classes2026HtmlPath, 'utf8');
 const recovery2026 = fs.readFileSync(recovery2026Path, 'utf8');
 const recoveryUx2026 = fs.readFileSync(recoveryUx2026Path, 'utf8');
 
@@ -90,6 +92,24 @@ assert.doesNotMatch(
   classes2026,
   /function\s+startAttendancePolling\(\)[\s\S]*?setInterval\([\s\S]*?15000/,
   'La asistencia no debe conservar un setInterval fijo de 15 segundos.'
+);
+
+assert.match(
+  classes2026,
+  /async\s+function\s+init\(\)[\s\S]*?try\s*\{\s*await\s+loadCanonicalClasses\(\);\s*\}\s*catch\s*\([^)]+\)\s*\{[\s\S]*?return;[\s\S]*?\}[\s\S]*?await\s+loadCourseProgress\(\);[\s\S]*?renderClasses\(\);/,
+  'La carga del catálogo debe tener su propio error boundary y no compartir catch con asistencia/recuperación.'
+);
+
+assert.match(
+  classes2026,
+  /renderClasses\(\);[\s\S]*?if\s*\(CLASSES\.length\)\s*\{\s*try\s*\{\s*selectClass\(CLASSES\[0\]\);/,
+  'Un error al inicializar la clase seleccionada no debe borrar la lista de clases ya cargada.'
+);
+
+assert.match(
+  classes2026Html,
+  /js\/clases-ayrpc-2026\.js\?v=20261031-init-isolation-v1/,
+  'El hotfix debe cambiar la version del script para evitar que los navegadores sigan usando el JS cacheado.'
 );
 
 assert.match(
