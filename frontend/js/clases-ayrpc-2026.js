@@ -265,7 +265,7 @@
 
     const data = await response.json().catch(() => null);
 
-    if (!response.ok || !data?.ok || !Array.isArray(data.classes)) {
+    if (!response.ok || !data?.ok || !Array.isArray(data.classes) || data.classes.length === 0) {
       throw new Error("No se pudieron cargar las clases.");
     }
 
