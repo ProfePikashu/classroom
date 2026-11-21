@@ -149,6 +149,18 @@
     );
   }
 
+  // Prevent a slow API request from blocking Classroom indefinitely.
+  async function fetchWithTimeout(url, options = {}, timeoutMs = 10000) {
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(() => controller.abort(), timeoutMs);
+
+    try {
+      return await fetch(url, { ...options, signal: controller.signal });
+    } finally {
+      window.clearTimeout(timeoutId);
+    }
+  }
+
   async function loadStaffAccess() {
     state.role = "alumno";
     state.permissions = {};
@@ -163,7 +175,7 @@
         : "https://api.andyazhtec.com";
 
     try {
-      const response = await fetch(
+      const response = await fetchWithTimeout(
         `${apiBase}/api/classroom/me/permissions`,
         {
           cache: "no-store",
@@ -241,7 +253,7 @@
         ? EXAMPRO_API_BASE
         : "https://api.andyazhtec.com";
 
-    const response = await fetch(
+    const response = await fetchWithTimeout(
       `${apiBase}/api/classroom/courses/ayrpc-2026/classes`,
       {
         cache: "no-store",
@@ -253,7 +265,7 @@
 
     const data = await response.json().catch(() => null);
 
-    if (!response.ok || !data?.ok || !Array.isArray(data.classes)) {
+    if (!response.ok || !data?.ok || !Array.isArray(data.classes) || data.classes.length === 0) {
       throw new Error("No se pudieron cargar las clases.");
     }
 
@@ -283,7 +295,7 @@
         : "https://api.andyazhtec.com";
 
     try {
-      const response = await fetch(
+      const response = await fetchWithTimeout(
         `${apiBase}/api/classroom/me/course-status?course=ayrpc-2026`,
         {
           cache: "no-store",
@@ -467,7 +479,7 @@
         ? `/api/classroom/admin/attendance/window-state?course=ayrpc-2026&class_number=${encodeURIComponent(item.number)}`
         : `/api/classroom/attendance/state?course=ayrpc-2026&class_number=${encodeURIComponent(item.number)}`;
 
-      const response = await fetch(
+      const response = await fetchWithTimeout(
         `${apiBase}${statePath}`,
         {
           cache: "no-store",
@@ -1578,32 +1590,62 @@
       );
   }
 
+  async function loadAndRenderClasses() {
+    const container = $("classesList");
+    if (container) {
+      container.innerHTML = '<p class="muted">Cargando clases...</p>';
+    }
+
+    try {
+      // A transient API error should not require the student to refresh the page.
+      let lastError;
+      for (let attempt = 0; attempt < 2; attempt++) {
+        try {
+          await loadCanonicalClasses();
+          lastError = null;
+          break;
+        } catch (error) {
+          lastError = error;
+          if (attempt === 0) {
+            await new Promise(resolve => window.setTimeout(resolve, 700));
+          }
+        }
+      }
+      if (lastError) throw lastError;
+
+      // Render immediately: neither permissions nor attendance can block the list.
+      renderClasses();
+      if (CLASSES.length) {
+        selectClass(CLASSES[0]);
+      }
+      startAttendancePolling();
+
+      // Progress is optional for initial rendering. Update badges when it arrives.
+      void loadCourseProgress().then(() => renderClasses());
+    } catch (error) {
+      console.error("No se pudieron cargar las clases AyRPC 2026:", error);
+      if (container) {
+        container.innerHTML =
+          '<p class="muted">No se pudieron cargar las clases.</p>' +
+          '<button type="button" class="btn btn-outline" id="retryClassroomClasses">Reintentar carga</button>';
+        $("retryClassroomClasses")?.addEventListener("click", loadAndRenderClasses, { once: true });
+      }
+    }
+  }
+
   async function init() {
     bindAttendanceForm();
     bindStaff();
     bindAttendancePollingVisibility();
 
-    try {
-      await loadStaffAccess();
-      await loadCanonicalClasses();
-      await loadCourseProgress();
-      renderClasses();
+    // Permissions load independently; students see classes without waiting.
+    void loadStaffAccess().then(() => {
+      if (!state.selected) return;
+      paintAttendance();
+      void refreshAttendanceWindowState(state.selected);
+    });
 
-      if (CLASSES.length) {
-        selectClass(CLASSES[0]);
-      }
-
-      startAttendancePolling();
-    } catch (error) {
-      console.error("No se pudieron cargar las clases AyRPC 2026:", error);
-
-      const container = $("classesList");
-
-      if (container) {
-        container.innerHTML =
-          '<p class="muted">No se pudieron cargar las clases.</p>';
-      }
-    }
+    await loadAndRenderClasses();
   }
 
   document.addEventListener(
