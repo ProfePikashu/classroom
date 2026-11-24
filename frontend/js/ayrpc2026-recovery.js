@@ -849,7 +849,7 @@
     }
   }
 
-  function paintQuestionResults(results = {}) {
+  function paintQuestionResults(results = {}, feedback = {}) {
     const form = $("ayrpc2026RecoveryForm");
     if (!form) return;
 
@@ -878,7 +878,13 @@
         wrapper.classList.add("is-invalid");
         textarea.classList.add("is-invalid");
         status.classList.add("is-invalid");
-        status.textContent = "Respuesta inválida o insuficiente. Revisala e intentá nuevamente.";
+        // Diagnóstico de conceptos sólo después del envío. No incluye claves
+        // ni sinónimos faltantes; versiones antiguas del API usan el fallback.
+        const detail = feedback?.[question.id];
+        const specific = typeof detail?.message === "string"
+          ? detail.message.trim().slice(0, 300) : "";
+        status.textContent = specific ||
+          "Respuesta inválida o insuficiente. Revisala e intentá nuevamente.";
       }
     }
   }
@@ -1051,7 +1057,7 @@
         throw new Error(data?.detail || "No se pudo registrar la recuperación.");
       }
 
-      paintQuestionResults(data?.question_results || {});
+      paintQuestionResults(data?.question_results || {}, data?.question_feedback || {});
 
       if (data?.passed && data?.status === "RECUPERADA") {
         if (feedback) {
